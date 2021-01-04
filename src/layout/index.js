@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import Button from '../components/Button';
+import UnlockWallet from '../components/UnlockWallet';
 import styled from 'styled-components';
 
 const LayoutWrapper = styled.div`
@@ -56,17 +57,25 @@ const LayoutWrapper = styled.div`
 `;
 
 function Layout({children}) {
+  const [isLocked, setIsLocked] = useState(false);
+
   return (
     <LayoutWrapper>
-      <Header/>
-      <main className="screen">
-        <div className="screen-top-content">
-          <div className="honey-balance">
-            <Button size="sm" variant="secondary" text="0 HONEY" />
-          </div>
-        </div>
-        {children}
-      </main>
+      {isLocked ? (
+        <UnlockWallet />
+      ) : (
+        <>
+          <Header/>
+          <main className="screen">
+            <div className="screen-top-content">
+              <div className="honey-balance">
+                <Button size="sm" variant="secondary" text="0 HONEY" />
+              </div>
+            </div>
+            {children}
+          </main>
+        </>
+      )}
     </LayoutWrapper>
   );
 }
