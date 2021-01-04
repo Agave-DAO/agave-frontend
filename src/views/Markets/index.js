@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Page from '../../components/Page';
+import MarketTable from './MarketTable';
 import styled from 'styled-components';
 
 const MarketsWrapper = styled.div`
@@ -114,6 +115,7 @@ function Markets() {
             </div>
           </div>
         </div>
+        <MarketTable activePrice={activePrice} />
       </MarketsWrapper>
     </Page>
   );
