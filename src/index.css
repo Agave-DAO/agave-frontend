@@ -32,3 +32,29 @@ body * {
   font-style: normal;
   font-size: 14px;
 }
+
+.custom-scroll {
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 3px;
+  background-color: var(--color-primary);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #e53d52;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: rgb(56, 61, 81) !important;
+}
+
+.custom-scroll::-webkit-scrollbar-corner {
+  background-color: transparent;
+}

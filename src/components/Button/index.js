@@ -15,24 +15,32 @@ const Button = ({
   const { color } = useContext(ThemeContext);
 
   let buttonColor;
+  let borderColor;
   let backgroundColor;
   let boxShadow;
+  let opacity;
   switch (variant) {
     case 'secondary':
       buttonColor = color.white;
+      borderColor = 'transparent';
       backgroundColor = color.pink;
-      boxShadow = `${color.pink} 0px 1px 3px 0px;`
+      boxShadow = `${color.pink} 0px 1px 3px 0px;`;
+      opacity = '1';
       break;
     case 'outline':
       buttonColor = color.grey[200];
+      borderColor = 'transparent';
       backgroundColor = 'transparent';
-      boxShadow = `${color.pink} 0px 1px 3px 0px;`
+      boxShadow = `none`;
+      opacity = '0.8';
       break;
-    case 'default':
+    case 'primary':
     default:
       buttonColor = color.white;
-      backgroundColor = color.grey[200];
-      boxShadow = `${color.grey[200]} 0px 1px 3px 0px;`
+      borderColor = 'transparent';
+      backgroundColor = color.grey[100];
+      boxShadow = `${color.grey[200]} 0px 1px 3px 0px;`;
+      opacity = '1';
   }
 
   let width;
@@ -70,12 +78,14 @@ const Button = ({
     <StyledButton
       boxShadow={boxShadow}
       color={buttonColor}
+      borderColor={borderColor}
       backgroundColor={backgroundColor}
       disabled={disabled}
       fontSize={fontSize}
       onClick={onClick}
       height={height}
       width={width}
+      opacity={opacity}
     >
       {children}
       {ButtonChild}
@@ -83,11 +93,11 @@ const Button = ({
   )
 }
 
-const StyledButton = styled.button`
+const StyledButton = styled.div`
   background-color: ${props => props.backgroundColor};
-  border: 0;
+  border: 1px solid transparent;
   border-radius: ${props => props.borderRadius};
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 3px 0px;
+  box-shadow: none;
   color: ${props => !props.disabled ? props.color : `${props.color}55`};
   cursor: pointer;
   display: flex;
@@ -100,6 +110,8 @@ const StyledButton = styled.button`
   transition: all 0.2s ease 0s;
   &:hover {
     box-shadow: ${props => props.boxShadow};
+    border: 1px solid ${props => props.borderColor};
+    opacity: ${props => props.opacity};
   }
 `
 

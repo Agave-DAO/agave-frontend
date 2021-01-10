@@ -41,13 +41,13 @@ const LayoutWrapper = styled.div`
         z-index: -1;
       }
 
-      .honey-balance {
+      .ag-balance {
         display: flex;
         justify-content: flex-end;
         z-index: 3;
 
-        .honey-balance-button {
-          .honey-balance-button-value {
+        .ag-balance-button {
+          .ag-balance-button-value {
 
           }
         }
@@ -68,8 +68,8 @@ function Layout({children}) {
           <Header/>
           <main className="screen">
             <div className="screen-top-content">
-              <div className="honey-balance">
-                <Button size="sm" variant="secondary" text="0 HONEY" />
+              <div className="ag-balance">
+                <Button size="sm" variant="primary" text="0 AG" />
               </div>
             </div>
             {children}

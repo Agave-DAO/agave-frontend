@@ -152,6 +152,9 @@ const TableWrapper = styled.div`
         }
       }
 
+      a:hover {
+        text-decoration: none;
+      }
     }
   }
 `;

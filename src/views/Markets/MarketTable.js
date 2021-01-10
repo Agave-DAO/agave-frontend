@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'
 import { useTable, useSortBy } from 'react-table'
 import daiImg from '../../assets/image/coins/dai.svg';
 import usdcImg from '../../assets/image/coins/usdc.svg';
@@ -201,15 +202,17 @@ function MarketTable({activePrice}) {
           {rows.map(row => {
             prepareRow(row)
             return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map(cell => {
-                  return (
-                    <td {...cell.getCellProps()}>
-                      {cell.render('Cell')}
-                    </td>
-                  )
-                })}
-              </tr>
+              <Link to={`/reserve-overview/1`}>
+                <tr {...row.getRowProps()}>
+                  {row.cells.map(cell => {
+                    return (
+                      <td {...cell.getCellProps()}>
+                        {cell.render('Cell')}
+                      </td>
+                    )
+                  })}
+                </tr>
+              </Link>
             )
           })}
         </tbody>

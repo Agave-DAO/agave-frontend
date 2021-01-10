@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const PageWrapper = styled.div`
+const CardWrapper = styled.div`
   flex: 1 1 0%;
   display: flex;
   flex-direction: column;
@@ -13,12 +13,12 @@ const PageWrapper = styled.div`
   z-index: 2;
 `;
 
-function Page({ children }) {
+function Card({ children }) {
   return (
-    <PageWrapper>
+    <CardWrapper>
       {children}
-    </PageWrapper>
+    </CardWrapper>
   );
 }
 
-export default Page;
+export default Card;
