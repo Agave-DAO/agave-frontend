@@ -112,7 +112,7 @@ function MarketTable({activePrice}) {
         Header: 'Market Size',
         accessor: 'market_size',
         Cell: row => {
-          return activePrice === 'usd' ? (
+          return activePrice === 'USD' ? (
             <div className="value-section">
               $ <span className="value">{row.value}</span>
             </div>
@@ -125,7 +125,7 @@ function MarketTable({activePrice}) {
         Header: 'Total Borrowed',
         accessor: 'total_borrowed',
         Cell: row => {
-          return activePrice === 'usd' ? (
+          return activePrice === 'USD' ? (
             <div className="value-section">
               $ <span className="value">{row.value}</span>
             </div>

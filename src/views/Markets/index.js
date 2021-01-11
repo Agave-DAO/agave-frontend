@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Page from '../../components/Page';
+import Switch from '../../components/Switch';
 import MarketTable from './MarketTable';
 import styled from 'styled-components';
 
@@ -96,7 +97,7 @@ const MarketsWrapper = styled.div`
 `;
 
 function Markets() {
-  const [activePrice, setActivePrice] = useState('usd');
+  const [activeValue, setActiveValue] = useState('USD');
   return (
     <Page>
       <MarketsWrapper>
@@ -105,17 +106,9 @@ function Markets() {
           <span>$ 97,827,149.29</span>
         </div>
         <div className="price-switcher">
-          <div className="labeled-switch">
-            <div className="labeled-switch-inner">
-              <div className={`labeled-switch__pointer ${activePrice === 'native' ? 'active' : ''}`}>
-                <span></span>
-              </div>
-              <div className={`button ${activePrice === 'usd' ? 'active' : ''}`} onClick={() => setActivePrice('usd')}>USD</div>
-              <div className={`button ${activePrice === 'native' ? 'active' : ''}`} onClick={() => setActivePrice('native')}>Native</div>
-            </div>
-          </div>
+          <Switch values={['USD', 'Native']} activeValue={activeValue} setActiveValue={setActiveValue} />
         </div>
-        <MarketTable activePrice={activePrice} />
+        <MarketTable activePrice={activeValue} />
       </MarketsWrapper>
     </Page>
   );
