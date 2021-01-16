@@ -8,10 +8,10 @@ const MarketsWrapper = styled.div`
   .topContent {
     width: 100%;
     border-radius: ${props => props.theme.color.borderRadius}px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 3px 0px;
+    box-shadow: ${props => props.theme.color.boxShadow};
     position: relative;
-    background-color: ${props => props.theme.color.grey[100]};
-    color: rgb(255, 255, 255);
+    background-color: ${props => props.theme.color.bgSecondary};
+    color: ${props => props.theme.color.textSecondary};
     padding: 15px 50px;
     display: flex;
     flex-direction: column;
@@ -21,11 +21,7 @@ const MarketsWrapper = styled.div`
       width: fit-content;
       font-size: 35px;
       font-weight: 800;
-      background: -webkit-linear-gradient(180deg, ${props => props.theme.color.pink} 0%, ${props => props.theme.color.blue} 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      -webkit-text-stroke-width: 0.3px;
-      -webkit-text-stroke-color: rgb(255, 255, 255);
+      color: ${props => props.theme.color.textSecondary};
     }
   }
 
@@ -40,13 +36,13 @@ const MarketsWrapper = styled.div`
       position: relative;
 
       .labeled-switch-inner {
-        background-color: ${props => props.theme.color.grey[100]};
+        background-color: ${props => props.theme.color.bgSecondary};
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
         border-radius: 1px;
-        border-style: 1px solid ${props => props.theme.color.grey[100]};
+        border-style: 1px solid ${props => props.theme.color.bgSecondary};
 
         .labeled-switch__pointer {
           transform: translateX(2px);
@@ -64,7 +60,7 @@ const MarketsWrapper = styled.div`
           }
 
           span {
-            background: rgb(255, 255, 255);
+            background: ${props => props.theme.color.bgWhite};
             display: block;
             border-radius: 1px;
             width: 100%;
@@ -85,7 +81,7 @@ const MarketsWrapper = styled.div`
           justify-content: center;
           padding: 1px 2px 2px;
           cursor: pointer;
-          color: rgb(255, 255, 255);
+          color: ${props => props.theme.color.textSecondary};;
 
           &.active {
             color: ${props => props.theme.color.black};

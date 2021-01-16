@@ -5,16 +5,22 @@ import { useTable, useSortBy } from 'react-table'
 import BasicTable from '../../components/BasicTable';
 import { marketData } from '../../utils/constants';
 
-function MarketTable({ activePrice, history }) {
+function DepositTable({ activeType, history }) {
   const data = useMemo(
-    () => marketData,
-    []
+    () => {
+      if (activeType === 'All') {
+        return marketData;
+      }
+
+      return marketData.slice(0, 3);
+    },
+    [activeType]
   );
 
   const columns = useMemo(
     () => [
       {
-        Header: 'Assets',
+        Header: 'Asset',
         accessor: 'name',
         Cell: row => {
           return (
@@ -26,33 +32,14 @@ function MarketTable({ activePrice, history }) {
         }
       },
       {
-        Header: 'Market Size',
-        accessor: 'market_size',
-        Cell: row => {
-          return activePrice === 'USD' ? (
-            <div className="value-section">
-              $ <span className="value">{row.value}</span>
-            </div>
-          ) : (
+        Header: 'Your wallet balance',
+        accessor: 'wallet_balance',
+        Cell: row => (
             <span className="value">{row.value}</span>
-          );
-        }
+        )
       },
       {
-        Header: 'Total Borrowed',
-        accessor: 'total_borrowed',
-        Cell: row => {
-          return activePrice === 'USD' ? (
-            <div className="value-section">
-              $ <span className="value">{row.value}</span>
-            </div>
-          ) : (
-            <span className="value">{row.value}</span>
-          );
-        }
-      },
-      {
-        Header: 'Deposit APY',
+        Header: 'APY',
         accessor: 'deposit_apy',
         Cell: row => (
           <div className="value-section">
@@ -60,28 +47,9 @@ function MarketTable({ activePrice, history }) {
           </div>
         )
       },
-      {
-        Header: 'Variable Borrow APR',
-        accessor: 'variable_borrow_apr',
-        Cell: row => (
-          <div className="value-section">
-            <span className="value blue">{row.value}</span> %
-          </div>
-        )
-      },
-      {
-        Header: 'Stable Borrow APR',
-        accessor: 'stable_borrow_apr',
-        Cell: row => (
-          <div className="value-section">
-            <span className="value pink">{row.value}</span> %
-          </div>
-        )
-      },
     ],
-    [activePrice]
+    []
   );
-
 
   const {
     getTableProps,
@@ -103,8 +71,8 @@ function MarketTable({ activePrice, history }) {
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column, index) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())} key={index}>
+              {headerGroup.headers.map(column => (
+                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
                   <div className="header-column">
                     <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
                       {column.render('Header')}
@@ -117,9 +85,9 @@ function MarketTable({ activePrice, history }) {
         </thead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row, index) => {
-            prepareRow(row);
+            prepareRow(row)
             return (
-              <tr {...row.getRowProps()} onClick={() => history.push(`/reserve-overview/${row.values.name}`)} key={index}>
+              <tr {...row.getRowProps()} onClick={() => history.push(`/deposit/${row.values.name}`)} key={index}>
                 {row.cells.map(cell => {
                   return (
                     <td {...cell.getCellProps()}>
@@ -136,4 +104,4 @@ function MarketTable({ activePrice, history }) {
   )
 }
 
-export default compose(withRouter)(MarketTable);
+export default compose(withRouter)(DepositTable);

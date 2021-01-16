@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { compose } from 'recompose';
+import { withRouter } from 'react-router-dom';
 import Page from '../../components/Page';
 import Graph from './Graph';
 import ReserveInfo from './ReserveInfo';
 import UserInfo from './UserInfo';
+import { marketData } from '../../utils/constants';
 
 const ReserveOverviewWrapper = styled.div`
   .content-wrapper {
@@ -20,18 +23,26 @@ const ReserveOverviewWrapper = styled.div`
   }
 `;
 
-function ReserveOverview() {  
+function ReserveOverview({ match, history }) {
+  const [asset, setAsset] = useState({});
+
+  useEffect(() => {
+    if (match.params && match.params.assetName) {
+      setAsset(marketData.find(item => item.name === match.params.assetName));
+    }
+  }, [match]);
+
   return (
     <Page>
       <ReserveOverviewWrapper>
         <Graph />
         <div className="content-wrapper">
-          <ReserveInfo />
-          <UserInfo />
+          <ReserveInfo asset={asset} />
+          <UserInfo asset={asset} />
         </div>
       </ReserveOverviewWrapper>
     </Page>
   );
 }
 
-export default ReserveOverview;
+export default compose(withRouter)(ReserveOverview);

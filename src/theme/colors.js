@@ -11,3 +11,5 @@ export const grey = {
   100: 'rgb(56, 61, 81)',
   200: 'rgb(43, 45, 60)'
 };
+
+export const boxShadow = 'rgba(0, 0, 0, 0.16) 0px 1px 3px 0px';

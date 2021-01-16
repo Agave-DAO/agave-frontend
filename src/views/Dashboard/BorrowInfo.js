@@ -1,67 +1,46 @@
 import React, { useMemo } from 'react';
 import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom'
-import { useTable, useSortBy } from 'react-table'
-import BasicTable from '../../components/BasicTable';
+import { useTable } from 'react-table'
+import InfoTable from '../../components/InfoTable';
+import CheckBox from '../../components/CheckBox';
+import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 
-function MarketTable({ activePrice, history }) {
+function BorrowInfo({ history }) {
   const data = useMemo(
-    () => marketData,
+    () => {
+      return marketData.slice(0, 2);
+    },
     []
   );
 
   const columns = useMemo(
     () => [
       {
-        Header: 'Assets',
+        Header: 'Your borrows',
         accessor: 'name',
         Cell: row => {
           return (
             <div>
-              <img src={row.row.original.img} width="35" height="35" />
+              <img src={row.row.original.img} alt="" width="35" height="35" />
               <span>{row.value}</span>
             </div>
           )
         }
       },
       {
-        Header: 'Market Size',
-        accessor: 'market_size',
-        Cell: row => {
-          return activePrice === 'USD' ? (
-            <div className="value-section">
-              $ <span className="value">{row.value}</span>
-            </div>
-          ) : (
-            <span className="value">{row.value}</span>
-          );
-        }
-      },
-      {
-        Header: 'Total Borrowed',
-        accessor: 'total_borrowed',
-        Cell: row => {
-          return activePrice === 'USD' ? (
-            <div className="value-section">
-              $ <span className="value">{row.value}</span>
-            </div>
-          ) : (
-            <span className="value">{row.value}</span>
-          );
-        }
-      },
-      {
-        Header: 'Deposit APY',
-        accessor: 'deposit_apy',
+        Header: 'Borrowed',
+        accessor: 'wallet_balance',
         Cell: row => (
-          <div className="value-section">
-            <span className="value yellow">{row.value}</span> %
+          <div className="value-col-section">
+            <div className="value">{row.value} {row.row.original.name}</div>
+            <div className="small">$ {row.value * row.row.original.asset_price}</div>
           </div>
         )
       },
       {
-        Header: 'Variable Borrow APR',
+        Header: 'APR',
         accessor: 'variable_borrow_apr',
         Cell: row => (
           <div className="value-section">
@@ -70,18 +49,31 @@ function MarketTable({ activePrice, history }) {
         )
       },
       {
-        Header: 'Stable Borrow APR',
-        accessor: 'stable_borrow_apr',
+        Header: 'APR Type',
+        accessor: 'isVariable',
         Cell: row => (
           <div className="value-section">
-            <span className="value pink">{row.value}</span> %
+            <CheckBox isChecked={row.value} labels={['Variable', 'Stable']} handleChange={() => {}} />
+          </div>
+        )
+      },
+      {
+        Header: '',
+        accessor: 'img',
+        Cell: row => (
+          <div className="value-section">
+            <Button size="sm" variant="primary" onClick={() => history.push(`/borrow/${row.row.original.name}`)}>
+              Borrow
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => history.push(`/repay/${row.row.original.name}`)}>
+              Repay
+            </Button>
           </div>
         )
       },
     ],
-    [activePrice]
+    []
   );
-
 
   const {
     getTableProps,
@@ -93,18 +85,17 @@ function MarketTable({ activePrice, history }) {
     {
       columns,
       data,
-    },
-    useSortBy
+    }
   );
 
   return (
-    <BasicTable>
+    <InfoTable>
       <table {...getTableProps()}>
         <thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column, index) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())} key={index}>
+              {headerGroup.headers.map(column => (
+                <th {...column.getHeaderProps()}>
                   <div className="header-column">
                     <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
                       {column.render('Header')}
@@ -117,9 +108,9 @@ function MarketTable({ activePrice, history }) {
         </thead>
         <tbody {...getTableBodyProps()}>
           {rows.map((row, index) => {
-            prepareRow(row);
+            prepareRow(row)
             return (
-              <tr {...row.getRowProps()} onClick={() => history.push(`/reserve-overview/${row.values.name}`)} key={index}>
+              <tr {...row.getRowProps()}>
                 {row.cells.map(cell => {
                   return (
                     <td {...cell.getCellProps()}>
@@ -132,8 +123,8 @@ function MarketTable({ activePrice, history }) {
           })}
         </tbody>
       </table>
-    </BasicTable>
+    </InfoTable>
   )
 }
 
-export default compose(withRouter)(MarketTable);
+export default compose(withRouter)(BorrowInfo);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from 'styled-components';
 import Switch from "react-switch";
 
@@ -25,10 +25,18 @@ const CheckBoxWrapper = styled.div`
   }
 `;
 
-function CheckBox({ isChecked, handleChange }) {
+function CheckBox({ isChecked, labels, handleChange }) {
+  const [labelList, setLabelList] = useState(['Yes', 'No']);
+
+  useEffect(() => {
+    if (labels && labels.length > 0) {
+      setLabelList(labels);
+    }
+  }, [labels]);
+
   return (
     <CheckBoxWrapper isChecked={isChecked}>
-      <span className={isChecked ? 'green' : 'red'}>{isChecked ? 'Yes' : 'No'}</span>
+      <span className={isChecked ? 'green' : 'red'}>{isChecked ? labelList[0] : labelList[1]}</span>
       <Switch
         checked={isChecked}
         onChange={handleChange}

@@ -7,12 +7,13 @@ import logo from '../../assets/image/logo.svg';
 const HeaderWrapper = styled.div`
   border-bottom: 1px solid #414250;
   .navbar {
-    background-color: var(--bg-color-primary) !important;
+    background-color: ${props => props.theme.color.bgPrimary} !important;
     box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 3px;
     height: 50px;
+    padding: 0 1rem;
 
     .navbar-brand {
-      color: ${props => props.theme.color.white};
+      color: ${props => props.theme.color.textSecondary};
       font-weight: bold;
       img {
         margin-right: 10px;
@@ -22,15 +23,21 @@ const HeaderWrapper = styled.div`
     .navbar-collapse {
       display: flex;
       justify-content: flex-end;
+      height: 100%;
 
       .navbar-nav {
         display: flex;
         align-items: center;
+        height: 100%;
         .menuItem {
           width: 85px;
           margin-right: 20px;
-          color: var(--color-white);
+          color: ${props => props.theme.color.textSecondary};
           text-align: center;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
   
           &:hover {
             text-decoration: none;
@@ -38,6 +45,7 @@ const HeaderWrapper = styled.div`
 
           &.active {
             font-weight: bold;
+            border-bottom: 2px solid white;
           }
         }
   
@@ -47,15 +55,15 @@ const HeaderWrapper = styled.div`
           display: flex;
           align-items: center;
           justify-content: center;
-          background: var(--bg-color-secondary);
+          background: ${props => props.theme.color.bgSecondary};
           border: 1px solid transparent;
-          color: var(--text-color-secondary);
+          color: ${props => props.theme.color.textSecondary};
           cursor: pointer;
           font-size: 14px;
           transition: 0.3s;
   
           &:hover {
-            border: 1px solid var(--color-white);
+            border: 1px solid ${props => props.theme.color.white};
           }
         }
       }
@@ -98,7 +106,7 @@ function Header() {
             >
               BORROW
             </NavLink>
-            <div className="connect-btn">Connect</div>
+            <div className="connect-btn">0x234...567</div>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

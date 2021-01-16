@@ -38,53 +38,6 @@ const TableWrapper = styled.div`
             align-items: center;
             justify-content: center;
             text-align: center;
-  
-            span {
-              display: inline;
-              position: relative;
-
-              &:hover {
-                &::after {
-                  border-top-color: ${props => props.theme.color.pink};
-                  opacity: 1;
-                }
-              }
-
-              &::after {
-                content: "";
-                position: absolute;
-                right: -15px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 0px;
-                height: 0px;
-                border-style: solid;
-                border-width: 8px 5px 0px;
-                border-color: transparent;
-                transition: all 0.2s ease 0s;
-                border-top-color: ${props => props.theme.color.bgSecondary};
-                opacity: 0.3;
-                box-sizing: border-box;
-              }
-
-              &.desc {
-                &::after {
-                  border-width: 0px 5px 8px;
-                  border-top-color: ${props => props.theme.color.pink};
-                  border-bottom-color: ${props => props.theme.color.pink};
-                  opacity: 1;
-                }
-              }
-
-              &.asc {
-                &::after {
-                  border-width: 8px 5px 0px;
-                  border-top-color: ${props => props.theme.color.pink};
-                  border-bottom-color: ${props => props.theme.color.pink};
-                  opacity: 1;
-                }
-              }
-            }
           }
         }
       }
@@ -93,21 +46,14 @@ const TableWrapper = styled.div`
     tbody {
       tr {
         width: 100%;
-        margin-bottom: 10px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         border-radius: 2px;
-        box-shadow: ${props => props.theme.color.boxShadow};
         transition: all 0.2s ease 0s;
-        border: 1px solid transparent;
+        border-bottom: 1px solid rgb(241, 241, 243);
         background: ${props => props.theme.color.bgWhite};
         color: ${props => props.theme.color.textPrimary};
-        cursor: pointer;
-
-        &:hover {
-          box-shadow: ${props => props.theme.color.pink} 0px 0px 10px 0px;
-        }
 
         td {
           display: flex;
@@ -116,7 +62,7 @@ const TableWrapper = styled.div`
           justify-content: flex-end;
           flex: 1 1 0%;
           overflow: hidden;
-          font-size: 16px;
+          font-size: 14px;
           padding: 10px 20px;
 
           &:first-child {
@@ -129,12 +75,19 @@ const TableWrapper = styled.div`
             }
           }
 
+          .value-col-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+
           .value-section {
-            font-size: 16px;
+            font-size: 14px;
+            display: flex;
           }
 
           .value {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
 
             &.yellow {

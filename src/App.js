@@ -6,7 +6,9 @@ import Markets from './views/Markets';
 import ReserveOverview from './views/ReserveOverview';
 import Dashboard from './views/Dashboard';
 import Deposit from './views/Deposit';
+import DepositDetail from './views/Deposit/DepositDetail';
 import Borrow from './views/Borrow';
+import BorrowDetail from './views/Borrow/BorrowDetail';
 import { NotificationContainer } from 'react-notifications';
 import theme from './theme';
 import './App.css';
@@ -24,10 +26,12 @@ class App extends Component {
           <Layout>
             <Switch>
               <Route path="/markets" component={Markets} exact />
-              <Route path="/reserve-overview/:id" component={ReserveOverview} exact />
+              <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact />
               <Route path="/dashboard" component={Dashboard} exact />
               <Route path="/deposit" component={Deposit} exact />
+              <Route path="/deposit/:assetName" component={DepositDetail} exact />
               <Route path="/borrow" component={Borrow} exact />
+              <Route path="/borrow/:assetName" component={BorrowDetail} exact />
               <Redirect from="/" to="/markets" />
             </Switch>
             <NotificationContainer />

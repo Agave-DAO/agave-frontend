@@ -1,4 +1,4 @@
-import { white, black, blue, pink, yellow, green, grey, red } from './colors'
+import { white, black, blue, pink, yellow, green, grey, red, boxShadow } from './colors'
 
 const theme = {
   borderRadius: 2,
@@ -6,6 +6,11 @@ const theme = {
     mobile: 400,
   },
   color: {
+    textPrimary: grey[100],
+    textSecondary: white,
+    bgPrimary: grey[200],
+    bgSecondary: grey[100],
+    bgWhite: white,
     white,
     black,
     grey,
@@ -14,6 +19,7 @@ const theme = {
     yellow,
     green,
     red,
+    boxShadow,
   },
   siteWidth: 1200,
   spacing: {

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { compose } from 'recompose';
+import { withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
 import CheckBox from '../../components/CheckBox';
 
@@ -20,11 +22,11 @@ const UserInfoWrapper = styled.div`
     width: 100%;
 
     .userinfo-wrapper {
-      background: rgb(255, 255, 255);
+      background: ${props => props.theme.color.bgWhite};
       padding: 15px;
       margin-bottom: 15px;
       position: relative;
-      box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 3px 0px;
+      box-shadow: ${props => props.theme.color.boxShadow};
 
       .userinfo-wrapper-top {
         font-weight: 600;
@@ -64,7 +66,7 @@ const UserInfoWrapper = styled.div`
             font-weight: 400;
 
             &.green {
-              color: rgb(121, 201, 130);
+              color: ${props => props.theme.color.green};
             }
           }
         }
@@ -73,7 +75,7 @@ const UserInfoWrapper = styled.div`
   }
 `;
 
-function UserInfo() {
+function UserInfo({ asset, history }) {
   const [isChecked, setIsChecked] = useState(false);
   const handleChange = () => {
     setIsChecked(!isChecked);
@@ -89,10 +91,10 @@ function UserInfo() {
           <div className="userinfo-wrapper-top">
             <span>Deposits</span>
             <div className="userinfo-wrapper-top-buttons">
-              <Button size="sm" variant="primary">
+              <Button size="sm" variant="primary" onClick={() => history.push(`/deposit/${asset.name}`)}>
                 Deposit
               </Button>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" onClick={() => history.push(`/withdraw/${asset.name}`)}>
                 Withdraw
               </Button>
             </div>
@@ -103,7 +105,7 @@ function UserInfo() {
                 Your wallet balance
               </div>
               <div className="userinfo-wrapper-content-value">
-                9500 DAI
+                9500 {asset.name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
@@ -111,7 +113,7 @@ function UserInfo() {
                 You already deposited
               </div>
               <div className="userinfo-wrapper-content-value">
-                500 DAI
+                500 {asset.name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
@@ -128,7 +130,7 @@ function UserInfo() {
           <div className="userinfo-wrapper-top">
             <span>Borrows</span>
             <div className="userinfo-wrapper-top-buttons">
-              <Button size="sm" variant="primary">
+              <Button size="sm" variant="primary" onClick={() => history.push(`/borrow/${asset.name}`)}>
                 Borrow
               </Button>
             </div>
@@ -139,7 +141,7 @@ function UserInfo() {
                 Borrowed
               </div>
               <div className="userinfo-wrapper-content-value">
-                0.00 DAI
+                0.00 {asset.name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
@@ -163,7 +165,7 @@ function UserInfo() {
                 Available to you
               </div>
               <div className="userinfo-wrapper-content-value">
-                1904.52 DAI
+                1904.52 {asset.name}
               </div>
             </div>
           </div>
@@ -173,4 +175,4 @@ function UserInfo() {
   );
 }
 
-export default UserInfo;
+export default compose(withRouter)(UserInfo);

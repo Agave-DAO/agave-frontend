@@ -34,7 +34,7 @@ const LayoutWrapper = styled.div`
         position: absolute;
         top: 0px;
         left: 0px;
-        height: 110px;
+        height: 90px;
         width: 100%;
         background-color: ${props => props.theme.color.grey[200]};
         transition: all 0.1s ease-in-out 0s;

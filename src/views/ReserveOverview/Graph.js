@@ -20,10 +20,10 @@ const GraphWrapper = styled.div`
     justify-content: space-between;
 
     .reserve-graph-inner {
-      background: rgb(56, 61, 81);
+      background-color: ${props => props.theme.color.bgSecondary};
       margin-bottom: 15px;
       border-radius: 2px;
-      box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 3px 0px;
+      box-shadow: ${props => props.theme.color.boxShadow};
       padding-bottom: 10px;
       width: 32.5%;
 
@@ -31,8 +31,8 @@ const GraphWrapper = styled.div`
         display: flex;
         align-items: center;
         padding: 6px 10px;
-        color: white;
-        border-bottom: 1px solid white;
+        color: ${props => props.theme.color.textSecondary};
+        border-bottom: 1px solid ${props => props.theme.color.white};
 
         .top-title {
           font-size: 12px !important;
@@ -242,7 +242,7 @@ function Graph() {
         <div className="reserve-graph-inner">
           <div className="top-inner">
             <div className="top-title">
-              Utilisation rate
+              Utilization rate
             </div>
           </div>
           <div className="content-inner">

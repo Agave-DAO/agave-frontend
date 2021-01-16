@@ -38,8 +38,8 @@ const Button = ({
     default:
       buttonColor = color.white;
       borderColor = 'transparent';
-      backgroundColor = color.grey[100];
-      boxShadow = `${color.grey[200]} 0px 1px 3px 0px;`;
+      backgroundColor = color.bgSecondary;
+      boxShadow = `none`;
       opacity = '1';
   }
 

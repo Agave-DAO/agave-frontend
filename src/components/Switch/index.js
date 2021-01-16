@@ -9,13 +9,13 @@ const SwitchWrapper = styled.div`
   position: relative;
 
   .labeled-switch-inner {
-    background-color: ${props => props.theme.color.grey[100]};
+    background-color: ${props => props.theme.color.bgSecondary};
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     border-radius: 1px;
-    border-style: 1px solid ${props => props.theme.color.grey[100]};
+    border-style: 1px solid ${props => props.theme.color.bgSecondary};
 
     .labeled-switch__pointer {
       transform: translateX(2px);
@@ -33,7 +33,7 @@ const SwitchWrapper = styled.div`
       }
 
       span {
-        background: rgb(255, 255, 255);
+        background: ${props => props.theme.color.bgWhite};
         display: block;
         border-radius: 1px;
         width: 100%;
@@ -54,7 +54,7 @@ const SwitchWrapper = styled.div`
       justify-content: center;
       padding: 1px 2px 2px;
       cursor: pointer;
-      color: rgb(255, 255, 255);
+      color: ${props => props.theme.color.textSecondary};
 
       &.active {
         color: ${props => props.theme.color.black};

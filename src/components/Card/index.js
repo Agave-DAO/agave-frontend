@@ -32,7 +32,7 @@ const CardWrapper = styled.div`
   .apycard-title {
     text-align: center;
     padding: 5px;
-    color: ${props => props.theme.color.white};
+    color: ${props => props.theme.color.textSecondary};
     font-size: 10px;
   }
 

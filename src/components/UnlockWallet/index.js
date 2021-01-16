@@ -9,7 +9,7 @@ const UnlockWalletWrapper = styled.div`
   position: relative;
   overflow: auto;
   background: rgb(241, 241, 243);
-  color: rgb(56, 61, 81);
+  color: ${props => props.theme.color.textPrimary};
 
   .inner {
     display: flex;
@@ -53,11 +53,11 @@ const UnlockWalletWrapper = styled.div`
         width: 200px;
         height: 50px;
         padding: 10px 5px 10px 15px;
-        background: rgb(255, 255, 255);
+        background: ${props => props.theme.color.bgWhite};
         display: flex;
         align-items: center;
         border-radius: 2px;
-        box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 3px 0px;
+        box-shadow: ${props => props.theme.color.boxShadow};
         transition: box-shadow 0.2s ease;
         border: 1px solid transparent;
         cursor: pointer;
@@ -65,7 +65,7 @@ const UnlockWalletWrapper = styled.div`
         &:hover {
           box-shadow: ${props => props.theme.color.pink} 0px 0px 10px 0px;
           span {
-            border-color: rgb(182, 80, 158);
+            border-color: ${props => props.theme.color.pink};
           }
         }
 

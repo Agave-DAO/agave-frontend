@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Chart from "react-apexcharts";
-import daiImg from '../../assets/image/coins/dai.svg';
 import DepositAPYCard from './APYCards/DepositAPYCard';
 import StableBorrowAPYCard from './APYCards/StableBorrowAPYCard';
 import VariableBorrowAPYCard from './APYCards/VariableBorrowAPYCard';
@@ -13,20 +12,20 @@ const ReserveInfoWrapper = styled.div`
   margin-right: 30px;
 
   .title {
-    color: rgb(56, 61, 81);
+    color: ${props => props.theme.color.textPrimary};
     font-size: 12px;
     font-weight: 400;
     margin-bottom: 10px;
   }
 
   .reserve-content {
-    color: rgb(56, 61, 81);
-    background: rgb(255, 255,255);
+    color: ${props => props.theme.color.textPrimary};
+    background: ${props => props.theme.color.bgWhite};
     padding: 10px;
     flex: 1 1 0%;
     position: relative;
     border-radius: 2px;
-    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 3px 0px;
+    box-shadow: ${props => props.theme.color.boxShadow};
 
     .reserve-graph-inner {
       width: 100%;
@@ -38,7 +37,7 @@ const ReserveInfoWrapper = styled.div`
       .total-value {
         display: flex;
         min-width: 300px;
-        color: rgb(56, 61, 81);
+        color: ${props => props.theme.color.textPrimary};
 
         &.liquidity {
           justify-content: flex-end;
@@ -92,7 +91,7 @@ const ReserveInfoWrapper = styled.div`
               opacity: 0.2;
               width: 40px;
               height: 1px;
-              background: rgb(56, 61, 81);
+              background: ${props => props.theme.color.bgSecondary};
             }
           }
 
@@ -141,7 +140,7 @@ const ReserveInfoWrapper = styled.div`
         padding: 5px 10px;
         border-radius: 2px;
         margin: 0px 15px;
-        border: 1px solid rgb(56, 61, 81);
+        border: 1px solid ${props => props.theme.color.bgSecondary};
         min-width: 200px;
 
         .reserve-line-label {
@@ -171,7 +170,7 @@ const ReserveInfoWrapper = styled.div`
       margin: 0px auto;
 
       .reserve-bottom-block {
-        color: rgb(56, 61, 81);
+        color: ${props => props.theme.color.textPrimary};
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -194,7 +193,7 @@ const ReserveInfoWrapper = styled.div`
           font-size: 12px;
 
           &.green {
-            color: rgb(121, 201, 130);
+            color: ${props => props.theme.color.green};
           }
         }
       }
@@ -202,7 +201,7 @@ const ReserveInfoWrapper = styled.div`
   }
 `;
 
-function ReserveInfo() { 
+function ReserveInfo({asset}) { 
   const [options, setOptions] = useState({
     chart: {
       height: 150,
@@ -235,7 +234,11 @@ function ReserveInfo() {
     },
   });
 
-  const [series, setSeries] = useState([18575678.44, 4453651.89]);
+  const [series, setSeries] = useState([0, 0]);
+
+  useEffect(() => {
+    setSeries([asset.liquidity, asset.total_borrowed]);
+  }, [asset])
  
   return (
     <ReserveInfoWrapper>
@@ -247,8 +250,8 @@ function ReserveInfo() {
           <div className="total-value liquidity">
             <div className="total-value-inner">
               <span>Available Liquidity <i className="liquidity" /></span>
-              <strong>4,453,651.89</strong>
-              <p>$ 4,477,462.92</p>
+              <strong>{asset.liquidity}</strong>
+              <p>$ {asset.liquidity * asset.asset_price}</p>
             </div>
           </div>
           <div className="graph-section">
@@ -259,15 +262,15 @@ function ReserveInfo() {
                 type="donut"
               />
               <div className="token-icon">
-                <img src={daiImg} alt="DAI" height="50" width="50" />
+                <img src={asset.img} alt="DAI" height="50" width="50" />
               </div>
             </div>
           </div>
           <div className="total-value borrowed">
             <div className="total-value-inner">
               <span>Total Borrowed <i className="borrowed" /></span>
-              <strong>18,575,678.44</strong>
-              <p>$ 18,665,446.02</p>
+              <strong>{asset.total_borrowed}</strong>
+              <p>$ {asset.total_borrowed * asset.asset_price}</p>
             </div>
           </div>
         </div>
@@ -277,15 +280,15 @@ function ReserveInfo() {
               Reserve size
             </div>
             <strong className="reserve-line-value">
-              $ 22,114,984.36
+              $ {asset.market_size}
             </strong>
           </div>
           <div className="reserve-line">
             <div className="reserve-line-label">
-              Utilisation Rate
+              Utilization Rate
             </div>
             <strong className="reserve-line-value">
-              91.62 %
+              {Number(asset.total_borrowed / asset.market_size * 100).toFixed(2)} %
             </strong>
           </div>
         </div>
