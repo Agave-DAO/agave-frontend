@@ -1,19 +1,17 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { compose } from 'recompose';
-import { withRouter } from 'react-router-dom'
-import { useTable } from 'react-table'
+import { withRouter } from 'react-router-dom';
 import InfoTable from '../../components/InfoTable';
 import CheckBox from '../../components/CheckBox';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 
 function DepositInfo({ history }) {
-  const data = useMemo(
-    () => {
-      return marketData.slice(0, 5);
-    },
-    []
-  );
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    setData(marketData.slice(0, 5));
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -53,7 +51,7 @@ function DepositInfo({ history }) {
         accessor: 'collateral',
         Cell: row => (
           <div className="value-section">
-            <CheckBox isChecked={row.value} handleChange={() => {}} />
+            <CheckBox isChecked={row.value} handleChange={() => { history.push(`/collateral/${row.row.original.name}`)}} />
           </div>
         )
       },
@@ -75,56 +73,9 @@ function DepositInfo({ history }) {
     []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable(
-    {
-      columns,
-      data,
-    }
-  );
-
   return (
-    <InfoTable>
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps()}>
-                  <div className="header-column">
-                    <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
-                      {column.render('Header')}
-                    </span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, index) => {
-            prepareRow(row)
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map(cell => {
-                  return (
-                    <td {...cell.getCellProps()}>
-                      {cell.render('Cell')}
-                    </td>
-                  )
-                })}
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </InfoTable>
-  )
+    <InfoTable columns={columns} data={data} />
+  );
 }
 
 export default compose(withRouter)(DepositInfo);

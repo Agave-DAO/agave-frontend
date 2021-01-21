@@ -76,11 +76,6 @@ const UserInfoWrapper = styled.div`
 `;
 
 function UserInfo({ asset, history }) {
-  const [isChecked, setIsChecked] = useState(false);
-  const handleChange = () => {
-    setIsChecked(!isChecked);
-  };
-
   return (
     <UserInfoWrapper>
       <div className="userinfo-title">
@@ -105,7 +100,7 @@ function UserInfo({ asset, history }) {
                 Your wallet balance
               </div>
               <div className="userinfo-wrapper-content-value">
-                9500 {asset.name}
+                {asset.wallet_balance} {asset.name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
@@ -113,7 +108,7 @@ function UserInfo({ asset, history }) {
                 You already deposited
               </div>
               <div className="userinfo-wrapper-content-value">
-                500 {asset.name}
+              {asset.supply_balance} {asset.name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
@@ -121,7 +116,7 @@ function UserInfo({ asset, history }) {
                 Use as collateral
               </div>
               <div className="userinfo-wrapper-content-value green">
-                <CheckBox isChecked={isChecked} handleChange={() => handleChange()} />
+                <CheckBox isChecked={asset.collateral} handleChange={() => { history.push(`/collateral/${asset.name}`)}} />
               </div>
             </div>
           </div>
@@ -141,7 +136,7 @@ function UserInfo({ asset, history }) {
                 Borrowed
               </div>
               <div className="userinfo-wrapper-content-value">
-                0.00 {asset.name}
+                {asset.borrow_balance} {asset.name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">

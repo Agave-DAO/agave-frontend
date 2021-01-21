@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import UnlockWallet from '../components/UnlockWallet';
@@ -57,11 +58,11 @@ const LayoutWrapper = styled.div`
 `;
 
 function Layout({children}) {
-  const [isLocked, setIsLocked] = useState(false);
+  const address = useSelector(state => state.authUser.address);
 
   return (
     <LayoutWrapper>
-      {isLocked ? (
+      {!address ? (
         <UnlockWallet />
       ) : (
         <>

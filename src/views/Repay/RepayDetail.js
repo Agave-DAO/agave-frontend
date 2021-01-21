@@ -6,9 +6,9 @@ import { NotificationManager } from 'react-notifications';
 import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
-import DepositOverview from './DepositOverview';
+import RepayOverview from './RepayOverview';
 
-const DepositDetailWrapper = styled.div`
+const RepayDetailWrapper = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -145,7 +145,7 @@ const DepositDetailWrapper = styled.div`
   }
 `;
 
-function DepositDetail({ match, history }) {
+function RepayDetail({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(null);
 
@@ -159,35 +159,35 @@ function DepositDetail({ match, history }) {
     setAmount(e.target.value);
   };
 
-  const handleDeposit = () => {
+  const handleRepay = () => {
     if (!amount) {
       NotificationManager.error('Please input the correct amount');
       return;
     }
-    history.push(`/deposit/confirm/${asset.name}/${amount}`);
+    history.push(`/repay/confirm/${asset.name}/${amount}`);
   };
 
   return (
     <Page>
-      <DepositDetailWrapper>
-        <DepositOverview asset={asset} />
+      <RepayDetailWrapper>
+        <RepayOverview asset={asset} />
         <div className="content-wrapper">
           <div className="basic-form">
             <div className="basic-form-header">
               <div className="basic-form-header-title">
-                How much would you like to deposit?
+                Repay
               </div>
               <div className="basic-form-header-content">
-                Please enter an amount you would like to deposit. The maximum amount you can deposit is shown below.
+                How much do you want to repay?
               </div>
             </div>
             <div className="basic-form-content">
               <div className="basic-form-content-top">
                 <div className="basic-form-content-top-label">
-                  Available to deposit
+                  Available to repay
                 </div>
                 <div className="basic-form-content-top-value">
-                  <span>{asset.wallet_balance}</span> {asset.name}
+                  <span>{asset.borrow_balance}</span> {asset.name}
                 </div>
               </div>
               <div className="basic-form-content-body">
@@ -195,22 +195,22 @@ function DepositDetail({ match, history }) {
                   <img src={asset.img} alt="" width={30} height={30} />
                 </div>
                 <div className="input-section">
-                  <input type="number" placeholder="Amount" step="any" min="0" max={asset.wallet_balance} value={amount} onChange={handleInputChange} />
+                  <input type="number" placeholder="Amount" step="any" min="0" max={asset.borrow_balance} value={amount} onChange={handleInputChange} />
                 </div>
-                <div className="max-section" onClick={() => setAmount(asset.wallet_balance)}>
+                <div className="max-section" onClick={() => setAmount(asset.borrow_balance)}>
                   Max
                 </div>
               </div>
             </div>
             <div className="basic-form-footer">
-              <Button variant="secondary" onClick={handleDeposit}>Continue</Button>
+              <Button variant="secondary" onClick={handleRepay}>Continue</Button>
               <Button variant="outline" onClick={() => history.goBack()}>Go back</Button>
             </div>
           </div>
         </div>
-      </DepositDetailWrapper>
+      </RepayDetailWrapper>
     </Page>
   );
 }
 
-export default compose(withRouter)(DepositDetail);
+export default compose(withRouter)(RepayDetail);

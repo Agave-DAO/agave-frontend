@@ -1,6 +1,8 @@
 import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setAddress } from "../../redux/actions";
 import styled from 'styled-components';
-import logo from '../../assets/image/logo.svg';
+import metamask from '../../assets/image/metamask.svg';
 
 const UnlockWalletWrapper = styled.div`
   display: flex;
@@ -126,6 +128,12 @@ const UnlockWalletWrapper = styled.div`
 `;
 
 function UnlockWallet() {
+  const dispatch = useDispatch();
+
+  const connect = () => {
+    dispatch(setAddress('accounts[0]'));
+  }
+
   return (
     <UnlockWalletWrapper>
       <div className="inner">
@@ -133,16 +141,16 @@ function UnlockWallet() {
           <span className="caption-title">Welcome to Agaave</span>
           <div className="caption-content">Connect your wallet and jump into DeFi</div>
         </div>
-        <div className="content">
+        <div className="content" onClick={connect}>
           <div className="content-inner">
-            <img src={logo} alt="Browser Wallet" />
+            <img src={metamask} alt="Browser Wallet" />
             <div className="content-inner-text" >Browser Wallet</div>
             <div className="content-inner-arrow">
               <span></span>
             </div>
           </div>
         </div>
-        <div className="without-wallet">
+        <div className="without-wallet" onClick={connect}>
           or continue without wallet
         </div>
         <div className="privacy">

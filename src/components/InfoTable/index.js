@@ -1,5 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
+import { useTable } from 'react-table';
 
 const TableWrapper = styled.div`
   table {
@@ -112,12 +113,57 @@ const TableWrapper = styled.div`
   }
 `;
  
-function BasicTable({children}) {
+function InfoTable({columns, data}) {
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+  } = useTable(
+    {
+      columns,
+      data,
+    }
+  );
+
   return (
     <TableWrapper>
-      {children}
+      <table {...getTableProps()}>
+        <thead>
+          {headerGroups.map(headerGroup => (
+            <tr {...headerGroup.getHeaderGroupProps()}>
+              {headerGroup.headers.map(column => (
+                <th {...column.getHeaderProps()}>
+                  <div className="header-column">
+                    <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
+                      {column.render('Header')}
+                    </span>
+                  </div>
+                </th>
+              ))}
+            </tr>
+          ))}
+        </thead>
+        <tbody {...getTableBodyProps()}>
+          {rows.map((row, index) => {
+            prepareRow(row)
+            return (
+              <tr {...row.getRowProps()}>
+                {row.cells.map(cell => {
+                  return (
+                    <td {...cell.getCellProps()}>
+                      {cell.render('Cell')}
+                    </td>
+                  )
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
     </TableWrapper>
   )
 }
 
-export default BasicTable;
+export default InfoTable;
