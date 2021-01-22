@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Nav, Navbar } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -15,8 +16,17 @@ const HeaderWrapper = styled.div`
     .navbar-brand {
       color: ${props => props.theme.color.textSecondary};
       font-weight: bold;
-      img {
-        margin-right: 10px;
+
+      a {
+        font-size: 20px;
+        color: white;
+
+        &:hover {
+          text-decoration: none;
+        }
+        img {
+          margin-right: 10px;
+        }
       }
     }
 
@@ -72,12 +82,16 @@ const HeaderWrapper = styled.div`
 `;
 
 function Header() {
+  const address = useSelector(state => state.authUser.address);
+
   return (
     <HeaderWrapper>
       <Navbar collapseOnSelect expand="lg">
-        <Navbar.Brand href="/">
-          <img src={logo} alt='Agaave App Logo' />
-          Agaave
+        <Navbar.Brand href="#">
+            <NavLink to='/'>
+              <img src={logo} alt='Agaave App Logo' />
+              Agaave
+            </NavLink>
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse>
@@ -106,7 +120,7 @@ function Header() {
             >
               BORROW
             </NavLink>
-            <div className="connect-btn">0x234...567</div>
+            <div className="connect-btn">{`${address.substring(0, 4)}...${address.substring(address.length - 4, address.length)}`}</div>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

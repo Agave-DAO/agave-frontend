@@ -31,7 +31,7 @@ function MarketTable({ activePrice, history }) {
         Cell: row => {
           return activePrice === 'USD' ? (
             <div className="value-section">
-              $ <span className="value">{row.value}</span>
+              $ <span className="value">{(row.value * row.row.original.asset_price).toFixed(2)}</span>
             </div>
           ) : (
             <span className="value">{row.value}</span>
@@ -44,7 +44,7 @@ function MarketTable({ activePrice, history }) {
         Cell: row => {
           return activePrice === 'USD' ? (
             <div className="value-section">
-              $ <span className="value">{row.value}</span>
+              $ <span className="value">{(row.value * row.row.original.asset_price).toFixed(2)}</span>
             </div>
           ) : (
             <span className="value">{row.value}</span>

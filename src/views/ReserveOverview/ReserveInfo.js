@@ -237,7 +237,7 @@ function ReserveInfo({asset}) {
   const [series, setSeries] = useState([0, 0]);
 
   useEffect(() => {
-    setSeries([asset.liquidity, asset.total_borrowed]);
+    setSeries([asset.total_borrowed, asset.liquidity]);
   }, [asset])
  
   return (

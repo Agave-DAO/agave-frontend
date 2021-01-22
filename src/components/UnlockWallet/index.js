@@ -1,7 +1,11 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { setAddress } from "../../redux/actions";
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import {  } from 'react-notifications';
+import { NotificationManager } from 'react-notifications';
+import { setAddress, setNetworkId, setConnectType } from "../../redux/actions";
+import { web3 } from '../../utils/web3';
+import config from '../../config';
 import metamask from '../../assets/image/metamask.svg';
 
 const UnlockWalletWrapper = styled.div`
@@ -130,9 +134,31 @@ const UnlockWalletWrapper = styled.div`
 function UnlockWallet() {
   const dispatch = useDispatch();
 
-  const connect = () => {
-    dispatch(setAddress('accounts[0]'));
-  }
+  const onMetamaskConnect = async () => {
+    if (typeof window.ethereum === 'undefined') {
+      NotificationManager.warning('Please install MetaMask!');
+      return;
+    }
+    try {
+      const netId = `${await web3.eth.net.getId()}`;
+      if (netId !== config.networkId) {
+        if (config.networkId === '1')
+          NotificationManager.warning('Please select main net to proceed!');
+        else if (config.networkId === '4') {
+          NotificationManager.warning('Please select rinkeby net to proceed!');
+        }
+        return;
+      }
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (accounts[0]) {
+        dispatch(setNetworkId(netId));
+        dispatch(setAddress(accounts[0]));
+        dispatch(setConnectType('metamask'));
+      }
+    } catch (error) {
+      NotificationManager.warning('Something went wrong while connect wallet');
+    }
+  };
 
   return (
     <UnlockWalletWrapper>
@@ -141,7 +167,7 @@ function UnlockWallet() {
           <span className="caption-title">Welcome to Agaave</span>
           <div className="caption-content">Connect your wallet and jump into DeFi</div>
         </div>
-        <div className="content" onClick={connect}>
+        <div className="content" onClick={onMetamaskConnect}>
           <div className="content-inner">
             <img src={metamask} alt="Browser Wallet" />
             <div className="content-inner-text" >Browser Wallet</div>
@@ -149,9 +175,6 @@ function UnlockWallet() {
               <span></span>
             </div>
           </div>
-        </div>
-        <div className="without-wallet" onClick={connect}>
-          or continue without wallet
         </div>
         <div className="privacy">
           <div className="paragraph">By unlocking Your wallet You agree to our <b>Terms of Service</b>, <b>Privacy</b> and <b>Cookie Policy</b>.</div>
