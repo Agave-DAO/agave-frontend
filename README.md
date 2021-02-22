@@ -1,4 +1,4 @@
-# Agaave Frontend
+# Agave Frontend
 This is an interface for Agaave protocol.
 ## Install
 ```
