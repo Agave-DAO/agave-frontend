@@ -153,7 +153,7 @@ function DepositDetail({ match, history }) {
 
   useEffect(async () => {
     if (match.params && match.params.assetName) {
-      let balance = await getBalance(address, match.params.assetName, 'deposit');
+      let balance = await getBalance(address, match.params.assetName);
       let image = marketData.find((data) => {
         return data.name === match.params.assetName;
       })

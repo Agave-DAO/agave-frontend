@@ -204,31 +204,23 @@ function DepositConfirm({ match, history }) {
   const approveFn = async (userAddress) => {
     let balance = await getBalance(userAddress, match.params.assetName);
     let approved = await approve(userAddress, match.params.assetName, balance);
-    getApprovedReceipt(approved)
-  };
-
-  const getApprovedReceipt = async (hash) => {
     setPendingApproval(true);
-    let receipt = await approveSpendListener(address, match.params.assetName, hash);
+    let receipt = await approveSpendListener(address, match.params.assetName, approved);
     if (receipt === true) {
       setStep(step + 1);
       setPendingApproval(false)
     }
-  }
+  };
 
   const depositFn = async (address, amount) => {
     let d = await deposit(address, amount, 0, match.params.assetName);
-    console.log(d)
-    getDepositReciept(d);
-
-  }
-
-  const getDepositReciept = async (hash) => {
-    let receipt = await depositListener(hash);
+    let receipt = await depositListener(d);
     if (receipt.status) {
       setStep(step + 1);
     }
   }
+
+
   return (
     <Page>
       <DepositConfirmWrapper>

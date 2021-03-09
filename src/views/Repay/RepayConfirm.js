@@ -201,15 +201,12 @@ function RepayConfirm({ match, history }) {
   const approveFn = async () => {
     let balance = await getBalance(address, match.params.assetName);
     let approved = await approve(address, match.params.assetName, balance);
-    getApprovedReceipt(approved)
-  };
-
-  const getApprovedReceipt = async (hash) => {
-    let receipt = await approveSpendListener(address, match.params.assetName, hash);
+    let receipt = await approveSpendListener(address, match.params.assetName, approved);
     if (receipt === true) {
       setStep(step + 1);
     }
-  }
+  };
+
 
   const repayFn = async () => {
     let r = await repay(address, amount, match.params.assetName);

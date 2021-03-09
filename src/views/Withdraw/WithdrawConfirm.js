@@ -195,14 +195,12 @@ function WithdrawConfirm({ match, history }) {
   }, [match]);
   const withdrawTokens = async () => {
     let res = await withdraw(address, amount, match.params.assetName);
-    getWithdrawReceipt(res);
-  }
-  const getWithdrawReceipt = async (hash) => { 
-    let r = await withdrawListener(hash);
+    let r = await withdrawListener(res);
     if(r.status){
       setStep(step + 1);
     }
   }
+
   return (
     <Page>
       <WithdrawConfirmWrapper>
