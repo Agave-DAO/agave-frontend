@@ -6,6 +6,12 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import RepayOverview from './RepayOverview';
+import { approve, checkApproved } from '../../utils/contracts/approve';
+import { approveSpendListener } from '../../utils/contracts/events/events';
+import { useSelector } from 'react-redux';
+import getBalance from '../../utils/contracts/getBalance';
+import repay from '../../utils/contracts/repay';
+import { repayListener } from '../../utils/contracts/events/events';
 
 const RepayConfirmWrapper = styled.div`
   height: 100%;
@@ -178,8 +184,9 @@ function RepayConfirm({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(0);
   const [step, setStep] = useState(1);
-
-  useEffect(() => {
+  const address = useSelector(state => state.authUser.address);
+  useEffect(async () => {
+    const approved = await checkApproved(address, match.params.assetName);
     if (match.params && match.params.assetName) {
       setAsset(marketData.find(item => item.name === match.params.assetName));
     }
@@ -187,8 +194,30 @@ function RepayConfirm({ match, history }) {
     if (match.params && match.params.amount) {
       setAmount(match.params.amount);
     }
+    if (approved > amount) {
+      setStep(2)
+    }
   }, [match]);
+  const approveFn = async () => {
+    let balance = await getBalance(address, match.params.assetName);
+    let approved = await approve(address, match.params.assetName, balance);
+    getApprovedReceipt(approved)
+  };
 
+  const getApprovedReceipt = async (hash) => {
+    let receipt = await approveSpendListener(address, match.params.assetName, hash);
+    if (receipt === true) {
+      setStep(step + 1);
+    }
+  }
+
+  const repayFn = async () => {
+    let r = await repay(address, amount, match.params.assetName);
+    let receipt = await repayListener(r);
+    if (receipt.status){
+      setStep(step + 1);
+    }
+  }
   return (
     <Page>
       <RepayConfirmWrapper>
@@ -241,7 +270,7 @@ function RepayConfirm({ match, history }) {
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => setStep(step + 1)}>Approve</Button>
+                      <Button variant="secondary" onClick={() => approveFn()}>Approve</Button>
                     </div>
                   </div>
                 )}
@@ -256,7 +285,7 @@ function RepayConfirm({ match, history }) {
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => setStep(step + 1)}>Submit</Button>
+                      <Button variant="secondary" onClick={() => repayFn()}>Submit</Button>
                     </div>
                   </div>
                 )}

@@ -7,6 +7,10 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import RepayOverview from './RepayOverview';
+import userAccount from '../../utils/contracts/userAccountData';
+import { web3 } from '../../utils/web3';
+import { useSelector } from 'react-redux';
+
 
 const RepayDetailWrapper = styled.div`
   height: 100%;
@@ -148,10 +152,21 @@ const RepayDetailWrapper = styled.div`
 function RepayDetail({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(null);
-
-  useEffect(() => {
+  const address = useSelector(state => state.authUser.address);
+  useEffect(async() => {
     if (match.params && match.params.assetName) {
-      setAsset(marketData.find(item => item.name === match.params.assetName));
+      let account = await userAccount(address);
+      console.log(account);
+      let image = marketData.find((data) => {
+        return data.name === match.params.assetName;
+      })
+      let availableEth = web3.utils.fromWei(account.totalDebtETH, 'ether');
+      let assetInfo = {
+        borrow_balance: availableEth,
+        name: match.params.assetName,
+        img: image.img
+      }
+      setAsset(assetInfo);
     }
   }, [match]);
 

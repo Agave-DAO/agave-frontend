@@ -6,6 +6,10 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import WithdrawOverview from './WithdrawOverview';
+import { useSelector } from 'react-redux';
+import withdraw from '../../utils/contracts/withdraw';
+import { withdrawListener } from '../../utils/contracts/events/events';
+
 
 const WithdrawConfirmWrapper = styled.div`
   height: 100%;
@@ -179,7 +183,7 @@ function WithdrawConfirm({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(0);
   const [step, setStep] = useState(1);
-
+  const address = useSelector(state => state.authUser.address);
   useEffect(() => {
     if (match.params && match.params.assetName) {
       setAsset(marketData.find(item => item.name === match.params.assetName));
@@ -189,7 +193,16 @@ function WithdrawConfirm({ match, history }) {
       setAmount(match.params.amount);
     }
   }, [match]);
-
+  const withdrawTokens = async () => {
+    let res = await withdraw(address, amount, match.params.assetName);
+    getWithdrawReceipt(res);
+  }
+  const getWithdrawReceipt = async (hash) => { 
+    let r = await withdrawListener(hash);
+    if(r.status){
+      setStep(step + 1);
+    }
+  }
   return (
     <Page>
       <WithdrawConfirmWrapper>
@@ -239,7 +252,9 @@ function WithdrawConfirm({ match, history }) {
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => setStep(step + 1)}>Submit</Button>
+                      <Button variant="secondary" onClick={() => {
+                        withdrawTokens()
+                      }}>Submit</Button>
                     </div>
                   </div>
                 )}

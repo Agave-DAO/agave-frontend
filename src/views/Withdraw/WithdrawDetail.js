@@ -7,6 +7,10 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import WithdrawOverview from './WithdrawOverview';
+import userAccount from '../../utils/contracts/userAccountData';
+import { useSelector } from 'react-redux';
+import { web3 } from '../../utils/web3';
+
 
 const WithdrawDetailWrapper = styled.div`
   height: 100%;
@@ -151,7 +155,7 @@ function WithdrawDetail({ match, history }) {
   const handleInputChange = (e) => {
     setAmount(e.target.value);
   };
-
+  let address = useSelector(state => state.authUser.address);
   const handleWithdraw = () => {
     if (!amount) {
       NotificationManager.error('Please input the correct amount');
@@ -160,10 +164,19 @@ function WithdrawDetail({ match, history }) {
     history.push(`/withdraw/confirm/${asset.name}/${amount}`);
   };
 
-  useEffect(() => {
-    if (match.params && match.params.assetName) {
-      setAsset(marketData.find(item => item.name === match.params.assetName));
+  useEffect(async () => {
+    let account = await userAccount(address);
+    let availableEth = web3.utils.fromWei(account.availableBorrowsETH, 'ether');
+
+    let image = marketData.find((data) => {
+      return data.name === match.params.assetName;
+    })
+    let assetInfo = {
+      supply_balance: availableEth,
+      name: match.params.assetName,
+      img: image.img
     }
+    setAsset(assetInfo);
   }, [match]);
 
   return (

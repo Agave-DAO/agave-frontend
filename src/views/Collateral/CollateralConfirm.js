@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
+import collateral from '../../utils/contracts/collateral';
+import { useSelector } from 'react-redux';
+import { reserveListner } from '../../utils/contracts/events/events';
 
 const CollateralConfirmWrapper = styled.div`
   height: 100%;
@@ -172,9 +175,20 @@ const CollateralConfirmWrapper = styled.div`
   }
 `;
 
-function CollateralConfirm({ asset, history }) {
+function CollateralConfirm({ asset, history, match }) {
   const [step, setStep] = useState(1);
-
+  const address = useSelector(state => state.authUser.address);
+  const approveCollateral = async () => {
+     let r = await collateral(address, match.params.assetName);
+     console.log(r);
+     approveCollateralReceipt(r);
+  }
+  const approveCollateralReceipt = async (hash) => {
+    let res = await reserveListner(hash);
+    if(res.status){
+      setStep(step + 1);
+    }
+  }
   return (
     <CollateralConfirmWrapper>
       <div className="content-wrapper">
@@ -219,7 +233,9 @@ function CollateralConfirm({ asset, history }) {
                     </div>
                   </div>
                   <div className="form-action-body-right">
-                    <Button variant="secondary" onClick={() => setStep(step + 1)}>Submit</Button>
+                    <Button variant="secondary" onClick={() => {
+                      approveCollateral();
+                    }}>Submit</Button>
                   </div>
                 </div>
               )}

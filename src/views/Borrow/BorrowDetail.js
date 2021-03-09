@@ -7,6 +7,10 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import BorrowOverview from './BorrowOverview';
+import { useSelector } from 'react-redux';
+import userAccount from '../../utils/contracts/userAccountData';
+import { web3 } from '../../utils/web3';
+
 
 const BorrowDetailWrapper = styled.div`
   height: 100%;
@@ -148,6 +152,9 @@ const BorrowDetailWrapper = styled.div`
 function BorrowDetail({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(null);
+  const address = useSelector(state => state.authUser.address);
+
+
   const handleInputChange = (e) => {
     setAmount(e.target.value);
   };
@@ -160,9 +167,19 @@ function BorrowDetail({ match, history }) {
     history.push(`/borrow/confirm/${asset.name}/${amount}`);
   };
 
-  useEffect(() => {
+  useEffect(async() => {
     if (match.params && match.params.assetName) {
-      setAsset(marketData.find(item => item.name === match.params.assetName));
+      let account = await userAccount(address);
+      let image = marketData.find((data) => {
+        return data.name === match.params.assetName;
+      })
+      let availableEth = web3.utils.fromWei(account.availableBorrowsETH, 'ether');
+      let assetInfo = {
+        wallet_balance: availableEth,
+        name: match.params.assetName,
+        img: image.img
+      }
+      setAsset(assetInfo);
     }
   }, [match]);
 

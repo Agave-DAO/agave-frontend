@@ -7,7 +7,8 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import DepositOverview from './DepositOverview';
-
+import { useSelector } from 'react-redux';
+import getBalance from '../../utils/contracts/getBalance';
 const DepositDetailWrapper = styled.div`
   height: 100%;
   display: flex;
@@ -148,10 +149,21 @@ const DepositDetailWrapper = styled.div`
 function DepositDetail({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(null);
+  let address = useSelector(state => state.authUser.address);
 
-  useEffect(() => {
+  useEffect(async () => {
     if (match.params && match.params.assetName) {
-      setAsset(marketData.find(item => item.name === match.params.assetName));
+      let balance = await getBalance(address, match.params.assetName, 'deposit');
+      let image = marketData.find((data) => {
+        return data.name === match.params.assetName;
+      })
+      
+      let assetInfo = {
+        wallet_balance: balance,
+        name: match.params.assetName,
+        img: image.img
+      }
+      setAsset(assetInfo);
     }
   }, [match]);
 
