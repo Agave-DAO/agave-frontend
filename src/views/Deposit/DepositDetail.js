@@ -156,7 +156,8 @@ function DepositDetail({ match, history }) {
       let balance = await getBalance(address, match.params.assetName);
       let image = marketData.find((data) => {
         return data.name === match.params.assetName;
-      })
+      });
+      console.log(image)
       
       let assetInfo = {
         wallet_balance: balance,

@@ -10,7 +10,8 @@ import WithdrawOverview from './WithdrawOverview';
 import userAccount from '../../utils/contracts/userAccountData';
 import { useSelector } from 'react-redux';
 import { web3 } from '../../utils/web3';
-
+import reserveData from '../../utils/contracts/reserveData';
+import getBalance from '../../utils/contracts/getBalance';
 
 const WithdrawDetailWrapper = styled.div`
   height: 100%;
@@ -166,7 +167,11 @@ function WithdrawDetail({ match, history }) {
 
   useEffect(async () => {
     let account = await userAccount(address);
-    let availableEth = web3.utils.fromWei(account.availableBorrowsETH, 'ether');
+    console.log(account)
+    let tokenData = await reserveData(address, match.params.assetName);
+    let aToken = tokenData.aTokenAddress;
+    let balance = await getBalance(address, match.params.assetName, aToken);
+    let availableEth = balance;
 
     let image = marketData.find((data) => {
       return data.name === match.params.assetName;

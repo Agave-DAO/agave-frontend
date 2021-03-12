@@ -172,7 +172,8 @@ function BorrowDetail({ match, history }) {
       let account = await userAccount(address);
       let image = marketData.find((data) => {
         return data.name === match.params.assetName;
-      })
+      });
+      console.log(account);
       let availableEth = web3.utils.fromWei(account.availableBorrowsETH, 'ether');
       let assetInfo = {
         wallet_balance: availableEth,

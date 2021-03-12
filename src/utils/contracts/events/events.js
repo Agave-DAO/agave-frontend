@@ -3,9 +3,13 @@ import { ContractABI } from '../abi/erc20abi';
 import { AgaveContractABI } from '../abi/agaveLendingABI';
 import { externalAddresses } from '../contractAddresses/externalAdresses';
 import { internalAddresses } from '../contractAddresses/internalAddresses';
+import { marketData } from '../../constants';
 
 export const approveSpendListener = async (address, assetName, hash) => {
-    let contractInstance = new web3.eth.Contract(ContractABI, externalAddresses[assetName]);
+    let targetAsset = marketData.find((asset) => {
+        return asset.name === assetName
+    });
+    let contractInstance = new web3.eth.Contract(ContractABI, targetAsset.contractAddress);
     return new Promise(async(resolve, reject) => {
         contractInstance.events.Approval({
             filter:{

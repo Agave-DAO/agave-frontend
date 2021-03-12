@@ -3,14 +3,13 @@ import { AgaveContractABI } from './abi/agaveLendingABI';
 import { internalAddresses } from './contractAddresses/internalAddresses';
 import { marketData } from '../constants';
 
-const withdraw = (address, amount, assetName) => {
+const reserveData = (address, assetName) => {
     let targetAsset = marketData.find((asset) => {
         return asset.name === assetName
     });
     const contractInstance = new web3.eth.Contract(AgaveContractABI, internalAddresses.Lending);
     return new Promise((resolve, reject) => {
-        let withdrawAmount = web3.utils.toWei(amount, 'ether')
-        contractInstance.methods.withdraw(targetAsset.contractAddress, withdrawAmount, address).send({
+        contractInstance.methods.getReserveData(targetAsset.contractAddress).call({
             from: address
         }, (err, res) => {
             if (err) reject(err);
@@ -20,4 +19,4 @@ const withdraw = (address, amount, assetName) => {
     
 }
 
-export default withdraw;
+export default reserveData;
