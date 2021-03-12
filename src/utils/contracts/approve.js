@@ -4,6 +4,7 @@ import { marketData } from '../constants';
 import { internalAddresses } from './contractAddresses/internalAddresses';
 
 export const approve = (address, assetName, balance) => {
+    
     let targetAsset = marketData.find((asset) => {
         return asset.name === assetName
     });

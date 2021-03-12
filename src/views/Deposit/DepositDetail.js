@@ -9,6 +9,8 @@ import { marketData } from '../../utils/constants';
 import DepositOverview from './DepositOverview';
 import { useSelector } from 'react-redux';
 import getBalance from '../../utils/contracts/getBalance';
+import userConfig from '../../utils/contracts/userconfig';
+
 const DepositDetailWrapper = styled.div`
   height: 100%;
   display: flex;
@@ -152,6 +154,8 @@ function DepositDetail({ match, history }) {
   let address = useSelector(state => state.authUser.address);
 
   useEffect(async () => {
+    let config = await userConfig(address);
+    console.log(config)
     if (match.params && match.params.assetName) {
       let balance = await getBalance(address, match.params.assetName);
       let image = marketData.find((data) => {

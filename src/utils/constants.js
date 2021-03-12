@@ -3,6 +3,7 @@ import ethImg from '../assets/image/coins/eth.svg';
 import agaveImg from '../assets/image/coins/agave.png';
 import honeyImg from '../assets/image/coins/honey.svg';
 import wbtcImg from '../assets/image/coins/wbtc.svg';
+import getBalance from './contracts/getBalance';
 
 let addresses = {
   Agave: "0xaE88624C894668E1bBABc9AFE87E8CA0fb74eC2a",
@@ -11,7 +12,7 @@ let addresses = {
   wBTC: "0x64Ed1291Fe07AdE7BB261c7AA8491e4bc0E8DE1c",
   DAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2"
 }
-export const marketData = [
+export let marketData = [
   {
     name: 'DAI',
     img: daiImg,
@@ -98,3 +99,9 @@ export const marketData = [
     contractAddress: addresses.wETH
   }
 ];
+export const updateBalance = (address) => {
+  marketData.forEach(async(asset) => {
+    let balance = await getBalance(address, asset.name);
+    asset.wallet_balance = balance;
+  });
+}

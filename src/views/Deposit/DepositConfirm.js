@@ -193,6 +193,7 @@ function DepositConfirm({ match, history }) {
   
   
   useEffect(async () => {
+  
     let approved = await checkApproved(address, match.params.assetName);
     const config = await userConfig(address);
     console.log(config);

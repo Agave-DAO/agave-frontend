@@ -24,6 +24,7 @@ import 'react-notifications/lib/notifications.css';
 import theme from './theme';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { updateBalance } from './utils/constants';
 
 class App extends Component {
   constructor(props) {
@@ -39,6 +40,7 @@ class App extends Component {
         window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
           if (accounts[0]) {
             this.props.setAddressRequest(accounts[0]);
+            updateBalance(accounts[0]);
           }
         });
         window.ethereum.on("accountsChanged", (accounts) =>
