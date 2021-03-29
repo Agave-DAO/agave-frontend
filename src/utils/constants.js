@@ -1,13 +1,18 @@
 import daiImg from '../assets/image/coins/dai.svg';
-import usdcImg from '../assets/image/coins/usdc.svg';
-import usdtImg from '../assets/image/coins/usdt.svg';
-import batImg from '../assets/image/coins/bat.svg';
 import ethImg from '../assets/image/coins/eth.svg';
-import uniImg from '../assets/image/coins/uni.svg';
+import agaveImg from '../assets/image/coins/agave.png';
+import honeyImg from '../assets/image/coins/honey.svg';
 import wbtcImg from '../assets/image/coins/wbtc.svg';
-import zrxImg from '../assets/image/coins/zrx.svg';
+import getBalance from './contracts/getBalance';
 
-export const marketData = [
+let addresses = {
+  Agave: "0xaE88624C894668E1bBABc9AFE87E8CA0fb74eC2a",
+  wETH: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+  HNY: "0xa30CCf67b489d627De8F8c035F5b9676442646e0",
+  wBTC: "0x64Ed1291Fe07AdE7BB261c7AA8491e4bc0E8DE1c",
+  DAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2"
+}
+export let marketData = [
   {
     name: 'DAI',
     img: daiImg,
@@ -23,10 +28,11 @@ export const marketData = [
     borrow_balance: 320,
     collateral: true,
     isVariable: true,
+    contractAddress: addresses.DAI
   },
   {
-    name: 'USDC',
-    img: usdcImg,
+    name: 'AG',
+    img: agaveImg,
     market_size: 32000,
     liquidity: 27200,
     total_borrowed: 4800,
@@ -39,10 +45,11 @@ export const marketData = [
     borrow_balance: 500,
     collateral: false,
     isVariable: false,
+    contractAddress: addresses.Agave
   },
   {
-    name: 'USDT',
-    img: usdtImg,
+    name: 'HNY',
+    img: honeyImg,
     market_size: 9800,
     liquidity: 6600,
     total_borrowed: 3200,
@@ -55,10 +62,11 @@ export const marketData = [
     borrow_balance: 0,
     collateral: true,
     isVariable: true,
+    contractAddress: addresses.HNY
   },
   {
-    name: 'BAT',
-    img: batImg,
+    name: 'wBTC',
+    img: wbtcImg,
     market_size: 6420,
     liquidity: 5120,
     total_borrowed: 1300,
@@ -71,6 +79,7 @@ export const marketData = [
     borrow_balance: 200,
     collateral: true,
     isVariable: true,
+    contractAddress: addresses.wBTC
   },
   {
     name: 'ETH',
@@ -87,53 +96,12 @@ export const marketData = [
     borrow_balance: 450,
     collateral: false,
     isVariable: false,
-  },
-  {
-    name: 'UNI',
-    img: uniImg,
-    market_size: 7800,
-    liquidity: 5500,
-    total_borrowed: 2300,
-    deposit_apy: 0.67,
-    variable_borrow_apr: 0.31,
-    stable_borrow_apr: 7.53,
-    asset_price: 7.09,
-    wallet_balance: 6700,
-    supply_balance: 9800,
-    borrow_balance: 0,
-    collateral: true,
-    isVariable: true,
-  },
-  {
-    name: 'WBTC',
-    img: wbtcImg,
-    market_size: 14300,
-    liquidity: 12000,
-    total_borrowed: 2300,
-    deposit_apy: 0.01,
-    variable_borrow_apr: 0.30,
-    stable_borrow_apr: 0.38,
-    asset_price: 35996.93,
-    wallet_balance: 5800,
-    supply_balance: 2100,
-    borrow_balance: 70,
-    collateral: true,
-    isVariable: true,
-  },
-  {
-    name: 'ZRX',
-    img: zrxImg,
-    market_size: 6300,
-    liquidity: 1200,
-    total_borrowed: 5100,
-    deposit_apy: 0.02,
-    variable_borrow_apr: 0.68,
-    stable_borrow_apr: 3.97,
-    asset_price: 0.49,
-    wallet_balance: 2000,
-    supply_balance: 3000,
-    borrow_balance: 0,
-    collateral: false,
-    isVariable: false,
-  },
+    contractAddress: addresses.wETH
+  }
 ];
+export const updateBalance = (address) => {
+  marketData.forEach(async(asset) => {
+    let balance = await getBalance(address, asset.name);
+    asset.wallet_balance = balance;
+  });
+}

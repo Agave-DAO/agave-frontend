@@ -6,6 +6,10 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import BorrowOverview from './BorrowOverview';
+import { useSelector } from 'react-redux';
+import borrow from '../../utils/contracts/borrow';
+import { borrowListener } from '../../utils/contracts/events/events';
+
 
 const BorrowConfirmWrapper = styled.div`
   height: 100%;
@@ -179,6 +183,7 @@ function BorrowConfirm({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(0);
   const [step, setStep] = useState(1);
+  const address = useSelector(state => state.authUser.address);
 
   useEffect(() => {
     if (match.params && match.params.assetName) {
@@ -189,7 +194,13 @@ function BorrowConfirm({ match, history }) {
       setAmount(match.params.amount);
     }
   }, [match]);
-
+  const borrowFn = async () => {
+    let r = await borrow(address, amount, match.params.assetName);
+    let receipt = await borrowListener(r);
+    if (receipt.status) {
+      setStep(step + 1);
+    }
+  }
   return (
     <Page>
       <BorrowConfirmWrapper>
@@ -239,7 +250,7 @@ function BorrowConfirm({ match, history }) {
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => setStep(step + 1)}>Submit</Button>
+                      <Button variant="secondary" onClick={() => borrowFn()}>Submit</Button>
                     </div>
                   </div>
                 )}

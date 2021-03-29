@@ -6,7 +6,14 @@ import Page from '../../components/Page';
 import Button from '../../components/Button';
 import { marketData } from '../../utils/constants';
 import DepositOverview from './DepositOverview';
-
+import { approve, checkApproved } from '../../utils/contracts/approve';
+import { useSelector } from 'react-redux';
+import { approveSpendListener, depositListener } from '../../utils/contracts/events/events';
+import deposit from '../../utils/contracts/deposit';
+import getBalance from '../../utils/contracts/getBalance';
+import userConfig from '../../utils/contracts/userconfig';
+import getReserveData from '../../utils/contracts/reserveData';
+import { web3 } from '../../utils/web3';
 const DepositConfirmWrapper = styled.div`
   height: 100%;
   display: flex;
@@ -175,11 +182,23 @@ const DepositConfirmWrapper = styled.div`
 `;
 
 function DepositConfirm({ match, history }) {
+  const address = useSelector(state => state.authUser.address);
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(0);
   const [step, setStep] = useState(1);
-
-  useEffect(() => {
+  const [balance, setBalance] = useState(() => {
+    return getBalance(address, match.params.assetName)
+  })
+  const [pendingApproval, setPendingApproval] = useState(false);
+  
+  
+  useEffect(async () => {
+  
+    let approved = await checkApproved(address, match.params.assetName);
+    const config = await userConfig(address);
+    console.log(config);
+    const assetData = await getReserveData(address, match.params.assetName);
+    console.log(assetData);
     if (match.params && match.params.assetName) {
       setAsset(marketData.find(item => item.name === match.params.assetName));
     }
@@ -187,7 +206,32 @@ function DepositConfirm({ match, history }) {
     if (match.params && match.params.amount) {
       setAmount(match.params.amount);
     }
+    
+    approved = web3.utils.fromWei(approved, 'ether');
+
+    if(approved > balance){
+      setStep(2)
+    }
   }, [match]);
+
+  const approveFn = async (userAddress) => {
+    let approved = await approve(userAddress, match.params.assetName, balance);
+    setPendingApproval(true);
+    let receipt = await approveSpendListener(address, match.params.assetName, approved);
+    if (receipt === true) {
+      setStep(step + 1);
+      setPendingApproval(false)
+    }
+  };
+
+  const depositFn = async (address, amount) => {
+    let d = await deposit(address, amount, 0, match.params.assetName);
+    let receipt = await depositListener(d);
+    if (receipt.status) {
+      setStep(step + 1);
+    }
+  }
+
 
   return (
     <Page>
@@ -241,7 +285,18 @@ function DepositConfirm({ match, history }) {
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => setStep(step + 1)}>Approve</Button>
+                      <Button variant="secondary" onClick={() => {
+                        approveFn(address);
+                      }}>Approve</Button>
+                    </div>
+                  </div>
+                )}
+                {step === 1 && pendingApproval && (
+                  <div className="form-action-body">
+                    <div className="form-action-body-left">
+                      <div className="desc">
+                        Transaction is pending...
+                      </div>
                     </div>
                   </div>
                 )}
@@ -256,7 +311,7 @@ function DepositConfirm({ match, history }) {
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => setStep(step + 1)}>Submit</Button>
+                      <Button variant="secondary" onClick={() => depositFn(address, amount)}>Submit</Button>
                     </div>
                   </div>
                 )}

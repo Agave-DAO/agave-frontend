@@ -24,6 +24,7 @@ import 'react-notifications/lib/notifications.css';
 import theme from './theme';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { updateBalance } from './utils/constants';
 
 class App extends Component {
   constructor(props) {
@@ -33,19 +34,22 @@ class App extends Component {
     if (typeof window.ethereum !== "undefined") {
       window.web3 = new Web3(window.ethereum);
       window.web3.eth.net.getId((err, netId) => {
-
+        console.log(netId)
+        console.log(this.props.setErrorRequest(true))
         this.handleNetworkChanged(`${netId}`);
         window.ethereum.request({ method: 'eth_accounts' }).then(accounts => {
           if (accounts[0]) {
             this.props.setAddressRequest(accounts[0]);
+            updateBalance(accounts[0]);
           }
         });
         window.ethereum.on("accountsChanged", (accounts) =>
           this.handleAddressChanged(accounts)
         );
-        window.ethereum.on("networkChanged", (networkId) =>
+        window.ethereum.on("networkChanged", (networkId) =>{
+          console.log(networkId)
           this.handleNetworkChanged(networkId)
-        );
+        });
         this.props.setConnectTypeRequest('metamask');
       });
     }
