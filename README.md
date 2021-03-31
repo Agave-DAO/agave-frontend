@@ -15,7 +15,7 @@ npm run build
 1. You will need metamask and I recommend you create a test account so you don't accidently send real money or tokens to test network.  You can goto the icon on top right and then select create
 account.  Name this account Account Test or something similar so you know its a test account.
 
-![alt text](https://github.com/[username]/[reponame]/blob/[branch]/assets/images/account.png?raw=true)
+![Account metamask](https://github.com/buzzlightyearbee/agave-frontend/blob/readme/assets/images/account.png?raw=true)
 
 2. You need to get some ETH into your test account.
 
