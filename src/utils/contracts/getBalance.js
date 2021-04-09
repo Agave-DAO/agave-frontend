@@ -1,5 +1,5 @@
 import { web3 } from '../web3';
-import { ContractABI } from './abi/erc20abi';
+import { ContractABI } from '../../abi/erc20abi';
 import { marketData } from '../constants';
 
 const getBalance = async (address, assetName, aToken) => {

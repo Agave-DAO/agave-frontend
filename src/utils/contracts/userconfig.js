@@ -1,5 +1,5 @@
 import { web3 } from '../web3';
-import { AgaveContractABI } from './abi/agaveLendingABI';
+import { AgaveContractABI } from '../../abi/agaveLendingABI';
 import { internalAddresses } from './contractAddresses/internalAddresses';
 import { externalAddresses } from './contractAddresses/externalAdresses';
 

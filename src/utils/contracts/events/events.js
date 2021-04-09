@@ -1,6 +1,6 @@
 import { web3 } from '../../web3';
-import { ContractABI } from '../abi/erc20abi';
-import { AgaveContractABI } from '../abi/agaveLendingABI';
+import { ContractABI } from '../../../abi/erc20abi';
+import { AgaveContractABI } from '../../../abi/agaveLendingABI';
 import { externalAddresses } from '../contractAddresses/externalAdresses';
 import { internalAddresses } from '../contractAddresses/internalAddresses';
 import { marketData } from '../../constants';
