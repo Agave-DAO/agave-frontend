@@ -53,11 +53,12 @@
     "web3modal": "^1.9.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "npm run gen-contract-types && react-scripts start",
+    "build": "npm run gen-contract-types && react-scripts build",
+    "test": "npm run gen-contract-types && react-scripts test",
     "eject": "react-scripts eject",
-    "typechain": "typechain --target=ethers-v5 --outDir=./src/contracts/ ./src/abi/*.json"
+    "typechain": "npm run gen-contract-types",
+    "gen-contract-types": "typechain --target=ethers-v5 --outDir=./src/contracts/ \"./src/abi/**/*.json\""
   },
   "eslintConfig": {
     "extends": [
