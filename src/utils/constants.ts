@@ -5,14 +5,33 @@ import honeyImg from '../assets/image/coins/honey.svg';
 import wbtcImg from '../assets/image/coins/wbtc.svg';
 import getBalance from './contracts/getBalance';
 
-let addresses = {
+const addresses: Readonly<Record<string, string>> = {
   Agave: "0xaE88624C894668E1bBABc9AFE87E8CA0fb74eC2a",
   wETH: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
   HNY: "0xa30CCf67b489d627De8F8c035F5b9676442646e0",
   wBTC: "0x64Ed1291Fe07AdE7BB261c7AA8491e4bc0E8DE1c",
   DAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2"
 }
-export let marketData = [
+
+export interface IMarketData {
+  name: string,
+  img: string,
+  market_size: number,
+  liquidity: number,
+  total_borrowed: number,
+  deposit_apy: number,
+  variable_borrow_apr: number,
+  stable_borrow_apr: number,
+  asset_price: number,
+  wallet_balance: number,
+  supply_balance: number,
+  borrow_balance: number,
+  collateral: boolean,
+  isVariable: boolean,
+  contractAddress: string,
+}
+
+export const marketData: ReadonlyArray<IMarketData> = [
   {
     name: 'DAI',
     img: daiImg,
@@ -99,9 +118,10 @@ export let marketData = [
     contractAddress: addresses.wETH
   }
 ];
-export const updateBalance = (address) => {
+
+export const updateBalance = (address: string) => {
   marketData.forEach(async(asset) => {
     let balance = await getBalance(address, asset.name);
     asset.wallet_balance = balance;
   });
-}
+};

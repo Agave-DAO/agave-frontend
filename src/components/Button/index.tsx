@@ -3,10 +3,10 @@ import styled, { CSSProperties, ThemeContext } from 'styled-components';
 import { Link, LinkProps } from 'react-router-dom';
 
 const Button: React.FC<Omit<React.HTMLProps<HTMLDivElement>, "size"> & {
-  text: string,
-  size: string | "sm" | "md" | "lg" | number | undefined,
+  text?: string,
+  size?: string | "sm" | "md" | "lg" | number | undefined,
   to?: LinkProps["to"] | undefined,
-  variant: {},
+  variant?: "secondary" | "outline" | "primary" | undefined,
 }> = ({
   children,
   disabled,

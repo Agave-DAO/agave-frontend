@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
-import { withRouter } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
+import { IMarketData } from '../../utils/constants';
 
 const BorrowOverviewWrapper = styled.div`
   display: flex;
@@ -184,7 +184,8 @@ const BorrowOverviewWrapper = styled.div`
   }
 `;
 
-function BorrowOverview({ asset, history }) {
+function BorrowOverview({ asset }: {asset: IMarketData }) {
+  const history = useHistory();
   return (
     <BorrowOverviewWrapper>
       <div className="topContent">
@@ -302,4 +303,4 @@ function BorrowOverview({ asset, history }) {
   );
 }
 
-export default compose(withRouter)(BorrowOverview);
+export default BorrowOverview;
