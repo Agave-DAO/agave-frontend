@@ -1,4 +1,3 @@
-import { fromRenderProps } from 'recompose';
 import { web3 } from '../web3';
 import { AgaveContractABI } from './abi/agaveLendingABI';
 import { internalAddresses } from './contractAddresses/internalAddresses';

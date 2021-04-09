@@ -1,9 +1,10 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useMemo } from 'react';
 import { Nav, Navbar } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 import logo from '../../assets/image/logo.svg';
+import { selectAddress } from '../../features/auth/authSlice';
+import { useAppSelector } from '../../redux/hooks';
 
 const HeaderWrapper = styled.div`
   border-bottom: 1px solid #414250;
@@ -82,7 +83,8 @@ const HeaderWrapper = styled.div`
 `;
 
 function Header() {
-  const address = useSelector(state => state.authUser.address);
+  const address: string | undefined = useAppSelector(selectAddress);
+  const addressPretty = useMemo(() => address ? `${address.substring(0, 4)}...${address.substring(address.length - 4, address.length)}` : undefined, [address]);
 
   return (
     <HeaderWrapper>
@@ -120,7 +122,7 @@ function Header() {
             >
               BORROW
             </NavLink>
-            <div className="connect-btn">{`${address.substring(0, 4)}...${address.substring(address.length - 4, address.length)}`}</div>
+            <div className="connect-btn">{addressPretty ?? "Connect"}</div>
           </Nav>
         </Navbar.Collapse>
       </Navbar>

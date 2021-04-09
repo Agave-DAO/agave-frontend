@@ -1,8 +1,13 @@
 import React, { useContext, useMemo } from 'react';
-import styled, { ThemeContext } from 'styled-components';
-import { Link } from 'react-router-dom';
+import styled, { CSSProperties, ThemeContext } from 'styled-components';
+import { Link, LinkProps } from 'react-router-dom';
 
-const Button = ({
+const Button: React.FC<Omit<React.HTMLProps<HTMLDivElement>, "size"> & {
+  text: string,
+  size: string | "sm" | "md" | "lg" | number | undefined,
+  to?: LinkProps["to"] | undefined,
+  variant: {},
+}> = ({
   children,
   disabled,
   href,
@@ -46,7 +51,7 @@ const Button = ({
   let width;
   let height;
   let fontSize;
-  switch (size) {
+  switch (size as "sm" | "md" | "lg" | number | undefined) {
     case 'sm':
       width = 70;
       height = 24;
@@ -93,7 +98,7 @@ const Button = ({
   )
 }
 
-const StyledButton = styled.div`
+const StyledButton = styled.div<{ disabled?: boolean | undefined } & CSSProperties>`
   background-color: ${props => props.backgroundColor};
   border: 1px solid transparent;
   border-radius: ${props => props.borderRadius};

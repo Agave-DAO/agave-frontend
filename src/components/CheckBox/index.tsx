@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from 'styled-components';
 import Switch from "react-switch";
 
-const CheckBoxWrapper = styled.div`
+const CheckBoxWrapper = styled.div<{isChecked: boolean}>`
   display: flex;
   align-items: center;
 
@@ -25,8 +25,12 @@ const CheckBoxWrapper = styled.div`
   }
 `;
 
-function CheckBox({ isChecked, labels, handleChange }) {
-  const [labelList, setLabelList] = useState(['Yes', 'No']);
+const CheckBox: React.FC<{
+  isChecked?: boolean | null | undefined,
+  labels: ReadonlyArray<string>,
+  handleChange: React.ComponentProps<typeof Switch>["onChange"],
+}> = ({ isChecked, labels, handleChange }) => {
+  const [labelList, setLabelList] = useState<ReadonlyArray<string>>(['Yes', 'No']);
 
   useEffect(() => {
     if (labels && labels.length > 0) {
@@ -35,10 +39,10 @@ function CheckBox({ isChecked, labels, handleChange }) {
   }, [labels]);
 
   return (
-    <CheckBoxWrapper isChecked={isChecked}>
+    <CheckBoxWrapper isChecked={isChecked ?? false}>
       <span className={isChecked ? 'green' : 'red'}>{isChecked ? labelList[0] : labelList[1]}</span>
       <Switch
-        checked={isChecked}
+        checked={isChecked ?? false}
         onChange={handleChange}
         onColor="#79C982"
         onHandleColor="#ffffff"

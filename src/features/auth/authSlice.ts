@@ -1,14 +1,21 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../redux/store";
+import type { AbstractConnector } from '@web3-react/abstract-connector';
 
-interface AuthState {
-    error?: string | undefined;
-    address?: string | undefined;
-    networkId?: string | undefined;
-    connectType?: string | undefined;
+export interface AuthenticatedAccount {
+    address: string;
+    networkId: string | undefined;
+    connector: AbstractConnector | undefined;
+}
+
+export interface AuthState {
+    error?: Error | undefined;
+    active?: AuthenticatedAccount | undefined;
 }
 
 const initialState: AuthState = {
+    error: undefined,
+    active: undefined,
 };
 
 export const authSlice = createSlice({
@@ -16,34 +23,25 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
 
-        setAddress: (state, address: PayloadAction<string>) => ({
+        setActiveAccount: (state, address: PayloadAction<AuthenticatedAccount | undefined>) => ({
             ...state,
-            address: address.payload
+            active: address.payload,
         }),
 
-        setNetworkId: (state, networkId: PayloadAction<string>) => ({
+        setError: (state, error: PayloadAction<Error | undefined>) => ({
             ...state,
-            networkId: networkId.payload
-        }),
-
-        setConnectType: (state, connectType: PayloadAction<string>) => ({
-            ...state,
-            connectType: connectType.payload
-        }),
-
-        setError: (state, error: PayloadAction<string>) => ({
-            ...state,
-            error: error.payload
+            error: error.payload,
         }),
 
     }
 });
 
-export const { setAddress, setNetworkId, setConnectType, setError } = authSlice.actions;
+export const { setActiveAccount, setError } = authSlice.actions;
 
-export const selectAddress = (state: RootState) => state.auth.address;
-export const selectNetworkId = (state: RootState) => state.auth.networkId;
-export const selectConnectType = (state: RootState) => state.auth.connectType;
+export const selectActiveAccount = (state: RootState) => state.auth.active;
+export const selectAddress = (state: RootState) => state.auth.active?.address;
+export const selectNetworkId = (state: RootState) => state.auth.active?.networkId;
+export const selectConnector = (state: RootState) => state.auth.active?.connector;
 export const selectError = (state: RootState) => state.auth.error;
 
 export default authSlice.reducer;

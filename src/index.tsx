@@ -11,7 +11,7 @@ import { Web3ReactProvider } from "@web3-react/core";
 function getWeb3Library(provider: any, connector?: AbstractConnector | undefined) {
 }
 
-// used to enable HMR
+// function wrapper is used to enable HMR
 function renderApp() {
   ReactDOM.render(
     <Web3ReactProvider getLibrary={getWeb3Library}>

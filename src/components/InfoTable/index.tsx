@@ -1,6 +1,6 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useTable } from 'react-table';
+import React from "react";
+import styled from "styled-components";
+import { useTable, Column, Row } from "react-table";
 
 const TableWrapper = styled.div`
   table {
@@ -24,7 +24,7 @@ const TableWrapper = styled.div`
           justify-content: flex-end;
           flex: 1 1 0%;
           overflow: hidden;
-            
+
           &:first-child {
             align-items: flex-start;
             justify-content: flex-start;
@@ -53,8 +53,8 @@ const TableWrapper = styled.div`
         border-radius: 2px;
         transition: all 0.2s ease 0s;
         border-bottom: 1px solid rgb(241, 241, 243);
-        background: ${props => props.theme.color.bgWhite};
-        color: ${props => props.theme.color.textPrimary};
+        background: ${(props) => props.theme.color.bgWhite};
+        color: ${(props) => props.theme.color.textPrimary};
 
         td {
           display: flex;
@@ -92,15 +92,15 @@ const TableWrapper = styled.div`
             font-weight: 600;
 
             &.yellow {
-              color: ${props => props.theme.color.yellow}
+              color: ${(props) => props.theme.color.yellow};
             }
 
             &.blue {
-              color: ${props => props.theme.color.blue}
+              color: ${(props) => props.theme.color.blue};
             }
 
             &.pink {
-              color: ${props => props.theme.color.pink}
+              color: ${(props) => props.theme.color.pink};
             }
           }
         }
@@ -112,32 +112,44 @@ const TableWrapper = styled.div`
     }
   }
 `;
- 
-function InfoTable({columns, data}) {
+
+function InfoTable<T extends object>({
+  columns,
+  data,
+}: {
+  columns: Column<T>[];
+  data: T[];
+}) {
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-  } = useTable(
-    {
-      columns,
-      data,
-    }
-  );
+  } = useTable<T>({
+    columns,
+    data,
+  });
 
   return (
     <TableWrapper>
       <table {...getTableProps()}>
         <thead>
-          {headerGroups.map(headerGroup => (
+          {headerGroups.map((headerGroup) => (
             <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
+              {headerGroup.headers.map((column) => (
                 <th {...column.getHeaderProps()}>
                   <div className="header-column">
-                    <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
-                      {column.render('Header')}
+                    <span
+                      className={
+                        !column.isSorted
+                          ? ""
+                          : column.isSortedDesc
+                          ? "desc"
+                          : "asc"
+                      }
+                    >
+                      {column.render("Header")}
                     </span>
                   </div>
                 </th>
@@ -146,24 +158,22 @@ function InfoTable({columns, data}) {
           ))}
         </thead>
         <tbody {...getTableBodyProps()}>
-          {rows.map((row, index) => {
-            prepareRow(row)
+          {rows.map((row, _index) => {
+            prepareRow(row);
             return (
               <tr {...row.getRowProps()}>
                 {row.cells.map(cell => {
                   return (
-                    <td {...cell.getCellProps()}>
-                      {cell.render('Cell')}
-                    </td>
-                  )
+                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
+                  );
                 })}
               </tr>
-            )
+            );
           })}
         </tbody>
       </table>
     </TableWrapper>
-  )
+  );
 }
 
 export default InfoTable;

@@ -13,12 +13,12 @@ const CardWrapper = styled.div`
   z-index: 2;
 `;
 
-function Card({ children }) {
+const Card: React.FC<{}> = ({ children }) => {
   return (
     <CardWrapper>
       {children}
     </CardWrapper>
   );
-}
+};
 
 export default Card;

@@ -63,7 +63,11 @@ const SwitchWrapper = styled.div`
   }
 `;
 
-function Switch({ values, activeValue, setActiveValue }) {
+export function Switch<T>({ values, activeValue, setActiveValue }: {
+  values: [T, T],
+  activeValue: T,
+  setActiveValue: (active: T) => void,
+}) {
   return (
     <SwitchWrapper>
       <div className="labeled-switch-inner">

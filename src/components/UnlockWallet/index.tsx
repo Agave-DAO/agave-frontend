@@ -1,12 +1,13 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import {  } from 'react-notifications';
-import { NotificationManager } from 'react-notifications';
-import { setAddress, setNetworkId, setConnectType } from "../../redux/actions";
+import { store as NotificationManager } from 'react-notifications-component';
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { web3 } from '../../utils/web3';
 import config from '../../config';
 import metamask from '../../assets/image/metamask.svg';
+import { useWeb3React } from '@web3-react/core';
+import { InjectedConnector } from '@web3-react/injected-connector';
 
 const UnlockWalletWrapper = styled.div`
   display: flex;
@@ -131,33 +132,36 @@ const UnlockWalletWrapper = styled.div`
   }
 `;
 
-function UnlockWallet() {
-  const dispatch = useDispatch();
+function warnUser(title: string, message?: string | undefined): void {
+  NotificationManager.addNotification({
+    container: "top-right",
+    type: "warning",
+    title,
+    message,
+  });
+}
+
+export const injectedConnector = new InjectedConnector({
+  supportedChainIds: [
+    1, // Mainet
+    3, // Ropsten
+    4, // Rinkeby
+    5, // Goerli
+    42, // Kovan
+    0x64, // XDAI
+  ],
+})
+
+const UnlockWallet: React.FC<{}> = props => {
+  const dispatch = useAppDispatch();
+  const { active, error, activate } = useWeb3React();
 
   const onMetamaskConnect = async () => {
-    if (typeof window.ethereum === 'undefined') {
-      NotificationManager.warning('Please install MetaMask!');
+    if (typeof (window as any).ethereum === 'undefined') {
+      warnUser("Please install MetaMask!");
       return;
     }
-    try {
-      const netId = `${await web3.eth.net.getId()}`;
-      if (netId !== config.networkId) {
-        if (config.networkId === '1')
-          NotificationManager.warning('Please select main net to proceed!');
-        else if (config.networkId === '4') {
-          NotificationManager.warning('Please select rinkeby net to proceed!');
-        }
-        return;
-      }
-      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts[0]) {
-        dispatch(setNetworkId(netId));
-        dispatch(setAddress(accounts[0]));
-        dispatch(setConnectType('metamask'));
-      }
-    } catch (error) {
-      NotificationManager.warning('Something went wrong while connect wallet');
-    }
+    await activate(injectedConnector);
   };
 
   return (

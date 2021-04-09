@@ -21,14 +21,19 @@ import 'react-notifications-component/dist/theme.css';
 import theme from './theme';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+//import "animate.css/animate.min.css";
+import "react-notifications-component/dist/theme.css";
+import ReactNotification from "react-notifications-component";
 
 
 interface IAppProps {
 }
 
 const App: React.FC<IAppProps> = props => {
+  const notifications = React.useMemo(() => (<ReactNotification />), [theme]);
   return (
     <ThemeProvider theme={theme}>
+      {notifications}
       <Router>
         <Layout>
           <Switch>

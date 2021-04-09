@@ -1,10 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { NotificationContainer } from 'react-notifications';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import UnlockWallet from '../components/UnlockWallet';
 import styled from 'styled-components';
+import { useAppSelector } from '../redux/hooks';
+import { selectActiveAccount } from '../features/auth/authSlice';
 
 const LayoutWrapper = styled.div`
   width: 100%;
@@ -58,12 +59,12 @@ const LayoutWrapper = styled.div`
   }
 `;
 
-function Layout({children}) {
-  const address = useSelector(state => state.authUser.address);
+const Layout: React.FC<{}> = ({children}) => {
+  const activeAccount = useAppSelector(selectActiveAccount);
 
   return (
     <LayoutWrapper>
-      {!address ? (
+      {!activeAccount ? (
         <UnlockWallet />
       ) : (
         <>
@@ -78,7 +79,6 @@ function Layout({children}) {
           </main>
         </>
       )}
-      <NotificationContainer />
     </LayoutWrapper>
   );
 }

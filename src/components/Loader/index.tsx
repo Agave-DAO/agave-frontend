@@ -9,7 +9,7 @@ const override = css`
   margin: 15% 30% 15% 33%;
 `;
 
-function Loader({ size = 60 }) {
+const Loader: React.FC<{ size?: number | undefined, }> = ({ size = 60 }) => {
     return (
         <MoonLoader
             css={override}

@@ -78,7 +78,7 @@ const CardWrapper = styled.div`
   }
 `;
 
-function Card({ color, children }) {
+const Card: React.FC<{ color: React.ComponentProps<typeof CardWrapper>["className"] }> = ({ color, children }) => {
   return (
     <CardWrapper className={color}>
       {children}
