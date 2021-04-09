@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Page from '../../components/Page';
 import Graph from './Graph';
@@ -45,4 +44,4 @@ function ReserveOverview({ match, history }) {
   );
 }
 
-export default compose(withRouter)(ReserveOverview);
+export default withRouter(ReserveOverview);

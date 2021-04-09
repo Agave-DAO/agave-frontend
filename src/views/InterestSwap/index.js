@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Page from '../../components/Page';
 import InterestSwapConfirm from './InterestSwapConfirm';
@@ -48,4 +47,4 @@ function InterestSwap({ match, history }) {
   );
 }
 
-export default compose(withRouter)(InterestSwap);
+export default withRouter(InterestSwap);

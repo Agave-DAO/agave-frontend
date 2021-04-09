@@ -92,14 +92,14 @@ const MarketsWrapper = styled.div`
   }
 `;
 
-function Markets() {
-  const [activeValue, setActiveValue] = useState('USD');
+const Markets: React.FC<{}> = ({}) => {
+  const [activeValue, setActiveValue] = useState<"USD" | "Native">("USD");
   return (
     <Page>
       <MarketsWrapper>
         <div className="topContent">
           <div>Current Market Size</div>
-          <span>$ 97,827,149.29</span>
+          <span>$ 97,827,149.29{/* TODO: placeholder*/}</span>
         </div>
         <div className="price-switcher">
           <Switch values={['USD', 'Native']} activeValue={activeValue} setActiveValue={setActiveValue} />

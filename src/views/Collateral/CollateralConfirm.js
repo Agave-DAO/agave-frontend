@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
 import collateral from '../../utils/contracts/collateral';
@@ -264,4 +263,4 @@ function CollateralConfirm({ asset, history, match }) {
   );
 }
 
-export default compose(withRouter)(CollateralConfirm);
+export default withRouter(CollateralConfirm);

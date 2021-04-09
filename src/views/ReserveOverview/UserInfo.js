@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
 import CheckBox from '../../components/CheckBox';
@@ -170,4 +169,4 @@ function UserInfo({ asset, history }) {
   );
 }
 
-export default compose(withRouter)(UserInfo);
+export default withRouter(UserInfo);

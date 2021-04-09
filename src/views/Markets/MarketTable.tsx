@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react';
-import { compose } from 'recompose';
-import { withRouter } from 'react-router-dom'
-import { useTable, useSortBy } from 'react-table'
+import { useHistory, withRouter } from 'react-router-dom'
+import { useTable, useSortBy, Column } from 'react-table'
 import BasicTable from '../../components/BasicTable';
-import { marketData } from '../../utils/constants';
+import { IMarketData, marketData } from '../../utils/constants';
 
-function MarketTable({ activePrice, history }) {
-  const data = useMemo(
-    () => marketData,
+export const MarketTable: React.FC<{ activePrice: "USD" | "Native" }> = ({ activePrice }) => {
+  const history = useHistory();
+  const data: IMarketData[] = useMemo(
+    () => Array.from(marketData),
     []
   );
 
-  const columns = useMemo(
+  const columns: Column<IMarketData>[] = useMemo(
     () => [
       {
         Header: 'Assets',
@@ -92,7 +92,7 @@ function MarketTable({ activePrice, history }) {
   } = useTable(
     {
       columns,
-      data,
+      data: data,
     },
     useSortBy
   );
@@ -136,4 +136,4 @@ function MarketTable({ activePrice, history }) {
   )
 }
 
-export default compose(withRouter)(MarketTable);
+export default MarketTable;

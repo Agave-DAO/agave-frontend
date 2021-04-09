@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
 
@@ -248,4 +247,4 @@ function InterestSwapConfirm({ asset, history }) {
   );
 }
 
-export default compose(withRouter)(InterestSwapConfirm);
+export default withRouter(InterestSwapConfirm);
