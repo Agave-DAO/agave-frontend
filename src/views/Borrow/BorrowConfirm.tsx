@@ -7,11 +7,11 @@ import { marketData, IMarketData } from "../../utils/constants";
 import BorrowOverview from "./BorrowOverview";
 import { useSelector } from "react-redux";
 import { borrowListener } from "../../utils/contracts/events/events";
-import type { Provider as EthersProvider } from "@ethersproject/abstract-provider";
 import { useWeb3React } from "@web3-react/core";
 import BigNumber from "bignumber.js";
 import { AgaveLendingABI__factory } from "../../contracts";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { Web3Provider } from '@ethersproject/providers'
 
 const BorrowConfirmWrapper = styled.div`
   height: 100%;
@@ -190,7 +190,7 @@ const BorrowConfirm: React.FC<{}> = ({}) => {
   const [amount, setAmount] = useState(0);
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
-  const { account: address, library } = useWeb3React<EthersProvider>();
+  const { account: address, library } = useWeb3React<Web3Provider>();
 
   useEffect(() => {
     if (match.params && match.params.assetName) {
@@ -212,7 +212,7 @@ const BorrowConfirm: React.FC<{}> = ({}) => {
     if (!address || !library || !asset) {
       return;
     }
-    const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library);
+    const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
     const interestRateMode = 2;
     const referralCode = 0;
     const tx = await lender.borrow(asset.contractAddress, amount, interestRateMode, referralCode, address);

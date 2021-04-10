@@ -9,8 +9,8 @@ import BorrowOverview from "./BorrowOverview";
 import { useWeb3React } from "@web3-react/core";
 import { AgaveLendingABI__factory } from "../../contracts";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import type { Provider as EthersProvider } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
+import { Web3Provider } from '@ethersproject/providers'
 
 const BorrowDetailWrapper = styled.div`
   height: 100%;
@@ -154,7 +154,7 @@ const BorrowDetail: React.FC<{}> = ({}) => {
     assetName: string | undefined,
   }>();
   const history = useHistory();
-  const { account: address, library } = useWeb3React<EthersProvider>();
+  const { account: address, library } = useWeb3React<Web3Provider>();
 
   const [asset, setAsset] = useState<IMarketData>();
   const [amountStr, setAmountStr] = useState<string>("");
@@ -186,13 +186,14 @@ const BorrowDetail: React.FC<{}> = ({}) => {
   useEffect(() => { (async () => {
     console.log(`${library} : ${address} : ${match.params}`);
     if (library && address && match.params && match.params.assetName) {
-      const contract = AgaveLendingABI__factory.connect(internalAddresses.Lending, library);
+      const contract = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
       let accountData;
       try {
         accountData = await contract.getUserAccountData(address);      
       } catch (e) {
         // revert?
-        console.log("Revert encountered attempting to read user account data");
+        console.log("Revert encountered attempting to read user account data for addr " + address);
+        console.log(e);
         return;
       }
       const assetBaseWithImage = marketData.find((data) => {
