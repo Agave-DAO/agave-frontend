@@ -3,7 +3,6 @@ import ethImg from '../assets/image/coins/eth.svg';
 import agaveImg from '../assets/image/coins/agave.png';
 import honeyImg from '../assets/image/coins/honey.svg';
 import wbtcImg from '../assets/image/coins/wbtc.svg';
-import getBalance from './contracts/getBalance';
 
 const addresses: Readonly<Record<string, string>> = {
   Agave: "0xaE88624C894668E1bBABc9AFE87E8CA0fb74eC2a",
@@ -118,10 +117,3 @@ export const marketData: ReadonlyArray<IMarketData> = [
     contractAddress: addresses.wETH
   }
 ];
-
-export const updateBalance = (address: string) => {
-  marketData.forEach(async(asset) => {
-    let balance = await getBalance(address, asset.name);
-    asset.wallet_balance = balance;
-  });
-};

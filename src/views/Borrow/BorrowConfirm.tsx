@@ -6,10 +6,12 @@ import Button from "../../components/Button";
 import { marketData, IMarketData } from "../../utils/constants";
 import BorrowOverview from "./BorrowOverview";
 import { useSelector } from "react-redux";
-import borrow from "../../utils/contracts/borrow";
 import { borrowListener } from "../../utils/contracts/events/events";
+import type { Provider as EthersProvider } from "@ethersproject/abstract-provider";
 import { useWeb3React } from "@web3-react/core";
 import BigNumber from "bignumber.js";
+import { AgaveLendingABI__factory } from "../../contracts";
+import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
 
 const BorrowConfirmWrapper = styled.div`
   height: 100%;
@@ -188,7 +190,7 @@ const BorrowConfirm: React.FC<{}> = ({}) => {
   const [amount, setAmount] = useState(0);
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
-  const { account: address } = useWeb3React();
+  const { account: address, library } = useWeb3React<EthersProvider>();
 
   useEffect(() => {
     if (match.params && match.params.assetName) {
@@ -207,11 +209,14 @@ const BorrowConfirm: React.FC<{}> = ({}) => {
     }
   }, [match]);
   const borrowFn = async () => {
-    if (!address) {
+    if (!address || !library || !asset) {
       return;
     }
-    const r = await borrow(address, amount, match.params.assetName);
-    const receipt = await borrowListener(r);
+    const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library);
+    const interestRateMode = 2;
+    const referralCode = 0;
+    const tx = await lender.borrow(asset.contractAddress, amount, interestRateMode, referralCode, address);
+    const receipt = await tx.wait()
     if (receipt.status) {
       setStep(step + 1);
     }

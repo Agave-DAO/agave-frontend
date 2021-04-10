@@ -7,8 +7,12 @@ import store, { } from './redux/store';
 import reportWebVitals from './reportWebVitals';
 import type { AbstractConnector } from '@web3-react/abstract-connector';
 import { Web3ReactProvider } from "@web3-react/core";
+import { Web3Provider } from '@ethersproject/providers'
 
-function getWeb3Library(provider: any, connector?: AbstractConnector | undefined) {
+function getWeb3Library(provider: any, connector?: AbstractConnector | undefined): Web3Provider {
+  const library = new Web3Provider(provider);
+  library.pollingInterval = 12_000;
+  return library;
 }
 
 // function wrapper is used to enable HMR

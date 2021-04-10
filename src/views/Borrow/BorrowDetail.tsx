@@ -6,11 +6,11 @@ import Page from "../../components/Page";
 import Button from "../../components/Button";
 import { IMarketData, marketData } from "../../utils/constants";
 import BorrowOverview from "./BorrowOverview";
-import { useSelector } from "react-redux";
-import userAccount from "../../utils/contracts/userAccountData";
-import { web3 } from "../../utils/web3";
 import { useWeb3React } from "@web3-react/core";
-import BigNumber from "bignumber.js";
+import { AgaveLendingABI__factory } from "../../contracts";
+import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
+import type { Provider as EthersProvider } from "@ethersproject/abstract-provider";
+import { ethers } from "ethers";
 
 const BorrowDetailWrapper = styled.div`
   height: 100%;
@@ -150,9 +150,11 @@ const BorrowDetailWrapper = styled.div`
 `;
 
 const BorrowDetail: React.FC<{}> = ({}) => {
-  const match = useRouteMatch();
+  const match = useRouteMatch<{
+    assetName: string | undefined,
+  }>();
   const history = useHistory();
-  const { account: address } = useWeb3React();
+  const { account: address, library } = useWeb3React<EthersProvider>();
 
   const [asset, setAsset] = useState<IMarketData>();
   const [amountStr, setAmountStr] = useState<string>("");
@@ -181,25 +183,39 @@ const BorrowDetail: React.FC<{}> = ({}) => {
     history.push(`/borrow/confirm/${asset.name}/${amountStr}`);
   };
 
-  /// TODO: when binding typechain contracts, figure out what the original author was actually trying to do here
-  // useEffect(async() => {
-  //   if (match.params && match.params.assetName) {
-  //     let account = await userAccount(address);
-  //     let image = marketData.find((data) => {
-  //       return data.name === match.params.assetName;
-  //     });
-  //     console.log(account);
-  //     let availableEth = web3.utils.fromWei(account.availableBorrowsETH, 'ether');
-  //     let assetInfo = {
-  //       wallet_balance: availableEth,
-  //       name: match.params.assetName,
-  //       img: image.img
-  //     }
-  //     setAsset(assetInfo);
-  //   }
-  // }, [match]);
+  useEffect(() => { (async () => {
+    console.log(`${library} : ${address} : ${match.params}`);
+    if (library && address && match.params && match.params.assetName) {
+      const contract = AgaveLendingABI__factory.connect(internalAddresses.Lending, library);
+      let accountData;
+      try {
+        accountData = await contract.getUserAccountData(address);      
+      } catch (e) {
+        // revert?
+        console.log("Revert encountered attempting to read user account data");
+        return;
+      }
+      const assetBaseWithImage = marketData.find((data) => {
+        return data.name === match.params.assetName;
+      });
+      if (!assetBaseWithImage) {
+        console.log("Asset with base image not found for name " + match.params.assetName);
+        return;
+      }
+      const availableEth = ethers.utils.parseEther(ethers.utils.formatEther(accountData.availableBorrowsETH));
+      const assetInfo = {
+        ...assetBaseWithImage,
+        wallet_balance: availableEth.toNumber(),
+        name: match.params.assetName,
+      }
+      setAsset(assetInfo);
+    }
+  })(); }, [match]);
 
-  if (!asset || !address) {
+  if (!asset) {
+    return <>No asset found with details </>;
+  }
+  if (!address || !library) {
     return <>No account loaded</>;
   }
 

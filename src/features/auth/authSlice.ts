@@ -5,7 +5,6 @@ import type { AbstractConnector } from '@web3-react/abstract-connector';
 export interface AuthenticatedAccount {
     address: string;
     networkId: string | undefined;
-    connector: AbstractConnector | undefined;
 }
 
 export interface AuthState {
@@ -41,7 +40,6 @@ export const { setActiveAccount, setError } = authSlice.actions;
 export const selectActiveAccount = (state: RootState) => state.auth.active;
 export const selectAddress = (state: RootState) => state.auth.active?.address;
 export const selectNetworkId = (state: RootState) => state.auth.active?.networkId;
-export const selectConnector = (state: RootState) => state.auth.active?.connector;
 export const selectError = (state: RootState) => state.auth.error;
 
 export default authSlice.reducer;

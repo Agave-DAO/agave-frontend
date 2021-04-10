@@ -22,7 +22,6 @@ export function useReduxWeb3Updater<T>(key?: string | undefined): Web3ReactConte
       dispatch(authSlice.actions.setActiveAccount({
         address: web3.account,
         networkId: web3.chainId?.toString(),
-        connector: web3.connector,
       }));
     } else {
       dispatch(authSlice.actions.setActiveAccount(undefined));
