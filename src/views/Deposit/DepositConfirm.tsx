@@ -1,18 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
+import { useHistory, useRouteMatch, withRouter } from "react-router-dom";
 import Page from '../../components/Page';
 import Button from '../../components/Button';
-import { marketData } from '../../utils/constants';
+import { marketData, IMarketData } from "../../utils/constants";
 import DepositOverview from './DepositOverview';
 import { approve, checkApproved } from '../../utils/contracts/approve';
 import { useSelector } from 'react-redux';
+import { useWeb3React } from "@web3-react/core";
+import BigNumber from "bignumber.js";
+import { AgaveLendingABI__factory } from "../../contracts";
 import { approveSpendListener, depositListener } from '../../utils/contracts/events/events';
 import deposit from '../../utils/contracts/deposit';
 import getBalance from '../../utils/contracts/getBalance';
 import userConfig from '../../utils/contracts/userconfig';
 import getReserveData from '../../utils/contracts/reserveData';
 import { web3 } from '../../utils/web3';
+import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { BigNumberish } from '@ethersproject/bignumber';
+import { Web3Provider } from '@ethersproject/providers'
+
 const DepositConfirmWrapper = styled.div`
   height: 100%;
   display: flex;
@@ -180,62 +187,92 @@ const DepositConfirmWrapper = styled.div`
   }
 `;
 
-function DepositConfirm({ match, history }) {
-  const address = useSelector(state => state.authUser.address);
-  const [asset, setAsset] = useState({});
-  const [amount, setAmount] = useState(0);
-  const [step, setStep] = useState(1);
-  const [balance, setBalance] = useState(() => {
-    return getBalance(address, match.params.assetName)
-  })
-  const [pendingApproval, setPendingApproval] = useState(false);
-  
-  
-  useEffect(async () => {
-  
-    let approved = await checkApproved(address, match.params.assetName);
-    const config = await userConfig(address);
-    console.log(config);
-    const assetData = await getReserveData(address, match.params.assetName);
-    console.log(assetData);
-    if (match.params && match.params.assetName) {
-      setAsset(marketData.find(item => item.name === match.params.assetName));
+const DepositConfirm: React.FC<{}> = ({}) => {
+    const match = useRouteMatch<{
+      assetName?: string | undefined;
+      amount?: string | undefined;
+    }>();
+    const history = useHistory();
+    const { account: address, library } = useWeb3React<Web3Provider>();
+    const [asset, setAsset] = useState<IMarketData>();
+    const [amount, setAmount] = useState(0);
+    // TODO: change this 'step' system to nested routes
+    const [step, setStep] = useState(1);
+    const [pendingApproval, setPendingApproval] = useState(false);
+    const [balance, setBalance] = useState(() => {
+      return getBalance(address!, match.params.assetName!, "")
+    })
+
+    useEffect(() => {
+      if (!address || !match.params.assetName) {
+        return;
+      }
+      let approved;
+
+      async function getCheckApproved() {
+        approved = await checkApproved(address!, match.params.assetName!);
+        const config = await userConfig(address!);
+        console.log(config);
+        const assetData = await getReserveData(address!, match.params.assetName!);
+        console.log(assetData);    
+      }
+      getCheckApproved();
+
+      if (match.params && match.params.assetName) {
+        setAsset(marketData.find(item => item.name === match.params.assetName));
+      }
+
+      if (match.params && match.params.amount) {
+        try {
+          const parsed = new BigNumber(String(match.params.amount));
+          if (amount != parsed.toNumber()) {
+            setAmount(amount);
+          }
+        } catch {
+          // Don't set the number if the match path isn't one
+        }
+      }
+      
+      approved = web3.utils.fromWei(approved, 'ether');
+
+      if(approved > balance){
+        setStep(2)
+      }
+    }, [match]);
+    const approveFn = async (userAddress?: string | null | undefined) => {
+      if (!asset || !match.params.assetName || !address || !library || !userAddress) {
+        return;
+      }
+      let curBalance: any = await balance;
+      let approved = await approve(userAddress, match.params.assetName!, curBalance);
+      setPendingApproval(true);
+      let curAsset: any = marketData.find(item => item.name === match.params.assetName);
+      if (!curAsset) {
+        let receipt: any = await approveSpendListener(address, curAsset, String(approved), library.getSigner());
+        if (receipt === true) {
+          setStep(step + 1);
+          setPendingApproval(false)
+        }
+      }
+      
+    };
+    const depositFn = async (address?: string | null | undefined, amount?: BigNumberish | null | undefined) => {
+      if (!address || !amount || !library || !asset || !match.params.assetName) {
+        return;
+      }
+      const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
+      const interestRateMode = 2;
+      const referralCode = 0;
+      const tx = await lender.deposit(match.params.assetName, amount, address, referralCode);
+      const receipt = await tx.wait()
+      if (receipt.status) {
+        setStep(step + 1);
+      }
     }
-
-    if (match.params && match.params.amount) {
-      setAmount(match.params.amount);
-    }
-    
-    approved = web3.utils.fromWei(approved, 'ether');
-
-    if(approved > balance){
-      setStep(2)
-    }
-  }, [match]);
-
-  const approveFn = async (userAddress) => {
-    let approved = await approve(userAddress, match.params.assetName, balance);
-    setPendingApproval(true);
-    let receipt = await approveSpendListener(address, match.params.assetName, approved);
-    if (receipt === true) {
-      setStep(step + 1);
-      setPendingApproval(false)
-    }
-  };
-
-  const depositFn = async (address, amount) => {
-    let d = await deposit(address, amount, 0, match.params.assetName);
-    let receipt = await depositListener(d);
-    if (receipt.status) {
-      setStep(step + 1);
-    }
-  }
-
-
   return (
     <Page>
       <DepositConfirmWrapper>
-        <DepositOverview asset={asset} />
+        {asset ? (<DepositOverview asset={asset} />): (<></>)}
         <div className="content-wrapper">
           <div className="basic-form">
             <div className="basic-form-header">
@@ -251,15 +288,21 @@ function DepositConfirm({ match, history }) {
                 <div className="content-label">
                   Amount
                 </div>
-                <div className="content-value">
-                  <div className="token-amount">
-                    <img src={asset.img} alt="" />
-                    <span>{amount} {asset.name}</span>
+                {asset ? (
+                  <div className="content-value">
+                    <div className="token-amount">
+                      <img src={asset.img} alt="" />
+                      <span>
+                        {amount} {asset.name}
+                      </span>
+                    </div>
+                    <div className="usd-amount">
+                      $ {asset.asset_price * amount}
+                    </div>
                   </div>
-                  <div className="usd-amount">
-                    $ {asset.asset_price * amount}
-                  </div>
-                </div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-action-view">
                 <div className="form-action-header">
@@ -340,4 +383,4 @@ function DepositConfirm({ match, history }) {
   );
 }
 
-export default withRouter(DepositConfirm);
+export default DepositConfirm;
