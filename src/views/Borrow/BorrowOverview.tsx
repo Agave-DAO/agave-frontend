@@ -1,9 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
+import { IMarketData } from '../../utils/constants';
 
-const DepositOverviewWrapper = styled.div`
+const BorrowOverviewWrapper = styled.div`
   display: flex;
   flex-direction: column;
 
@@ -89,6 +90,10 @@ const DepositOverviewWrapper = styled.div`
           flex-direction: column;
           justify-content: space-between;
 
+          &:last-child {
+            justify-content: flex-start;
+          }
+
           .currency-overview-row {
             display: flex;
             flex-flow: row wrap;
@@ -120,6 +125,14 @@ const DepositOverviewWrapper = styled.div`
 
                 &.green {
                   color: ${props => props.theme.color.green};
+                }
+
+                &.blue {
+                  color: ${props => props.theme.color.blue};
+                }
+
+                &.pink {
+                  color: ${props => props.theme.color.pink};
                 }
               }
             }
@@ -171,24 +184,33 @@ const DepositOverviewWrapper = styled.div`
   }
 `;
 
-function DepositOverview({ asset, history }) {
+function BorrowOverview({ asset }: {asset: IMarketData }) {
+  const history = useHistory();
   return (
-    <DepositOverviewWrapper>
+    <BorrowOverviewWrapper>
       <div className="topContent">
         <div className="topContent-section">
           <span className="topContent-section-title">
-            Your balance in Aave
+            You borrowed
           </span>
           <span className="topContent-section-value">
-            500.0091 {asset.name}
+            300.0341 {asset.name}
           </span>
         </div>
         <div className="topContent-section">
           <span className="topContent-section-title">
-            Your wallet balance
+            Total collateral
           </span>
           <span className="topContent-section-value">
-            9,499.9973 {asset.name}
+            2,480.1911 USD
+          </span>
+        </div>
+        <div className="topContent-section">
+          <span className="topContent-section-title">
+            Loan to value
+          </span>
+          <span className="topContent-section-value">
+            78.59 %
           </span>
         </div>
         <div className="topContent-section">
@@ -203,7 +225,7 @@ function DepositOverview({ asset, history }) {
       <div className="top-overview">
         <div className="top-overview-header">
           <div className="top-overview-title">
-            Deposit {asset.name}
+            Borrow {asset.name}
           </div>
           <div className="top-overview-reserve" onClick={() => history.push(`/reserve-overview/${asset.name}`)}>
             <img src={asset.img} alt="" width={20} height={20} />
@@ -231,52 +253,28 @@ function DepositOverview({ asset, history }) {
               </div>
               <div className="currency-overview-row">
                 <div className="currency-overview-row-title">
-                  Deposit APY
-                </div>
-                <div className="currency-overview-row-content">
-                  <span className="yellow">0.04</span> %
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Can be used as collateral
-                </div>
-                <div className="currency-overview-row-content">
-                  <span className="green">Yes</span>
-                </div>
-              </div>
-            </div>
-            <div className="currency-overview">
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
                   Asset Price
                 </div>
                 <div className="currency-overview-row-content">
                   <span>0.99</span> USD
                 </div>
               </div>
+            </div>
+            <div className="currency-overview">
               <div className="currency-overview-row">
                 <div className="currency-overview-row-title">
-                  Maximum LTV
+                  Stable borrow APR
                 </div>
                 <div className="currency-overview-row-content">
-                  <span>75</span> %
+                  <span className="blue">9.21</span> %
                 </div>
               </div>
               <div className="currency-overview-row">
                 <div className="currency-overview-row-title">
-                  Liquidation threshold
+                  Variable borrow APR
                 </div>
                 <div className="currency-overview-row-content">
-                  <span>80</span> %
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Liquidation penalty
-                </div>
-                <div className="currency-overview-row-content">
-                  <span>5</span> %
+                  <span className="pink">0.42</span> %
                 </div>
               </div>
             </div>
@@ -301,8 +299,8 @@ function DepositOverview({ asset, history }) {
           </div>
         </div>
       </div>
-    </DepositOverviewWrapper>
+    </BorrowOverviewWrapper>
   );
 }
 
-export default withRouter(DepositOverview);
+export default BorrowOverview;

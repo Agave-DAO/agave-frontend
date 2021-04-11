@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import InfoTable from '../../components/InfoTable';
 import CheckBox from '../../components/CheckBox';
@@ -78,4 +77,4 @@ function BorrowInfo({ history }) {
   )
 }
 
-export default compose(withRouter)(BorrowInfo);
+export default withRouter(BorrowInfo);

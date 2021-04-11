@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import { NotificationManager } from 'react-notifications';
 import Page from '../../components/Page';
@@ -230,4 +229,4 @@ function WithdrawDetail({ match, history }) {
   );
 }
 
-export default compose(withRouter)(WithdrawDetail);
+export default withRouter(WithdrawDetail);

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Page from '../../components/Page';
 import CollateralConfirm from './CollateralConfirm';
@@ -48,4 +47,4 @@ function Collateral({ match, history }) {
   );
 }
 
-export default compose(withRouter)(Collateral);
+export default withRouter(Collateral);

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Page from '../../components/Page';
 import Button from '../../components/Button';
@@ -312,4 +311,4 @@ function RepayConfirm({ match, history }) {
   );
 }
 
-export default compose(withRouter)(RepayConfirm);
+export default withRouter(RepayConfirm);

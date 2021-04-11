@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
 
@@ -306,4 +305,4 @@ function RepayOverview({ asset, history }) {
   );
 }
 
-export default compose(withRouter)(RepayOverview);
+export default withRouter(RepayOverview);

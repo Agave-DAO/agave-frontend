@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { compose } from 'recompose';
 import { withRouter } from 'react-router-dom'
 import { useTable, useSortBy } from 'react-table'
 import BasicTable from '../../components/BasicTable';
@@ -104,4 +103,4 @@ function DepositTable({ activeType, history }) {
   )
 }
 
-export default compose(withRouter)(DepositTable);
+export default withRouter(DepositTable);
