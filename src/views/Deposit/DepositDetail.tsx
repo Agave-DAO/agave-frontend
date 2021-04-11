@@ -12,8 +12,6 @@ import { AgaveLendingABI__factory } from "../../contracts";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
 import { ethers } from "ethers";
 import { Web3Provider } from '@ethersproject/providers';
-import getBalance from '../../utils/contracts/getBalance';
-import userConfig from '../../utils/contracts/userconfig';
 
 const DepositDetailWrapper = styled.div`
   height: 100%;

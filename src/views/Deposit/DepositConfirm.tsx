@@ -1,24 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
 import { useHistory, useRouteMatch, withRouter } from "react-router-dom";
-import Page from '../../components/Page';
-import Button from '../../components/Button';
+import Page from "../../components/Page";
+import Button from "../../components/Button";
 import { marketData, IMarketData } from "../../utils/constants";
-import DepositOverview from './DepositOverview';
-import { approve, checkApproved } from '../../utils/contracts/approve';
-import { useSelector } from 'react-redux';
+import DepositOverview from "./DepositOverview";
 import { useWeb3React } from "@web3-react/core";
-import BigNumber from "bignumber.js";
-import { AgaveLendingABI__factory } from "../../contracts";
-import { approveSpendListener, depositListener } from '../../utils/contracts/events/events';
-import deposit from '../../utils/contracts/deposit';
-import getBalance from '../../utils/contracts/getBalance';
-import userConfig from '../../utils/contracts/userconfig';
-import getReserveData from '../../utils/contracts/reserveData';
-import { web3 } from '../../utils/web3';
+import {
+  AgaveLendingABI__factory,
+  Erc20abi,
+  Erc20abi__factory,
+} from "../../contracts";
+import {
+  approveSpendListener,
+  depositListener,
+} from "../../utils/contracts/events/events";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { BigNumberish } from '@ethersproject/bignumber';
-import { Web3Provider } from '@ethersproject/providers'
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { Web3Provider } from "@ethersproject/providers";
+import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useAppWeb3 } from "../../hooks/appWeb3";
+import { ethers } from "ethers";
 
 const DepositConfirmWrapper = styled.div`
   height: 100%;
@@ -33,7 +35,7 @@ const DepositConfirmWrapper = styled.div`
     align-items: center;
     justify-content: center;
     flex: 1 1 0%;
-    background: ${props => props.theme.color.bgWhite};
+    background: ${(props) => props.theme.color.bgWhite};
 
     .basic-form {
       max-width: 380px;
@@ -51,13 +53,13 @@ const DepositConfirmWrapper = styled.div`
           font-weight: bold;
           text-align: center;
           margin-bottom: 10px;
-          color: ${props => props.theme.color.pink};
+          color: ${(props) => props.theme.color.pink};
         }
 
         .basic-form-header-content {
           font-size: 16px;
           text-align: center;
-          color: ${props => props.theme.color.textPrimary};
+          color: ${(props) => props.theme.color.textPrimary};
         }
       }
 
@@ -68,7 +70,7 @@ const DepositConfirmWrapper = styled.div`
         .form-content-view {
           margin-bottom: 20px;
           width: 100%;
-          border: 1px solid ${props => props.theme.color.textPrimary};
+          border: 1px solid ${(props) => props.theme.color.textPrimary};
           padding: 15px;
           border-radius: 2px;
           display: flex;
@@ -76,7 +78,7 @@ const DepositConfirmWrapper = styled.div`
 
           .content-label {
             font-weight: 400;
-            color: ${props => props.theme.color.textPrimary};
+            color: ${(props) => props.theme.color.textPrimary};
           }
 
           .content-value {
@@ -96,7 +98,7 @@ const DepositConfirmWrapper = styled.div`
                 font-size: 16px;
               }
             }
-            
+
             .usd-amount {
               font-size: 10px;
             }
@@ -106,7 +108,7 @@ const DepositConfirmWrapper = styled.div`
         .form-action-view {
           width: 100%;
           background: white;
-          border: 1px solid ${props => props.theme.color.textPrimary};
+          border: 1px solid ${(props) => props.theme.color.textPrimary};
 
           .form-action-header {
             width: 100%;
@@ -118,7 +120,7 @@ const DepositConfirmWrapper = styled.div`
               justify-content: center;
               align-items: center;
               background: rgb(241, 241, 243);
-              color: ${props => props.theme.color.textPrimary};
+              color: ${(props) => props.theme.color.textPrimary};
               font-size: 12px;
 
               &:not(:last-child) {
@@ -134,13 +136,13 @@ const DepositConfirmWrapper = styled.div`
               &.active {
                 color: white;
                 font-size: 12px;
-                background: ${props => props.theme.color.bgSecondary};
+                background: ${(props) => props.theme.color.bgSecondary};
               }
 
               &.success {
                 color: white;
                 font-size: 12px;
-                background: ${props => props.theme.color.green};
+                background: ${(props) => props.theme.color.green};
               }
             }
           }
@@ -160,19 +162,18 @@ const DepositConfirmWrapper = styled.div`
 
               .title {
                 font-size: 14px;
-                color: ${props => props.theme.color.pink};
+                color: ${(props) => props.theme.color.pink};
 
                 &.green {
-                  color: ${props => props.theme.color.green};
+                  color: ${(props) => props.theme.color.green};
                 }
               }
 
               .desc {
                 font-size: 12px;
-                color: ${props => props.theme.color.textPrimary};
+                color: ${(props) => props.theme.color.textPrimary};
               }
             }
-
           }
         }
       }
@@ -188,116 +189,198 @@ const DepositConfirmWrapper = styled.div`
 `;
 
 const DepositConfirm: React.FC<{}> = ({}) => {
-    const match = useRouteMatch<{
-      assetName?: string | undefined;
-      amount?: string | undefined;
-    }>();
-    const history = useHistory();
-    const { account: address, library } = useWeb3React<Web3Provider>();
-    const [asset, setAsset] = useState<IMarketData>();
-    const [amount, setAmount] = useState(0);
-    // TODO: change this 'step' system to nested routes
-    const [step, setStep] = useState(1);
-    const [pendingApproval, setPendingApproval] = useState(false);
-    const [balance, setBalance] = useState(() => {
-      return getBalance(address!, match.params.assetName!, "")
-    })
+  const queryClient = useQueryClient();
+  const history = useHistory();
+  const match = useRouteMatch<{
+    assetName?: string | undefined;
+    amount?: string | undefined;
+  }>();
+  const assetName = match.params.assetName;
+  const { account: address, library } = useAppWeb3();
 
-    useEffect(() => {
-      if (!address || !match.params.assetName) {
+  const [wholeTokenAmount, setWholeTokenAmount] = useState<number>(0);
+  // TODO: change this 'step' system to nested routes
+  const [step, setStep] = useState(1);
+
+  const assetQueryKey = [assetName] as const;
+  const {
+    data: asset,
+    error: assetFetchError,
+    isLoading: isAssetLoading,
+  } = useQuery(
+    assetQueryKey,
+    async (ctx): Promise<IMarketData | undefined> => {
+      const [assetName]: typeof assetQueryKey = ctx.queryKey;
+      if (!assetName) {
+        return undefined;
+      }
+
+      const asset = marketData.find((a) => a.name == match.params.assetName);
+      if (!asset) {
+        console.warn(`Asset ${match.params.assetName} not found`);
         return;
       }
-      let approved;
 
-      async function getCheckApproved() {
-        approved = await checkApproved(address!, match.params.assetName!);
-        const config = await userConfig(address!);
-        console.log(config);
-        const assetData = await getReserveData(address!, match.params.assetName!);
-        console.log(assetData);    
-      }
-      getCheckApproved();
+      return asset;
+    },
+    {
+      initialData: undefined,
+    }
+  );
 
-      if (match.params && match.params.assetName) {
-        setAsset(marketData.find(item => item.name === match.params.assetName));
+  const balanceQueryKey = [address, library, asset] as const;
+  const {
+    data: balance,
+    error: balanceFetchError,
+    isLoading: isBalanceLoading,
+  } = useQuery(
+    balanceQueryKey,
+    async (ctx) => {
+      const [address, library, asset]: typeof balanceQueryKey = ctx.queryKey;
+      if (!address || !library || !asset) {
+        return undefined;
       }
+      const contract = Erc20abi__factory.connect(
+        asset.contractAddress,
+        library.getSigner()
+      );
+      const tokenBalance = await contract.balanceOf(address);
+      return tokenBalance;
+    },
+    {
+      initialData: undefined,
+    }
+  );
 
-      if (match.params && match.params.amount) {
-        try {
-          const parsed = new BigNumber(String(match.params.amount));
-          if (amount != parsed.toNumber()) {
-            setAmount(amount);
-          }
-        } catch {
-          // Don't set the number if the match path isn't one
-        }
+  const approvedQueryKey = [address, library, asset] as const;
+  const {
+    data: approval,
+    error: approvalFetchError,
+    isLoading: isApprovalLoading,
+  } = useQuery(
+    approvedQueryKey,
+    async (ctx): Promise<BigNumber | undefined> => {
+      const [address, library, asset]: typeof approvedQueryKey = ctx.queryKey;
+      if (!address || !library || !asset) {
+        return undefined;
       }
-      
-      approved = web3.utils.fromWei(approved, 'ether');
+      const contract = Erc20abi__factory.connect(
+        asset.contractAddress,
+        library.getSigner()
+      );
+      const allowance = await contract.allowance(address, internalAddresses.Lending);
+      return allowance;
+    },
+    {
+      initialData: BigNumber.from(0),
+    }
+  );
 
-      if(approved > balance){
-        setStep(2)
+  const approvalMutationKey = [...approvedQueryKey, wholeTokenAmount] as const;
+  const approvalMutation = useMutation(
+    approvalMutationKey,
+    async (newValue) => {
+      const [address, library, asset, wholeTokenAmount] = approvalMutationKey;
+      if (!address || !library || !asset) {
+        throw new Error("Account or asset details are not available");
       }
-    }, [match]);
-    const approveFn = async (userAddress?: string | null | undefined) => {
-      if (!asset || !match.params.assetName || !address || !library || !userAddress) {
-        return;
+      const contract = Erc20abi__factory.connect(
+        asset.contractAddress,
+        library.getSigner()
+      );
+      const unitAmount = ethers.utils.parseEther(wholeTokenAmount.toString());
+      const tx = await contract.approve(internalAddresses.Lending, unitAmount);
+      const receipt = await tx.wait();
+      return BigNumber.from(receipt.status ? unitAmount : 0);
+    },
+    {
+      onSuccess: async (unitAmountResult, vars, context) => {
+        await Promise.allSettled([
+          // queryClient.invalidateQueries(approvedQueryKey), // Request that the approval query refreshes
+          queryClient.setQueryData(approvedQueryKey, ethers.utils.parseEther(wholeTokenAmount.toString())), // Update the approved amount query immediately
+          queryClient.invalidateQueries(approvalMutationKey),
+        ]);
+      },
+    }
+  );
+
+  const depositMutationKey = [...approvedQueryKey, wholeTokenAmount] as const;
+  const depositMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
+    depositMutationKey,
+    async (unitAmount): Promise<BigNumber | undefined> => {
+      const [address, library, asset, wholeTokenAmount] = depositMutationKey;
+      if (!address || !library || !asset) {
+        throw new Error("Account or asset details are not available");
       }
-      let curBalance: any = await balance;
-      let approved = await approve(userAddress, match.params.assetName!, curBalance);
-      setPendingApproval(true);
-      let curAsset: any = marketData.find(item => item.name === match.params.assetName);
-      if (!curAsset) {
-        let receipt: any = await approveSpendListener(address, curAsset, String(approved), library.getSigner());
-        if (receipt === true) {
-          setStep(step + 1);
-          setPendingApproval(false)
-        }
-      }
-      
-    };
-    const depositFn = async (address?: string | null | undefined, amount?: BigNumberish | null | undefined) => {
-      if (!address || !amount || !library || !asset || !match.params.assetName) {
-        return;
-      }
-      const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
-      const interestRateMode = 2;
+      const contract = AgaveLendingABI__factory.connect(
+        internalAddresses.Lending,
+        library.getSigner()
+      );
       const referralCode = 0;
-      const tx = await lender.deposit(match.params.assetName, amount, address, referralCode);
-      const receipt = await tx.wait()
-      if (receipt.status) {
-        setStep(step + 1);
+      const tx = await contract.deposit(
+        asset.contractAddress,
+        unitAmount,
+        address,
+        referralCode
+      );
+      const receipt = await tx.wait();
+      return receipt.status ? BigNumber.from(unitAmount) : undefined;
+    },
+    {
+      onSuccess: async (unitAmountResult, vars, context) => {
+        await Promise.allSettled([
+          queryClient.invalidateQueries(approvedQueryKey),
+          queryClient.invalidateQueries(approvalMutationKey),
+          queryClient.invalidateQueries(balanceQueryKey),
+          queryClient.invalidateQueries(assetQueryKey),
+        ]);
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (match.params && match.params.amount) {
+      try {
+        const parsed = Number(String(match.params.amount));
+        if (wholeTokenAmount != parsed) {
+          setWholeTokenAmount(parsed);
+        }
+      } catch {
+        // Don't set the number if the match path isn't one
       }
     }
+
+    if (step != 2 && approval && balance && approval.gte(balance)) {
+      setStep(2);
+    }
+  }, [approval, balance, wholeTokenAmount, setWholeTokenAmount, step, setStep]);
+
   return (
     <Page>
       <DepositConfirmWrapper>
-        {asset ? (<DepositOverview asset={asset} />): (<></>)}
+        {asset ? <DepositOverview asset={asset} /> : <></>}
         <div className="content-wrapper">
           <div className="basic-form">
             <div className="basic-form-header">
-              <div className="basic-form-header-title">
-                Deposit Overview
-              </div>
+              <div className="basic-form-header-title">Deposit Overview</div>
               <div className="basic-form-header-content">
-                These are your transaction details. Make sure to check if this is correct before submitting.
+                These are your transaction details. Make sure to check if this
+                is correct before submitting.
               </div>
             </div>
             <div className="basic-form-content">
               <div className="form-content-view">
-                <div className="content-label">
-                  Amount
-                </div>
+                <div className="content-label">Amount</div>
                 {asset ? (
                   <div className="content-value">
                     <div className="token-amount">
                       <img src={asset.img} alt="" />
                       <span>
-                        {amount} {asset.name}
+                        {wholeTokenAmount} {asset.name}
                       </span>
                     </div>
                     <div className="usd-amount">
-                      $ {asset.asset_price * amount}
+                      $ {asset.asset_price * wholeTokenAmount}
                     </div>
                   </div>
                 ) : (
@@ -306,66 +389,93 @@ const DepositConfirm: React.FC<{}> = ({}) => {
               </div>
               <div className="form-action-view">
                 <div className="form-action-header">
-                  <div className={`form-action-step ${step === 3 ? 'success' : step > 0 ? 'active' : ''}`}>
+                  <div
+                    className={`form-action-step ${
+                      step === 3 ? "success" : step > 0 ? "active" : ""
+                    }`}
+                  >
                     <span>1</span> Approve
                   </div>
-                  <div className={`form-action-step ${step === 3 ? 'success' : step > 1 ? 'active' : ''}`}>
+                  <div
+                    className={`form-action-step ${
+                      step === 3 ? "success" : step > 1 ? "active" : ""
+                    }`}
+                  >
                     <span>2</span> Deposit
                   </div>
-                  <div className={`form-action-step ${step === 3 ? 'success' : step > 2 ? 'active' : ''}`}>
+                  <div
+                    className={`form-action-step ${
+                      step === 3 ? "success" : step > 2 ? "active" : ""
+                    }`}
+                  >
                     <span>3</span> Finished
                   </div>
                 </div>
-                {step === 1 && (
+                {step === 1 && (approval === undefined || approval.lt(ethers.utils.parseEther(wholeTokenAmount.toString()))) && !approvalMutation.isLoading && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
-                      <div className="title">
-                        Approve
-                      </div>
+                      <div className="title">Approve</div>
                       <div className="desc">
-                        Please approve before deposting
+                        Please approve before deposting {wholeTokenAmount} eth
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => {
-                        approveFn(address);
-                      }}>Approve</Button>
+                      <Button
+                        disabled={approvalMutation.isLoading}
+                        variant="secondary"
+                        onClick={() => {
+                          approvalMutation.mutate();
+                        }}
+                      >
+                        Approve
+                      </Button>
                     </div>
                   </div>
                 )}
-                {step === 1 && pendingApproval && (
+                {step === 1 && approvalMutation.isLoading && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
-                      <div className="desc">
-                        Transaction is pending...
-                      </div>
+                      <div className="desc">Transaction is pending...</div>
                     </div>
                   </div>
                 )}
                 {step === 2 && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
-                      <div className="title">
-                        Deposit
-                      </div>
-                      <div className="desc">
-                        Please submit to deposit
-                      </div>
+                      <div className="title">Deposit</div>
+                      <div className="desc">Please submit to deposit</div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => depositFn(address, amount)}>Submit</Button>
+                      <Button
+                        variant="secondary"
+                        disabled={depositMutation.isLoading || approvalMutation.isLoading || approval === undefined}
+                        onClick={() => {
+                          depositMutation
+                            .mutateAsync(ethers.utils.parseEther(wholeTokenAmount.toString()))
+                            .then(async (result) => {
+                              if (result) {
+                                setStep(step + 1)
+                              }
+                            });
+                        }}
+                      >
+                        Submit
+                      </Button>
                     </div>
                   </div>
                 )}
                 {step === 3 && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
-                      <div className="title green">
-                        Success!
-                      </div>
+                      <div className="title green">Success!</div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => history.push('/dashboard')}>Dashboard</Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => history.push("/dashboard")}
+                      >
+                        Dashboard
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -373,7 +483,9 @@ const DepositConfirm: React.FC<{}> = ({}) => {
             </div>
             {step !== 3 && (
               <div className="basic-form-footer">
-                <Button variant="outline" onClick={() => history.goBack()}>Go back</Button>
+                <Button variant="outline" onClick={() => history.goBack()}>
+                  Go back
+                </Button>
               </div>
             )}
           </div>
@@ -381,6 +493,6 @@ const DepositConfirm: React.FC<{}> = ({}) => {
       </DepositConfirmWrapper>
     </Page>
   );
-}
+};
 
 export default DepositConfirm;
