@@ -3,7 +3,6 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { store as NotificationManager } from 'react-notifications-component';
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { web3 } from '../../utils/web3';
 import config from '../../config';
 import metamask from '../../assets/image/metamask.svg';
 import { useWeb3React } from '@web3-react/core';

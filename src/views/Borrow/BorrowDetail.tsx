@@ -10,7 +10,7 @@ import { useWeb3React } from "@web3-react/core";
 import { AgaveLendingABI__factory } from "../../contracts";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
 import { ethers } from "ethers";
-import { Web3Provider } from '@ethersproject/providers'
+import { Web3Provider } from '@ethersproject/providers';
 
 const BorrowDetailWrapper = styled.div`
   height: 100%;

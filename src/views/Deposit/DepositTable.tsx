@@ -1,22 +1,20 @@
-import React, { useMemo } from 'react';
-import { withRouter } from 'react-router-dom'
-import { useTable, useSortBy } from 'react-table'
-import BasicTable from '../../components/BasicTable';
-import { marketData } from '../../utils/constants';
+import React, { useMemo } from "react";
+import { useHistory } from "react-router-dom";
+import { useTable, useSortBy, Column } from "react-table";
+import BasicTable from "../../components/BasicTable";
+import { IMarketData, marketData } from "../../utils/constants";
 
-function DepositTable({ activeType, history }) {
-  const data = useMemo(
-    () => {
-      if (activeType === 'All') {
-        return marketData;
-      }
+const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
+  const history = useHistory();
+  const data = useMemo(() => {
+    if (activeType === "All") {
+      return marketData;
+    }
 
-      return marketData.slice(0, 3);
-    },
-    [activeType]
-  );
+    return marketData.slice(0, 3);
+  }, [activeType]);
 
-  const columns = useMemo(
+  const columns: Column<IMarketData>[] = useMemo(
     () => [
       {
         Header: 'Asset',
@@ -56,10 +54,10 @@ function DepositTable({ activeType, history }) {
     headerGroups,
     rows,
     prepareRow,
-  } = useTable(
+  } = useTable<IMarketData>(
     {
       columns,
-      data,
+      data: Array.from(data),
     },
     useSortBy
   );
@@ -103,4 +101,4 @@ function DepositTable({ activeType, history }) {
   )
 }
 
-export default withRouter(DepositTable);
+export default DepositTable;

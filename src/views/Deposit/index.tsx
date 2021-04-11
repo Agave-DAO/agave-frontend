@@ -24,7 +24,7 @@ const DepositWrapper = styled.div`
 `;
 
 function Deposit() {
-  const [activeValue, setActiveValue] = useState('All');
+  const [activeValue, setActiveValue] = useState<"All" | "Stable Coins">('All');
   return (
     <Page>
       <DepositWrapper>

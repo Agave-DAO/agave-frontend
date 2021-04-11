@@ -185,6 +185,7 @@ const BorrowConfirm: React.FC<{}> = ({}) => {
     assetName?: string | undefined;
     amount?: string | undefined;
   }>();
+
   const history = useHistory();
   const [asset, setAsset] = useState<IMarketData>();
   const [amount, setAmount] = useState(0);

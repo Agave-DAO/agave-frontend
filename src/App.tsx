@@ -5,9 +5,9 @@ import Layout from './layout';
 import Markets from './views/Markets';
 // import ReserveOverview from './views/ReserveOverview';
 // import Dashboard from './views/Dashboard';
-// import Deposit from './views/Deposit';
-// import DepositDetail from './views/Deposit/DepositDetail';
-// import DepositConfirm from './views/Deposit/DepositConfirm';
+import Deposit from './views/Deposit';
+import DepositDetail from './views/Deposit/DepositDetail';
+import DepositConfirm from './views/Deposit/DepositConfirm';
 import Borrow from './views/Borrow';
 import BorrowDetail from './views/Borrow/BorrowDetail';
 import BorrowConfirm from './views/Borrow/BorrowConfirm';
@@ -42,9 +42,9 @@ const App: React.FC<IAppProps> = props => {
             <Route path="/markets" component={Markets} exact />
             {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
             {/* <Route path="/dashboard" component={Dashboard} exact /> */}
-            {/* <Route path="/deposit" component={Deposit} exact /> */}
-            {/* <Route path="/deposit/:assetName" component={DepositDetail} exact /> */}
-            {/* <Route path="/deposit/confirm/:assetName/:amount" component={DepositConfirm} exact /> */}
+            <Route path="/deposit" component={Deposit} exact />
+            <Route path="/deposit/:assetName" component={DepositDetail} exact />
+            <Route path="/deposit/confirm/:assetName/:amount" component={DepositConfirm} exact />
             <Route path="/borrow" component={Borrow} exact />
             <Route path="/borrow/:assetName" component={BorrowDetail} exact />
             <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />

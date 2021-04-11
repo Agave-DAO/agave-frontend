@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
+import { useHistory, withRouter } from 'react-router-dom';
 import Button from '../../components/Button';
+import { IMarketData } from '../../utils/constants';
 
 const DepositOverviewWrapper = styled.div`
   display: flex;
@@ -171,7 +172,8 @@ const DepositOverviewWrapper = styled.div`
   }
 `;
 
-function DepositOverview({ asset, history }) {
+function DepositOverview({ asset }: {asset: IMarketData }) {
+  const history = useHistory();
   return (
     <DepositOverviewWrapper>
       <div className="topContent">
@@ -305,4 +307,4 @@ function DepositOverview({ asset, history }) {
   );
 }
 
-export default withRouter(DepositOverview);
+export default DepositOverview;

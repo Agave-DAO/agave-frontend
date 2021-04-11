@@ -8,6 +8,15 @@ import reportWebVitals from './reportWebVitals';
 import type { AbstractConnector } from '@web3-react/abstract-connector';
 import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from '@ethersproject/providers'
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryCache,
+} from "react-query";
+
+const reactQueryClient = new QueryClient({
+  queryCache: new QueryCache(),
+});
 
 function getWeb3Library(provider: any, connector?: AbstractConnector | undefined): Web3Provider {
   const library = new Web3Provider(provider);
@@ -20,9 +29,11 @@ function renderApp() {
   ReactDOM.render(
     <Web3ReactProvider getLibrary={getWeb3Library}>
       <Provider store={store}>
-        <React.StrictMode>
-          <App />
-        </React.StrictMode>
+        <QueryClientProvider client={reactQueryClient}>
+          <React.StrictMode>
+            <App />
+          </React.StrictMode>
+        </QueryClientProvider>
       </Provider>
     </Web3ReactProvider>,
     document.getElementById("root")

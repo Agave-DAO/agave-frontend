@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
-import { NotificationManager } from 'react-notifications';
-import Page from '../../components/Page';
-import Button from '../../components/Button';
-import { marketData } from '../../utils/constants';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { useHistory, useRouteMatch, withRouter } from "react-router-dom";
+import { store as NotificationManager } from "react-notifications-component";
+import Page from "../../components/Page";
+import Button from "../../components/Button";
+import { IMarketData, marketData } from "../../utils/constants";
 import DepositOverview from './DepositOverview';
+import { useWeb3React } from "@web3-react/core";
 import { useSelector } from 'react-redux';
-import getBalance from '../../utils/contracts/getBalance';
-import userConfig from '../../utils/contracts/userconfig';
+import { AgaveLendingABI__factory } from "../../contracts";
+import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { ethers } from "ethers";
+import { Web3Provider } from '@ethersproject/providers';
 
 const DepositDetailWrapper = styled.div`
   height: 100%;
@@ -147,41 +150,75 @@ const DepositDetailWrapper = styled.div`
   }
 `;
 
-function DepositDetail({ match, history }) {
-  const [asset, setAsset] = useState({});
-  const [amount, setAmount] = useState(null);
-  let address = useSelector(state => state.authUser.address);
+const DepositDetail: React.FC<{}> = ({}) => {
+  const match = useRouteMatch<{
+    assetName: string | undefined,
+  }>();
+  const history = useHistory();
+  const { account: address, library } = useWeb3React<Web3Provider>();
+  const [asset, setAsset] = useState<IMarketData>();
+  const [amountStr, setAmountStr] = useState<string>("");
 
-  useEffect(async () => {
-    let config = await userConfig(address);
-    console.log(config)
-    if (match.params && match.params.assetName) {
-      let balance = await getBalance(address, match.params.assetName);
-      let image = marketData.find((data) => {
+  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    setAmountStr(e.target.value);
+  };
+
+  const handleDeposit: React.MouseEventHandler<HTMLDivElement> = () => {
+    if (!asset) {
+      NotificationManager.addNotification({
+        type: "danger",
+        container: "top-right",
+        message: "Please input the correct amount",
+      });
+      return;
+    }
+    if (!amountStr || isNaN(Number(amountStr))) {
+      NotificationManager.addNotification({
+        type: "danger",
+        container: "center",
+        message: "Please input a valid asset amount",
+      });
+      return;
+    }
+    history.push(`/deposit/confirm/${asset.name}/${amountStr}`);
+  };
+
+  useEffect(() => { (async () => {
+    console.log(`${library} : ${address} : ${match.params}`);
+    if (library && address && match.params && match.params.assetName) {
+      const contract = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
+      let accountData;
+      try {
+        accountData = await contract.getUserAccountData(address);      
+      } catch (e) {
+        // revert?
+        console.log("Revert encountered attempting to read user account data for addr " + address);
+        console.log(e);
+        return;
+      }
+      const assetBaseWithImage = marketData.find((data) => {
         return data.name === match.params.assetName;
       });
-      console.log(image)
-      
-      let assetInfo = {
-        wallet_balance: balance,
+      if (!assetBaseWithImage) {
+        console.log("Asset with base image not found for name " + match.params.assetName);
+        return;
+      }
+      const availableEth = ethers.utils.parseEther(ethers.utils.formatEther(accountData.availableBorrowsETH));
+      const assetInfo = {
+        ...assetBaseWithImage,
+        wallet_balance: availableEth.toNumber(),
         name: match.params.assetName,
-        img: image.img
       }
       setAsset(assetInfo);
     }
-  }, [match]);
-
-  const handleInputChange = (e) => {
-    setAmount(e.target.value);
-  };
-
-  const handleDeposit = () => {
-    if (!amount) {
-      NotificationManager.error('Please input the correct amount');
-      return;
-    }
-    history.push(`/deposit/confirm/${asset.name}/${amount}`);
-  };
+  })(); }, [match]);
+  
+  if (!asset) {
+    return <>No asset found with details </>;
+  }
+  if (!address || !library) {
+    return <>No account loaded</>;
+  }
 
   return (
     <Page>
@@ -211,9 +248,16 @@ function DepositDetail({ match, history }) {
                   <img src={asset.img} alt="" width={30} height={30} />
                 </div>
                 <div className="input-section">
-                  <input type="number" placeholder="Amount" step="any" min="0" max={asset.wallet_balance} value={amount} onChange={handleInputChange} />
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    step="any"
+                    min="0"
+                    value={amountStr}
+                    onChange={handleInputChange}
+                  />
                 </div>
-                <div className="max-section" onClick={() => setAmount(asset.wallet_balance)}>
+                <div className="max-section" onClick={() => setAmountStr(String(asset.wallet_balance))}>
                   Max
                 </div>
               </div>
