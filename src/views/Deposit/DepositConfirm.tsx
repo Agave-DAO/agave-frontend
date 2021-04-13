@@ -197,7 +197,6 @@ const DepositConfirm: React.FC<{}> = ({}) => {
   }>();
   const assetName = match.params.assetName;
   const { account: address, library } = useAppWeb3();
-
   const [wholeTokenAmount, setWholeTokenAmount] = useState<number>(0);
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
@@ -295,11 +294,13 @@ const DepositConfirm: React.FC<{}> = ({}) => {
     },
     {
       onSuccess: async (unitAmountResult, vars, context) => {
+        console.log("approvalMutation:onSuccess");
         await Promise.allSettled([
           // queryClient.invalidateQueries(approvedQueryKey), // Request that the approval query refreshes
           queryClient.setQueryData(approvedQueryKey, ethers.utils.parseEther(wholeTokenAmount.toString())), // Update the approved amount query immediately
           queryClient.invalidateQueries(approvalMutationKey),
         ]);
+        setStep(2);
       },
     }
   );
@@ -317,6 +318,8 @@ const DepositConfirm: React.FC<{}> = ({}) => {
         library.getSigner()
       );
       const referralCode = 0;
+      console.log("depositMutationKey:deposit");
+      console.log(Number(ethers.utils.formatEther(unitAmount)));
       const tx = await contract.deposit(
         asset.contractAddress,
         unitAmount,
@@ -349,10 +352,10 @@ const DepositConfirm: React.FC<{}> = ({}) => {
         // Don't set the number if the match path isn't one
       }
     }
-
+    /*
     if (step != 2 && approval && balance && approval.gte(balance)) {
       setStep(2);
-    }
+    }*/
   }, [approval, balance, wholeTokenAmount, setWholeTokenAmount, step, setStep]);
 
   return (
@@ -411,8 +414,8 @@ const DepositConfirm: React.FC<{}> = ({}) => {
                     <span>3</span> Finished
                   </div>
                 </div>
-                {step === 1 && (approval === undefined || approval.lt(ethers.utils.parseEther(wholeTokenAmount.toString()))) && !approvalMutation.isLoading && (
-                  <div className="form-action-body">
+                {step === 1 && (
+                <div className="form-action-body">
                     <div className="form-action-body-left">
                       <div className="title">Approve</div>
                       <div className="desc">
@@ -432,6 +435,7 @@ const DepositConfirm: React.FC<{}> = ({}) => {
                     </div>
                   </div>
                 )}
+                
                 {step === 1 && approvalMutation.isLoading && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
