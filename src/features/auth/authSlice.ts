@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../redux/store";
-import type { AbstractConnector } from '@web3-react/abstract-connector';
 
 export interface AuthenticatedAccount {
     address: string;

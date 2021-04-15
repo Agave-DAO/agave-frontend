@@ -22,7 +22,7 @@ const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
         Cell: row => {
           return (
             <div>
-              <img src={row.row.original.img} width="35" height="35" />
+              <img src={row.row.original.img} width="35" height="35" alt="" />
               <span>{row.value}</span>
             </div>
           )

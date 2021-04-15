@@ -92,7 +92,7 @@ const MarketsWrapper = styled.div`
   }
 `;
 
-const Markets: React.FC<{}> = ({}) => {
+const Markets: React.FC = () => {
   const [activeValue, setActiveValue] = useState<"USD" | "Native">("USD");
   return (
     <Page>

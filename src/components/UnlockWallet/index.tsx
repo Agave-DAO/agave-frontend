@@ -1,9 +1,6 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { store as NotificationManager } from 'react-notifications-component';
-import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import config from '../../config';
 import metamask from '../../assets/image/metamask.svg';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
@@ -152,12 +149,11 @@ export const injectedConnector = new InjectedConnector({
 })
 
 const UnlockWallet: React.FC<{}> = props => {
-  const dispatch = useAppDispatch();
-  const { active, error, activate } = useWeb3React();
+  const { activate } = useWeb3React();
 
   const onMetamaskConnect = async () => {
     if (typeof (window as any).ethereum === 'undefined') {
-      warnUser("Please install MetaMask!");
+      warnUser("Please install MetaMask!", "Agaave requires Metamask to be installed in your browser to work properly.");
       return;
     }
     await activate(injectedConnector);

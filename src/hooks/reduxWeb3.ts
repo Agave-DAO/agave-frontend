@@ -1,8 +1,5 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
-import { store as NotificationManager } from 'react-notifications-component';
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useAppDispatch } from "../redux/hooks";
 import { authSlice } from '../features/auth/authSlice';
 import { useWeb3React } from '@web3-react/core';
 import type { Web3ReactContextInterface } from '@web3-react/core/dist/types';
@@ -25,12 +22,12 @@ export function useReduxWeb3Updater<T>(key?: string | undefined): Web3ReactConte
     } else {
       dispatch(authSlice.actions.setActiveAccount(undefined));
     }
-  }, [web3.account, web3.chainId, web3.connector]);
+  }, [web3.account, web3.chainId, web3.connector, dispatch]);
 
   // Update Redux error state
   React.useEffect(() => {
     dispatch(authSlice.actions.setError(web3.error));
-  }, [web3.error]);
+  }, [web3.error, dispatch]);
 
   return web3;
 }
