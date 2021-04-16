@@ -149,7 +149,7 @@ const BorrowDetailWrapper = styled.div`
   }
 `;
 
-const BorrowDetail: React.FC<{}> = ({}) => {
+const BorrowDetail: React.FC = () => {
   const match = useRouteMatch<{
     assetName: string | undefined,
   }>();
@@ -211,7 +211,7 @@ const BorrowDetail: React.FC<{}> = ({}) => {
       }
       setAsset(assetInfo);
     }
-  })(); }, [match]);
+  })(); }, [match, address, library]);
 
   if (!asset) {
     return <>No asset found with details </>;

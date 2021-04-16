@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useHistory, useRouteMatch, withRouter } from "react-router-dom";
+import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
 import { marketData, IMarketData } from "../../utils/constants";
 import BorrowOverview from "./BorrowOverview";
-import { useSelector } from "react-redux";
-import { borrowListener } from "../../utils/contracts/events/events";
 import { useWeb3React } from "@web3-react/core";
 import BigNumber from "bignumber.js";
 import { AgaveLendingABI__factory } from "../../contracts";
@@ -180,7 +178,7 @@ const BorrowConfirmWrapper = styled.div`
   }
 `;
 
-const BorrowConfirm: React.FC<{}> = ({}) => {
+const BorrowConfirm: React.FC = () => {
   const match = useRouteMatch<{
     assetName?: string | undefined;
     amount?: string | undefined;
@@ -201,14 +199,14 @@ const BorrowConfirm: React.FC<{}> = ({}) => {
     if (match.params && match.params.amount) {
       try {
         const parsed = new BigNumber(String(match.params.amount));
-        if (amount != parsed.toNumber()) {
+        if (amount !== parsed.toNumber()) {
           setAmount(amount);
         }
       } catch {
         // Don't set the number if the match path isn't one
       }
     }
-  }, [match]);
+  }, [match, amount]);
   const borrowFn = async () => {
     if (!address || !library || !asset) {
       return;

@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import UnlockWallet from '../components/UnlockWallet';

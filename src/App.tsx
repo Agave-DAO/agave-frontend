@@ -31,8 +31,8 @@ interface IAppProps {
 }
 
 const App: React.FC<IAppProps> = props => {
-  const notifications = React.useMemo(() => (<ReactNotification />), [theme]);
-  const web3Redux = useReduxWeb3Updater();
+  const notifications = React.useMemo(() => (<ReactNotification />), []);
+  useReduxWeb3Updater();
   return (
     <ThemeProvider theme={theme}>
       {notifications}

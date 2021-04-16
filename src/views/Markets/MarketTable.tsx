@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useHistory, withRouter } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { useTable, useSortBy, Column } from 'react-table'
 import BasicTable from '../../components/BasicTable';
 import { IMarketData, marketData } from '../../utils/constants';
@@ -19,7 +19,7 @@ export const MarketTable: React.FC<{ activePrice: "USD" | "Native" }> = ({ activ
         Cell: row => {
           return (
             <div>
-              <img src={row.row.original.img} width="35" height="35" />
+              <img src={row.row.original.img} width="35" height="35" alt="" />
               <span>{row.value}</span>
             </div>
           )

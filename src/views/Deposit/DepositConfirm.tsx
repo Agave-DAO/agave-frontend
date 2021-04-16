@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { useHistory, useRouteMatch, withRouter } from "react-router-dom";
+import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
 import { marketData, IMarketData } from "../../utils/constants";
 import DepositOverview from "./DepositOverview";
-import { useWeb3React } from "@web3-react/core";
 import {
   AgaveLendingABI__factory,
-  Erc20abi,
   Erc20abi__factory,
 } from "../../contracts";
-import {
-  approveSpendListener,
-  depositListener,
-} from "../../utils/contracts/events/events";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { Web3Provider } from "@ethersproject/providers";
+import { BigNumber } from "@ethersproject/bignumber";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ethers } from "ethers";
@@ -188,7 +181,7 @@ const DepositConfirmWrapper = styled.div`
   }
 `;
 
-const DepositConfirm: React.FC<{}> = ({}) => {
+const DepositConfirm: React.FC = () => {
   const queryClient = useQueryClient();
   const history = useHistory();
   const match = useRouteMatch<{
@@ -204,8 +197,6 @@ const DepositConfirm: React.FC<{}> = ({}) => {
   const assetQueryKey = [assetName] as const;
   const {
     data: asset,
-    error: assetFetchError,
-    isLoading: isAssetLoading,
   } = useQuery(
     assetQueryKey,
     async (ctx): Promise<IMarketData | undefined> => {
@@ -214,7 +205,7 @@ const DepositConfirm: React.FC<{}> = ({}) => {
         return undefined;
       }
 
-      const asset = marketData.find((a) => a.name == match.params.assetName);
+      const asset = marketData.find((a) => a.name === match.params.assetName);
       if (!asset) {
         console.warn(`Asset ${match.params.assetName} not found`);
         return;
@@ -230,8 +221,6 @@ const DepositConfirm: React.FC<{}> = ({}) => {
   const balanceQueryKey = [address, library, asset] as const;
   const {
     data: balance,
-    error: balanceFetchError,
-    isLoading: isBalanceLoading,
   } = useQuery(
     balanceQueryKey,
     async (ctx) => {
@@ -254,8 +243,6 @@ const DepositConfirm: React.FC<{}> = ({}) => {
   const approvedQueryKey = [address, library, asset] as const;
   const {
     data: approval,
-    error: approvalFetchError,
-    isLoading: isApprovalLoading,
   } = useQuery(
     approvedQueryKey,
     async (ctx): Promise<BigNumber | undefined> => {
@@ -309,7 +296,7 @@ const DepositConfirm: React.FC<{}> = ({}) => {
   const depositMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
     depositMutationKey,
     async (unitAmount): Promise<BigNumber | undefined> => {
-      const [address, library, asset, wholeTokenAmount] = depositMutationKey;
+      const [address, library, asset, ] = depositMutationKey;
       if (!address || !library || !asset) {
         throw new Error("Account or asset details are not available");
       }
@@ -345,7 +332,7 @@ const DepositConfirm: React.FC<{}> = ({}) => {
     if (match.params && match.params.amount) {
       try {
         const parsed = Number(String(match.params.amount));
-        if (wholeTokenAmount != parsed) {
+        if (wholeTokenAmount !== parsed) {
           setWholeTokenAmount(parsed);
         }
       } catch {
@@ -356,7 +343,7 @@ const DepositConfirm: React.FC<{}> = ({}) => {
     if (step != 2 && approval && balance && approval.gte(balance)) {
       setStep(2);
     }*/
-  }, [approval, balance, wholeTokenAmount, setWholeTokenAmount, step, setStep]);
+  }, [match, approval, balance, wholeTokenAmount, setWholeTokenAmount, step, setStep]);
 
   return (
     <Page>

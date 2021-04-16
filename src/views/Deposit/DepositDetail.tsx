@@ -7,15 +7,10 @@ import Button from "../../components/Button";
 import { IMarketData, marketData } from "../../utils/constants";
 import DepositOverview from './DepositOverview';
 import { useWeb3React } from "@web3-react/core";
-import { useSelector } from 'react-redux';
 import {
-  AgaveLendingABI__factory,
-  Erc20abi,
   Erc20abi__factory,
 } from "../../contracts";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
-import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { useQuery } from "react-query";
 import { ethers } from "ethers";
 import { Web3Provider } from '@ethersproject/providers';
 
@@ -141,7 +136,7 @@ const DepositDetailWrapper = styled.div`
 
 
 
-const DepositDetail: React.FC<{}> = ({}) => {
+const DepositDetail: React.FC = () => {
   const match = useRouteMatch<{
     assetName: string | undefined,
   }>();
@@ -155,8 +150,6 @@ const DepositDetail: React.FC<{}> = ({}) => {
   const assetQueryKey = [assetName] as const;
   const {
     data: asset,
-    error: assetFetchError,
-    isLoading: isAssetLoading,
   } = useQuery(
     assetQueryKey,
     async (ctx): Promise<IMarketData | undefined> => {
@@ -165,7 +158,7 @@ const DepositDetail: React.FC<{}> = ({}) => {
         return undefined;
       }
 
-      const asset = marketData.find((a) => a.name == match.params.assetName);
+      const asset = marketData.find((a) => a.name === match.params.assetName);
       if (!asset) {
         console.warn(`Asset ${match.params.assetName} not found`);
         return;
@@ -181,8 +174,6 @@ const DepositDetail: React.FC<{}> = ({}) => {
   const balanceQueryKey = [address, library, asset] as const;
   const {
     data: balance,
-    error: balanceFetchError,
-    isLoading: isBalanceLoading,
   } = useQuery(
     balanceQueryKey,
     async (ctx) => {
@@ -261,7 +252,7 @@ const DepositDetail: React.FC<{}> = ({}) => {
       setAsset(assetInfo);
       */
     }
-  })(); }, [match, asset, balance]);
+  })(); }, [match, asset, balance, address, library]);
   
   if (!asset) {
     return <>No asset found with details </>;
