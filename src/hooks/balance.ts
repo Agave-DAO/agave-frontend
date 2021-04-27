@@ -7,10 +7,10 @@ import { ethers } from "ethers";
 import { BigNumber } from "@ethersproject/bignumber";
 
 export interface UseBalanceDto {
-	balance: BigNumber | undefined;
+  balance: BigNumber | undefined;
   address: string | null | undefined;
   library: Web3Provider | undefined;
-	balanceQueryKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined];
+  balanceQueryKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined];
 };
 
 export const useBalance = (asset: IMarketData | undefined): UseBalanceDto => {
@@ -39,5 +39,5 @@ export const useBalance = (asset: IMarketData | undefined): UseBalanceDto => {
       initialData: undefined,
     }
   );
-	return { balance, address, library, balanceQueryKey };
+  return { balance, address, library, balanceQueryKey };
 };

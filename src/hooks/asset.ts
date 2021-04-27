@@ -2,8 +2,8 @@ import { useQuery } from "react-query";
 import { IMarketData, marketData } from "../utils/constants";
 
 export interface UseAssetDto {
-	asset: IMarketData | undefined;
-	assetQueryKey: readonly [string | undefined];
+  asset: IMarketData | undefined;
+  assetQueryKey: readonly [string | undefined];
 };
 
 export const useAsset = (assetName: string | undefined): UseAssetDto => {
@@ -31,5 +31,5 @@ export const useAsset = (assetName: string | undefined): UseAssetDto => {
       initialData: undefined,
     }
   );
-	return { asset, assetQueryKey };
+  return { asset, assetQueryKey };
 };

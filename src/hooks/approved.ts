@@ -7,8 +7,8 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
 
 export interface UseApprovedDto {
-	approved: BigNumber | undefined;
-	approvedQueryKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined];
+  approved: BigNumber | undefined;
+  approvedQueryKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined];
 };
 
 export const useApproved = (asset: IMarketData | undefined): UseApprovedDto => {
@@ -35,5 +35,5 @@ export const useApproved = (asset: IMarketData | undefined): UseApprovedDto => {
       initialData: BigNumber.from(0),
     }
   );
-	return { approved, approvedQueryKey };
+  return { approved, approvedQueryKey };
 };

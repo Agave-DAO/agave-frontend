@@ -142,10 +142,10 @@ const ActionDetailWrapper = styled.div`
 `;
 
 export interface ActionDetailProps {
-	asset: IMarketData;
-	balance: any; // Type?
-	actionName: string;
-	actionBaseRoute: string;
+  asset: IMarketData;
+  balance: any; // Type?
+  actionName: string;
+  actionBaseRoute: string;
 };
 
 export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, actionName, actionBaseRoute }) => {
@@ -211,59 +211,59 @@ export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, acti
   // */
 
   return (
-		<ActionDetailWrapper>
-			<div className="content-wrapper">
-				<div className="basic-form">
-					<div className="basic-form-header">
-						<div className="basic-form-header-title">
-							How much would you like to {actionName}?
-						</div>
-						<div className="basic-form-header-content">
-							Please enter an amount you would like to {actionName}.
-							The maximum amount you can {actionName} is shown below.
-						</div>
-					</div>
-					<div className="basic-form-content">
-						<div className="basic-form-content-top">
-							<div className="basic-form-content-top-label">
-								Available to {actionName}
-							</div>
-							<div className="basic-form-content-top-value">
-								<span>{walletBalance}</span> {asset.name}
-							</div>
-						</div>
-						<div className="basic-form-content-body">
-							<div className="image-section">
-								<img src={asset.img} alt="" width={30} height={30} />
-							</div>
-							<div className="input-section">
-								<input
-									type="number"
-									placeholder="Amount"
-									step="any"
-									min="0"
-									value={amountStr}
-									onChange={handleInputChange}
-								/>
-							</div>
-							<div
-								className="max-section"
-								onClick={() => setAmountStr(String(walletBalance))}
-							>
-								Max
-							</div>
-						</div>
-					</div>
-					<div className="basic-form-footer">
-						<Button variant="secondary" onClick={handleContinue}>
-							Continue
-						</Button>
-						<Button variant="outline" onClick={() => history.goBack()}>
-							Go back
-						</Button>
-					</div>
-				</div>
-			</div>
-		</ActionDetailWrapper>
+    <ActionDetailWrapper>
+      <div className="content-wrapper">
+        <div className="basic-form">
+          <div className="basic-form-header">
+            <div className="basic-form-header-title">
+              How much would you like to {actionName}?
+            </div>
+            <div className="basic-form-header-content">
+              Please enter an amount you would like to {actionName}.
+              The maximum amount you can {actionName} is shown below.
+            </div>
+          </div>
+          <div className="basic-form-content">
+            <div className="basic-form-content-top">
+              <div className="basic-form-content-top-label">
+                Available to {actionName}
+              </div>
+              <div className="basic-form-content-top-value">
+                <span>{walletBalance}</span> {asset.name}
+              </div>
+            </div>
+            <div className="basic-form-content-body">
+              <div className="image-section">
+                <img src={asset.img} alt="" width={30} height={30} />
+              </div>
+              <div className="input-section">
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  step="any"
+                  min="0"
+                  value={amountStr}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div
+                className="max-section"
+                onClick={() => setAmountStr(String(walletBalance))}
+              >
+                Max
+              </div>
+            </div>
+          </div>
+          <div className="basic-form-footer">
+            <Button variant="secondary" onClick={handleContinue}>
+              Continue
+            </Button>
+            <Button variant="outline" onClick={() => history.goBack()}>
+              Go back
+            </Button>
+          </div>
+        </div>
+      </div>
+    </ActionDetailWrapper>
   );
 };
