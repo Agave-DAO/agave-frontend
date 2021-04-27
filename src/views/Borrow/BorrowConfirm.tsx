@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
+import { AssetAmount } from "../../components/Actions/AssetAmount";
+import { ConfirmationProgressHeader } from "../../components/Actions/ConfirmationProgressHeader";
 import { useAsset } from "../../hooks/asset";
 import { useBorrowMutation } from "../../mutations/borrow";
 import { ethers } from "ethers";
@@ -54,85 +56,10 @@ const BorrowConfirmWrapper = styled.div`
         margin-bottom: 20px;
         width: 100%;
 
-        .form-content-view {
-          margin-bottom: 20px;
-          width: 100%;
-          border: 1px solid ${(props) => props.theme.color.textPrimary};
-          padding: 15px;
-          border-radius: 2px;
-          display: flex;
-          justify-content: space-between;
-
-          .content-label {
-            font-weight: 400;
-            color: ${(props) => props.theme.color.textPrimary};
-          }
-
-          .content-value {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            .token-amount {
-              display: flex;
-              align-items: center;
-              img {
-                width: 16px;
-                height: 16px;
-                margin-right: 5px;
-              }
-
-              span {
-                font-size: 16px;
-              }
-            }
-
-            .usd-amount {
-              font-size: 10px;
-            }
-          }
-        }
-
         .form-action-view {
           width: 100%;
           background: white;
           border: 1px solid ${(props) => props.theme.color.textPrimary};
-
-          .form-action-header {
-            width: 100%;
-            display: flex;
-
-            .form-action-step {
-              flex: 1 1 0%;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              background: rgb(241, 241, 243);
-              color: ${(props) => props.theme.color.textPrimary};
-              font-size: 12px;
-
-              &:not(:last-child) {
-                border-right: 1px solid white;
-              }
-
-              span {
-                font-size: 12px;
-                font-weight: 600;
-                margin-right: 5px;
-              }
-
-              &.active {
-                color: white;
-                font-size: 12px;
-                background: ${(props) => props.theme.color.bgSecondary};
-              }
-
-              &.success {
-                color: white;
-                font-size: 12px;
-                background: ${(props) => props.theme.color.green};
-              }
-            }
-          }
 
           .form-action-body {
             color: rgb(56, 61, 81);
@@ -217,41 +144,12 @@ const BorrowConfirm: React.FC = () => {
               </div>
             </div>
             <div className="basic-form-content">
-              <div className="form-content-view">
-                <div className="content-label">Amount</div>
-                {asset ? (
-                  <div className="content-value">
-                    <div className="token-amount">
-                      <img src={asset.img} alt="" />
-                      <span>
-                        {amount} {asset.name}
-                      </span>
-                    </div>
-                    <div className="usd-amount">
-                      $ {asset.asset_price * amount}
-                    </div>
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
+              <AssetAmount asset={asset} amount={amount} />
               <div className="form-action-view">
-                <div className="form-action-header">
-                  <div
-                    className={`form-action-step ${
-                      step === 2 ? "success" : step > 0 ? "active" : ""
-                    }`}
-                  >
-                    <span>1</span> Borrow
-                  </div>
-                  <div
-                    className={`form-action-step ${
-                      step === 2 ? "success" : step > 1 ? "active" : ""
-                    }`}
-                  >
-                    <span>2</span> Finished
-                  </div>
-                </div>
+                <ConfirmationProgressHeader
+                  step={step}
+                  labels={["Borrow", "Finished"]}
+                />
                 {step === 1 && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">

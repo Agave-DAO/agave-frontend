@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
+import { AssetAmount } from "../../components/Actions/AssetAmount";
+import { ConfirmationProgressHeader } from "../../components/Actions/ConfirmationProgressHeader";
 import { useAsset } from "../../hooks/asset";
 import { useApproved } from "../../hooks/approved";
 import { useApprovalMutation } from "../../mutations/approval";
@@ -56,43 +58,6 @@ const DepositConfirmWrapper = styled.div`
         margin-bottom: 20px;
         width: 100%;
 
-        .form-content-view {
-          margin-bottom: 20px;
-          width: 100%;
-          border: 1px solid ${(props) => props.theme.color.textPrimary};
-          padding: 15px;
-          border-radius: 2px;
-          display: flex;
-          justify-content: space-between;
-
-          .content-label {
-            font-weight: 400;
-            color: ${(props) => props.theme.color.textPrimary};
-          }
-
-          .content-value {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            .token-amount {
-              display: flex;
-              align-items: center;
-              img {
-                width: 16px;
-                height: 16px;
-                margin-right: 5px;
-              }
-
-              span {
-                font-size: 16px;
-              }
-            }
-
-            .usd-amount {
-              font-size: 10px;
-            }
-          }
-        }
 
         .form-action-view {
           width: 100%;
@@ -224,48 +189,12 @@ const DepositConfirm: React.FC = () => {
               </div>
             </div>
             <div className="basic-form-content">
-              <div className="form-content-view">
-                <div className="content-label">Amount</div>
-                {asset ? (
-                  <div className="content-value">
-                    <div className="token-amount">
-                      <img src={asset.img} alt="" />
-                      <span>
-                        {amount} {asset.name}
-                      </span>
-                    </div>
-                    <div className="usd-amount">
-                      $ {asset.asset_price * amount}
-                    </div>
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
+              <AssetAmount asset={asset} amount={amount} />
               <div className="form-action-view">
-                <div className="form-action-header">
-                  <div
-                    className={`form-action-step ${
-                      step === 3 ? "success" : step > 0 ? "active" : ""
-                    }`}
-                  >
-                    <span>1</span> Approve
-                  </div>
-                  <div
-                    className={`form-action-step ${
-                      step === 3 ? "success" : step > 1 ? "active" : ""
-                    }`}
-                  >
-                    <span>2</span> Deposit
-                  </div>
-                  <div
-                    className={`form-action-step ${
-                      step === 3 ? "success" : step > 2 ? "active" : ""
-                    }`}
-                  >
-                    <span>3</span> Finished
-                  </div>
-                </div>
+                <ConfirmationProgressHeader
+                  step={step}
+                  labels={["Approve", "Deposit", "Finished"]}
+                />
                 {step === 1 && (
                 <div className="form-action-body">
                     <div className="form-action-body-left">
