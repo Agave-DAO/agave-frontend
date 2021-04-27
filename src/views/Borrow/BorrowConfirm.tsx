@@ -3,13 +3,17 @@ import styled from "styled-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
-import { marketData, IMarketData } from "../../utils/constants";
-import BorrowOverview from "./BorrowOverview";
-import { useWeb3React } from "@web3-react/core";
-import BigNumber from "bignumber.js";
-import { AgaveLendingABI__factory } from "../../contracts";
+import {
+  AgaveLendingABI__factory,
+} from "../../contracts";
+import { useAsset } from "../../hooks/asset";
+import { useBalance } from "../../hooks/balance";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { Web3Provider } from '@ethersproject/providers'
+import { useMutation, useQueryClient } from "react-query";
+import { ethers } from "ethers";
+import { BigNumber } from "@ethersproject/bignumber";
+
+import BorrowOverview from "./BorrowOverview";
 
 const BorrowConfirmWrapper = styled.div`
   height: 100%;
@@ -111,10 +115,9 @@ const BorrowConfirmWrapper = styled.div`
               background: rgb(241, 241, 243);
               color: ${(props) => props.theme.color.textPrimary};
               font-size: 12px;
-              border-right: 1px solid white;
 
-              &:last-child {
-                border-right: 0;
+              &:not(:last-child) {
+                border-right: 1px solid white;
               }
 
               span {
@@ -124,15 +127,15 @@ const BorrowConfirmWrapper = styled.div`
               }
 
               &.active {
+                color: white;
                 font-size: 12px;
                 background: ${(props) => props.theme.color.bgSecondary};
-                color: white;
               }
 
               &.success {
+                color: white;
                 font-size: 12px;
                 background: ${(props) => props.theme.color.green};
-                color: white;
               }
             }
           }
@@ -179,47 +182,63 @@ const BorrowConfirmWrapper = styled.div`
 `;
 
 const BorrowConfirm: React.FC = () => {
+  const queryClient = useQueryClient();
+  const history = useHistory();
   const match = useRouteMatch<{
     assetName?: string | undefined;
     amount?: string | undefined;
   }>();
 
-  const history = useHistory();
-  const [asset, setAsset] = useState<IMarketData>();
-  const [amount, setAmount] = useState(0);
+  const assetName = match.params.assetName;
+  const [amount, setAmount] = useState<number>(0);
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
-  const { account: address, library } = useWeb3React<Web3Provider>();
+
+  const { asset, assetQueryKey } = useAsset(assetName);
+  const { balanceQueryKey } = useBalance(asset);
 
   useEffect(() => {
-    if (match.params && match.params.assetName) {
-      setAsset(marketData.find((item) => item.name === match.params.assetName));
-    }
-
     if (match.params && match.params.amount) {
       try {
-        const parsed = new BigNumber(String(match.params.amount));
-        if (amount !== parsed.toNumber()) {
-          setAmount(amount);
+        const parsed = Number(String(match.params.amount));
+        if (amount !== parsed) {
+          setAmount(parsed);
         }
       } catch {
         // Don't set the number if the match path isn't one
       }
     }
-  }, [match, amount]);
-  const borrowFn = async () => {
-    if (!address || !library || !asset) {
-      return;
+  }, [match, amount, setAmount]);
+
+
+  const borrowMutationKey = [...balanceQueryKey, amount] as const;
+  const borrowMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
+    borrowMutationKey,
+    async (unitAmount): Promise<BigNumber | undefined> => {
+      const [address, library, asset, amount] = borrowMutationKey;
+      if (!address || !library || !asset) {
+        throw new Error("Account or asset details are not available");
+      }
+      const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
+      const interestRateMode = 2;
+      const referralCode = 0;
+      const tx = await lender.borrow(asset.contractAddress, amount, interestRateMode, referralCode, address);
+      const receipt = await tx.wait();
+      return BigNumber.from(receipt.status ? amount : 0);
+    },
+    {
+      onSuccess: async (unitAmountResult, vars, context) => {
+        console.log("borrowMutation:onSuccess");
+        await Promise.allSettled([
+          queryClient.invalidateQueries(borrowMutationKey),
+          queryClient.invalidateQueries(balanceQueryKey),
+          queryClient.invalidateQueries(assetQueryKey),
+        ]);
+      },
     }
-    const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
-    const interestRateMode = 2;
-    const referralCode = 0;
-    const tx = await lender.borrow(asset.contractAddress, amount, interestRateMode, referralCode, address);
-    const receipt = await tx.wait()
-    if (receipt.status) {
-      setStep(step + 1);
-    }
-  };
+  );
+
+
   return (
     <Page>
       <BorrowConfirmWrapper>
@@ -227,7 +246,7 @@ const BorrowConfirm: React.FC = () => {
         <div className="content-wrapper">
           <div className="basic-form">
             <div className="basic-form-header">
-              <div className="basic-form-header-title">Borrow overview</div>
+              <div className="basic-form-header-title">Borrow Overview</div>
               <div className="basic-form-header-content">
                 These are your transaction details. Make sure to check if this
                 is correct before submitting.
@@ -276,7 +295,18 @@ const BorrowConfirm: React.FC = () => {
                       <div className="desc">Please submit to borrow</div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => borrowFn()}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          borrowMutation
+                            .mutateAsync(ethers.utils.parseEther(amount.toString()))
+                            .then(async (result) => {
+                              if (result) {
+                                setStep(step + 1)
+                              }
+                            });
+                        }}
+                      >
                         Submit
                       </Button>
                     </div>
