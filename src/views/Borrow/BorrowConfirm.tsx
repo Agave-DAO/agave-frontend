@@ -3,15 +3,9 @@ import styled from "styled-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
-import {
-  AgaveLendingABI__factory,
-} from "../../contracts";
 import { useAsset } from "../../hooks/asset";
-import { useBalance } from "../../hooks/balance";
-import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { useMutation, useQueryClient } from "react-query";
+import { useBorrowMutation } from "../../mutations/borrow";
 import { ethers } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
 
 import BorrowOverview from "./BorrowOverview";
 
@@ -182,7 +176,6 @@ const BorrowConfirmWrapper = styled.div`
 `;
 
 const BorrowConfirm: React.FC = () => {
-  const queryClient = useQueryClient();
   const history = useHistory();
   const match = useRouteMatch<{
     assetName?: string | undefined;
@@ -194,8 +187,8 @@ const BorrowConfirm: React.FC = () => {
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
 
-  const { asset, assetQueryKey } = useAsset(assetName);
-  const { balanceQueryKey } = useBalance(asset);
+  const { asset } = useAsset(assetName);
+  const { borrowMutation } = useBorrowMutation({asset, amount, onSuccess: () => {}});
 
   useEffect(() => {
     if (match.params && match.params.amount) {
@@ -209,35 +202,6 @@ const BorrowConfirm: React.FC = () => {
       }
     }
   }, [match, amount, setAmount]);
-
-
-  const borrowMutationKey = [...balanceQueryKey, amount] as const;
-  const borrowMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
-    borrowMutationKey,
-    async (unitAmount): Promise<BigNumber | undefined> => {
-      const [address, library, asset, amount] = borrowMutationKey;
-      if (!address || !library || !asset) {
-        throw new Error("Account or asset details are not available");
-      }
-      const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
-      const interestRateMode = 2;
-      const referralCode = 0;
-      const tx = await lender.borrow(asset.contractAddress, amount, interestRateMode, referralCode, address);
-      const receipt = await tx.wait();
-      return BigNumber.from(receipt.status ? amount : 0);
-    },
-    {
-      onSuccess: async (unitAmountResult, vars, context) => {
-        console.log("borrowMutation:onSuccess");
-        await Promise.allSettled([
-          queryClient.invalidateQueries(borrowMutationKey),
-          queryClient.invalidateQueries(balanceQueryKey),
-          queryClient.invalidateQueries(assetQueryKey),
-        ]);
-      },
-    }
-  );
-
 
   return (
     <Page>

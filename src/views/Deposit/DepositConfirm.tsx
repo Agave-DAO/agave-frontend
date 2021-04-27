@@ -3,17 +3,11 @@ import styled from "styled-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
-import {
-  AgaveLendingABI__factory,
-  Erc20abi__factory,
-} from "../../contracts";
 import { useAsset } from "../../hooks/asset";
-import { useBalance } from "../../hooks/balance";
 import { useApproved } from "../../hooks/approved";
-import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { useMutation, useQueryClient } from "react-query";
+import { useApprovalMutation } from "../../mutations/approval";
+import { useDepositMutation } from "../../mutations/deposit";
 import { ethers } from "ethers";
-import { BigNumber } from "@ethersproject/bignumber";
 
 import DepositOverview from "./DepositOverview";
 
@@ -184,7 +178,6 @@ const DepositConfirmWrapper = styled.div`
 `;
 
 const DepositConfirm: React.FC = () => {
-  const queryClient = useQueryClient();
   const history = useHistory();
   const match = useRouteMatch<{
     assetName?: string | undefined;
@@ -196,8 +189,12 @@ const DepositConfirm: React.FC = () => {
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
 
-  const { asset, assetQueryKey } = useAsset(assetName);
-  const { balanceQueryKey } = useBalance(asset);
+  const { asset } = useAsset(assetName);
+  const { approved: approval } = useApproved(asset);
+  const { approvalMutation } = useApprovalMutation({ asset, amount, onSuccess: () => {
+    setStep(2);
+  }});
+  const { depositMutation } = useDepositMutation({ asset, amount, onSuccess: () => {}});
 
   useEffect(() => {
     if (match.params && match.params.amount) {
@@ -211,74 +208,6 @@ const DepositConfirm: React.FC = () => {
       }
     }
   }, [match, amount, setAmount]);
-
-  const { approved: approval, approvedQueryKey } = useApproved(asset);
-
-  const approvalMutationKey = [...approvedQueryKey, amount] as const;
-  const approvalMutation = useMutation(
-    approvalMutationKey,
-    async (newValue) => {
-      const [address, library, asset, amount] = approvalMutationKey;
-      if (!address || !library || !asset) {
-        throw new Error("Account or asset details are not available");
-      }
-      const contract = Erc20abi__factory.connect(
-        asset.contractAddress,
-        library.getSigner()
-      );
-      const unitAmount = ethers.utils.parseEther(amount.toString());
-      const tx = await contract.approve(internalAddresses.Lending, unitAmount);
-      const receipt = await tx.wait();
-      return BigNumber.from(receipt.status ? unitAmount : 0);
-    },
-    {
-      onSuccess: async (unitAmountResult, vars, context) => {
-        console.log("approvalMutation:onSuccess");
-        await Promise.allSettled([
-          // queryClient.invalidateQueries(approvedQueryKey), // Request that the approval query refreshes
-          queryClient.setQueryData(approvedQueryKey, ethers.utils.parseEther(amount.toString())), // Update the approved amount query immediately
-          queryClient.invalidateQueries(approvalMutationKey),
-        ]);
-        setStep(2);
-      },
-    }
-  );
-
-  const depositMutationKey = [...approvedQueryKey, amount] as const;
-  const depositMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
-    depositMutationKey,
-    async (unitAmount): Promise<BigNumber | undefined> => {
-      const [address, library, asset, ] = depositMutationKey;
-      if (!address || !library || !asset) {
-        throw new Error("Account or asset details are not available");
-      }
-      const contract = AgaveLendingABI__factory.connect(
-        internalAddresses.Lending,
-        library.getSigner()
-      );
-      const referralCode = 0;
-      console.log("depositMutationKey:deposit");
-      console.log(Number(ethers.utils.formatEther(unitAmount)));
-      const tx = await contract.deposit(
-        asset.contractAddress,
-        unitAmount,
-        address,
-        referralCode
-      );
-      const receipt = await tx.wait();
-      return receipt.status ? BigNumber.from(unitAmount) : undefined;
-    },
-    {
-      onSuccess: async (unitAmountResult, vars, context) => {
-        await Promise.allSettled([
-          queryClient.invalidateQueries(approvedQueryKey),
-          queryClient.invalidateQueries(approvalMutationKey),
-          queryClient.invalidateQueries(balanceQueryKey),
-          queryClient.invalidateQueries(assetQueryKey),
-        ]);
-      },
-    }
-  );
 
 
   return (
