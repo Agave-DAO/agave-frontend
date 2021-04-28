@@ -3,13 +3,13 @@ import styled from "styled-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
-import { marketData, IMarketData } from "../../utils/constants";
+import { AssetAmount } from "../../components/Actions/AssetAmount";
+import { ConfirmationProgressHeader } from "../../components/Actions/ConfirmationProgressHeader";
+import { useAsset } from "../../hooks/asset";
+import { useBorrowMutation } from "../../mutations/borrow";
+import { ethers } from "ethers";
+
 import BorrowOverview from "./BorrowOverview";
-import { useWeb3React } from "@web3-react/core";
-import BigNumber from "bignumber.js";
-import { AgaveLendingABI__factory } from "../../contracts";
-import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { Web3Provider } from '@ethersproject/providers'
 
 const BorrowConfirmWrapper = styled.div`
   height: 100%;
@@ -56,86 +56,10 @@ const BorrowConfirmWrapper = styled.div`
         margin-bottom: 20px;
         width: 100%;
 
-        .form-content-view {
-          margin-bottom: 20px;
-          width: 100%;
-          border: 1px solid ${(props) => props.theme.color.textPrimary};
-          padding: 15px;
-          border-radius: 2px;
-          display: flex;
-          justify-content: space-between;
-
-          .content-label {
-            font-weight: 400;
-            color: ${(props) => props.theme.color.textPrimary};
-          }
-
-          .content-value {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            .token-amount {
-              display: flex;
-              align-items: center;
-              img {
-                width: 16px;
-                height: 16px;
-                margin-right: 5px;
-              }
-
-              span {
-                font-size: 16px;
-              }
-            }
-
-            .usd-amount {
-              font-size: 10px;
-            }
-          }
-        }
-
         .form-action-view {
           width: 100%;
           background: white;
           border: 1px solid ${(props) => props.theme.color.textPrimary};
-
-          .form-action-header {
-            width: 100%;
-            display: flex;
-
-            .form-action-step {
-              flex: 1 1 0%;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              background: rgb(241, 241, 243);
-              color: ${(props) => props.theme.color.textPrimary};
-              font-size: 12px;
-              border-right: 1px solid white;
-
-              &:last-child {
-                border-right: 0;
-              }
-
-              span {
-                font-size: 12px;
-                font-weight: 600;
-                margin-right: 5px;
-              }
-
-              &.active {
-                font-size: 12px;
-                background: ${(props) => props.theme.color.bgSecondary};
-                color: white;
-              }
-
-              &.success {
-                font-size: 12px;
-                background: ${(props) => props.theme.color.green};
-                color: white;
-              }
-            }
-          }
 
           .form-action-body {
             color: rgb(56, 61, 81);
@@ -179,47 +103,33 @@ const BorrowConfirmWrapper = styled.div`
 `;
 
 const BorrowConfirm: React.FC = () => {
+  const history = useHistory();
   const match = useRouteMatch<{
     assetName?: string | undefined;
     amount?: string | undefined;
   }>();
 
-  const history = useHistory();
-  const [asset, setAsset] = useState<IMarketData>();
-  const [amount, setAmount] = useState(0);
+  const assetName = match.params.assetName;
+  const [amount, setAmount] = useState<number>(0);
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
-  const { account: address, library } = useWeb3React<Web3Provider>();
+
+  const { asset } = useAsset(assetName);
+  const { borrowMutation } = useBorrowMutation({asset, amount, onSuccess: () => {}});
 
   useEffect(() => {
-    if (match.params && match.params.assetName) {
-      setAsset(marketData.find((item) => item.name === match.params.assetName));
-    }
-
     if (match.params && match.params.amount) {
       try {
-        const parsed = new BigNumber(String(match.params.amount));
-        if (amount !== parsed.toNumber()) {
-          setAmount(amount);
+        const parsed = Number(String(match.params.amount));
+        if (amount !== parsed) {
+          setAmount(parsed);
         }
       } catch {
         // Don't set the number if the match path isn't one
       }
     }
-  }, [match, amount]);
-  const borrowFn = async () => {
-    if (!address || !library || !asset) {
-      return;
-    }
-    const lender = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
-    const interestRateMode = 2;
-    const referralCode = 0;
-    const tx = await lender.borrow(asset.contractAddress, amount, interestRateMode, referralCode, address);
-    const receipt = await tx.wait()
-    if (receipt.status) {
-      setStep(step + 1);
-    }
-  };
+  }, [match, amount, setAmount]);
+
   return (
     <Page>
       <BorrowConfirmWrapper>
@@ -227,48 +137,19 @@ const BorrowConfirm: React.FC = () => {
         <div className="content-wrapper">
           <div className="basic-form">
             <div className="basic-form-header">
-              <div className="basic-form-header-title">Borrow overview</div>
+              <div className="basic-form-header-title">Borrow Overview</div>
               <div className="basic-form-header-content">
                 These are your transaction details. Make sure to check if this
                 is correct before submitting.
               </div>
             </div>
             <div className="basic-form-content">
-              <div className="form-content-view">
-                <div className="content-label">Amount</div>
-                {asset ? (
-                  <div className="content-value">
-                    <div className="token-amount">
-                      <img src={asset.img} alt="" />
-                      <span>
-                        {amount} {asset.name}
-                      </span>
-                    </div>
-                    <div className="usd-amount">
-                      $ {asset.asset_price * amount}
-                    </div>
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
+              <AssetAmount asset={asset} amount={amount} />
               <div className="form-action-view">
-                <div className="form-action-header">
-                  <div
-                    className={`form-action-step ${
-                      step === 2 ? "success" : step > 0 ? "active" : ""
-                    }`}
-                  >
-                    <span>1</span> Borrow
-                  </div>
-                  <div
-                    className={`form-action-step ${
-                      step === 2 ? "success" : step > 1 ? "active" : ""
-                    }`}
-                  >
-                    <span>2</span> Finished
-                  </div>
-                </div>
+                <ConfirmationProgressHeader
+                  step={step}
+                  labels={["Borrow", "Finished"]}
+                />
                 {step === 1 && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
@@ -276,7 +157,18 @@ const BorrowConfirm: React.FC = () => {
                       <div className="desc">Please submit to borrow</div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => borrowFn()}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          borrowMutation
+                            .mutateAsync(ethers.utils.parseEther(amount.toString()))
+                            .then(async (result) => {
+                              if (result) {
+                                setStep(step + 1)
+                              }
+                            });
+                        }}
+                      >
                         Submit
                       </Button>
                     </div>

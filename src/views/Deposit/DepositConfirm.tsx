@@ -3,17 +3,15 @@ import styled from "styled-components";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import Page from "../../components/Page";
 import Button from "../../components/Button";
-import { marketData, IMarketData } from "../../utils/constants";
-import DepositOverview from "./DepositOverview";
-import {
-  AgaveLendingABI__factory,
-  Erc20abi__factory,
-} from "../../contracts";
-import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { BigNumber } from "@ethersproject/bignumber";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import { useAppWeb3 } from "../../hooks/appWeb3";
+import { AssetAmount } from "../../components/Actions/AssetAmount";
+import { ConfirmationProgressHeader } from "../../components/Actions/ConfirmationProgressHeader";
+import { useAsset } from "../../hooks/asset";
+import { useApproved } from "../../hooks/approved";
+import { useApprovalMutation } from "../../mutations/approval";
+import { useDepositMutation } from "../../mutations/deposit";
 import { ethers } from "ethers";
+
+import DepositOverview from "./DepositOverview";
 
 const DepositConfirmWrapper = styled.div`
   height: 100%;
@@ -60,43 +58,6 @@ const DepositConfirmWrapper = styled.div`
         margin-bottom: 20px;
         width: 100%;
 
-        .form-content-view {
-          margin-bottom: 20px;
-          width: 100%;
-          border: 1px solid ${(props) => props.theme.color.textPrimary};
-          padding: 15px;
-          border-radius: 2px;
-          display: flex;
-          justify-content: space-between;
-
-          .content-label {
-            font-weight: 400;
-            color: ${(props) => props.theme.color.textPrimary};
-          }
-
-          .content-value {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            .token-amount {
-              display: flex;
-              align-items: center;
-              img {
-                width: 16px;
-                height: 16px;
-                margin-right: 5px;
-              }
-
-              span {
-                font-size: 16px;
-              }
-            }
-
-            .usd-amount {
-              font-size: 10px;
-            }
-          }
-        }
 
         .form-action-view {
           width: 100%;
@@ -182,168 +143,37 @@ const DepositConfirmWrapper = styled.div`
 `;
 
 const DepositConfirm: React.FC = () => {
-  const queryClient = useQueryClient();
   const history = useHistory();
   const match = useRouteMatch<{
     assetName?: string | undefined;
     amount?: string | undefined;
   }>();
+
   const assetName = match.params.assetName;
-  const { account: address, library } = useAppWeb3();
-  const [wholeTokenAmount, setWholeTokenAmount] = useState<number>(0);
+  const [amount, setAmount] = useState<number>(0);
   // TODO: change this 'step' system to nested routes
   const [step, setStep] = useState(1);
 
-  const assetQueryKey = [assetName] as const;
-  const {
-    data: asset,
-  } = useQuery(
-    assetQueryKey,
-    async (ctx): Promise<IMarketData | undefined> => {
-      const [assetName]: typeof assetQueryKey = ctx.queryKey;
-      if (!assetName) {
-        return undefined;
-      }
-
-      const asset = marketData.find((a) => a.name === match.params.assetName);
-      if (!asset) {
-        console.warn(`Asset ${match.params.assetName} not found`);
-        return;
-      }
-
-      return asset;
-    },
-    {
-      initialData: undefined,
-    }
-  );
-
-  const balanceQueryKey = [address, library, asset] as const;
-  const {
-    data: balance,
-  } = useQuery(
-    balanceQueryKey,
-    async (ctx) => {
-      const [address, library, asset]: typeof balanceQueryKey = ctx.queryKey;
-      if (!address || !library || !asset) {
-        return undefined;
-      }
-      const contract = Erc20abi__factory.connect(
-        asset.contractAddress,
-        library.getSigner()
-      );
-      const tokenBalance = await contract.balanceOf(address);
-      return tokenBalance;
-    },
-    {
-      initialData: undefined,
-    }
-  );
-
-  const approvedQueryKey = [address, library, asset] as const;
-  const {
-    data: approval,
-  } = useQuery(
-    approvedQueryKey,
-    async (ctx): Promise<BigNumber | undefined> => {
-      const [address, library, asset]: typeof approvedQueryKey = ctx.queryKey;
-      if (!address || !library || !asset) {
-        return undefined;
-      }
-      const contract = Erc20abi__factory.connect(
-        asset.contractAddress,
-        library.getSigner()
-      );
-      const allowance = await contract.allowance(address, internalAddresses.Lending);
-      return allowance;
-    },
-    {
-      initialData: BigNumber.from(0),
-    }
-  );
-
-  const approvalMutationKey = [...approvedQueryKey, wholeTokenAmount] as const;
-  const approvalMutation = useMutation(
-    approvalMutationKey,
-    async (newValue) => {
-      const [address, library, asset, wholeTokenAmount] = approvalMutationKey;
-      if (!address || !library || !asset) {
-        throw new Error("Account or asset details are not available");
-      }
-      const contract = Erc20abi__factory.connect(
-        asset.contractAddress,
-        library.getSigner()
-      );
-      const unitAmount = ethers.utils.parseEther(wholeTokenAmount.toString());
-      const tx = await contract.approve(internalAddresses.Lending, unitAmount);
-      const receipt = await tx.wait();
-      return BigNumber.from(receipt.status ? unitAmount : 0);
-    },
-    {
-      onSuccess: async (unitAmountResult, vars, context) => {
-        console.log("approvalMutation:onSuccess");
-        await Promise.allSettled([
-          // queryClient.invalidateQueries(approvedQueryKey), // Request that the approval query refreshes
-          queryClient.setQueryData(approvedQueryKey, ethers.utils.parseEther(wholeTokenAmount.toString())), // Update the approved amount query immediately
-          queryClient.invalidateQueries(approvalMutationKey),
-        ]);
-        setStep(2);
-      },
-    }
-  );
-
-  const depositMutationKey = [...approvedQueryKey, wholeTokenAmount] as const;
-  const depositMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
-    depositMutationKey,
-    async (unitAmount): Promise<BigNumber | undefined> => {
-      const [address, library, asset, ] = depositMutationKey;
-      if (!address || !library || !asset) {
-        throw new Error("Account or asset details are not available");
-      }
-      const contract = AgaveLendingABI__factory.connect(
-        internalAddresses.Lending,
-        library.getSigner()
-      );
-      const referralCode = 0;
-      console.log("depositMutationKey:deposit");
-      console.log(Number(ethers.utils.formatEther(unitAmount)));
-      const tx = await contract.deposit(
-        asset.contractAddress,
-        unitAmount,
-        address,
-        referralCode
-      );
-      const receipt = await tx.wait();
-      return receipt.status ? BigNumber.from(unitAmount) : undefined;
-    },
-    {
-      onSuccess: async (unitAmountResult, vars, context) => {
-        await Promise.allSettled([
-          queryClient.invalidateQueries(approvedQueryKey),
-          queryClient.invalidateQueries(approvalMutationKey),
-          queryClient.invalidateQueries(balanceQueryKey),
-          queryClient.invalidateQueries(assetQueryKey),
-        ]);
-      },
-    }
-  );
+  const { asset } = useAsset(assetName);
+  const { approved: approval } = useApproved(asset);
+  const { approvalMutation } = useApprovalMutation({ asset, amount, onSuccess: () => {
+    setStep(2);
+  }});
+  const { depositMutation } = useDepositMutation({ asset, amount, onSuccess: () => {}});
 
   useEffect(() => {
     if (match.params && match.params.amount) {
       try {
         const parsed = Number(String(match.params.amount));
-        if (wholeTokenAmount !== parsed) {
-          setWholeTokenAmount(parsed);
+        if (amount !== parsed) {
+          setAmount(parsed);
         }
       } catch {
         // Don't set the number if the match path isn't one
       }
     }
-    /*
-    if (step != 2 && approval && balance && approval.gte(balance)) {
-      setStep(2);
-    }*/
-  }, [match, approval, balance, wholeTokenAmount, setWholeTokenAmount, step, setStep]);
+  }, [match, amount, setAmount]);
+
 
   return (
     <Page>
@@ -359,54 +189,18 @@ const DepositConfirm: React.FC = () => {
               </div>
             </div>
             <div className="basic-form-content">
-              <div className="form-content-view">
-                <div className="content-label">Amount</div>
-                {asset ? (
-                  <div className="content-value">
-                    <div className="token-amount">
-                      <img src={asset.img} alt="" />
-                      <span>
-                        {wholeTokenAmount} {asset.name}
-                      </span>
-                    </div>
-                    <div className="usd-amount">
-                      $ {asset.asset_price * wholeTokenAmount}
-                    </div>
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </div>
+              <AssetAmount asset={asset} amount={amount} />
               <div className="form-action-view">
-                <div className="form-action-header">
-                  <div
-                    className={`form-action-step ${
-                      step === 3 ? "success" : step > 0 ? "active" : ""
-                    }`}
-                  >
-                    <span>1</span> Approve
-                  </div>
-                  <div
-                    className={`form-action-step ${
-                      step === 3 ? "success" : step > 1 ? "active" : ""
-                    }`}
-                  >
-                    <span>2</span> Deposit
-                  </div>
-                  <div
-                    className={`form-action-step ${
-                      step === 3 ? "success" : step > 2 ? "active" : ""
-                    }`}
-                  >
-                    <span>3</span> Finished
-                  </div>
-                </div>
+                <ConfirmationProgressHeader
+                  step={step}
+                  labels={["Approve", "Deposit", "Finished"]}
+                />
                 {step === 1 && (
                 <div className="form-action-body">
                     <div className="form-action-body-left">
                       <div className="title">Approve</div>
                       <div className="desc">
-                        Please approve before deposting {wholeTokenAmount} eth
+                        Please approve before depositing {amount} {assetName}
                       </div>
                     </div>
                     <div className="form-action-body-right">
@@ -442,7 +236,7 @@ const DepositConfirm: React.FC = () => {
                         disabled={depositMutation.isLoading || approvalMutation.isLoading || approval === undefined}
                         onClick={() => {
                           depositMutation
-                            .mutateAsync(ethers.utils.parseEther(wholeTokenAmount.toString()))
+                            .mutateAsync(ethers.utils.parseEther(amount.toString()))
                             .then(async (result) => {
                               if (result) {
                                 setStep(step + 1)
