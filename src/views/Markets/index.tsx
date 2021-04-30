@@ -99,7 +99,7 @@ const Markets: React.FC = () => {
       <MarketsWrapper>
         <div className="topContent">
           <div>Current Market Size</div>
-          <span>$ 97,827,149.29{/* TODO: placeholder*/}</span>
+          <span>$ 0.00{/* TODO: placeholder*/}</span>
         </div>
         <div className="price-switcher">
           <Switch values={['USD', 'Native']} activeValue={activeValue} setActiveValue={setActiveValue} />

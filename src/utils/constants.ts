@@ -12,6 +12,14 @@ const addresses: Readonly<Record<string, string>> = {
   DAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2"
 }
 
+export const imagesBySymbol: Record<string, string | undefined> = {
+  AGVE: agaveImg,
+  WETH: ethImg,
+  HNY: honeyImg,
+  WBTC: wbtcImg,
+  USDC: daiImg,
+};
+
 export interface IMarketData {
   name: string,
   img: string,
