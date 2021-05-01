@@ -111,12 +111,16 @@ export interface ReserveConfigurationMap extends BigNumber {}
 
 export const useMarketData = (): UseMarketDataDto => {
   const { account: address, library, chainId } = useAppWeb3();
-  const marketDataQueryKey = [
-    "marketData",
-    address ?? undefined,
-    library ?? undefined,
-    chainId ?? undefined,
-  ] as const;
+  const marketDataQueryKey = useMemo(
+    () =>
+      [
+        "marketData",
+        address ?? undefined,
+        library ?? undefined,
+        chainId ?? undefined,
+      ] as const,
+    [address, library, chainId] as const
+  );
   const { data } = useQuery(
     marketDataQueryKey,
     async (ctx) => {
@@ -179,14 +183,17 @@ export const useMarketData = (): UseMarketDataDto => {
       staleTime: 1 * 60 * 1000,
     }
   );
-  return {
-    assets: data?.assets ?? [],
-    reserves: data?.reserves ?? {},
-    assetInfo: data?.assetInfo ?? {},
-    address,
-    library: library ?? undefined,
-    marketDataQueryKey,
-  };
+  return useMemo(
+    () => ({
+      assets: data?.assets ?? [],
+      reserves: data?.reserves ?? {},
+      assetInfo: data?.assetInfo ?? {},
+      address,
+      library: library ?? undefined,
+      marketDataQueryKey,
+    }),
+    [data, library, address, marketDataQueryKey]
+  );
 };
 
 export const MarketTable: React.FC<{ activePrice: "USD" | "Native" }> = ({
