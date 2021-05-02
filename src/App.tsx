@@ -17,6 +17,7 @@ import BorrowConfirm from './views/Borrow/BorrowConfirm';
 // import RepayConfirm from './views/Repay/RepayConfirm';
 // import Collateral from './views/Collateral';
 // import InterestSwap from './views/InterestSwap';
+import { Staking } from "./views/Staking";
 import 'react-notifications-component/dist/theme.css';
 import theme from './theme';
 import './App.css';
@@ -54,6 +55,7 @@ const App: React.FC<IAppProps> = props => {
             {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
             {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
             {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
+            <Route path="/stake" component={Staking} />
             <Redirect from="/" to="/markets" />
           </Switch>
         </Layout>

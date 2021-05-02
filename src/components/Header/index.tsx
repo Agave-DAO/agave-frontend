@@ -122,6 +122,12 @@ function Header() {
             >
               BORROW
             </NavLink>
+            <NavLink
+              to='/stake'
+              className="menuItem"
+            >
+              STAKE
+            </NavLink>
             <div className="connect-btn">{addressPretty ?? "Connect"}</div>
           </Nav>
         </Navbar.Collapse>
