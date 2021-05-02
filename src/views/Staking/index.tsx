@@ -4,7 +4,7 @@ import { WeiBox } from "../../components/Actions/WeiBox";
 
 export interface StakingProps {}
 
-export const Staking: React.FC<StakingProps> = ({}) => {
+export const Staking: React.FC<StakingProps> = (_props) => {
   const [weiAmount, setWeiAmount] = useState<BigNumber | undefined>(BigNumber.from(10));
   return (
     <>

@@ -41,21 +41,9 @@ const WeiBoxWrapper = styled.div`
   }
 `;
 
-export interface WeiBoxProps {
-  amount: BigNumber | undefined;
-  decimals: number;
-  setAmount: (newValue: BigNumber | undefined) => void;
-  // Dual mode enables both displays as textboxes, while int and fixed display one format or the other
-  mode?: "dual" | "int" | "fixed";
-  icon?: ReactNode | undefined;
-  minAmount?: BigNumber | undefined;
-  maxAmount?: BigNumber | undefined;
-}
-
-// TODO: Create a second component meant to be used alongside this one which displays USD value of the asset
-
-function parseWholeTokensFixed(value: string, decimals: BigNumberish): BigNumber {
-  throw new Error();
+// Equate (BigNumber | undefined) instances with eachother
+function eqBigNumberOptions(a: BigNumber | undefined, b: BigNumber | undefined): boolean {
+  return !(a !== b && ((a === undefined || b === undefined) || !a.eq(b)));
 }
 
 function clampBigNumber(value: BigNumberish, minAmount: BigNumber | undefined, maxAmount: BigNumber | undefined): BigNumber {
@@ -71,61 +59,130 @@ function clampBigNumber(value: BigNumberish, minAmount: BigNumber | undefined, m
   return BigNumber.from(value);
 }
 
+export interface WeiInputProps {
+  amount: BigNumber | undefined;
+  setAmount: (newValue: BigNumber | undefined) => void;
+  minAmount?: BigNumber | undefined;
+  maxAmount?: BigNumber | undefined;
+  children: (rawAmount: string, setRawAmount: (newRawAmount: string) => void) => React.ReactElement<any, any> | null;
+}
+
+export interface FixedDecimalInputProps {
+  amount: BigNumber | undefined;
+  decimals: BigNumberish;
+  setAmount: (newValue: BigNumber | undefined) => void;
+  minAmount?: BigNumber | undefined;
+  maxAmount?: BigNumber | undefined;
+  children: (rawAmount: string, setRawAmount: (newRawAmount: string) => void) => React.ReactElement<any, any> | null;
+}
+
+export interface WeiBoxProps {
+  amount: BigNumber | undefined;
+  decimals: BigNumberish;
+  setAmount: (newValue: BigNumber | undefined) => void;
+  // Dual mode enables both displays as textboxes, while int and fixed display one format or the other
+  mode?: "dual" | "int" | "fixed";
+  icon?: ReactNode | undefined;
+  minAmount?: BigNumber | undefined;
+  maxAmount?: BigNumber | undefined;
+}
+
+export const WeiInput: React.FC<WeiInputProps> = ({ amount, setAmount, maxAmount, minAmount, children }) => {
+  const [state, setState] = useState({
+    baked: amount,
+    raw: amount?.toString() ?? "",
+  });
+
+  useEffect(() => {
+    if (!eqBigNumberOptions(amount, state.baked)) {
+      setState({ baked: amount, raw: (amount !== undefined) ? amount.toString() : state.raw });
+    }
+  }, [state.raw, state.baked, amount]);
+
+  const updateRawWeiAmount = useMemo(() => (newValue: string) => {
+    const preparse = newValue.trim();
+    let parsedAmount: BigNumber;
+    try {
+      parsedAmount = BigNumber.from(preparse);
+      clampBigNumber(parsedAmount, minAmount, maxAmount);
+    } catch {
+      setState({
+        baked: undefined,
+        raw: preparse,
+      });
+      if (amount !== undefined) {
+        setAmount(undefined);
+      }
+      return;
+    }
+    setState({
+      baked: parsedAmount,
+      raw: preparse,
+    });
+    if (amount === undefined || amount?.eq(parsedAmount) === false) {
+      setAmount(parsedAmount);
+    }
+  }, [setState, setAmount, minAmount, maxAmount, amount]);
+
+  return useMemo(() => children(state.raw, updateRawWeiAmount), [state.raw, updateRawWeiAmount, children]);
+};
+
+// Caution: If the number of decimals changes during operation, the value will not be updated to track it
+export const FixedDecimalInput: React.FC<FixedDecimalInputProps> = ({ amount, decimals, setAmount, maxAmount, minAmount, children }) => {
+  const [state, setState] = useState({
+    baked: amount,
+    raw: amount ? FixedNumber.fromValue(amount, decimals).toString() : "",
+  });
+
+  useEffect(() => {
+    if (!eqBigNumberOptions(amount, state.baked)) {
+      setState({ baked: amount, raw: (amount !== undefined) ? FixedNumber.fromValue(amount, decimals).toString() : state.raw });
+    }
+  }, [state.raw, state.baked, amount, decimals]);
+
+  const updateRawFixedAmount = useMemo(() => (newValue: string) => {
+    const preparse = newValue.trim();
+    let parsedAmount: BigNumber;
+    try {
+      parsedAmount = parseFixed(preparse, decimals);
+      clampBigNumber(parsedAmount, minAmount, maxAmount);
+    } catch {
+      setState({
+        baked: undefined,
+        raw: preparse,
+      });
+      if (amount !== undefined) {
+        setAmount(undefined);
+      }
+      return;
+    }
+    setState({
+      baked: parsedAmount,
+      raw: preparse,
+    });
+    if (amount === undefined || amount?.eq(parsedAmount) === false) {
+      setAmount(parsedAmount);
+    }
+  }, [setState, setAmount, minAmount, maxAmount, decimals, amount]);
+
+  return useMemo(() => children(state.raw, updateRawFixedAmount), [state.raw, updateRawFixedAmount, children]);
+};
+
+// TODO: Create a second component meant to be used alongside this one which displays USD value of the asset
+
 // Caution: If the number of decimals changes during operation, the value will not be updated to track it
 export const WeiBox: React.FC<WeiBoxProps> = ({ amount, decimals, setAmount, maxAmount, minAmount, }) => {
-  const [rawWeiAmount, setRawWeiAmount] = useState(amount?.toString() ?? "");
-  const [rawFixedAmount, setRawFixedAmount] = useState(amount ? FixedNumber.fromValue(amount, decimals).toString() : "");
-
-  const clampValue = useMemo(() => (value: BigNumberish) => clampBigNumber(value, minAmount, maxAmount), [minAmount, maxAmount]);
-
-  type InputChangeEvent = React.ChangeEvent<HTMLInputElement>;
-  const updateRawWeiAmountFromEvent = useMemo(() => (ev: InputChangeEvent) => {
-    if (rawWeiAmount != ev.target.value) { setRawWeiAmount(ev.target.value.trim()); }
-    let parsedAmount: BigNumber;
-    try {
-      parsedAmount = BigNumber.from(ev.target.value.trim());
-    } catch {
-      if (amount !== undefined) {
-        setAmount(undefined);
-      }
-      return;
-    }
-    if (amount === undefined || amount?.eq(parsedAmount) === false) {
-      setAmount(parsedAmount);
-    }
-    const newRawAmount = FixedNumber.fromValue(parsedAmount, decimals).toString();
-    if (rawFixedAmount != newRawAmount) {
-      setRawFixedAmount(newRawAmount);
-    }
-  }, [rawWeiAmount, rawFixedAmount, setRawWeiAmount, setRawFixedAmount, setAmount, clampValue]);
-
-  const updateRawFixedAmountFromEvent = useMemo(() => (ev: InputChangeEvent) => {
-    if (rawFixedAmount != ev.target.value) { setRawFixedAmount(ev.target.value.trim()); }
-    let parsedAmount: BigNumber;
-    try {
-      parsedAmount = parseFixed(ev.target.value.trim(), decimals);
-    } catch {
-      if (amount !== undefined) {
-        setAmount(undefined);
-      }
-      return;
-    }
-    if (amount === undefined || amount?.eq(parsedAmount) === false) {
-      setAmount(parsedAmount);
-    }
-    const newRawAmount = parsedAmount.toString();
-    if (rawWeiAmount != newRawAmount) {
-      setRawWeiAmount(newRawAmount);
-    }
-  }, [rawFixedAmount, rawWeiAmount, setRawFixedAmount, setRawWeiAmount, setAmount, clampValue, decimals]);
-
   return (
     <WeiBoxWrapper>
       <div className="content-label">Amount</div>
       <div className="content-value">
         <span className="token-amount">
-          Tokens: <input value={rawFixedAmount} onChange={updateRawFixedAmountFromEvent}/>
-          Wei: <input value={rawWeiAmount} onChange={updateRawWeiAmountFromEvent} />
+          Tokens: <FixedDecimalInput amount={amount} setAmount={setAmount} minAmount={minAmount} maxAmount={maxAmount} decimals={decimals}>
+            {(a, sa) => <input value={a} onChange={ev => sa(ev.target.value)} />}
+          </FixedDecimalInput>
+          Wei: <WeiInput amount={amount} setAmount={setAmount} minAmount={minAmount} maxAmount={maxAmount}>
+            {(a, sa) => <input value={a} onChange={ev => sa(ev.target.value)} />}
+          </WeiInput>
         </span>
       </div>
     </WeiBoxWrapper>
