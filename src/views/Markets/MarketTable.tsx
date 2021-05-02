@@ -10,7 +10,7 @@ import {
   Erc20abi__factory,
 } from "../../contracts";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { imagesBySymbol, IMarketData, marketData } from "../../utils/constants";
+import { imagesBySymbol } from "../../utils/constants";
 import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
 import { Web3Provider } from "@ethersproject/providers";
 

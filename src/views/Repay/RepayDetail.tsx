@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
-import { NotificationManager } from 'react-notifications';
+import { useRouteMatch } from "react-router-dom";
 import Page from '../../components/Page';
-import Button from '../../components/Button';
-import { marketData } from '../../utils/constants';
+import { useAsset } from "../../hooks/asset";
+import { useBalance } from "../../hooks/balance";
 import RepayOverview from './RepayOverview';
-import userAccount from '../../utils/contracts/userAccountData';
-import { web3 } from '../../utils/web3';
-import { useSelector } from 'react-redux';
-
+import { ActionDetail } from "../../components/Actions/ActionDetail";
 
 const RepayDetailWrapper = styled.div`
   height: 100%;
@@ -148,27 +144,31 @@ const RepayDetailWrapper = styled.div`
   }
 `;
 
-function RepayDetail({ match, history }) {
-  const [asset, setAsset] = useState({});
-  const [amount, setAmount] = useState(null);
-  const address = useSelector(state => state.authUser.address);
-  useEffect(async() => {
-    if (match.params && match.params.assetName) {
-      let account = await userAccount(address);
-      console.log(account);
-      let image = marketData.find((data) => {
-        return data.name === match.params.assetName;
-      })
-      let availableEth = web3.utils.fromWei(account.totalDebtETH, 'ether');
-      let assetInfo = {
-        borrow_balance: availableEth,
-        name: match.params.assetName,
-        img: image.img
-      }
-      setAsset(assetInfo);
-    }
-  }, [match]);
+const RepayDetail: React.FC = () => {
+  const match = useRouteMatch<{
+    assetName: string | undefined,
+  }>();
+  const assetName = match.params.assetName;
+  const { asset } = useAsset(assetName);
+  const { library, address, balance } = useBalance(asset);
+  if (!asset) {
+    return <>No asset found with details </>;
+  }
 
+  if (!address || !library) {
+    return <>No account loaded</>;
+  }
+
+  return (
+    <Page>
+      <RepayDetailWrapper>
+        <RepayOverview asset={asset} />
+        <ActionDetail asset={asset} balance={balance} actionName="repay" actionBaseRoute="repay" />
+      </RepayDetailWrapper>
+    </Page>
+  );
+};
+/*
   const handleInputChange = (e) => {
     setAmount(e.target.value);
   };
@@ -180,7 +180,10 @@ function RepayDetail({ match, history }) {
     }
     history.push(`/repay/confirm/${asset.name}/${amount}`);
   };
+*/
 
+
+/*
   return (
     <Page>
       <RepayDetailWrapper>
@@ -225,6 +228,6 @@ function RepayDetail({ match, history }) {
       </RepayDetailWrapper>
     </Page>
   );
-}
+} */
 
-export default withRouter(RepayDetail);
+export default RepayDetail;
