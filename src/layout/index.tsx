@@ -3,8 +3,7 @@ import Header from '../components/Header';
 import Button from '../components/Button';
 import UnlockWallet from '../components/UnlockWallet';
 import styled from 'styled-components';
-import { useAppSelector } from '../redux/hooks';
-import { selectActiveAccount } from '../features/auth/authSlice';
+import { useAmbientConnection } from '../hooks/injectedConnectors';
 
 const LayoutWrapper = styled.div`
   width: 100%;
@@ -59,11 +58,11 @@ const LayoutWrapper = styled.div`
 `;
 
 const Layout: React.FC<{}> = ({children}) => {
-  const activeAccount = useAppSelector(selectActiveAccount);
+  const { active: activeConnection } = useAmbientConnection();
 
   return (
     <LayoutWrapper>
-      {!activeAccount ? (
+      {!activeConnection ? (
         <UnlockWallet />
       ) : (
         <>

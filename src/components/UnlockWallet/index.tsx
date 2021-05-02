@@ -4,6 +4,7 @@ import { store as NotificationManager } from 'react-notifications-component';
 import metamask from '../../assets/image/metamask.svg';
 import { useWeb3React } from '@web3-react/core';
 import { InjectedConnector } from '@web3-react/injected-connector';
+import { injectedConnector } from '../../hooks/injectedConnectors';
 
 const UnlockWalletWrapper = styled.div`
   display: flex;
@@ -136,17 +137,6 @@ function warnUser(title: string, message?: string | undefined): void {
     message,
   });
 }
-
-export const injectedConnector = new InjectedConnector({
-  supportedChainIds: [
-    1, // Mainet
-    3, // Ropsten
-    4, // Rinkeby
-    5, // Goerli
-    42, // Kovan
-    0x64, // XDAI
-  ],
-})
 
 const UnlockWallet: React.FC<{}> = props => {
   const { activate } = useWeb3React();
