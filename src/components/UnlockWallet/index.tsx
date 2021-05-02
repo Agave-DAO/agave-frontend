@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import { store as NotificationManager } from 'react-notifications-component';
 import metamask from '../../assets/image/metamask.svg';
 import { useWeb3React } from '@web3-react/core';
-import { InjectedConnector } from '@web3-react/injected-connector';
 import { injectedConnector } from '../../hooks/injectedConnectors';
 
 const UnlockWalletWrapper = styled.div`

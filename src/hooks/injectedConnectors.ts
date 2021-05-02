@@ -19,7 +19,6 @@ export function useAmbientConnection(
   const { active, activate } = useAppWeb3(key);
   // Init to active state to mean: If we are already active, don't bother doing anything
   const [tried, setTried] = useState(!!active);
-  const emptyDeps = [] as const; // Only fire once on mount
   useEffect(() => {
     // TODO: Move into a useQuery invocation to track result state; Until then: intentionally forget the awaitable result
     if (!active && !tried) {
@@ -33,7 +32,7 @@ export function useAmbientConnection(
         }
       });
     }
-  }, emptyDeps);
+  }); // Only fire once on mount
 
   useEffect(() => {
     if (!tried && active) {
