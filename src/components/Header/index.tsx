@@ -89,7 +89,7 @@ function Header() {
   return (
     <HeaderWrapper>
       <Navbar collapseOnSelect expand="lg">
-        <Navbar.Brand href="#">
+        <Navbar.Brand>
             <NavLink to='/'>
               <img src={logo} alt='Agaave App Logo' />
               Agaave
