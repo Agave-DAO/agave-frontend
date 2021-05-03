@@ -1,3 +1,18 @@
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { useHistory, useRouteMatch } from "react-router-dom";
+import Page from "../../components/Page";
+import Button from "../../components/Button";
+import { AssetAmount } from "../../components/Actions/AssetAmount";
+import { ConfirmationProgressHeader } from "../../components/Actions/ConfirmationProgressHeader";
+import { useAsset } from "../../hooks/asset";
+import { useApproved } from "../../hooks/approved";
+import { useApprovalMutation } from "../../mutations/approval";
+import { useRepayMutation } from "../../mutations/repay";
+import { ethers } from "ethers";
+
+import RepayOverview from "./RepayOverview";
+/*
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { withRouter } from 'react-router-dom';
@@ -11,6 +26,7 @@ import { useSelector } from 'react-redux';
 import getBalance from '../../utils/contracts/getBalance';
 import repay from '../../utils/contracts/repay';
 import { repayListener } from '../../utils/contracts/events/events';
+*/
 
 const RepayConfirmWrapper = styled.div`
   height: 100%;
@@ -179,6 +195,40 @@ const RepayConfirmWrapper = styled.div`
   }
 `;
 
+const RepayConfirm: React.FC = () => {
+  const history = useHistory();
+  const match = useRouteMatch<{
+    assetName?: string | undefined;
+    amount?: string | undefined;
+  }>();
+
+  const assetName = match.params.assetName;
+  const [amount, setAmount] = useState<number>(0);
+  // TODO: change this 'step' system to nested routes
+  const [step, setStep] = useState(1);
+
+  const { asset } = useAsset(assetName);
+  const { approved: approval } = useApproved(asset);
+  const { approvalMutation } = useApprovalMutation({ asset, amount, onSuccess: () => {
+    setStep(2);
+  }});
+  //TODO: ZedKai check repayMutation and that logic works correct... 
+  const { repayMutation } = useRepayMutation({ asset, amount, onSuccess: () => {}});
+
+  useEffect(() => {
+    if (match.params && match.params.amount) {
+      try {
+        const parsed = Number(String(match.params.amount));
+        if (amount !== parsed) {
+          setAmount(parsed);
+        }
+      } catch {
+        // Don't set the number if the match path isn't one
+      }
+    }
+  }, [match, amount, setAmount]);
+
+  /*
 function RepayConfirm({ match, history }) {
   const [asset, setAsset] = useState({});
   const [amount, setAmount] = useState(0);
@@ -214,86 +264,93 @@ function RepayConfirm({ match, history }) {
       setStep(step + 1);
     }
   }
+  */
   return (
     <Page>
       <RepayConfirmWrapper>
-        <RepayOverview asset={asset} />
+        {asset ? <RepayOverview asset={asset} /> : <></>}
         <div className="content-wrapper">
           <div className="basic-form">
             <div className="basic-form-header">
-              <div className="basic-form-header-title">
-                Repay Overview
-              </div>
+              <div className="basic-form-header-title">Deposit Overview</div>
               <div className="basic-form-header-content">
-                These are your transaction details. Make sure to check if this is correct before submitting.
+                These are your transaction details. Make sure to check if this
+                is correct before submitting.
               </div>
             </div>
             <div className="basic-form-content">
-              <div className="form-content-view">
-                <div className="content-label">
-                  Amount
-                </div>
-                <div className="content-value">
-                  <div className="token-amount">
-                    <img src={asset.img} alt="" />
-                    <span>{amount} {asset.name}</span>
-                  </div>
-                  <div className="usd-amount">
-                    $ {asset.asset_price * amount}
-                  </div>
-                </div>
-              </div>
+              <AssetAmount asset={asset} amount={amount} />
               <div className="form-action-view">
-                <div className="form-action-header">
-                  <div className={`form-action-step ${step === 3 ? 'success' : step > 0 ? 'active' : ''}`}>
-                    <span>1</span> Approve
-                  </div>
-                  <div className={`form-action-step ${step === 3 ? 'success' : step > 1 ? 'active' : ''}`}>
-                    <span>2</span> Repay
-                  </div>
-                  <div className={`form-action-step ${step === 3 ? 'success' : step > 2 ? 'active' : ''}`}>
-                    <span>3</span> Finished
-                  </div>
-                </div>
+                <ConfirmationProgressHeader
+                  step={step}
+                  labels={["Approve", "Deposit", "Finished"]}
+                />
                 {step === 1 && (
-                  <div className="form-action-body">
+                <div className="form-action-body">
                     <div className="form-action-body-left">
-                      <div className="title">
-                        Approve
-                      </div>
+                      <div className="title">Approve</div>
                       <div className="desc">
-                        Please approve before repaying
+                        Please approve before depositing {amount} {assetName}
                       </div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => approveFn()}>Approve</Button>
+                      <Button
+                        disabled={approvalMutation.isLoading}
+                        variant="secondary"
+                        onClick={() => {
+                          approvalMutation.mutate();
+                        }}
+                      >
+                        Approve
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                {step === 1 && approvalMutation.isLoading && (
+                  <div className="form-action-body">
+                    <div className="form-action-body-left">
+                      <div className="desc">Transaction is pending...</div>
                     </div>
                   </div>
                 )}
                 {step === 2 && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
-                      <div className="title">
-                        Repay
-                      </div>
-                      <div className="desc">
-                        Please submit to repay
-                      </div>
+                      <div className="title">Repay</div>
+                      <div className="desc">Please submit to repay</div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => repayFn()}>Submit</Button>
+                      <Button
+                        variant="secondary"
+                        disabled={repayMutation.isLoading || approvalMutation.isLoading || approval === undefined}
+                        onClick={() => {
+                          repayMutation
+                            .mutateAsync(ethers.utils.parseEther(amount.toString()))
+                            .then(async (result) => {
+                              if (result) {
+                                setStep(step + 1)
+                              }
+                            });
+                        }}
+                      >
+                        Submit
+                      </Button>
                     </div>
                   </div>
                 )}
                 {step === 3 && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
-                      <div className="title green">
-                        Success!
-                      </div>
+                      <div className="title green">Success!</div>
                     </div>
                     <div className="form-action-body-right">
-                      <Button variant="secondary" onClick={() => history.push('/dashboard')}>Dashboard</Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => history.push("/dashboard")}
+                      >
+                        Dashboard
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -301,7 +358,9 @@ function RepayConfirm({ match, history }) {
             </div>
             {step !== 3 && (
               <div className="basic-form-footer">
-                <Button variant="outline" onClick={() => history.goBack()}>Go back</Button>
+                <Button variant="outline" onClick={() => history.goBack()}>
+                  Go back
+                </Button>
               </div>
             )}
           </div>
@@ -311,4 +370,4 @@ function RepayConfirm({ match, history }) {
   );
 }
 
-export default withRouter(RepayConfirm);
+export default RepayConfirm;

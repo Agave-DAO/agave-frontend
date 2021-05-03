@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import Button from '../../components/Button';
+import { IMarketData } from '../../utils/constants';
 
 const RepayOverviewWrapper = styled.div`
   display: flex;
@@ -171,7 +172,8 @@ const RepayOverviewWrapper = styled.div`
   }
 `;
 
-function RepayOverview({ asset, history }) {
+function RepayOverview({ asset }: {asset: IMarketData }) {
+  const history = useHistory();
   return (
     <RepayOverviewWrapper>
       <div className="topContent">
@@ -305,4 +307,4 @@ function RepayOverview({ asset, history }) {
   );
 }
 
-export default withRouter(RepayOverview);
+export default RepayOverview;
