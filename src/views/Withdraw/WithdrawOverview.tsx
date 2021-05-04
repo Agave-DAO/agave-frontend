@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import Button from '../../components/Button';
+import { IMarketData } from '../../utils/constants';
 
 const WithdrawOverviewWrapper = styled.div`
   display: flex;
@@ -183,7 +184,8 @@ const WithdrawOverviewWrapper = styled.div`
   }
 `;
 
-function WithdrawOverview({ asset, history }) {
+function WithdrawOverview({ asset }: {asset: IMarketData }) {
+    const history = useHistory();
   return (
     <WithdrawOverviewWrapper>
       <div className="topContent">
@@ -301,4 +303,4 @@ function WithdrawOverview({ asset, history }) {
   );
 }
 
-export default withRouter(WithdrawOverview);
+export default WithdrawOverview;

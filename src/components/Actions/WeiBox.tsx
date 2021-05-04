@@ -2,6 +2,7 @@ import { BigNumberish, parseFixed } from "@ethersproject/bignumber";
 import { BigNumber, FixedNumber } from "ethers";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
+import * as Mui from "@material-ui/core";
 
 const WeiBoxWrapper = styled.div`
   margin-bottom: 20px;
@@ -42,11 +43,18 @@ const WeiBoxWrapper = styled.div`
 `;
 
 // Equate (BigNumber | undefined) instances with eachother
-function eqBigNumberOptions(a: BigNumber | undefined, b: BigNumber | undefined): boolean {
-  return !(a !== b && ((a === undefined || b === undefined) || !a.eq(b)));
+function eqBigNumberOptions(
+  a: BigNumber | undefined,
+  b: BigNumber | undefined
+): boolean {
+  return !(a !== b && (a === undefined || b === undefined || !a.eq(b)));
 }
 
-function clampBigNumber(value: BigNumberish, minAmount: BigNumber | undefined, maxAmount: BigNumber | undefined): BigNumber {
+function clampBigNumber(
+  value: BigNumberish,
+  minAmount: BigNumber | undefined,
+  maxAmount: BigNumber | undefined
+): BigNumber {
   if (value == null) {
     return value;
   }
@@ -59,12 +67,21 @@ function clampBigNumber(value: BigNumberish, minAmount: BigNumber | undefined, m
   return BigNumber.from(value);
 }
 
+export interface RawInputProps {
+  value: string;
+  setValue: (newRawAmount: string) => void;
+  error?: boolean | undefined;
+  helperText?: string | undefined;
+}
+
 export interface WeiInputProps {
   amount: BigNumber | undefined;
   setAmount: (newValue: BigNumber | undefined) => void;
   minAmount?: BigNumber | undefined;
   maxAmount?: BigNumber | undefined;
-  children: (rawAmount: string, setRawAmount: (newRawAmount: string) => void) => React.ReactElement<any, any> | null;
+  children: (
+    rawInputProps: RawInputProps
+  ) => React.ReactElement<any, any> | null;
 }
 
 export interface FixedDecimalInputProps {
@@ -73,7 +90,9 @@ export interface FixedDecimalInputProps {
   setAmount: (newValue: BigNumber | undefined) => void;
   minAmount?: BigNumber | undefined;
   maxAmount?: BigNumber | undefined;
-  children: (rawAmount: string, setRawAmount: (newRawAmount: string) => void) => React.ReactElement<any, any> | null;
+  children: (
+    rawInputProps: RawInputProps
+  ) => React.ReactElement<any, any> | null;
 }
 
 export interface WeiBoxProps {
@@ -87,104 +106,187 @@ export interface WeiBoxProps {
   maxAmount?: BigNumber | undefined;
 }
 
-export const WeiInput: React.FC<WeiInputProps> = ({ amount, setAmount, maxAmount, minAmount, children }) => {
+export const WeiInput: React.FC<WeiInputProps> = ({
+  amount,
+  setAmount,
+  maxAmount,
+  minAmount,
+  children,
+}) => {
   const [state, setState] = useState({
     baked: amount,
     raw: amount?.toString() ?? "",
+    err: undefined as string | undefined,
   });
 
   useEffect(() => {
     if (!eqBigNumberOptions(amount, state.baked)) {
-      setState({ baked: amount, raw: (amount !== undefined) ? amount.toString() : state.raw });
-    }
-  }, [state.raw, state.baked, amount]);
-
-  const updateRawWeiAmount = useMemo(() => (newValue: string) => {
-    const preparse = newValue.trim();
-    let parsedAmount: BigNumber;
-    try {
-      parsedAmount = BigNumber.from(preparse);
-      clampBigNumber(parsedAmount, minAmount, maxAmount);
-    } catch {
       setState({
-        baked: undefined,
-        raw: preparse,
+        baked: amount,
+        raw: amount !== undefined ? amount.toString() : state.raw,
+        err: state.err,
       });
-      if (amount !== undefined) {
-        setAmount(undefined);
-      }
-      return;
     }
-    setState({
-      baked: parsedAmount,
-      raw: preparse,
-    });
-    if (amount === undefined || amount?.eq(parsedAmount) === false) {
-      setAmount(parsedAmount);
-    }
-  }, [setState, setAmount, minAmount, maxAmount, amount]);
+  }, [state.raw, state.baked, state.err, amount]);
 
-  return useMemo(() => children(state.raw, updateRawWeiAmount), [state.raw, updateRawWeiAmount, children]);
+  const updateRawWeiAmount = useMemo(
+    () => (newValue: string) => {
+      const preparse = newValue.trim();
+      let parsedAmount: BigNumber;
+      try {
+        parsedAmount = BigNumber.from(preparse);
+        clampBigNumber(parsedAmount, minAmount, maxAmount);
+      } catch {
+        setState({
+          baked: undefined,
+          raw: preparse,
+          err: "Invalid input",
+        });
+        if (amount !== undefined) {
+          setAmount(undefined);
+        }
+        return;
+      }
+      setState({
+        baked: parsedAmount,
+        raw: preparse,
+        err: undefined,
+      });
+      if (amount === undefined || amount?.eq(parsedAmount) === false) {
+        setAmount(parsedAmount);
+      }
+    },
+    [setState, setAmount, minAmount, maxAmount, amount]
+  );
+
+  return useMemo(
+    () =>
+      children({
+        value: state.raw,
+        setValue: updateRawWeiAmount,
+        error: state.err !== undefined ? true : undefined,
+        helperText: state.err,
+      }),
+    [state.raw, state.err, updateRawWeiAmount, children]
+  );
 };
 
 // Caution: If the number of decimals changes during operation, the value will not be updated to track it
-export const FixedDecimalInput: React.FC<FixedDecimalInputProps> = ({ amount, decimals, setAmount, maxAmount, minAmount, children }) => {
+export const FixedDecimalInput: React.FC<FixedDecimalInputProps> = ({
+  amount,
+  decimals,
+  setAmount,
+  maxAmount,
+  minAmount,
+  children,
+}) => {
   const [state, setState] = useState({
     baked: amount,
     raw: amount ? FixedNumber.fromValue(amount, decimals).toString() : "",
+    err: undefined as string | undefined,
   });
 
   useEffect(() => {
     if (!eqBigNumberOptions(amount, state.baked)) {
-      setState({ baked: amount, raw: (amount !== undefined) ? FixedNumber.fromValue(amount, decimals).toString() : state.raw });
-    }
-  }, [state.raw, state.baked, amount, decimals]);
-
-  const updateRawFixedAmount = useMemo(() => (newValue: string) => {
-    const preparse = newValue.trim();
-    let parsedAmount: BigNumber;
-    try {
-      parsedAmount = parseFixed(preparse, decimals);
-      clampBigNumber(parsedAmount, minAmount, maxAmount);
-    } catch {
       setState({
-        baked: undefined,
-        raw: preparse,
+        baked: amount,
+        raw:
+          amount !== undefined
+            ? FixedNumber.fromValue(amount, decimals).toString()
+            : state.raw,
+        err: state.err,
       });
-      if (amount !== undefined) {
-        setAmount(undefined);
-      }
-      return;
     }
-    setState({
-      baked: parsedAmount,
-      raw: preparse,
-    });
-    if (amount === undefined || amount?.eq(parsedAmount) === false) {
-      setAmount(parsedAmount);
-    }
-  }, [setState, setAmount, minAmount, maxAmount, decimals, amount]);
+  }, [state.raw, state.baked, state.err, amount, decimals]);
 
-  return useMemo(() => children(state.raw, updateRawFixedAmount), [state.raw, updateRawFixedAmount, children]);
+  const updateRawFixedAmount = useMemo(
+    () => (newValue: string) => {
+      const preparse = newValue.trim();
+      let parsedAmount: BigNumber;
+      try {
+        parsedAmount = parseFixed(preparse, decimals);
+        clampBigNumber(parsedAmount, minAmount, maxAmount);
+      } catch {
+        setState({
+          baked: undefined,
+          raw: preparse,
+          err: "Invalid input",
+        });
+        if (amount !== undefined) {
+          setAmount(undefined);
+        }
+        return;
+      }
+      setState({
+        baked: parsedAmount,
+        raw: preparse,
+        err: undefined,
+      });
+      if (amount === undefined || amount?.eq(parsedAmount) === false) {
+        setAmount(parsedAmount);
+      }
+    },
+    [setState, setAmount, minAmount, maxAmount, decimals, amount]
+  );
+
+  return useMemo(
+    () =>
+      children({
+        value: state.raw,
+        setValue: updateRawFixedAmount,
+        error: state.err !== undefined ? true : undefined,
+        helperText: state.err,
+      }),
+    [state.raw, state.err, updateRawFixedAmount, children]
+  );
 };
 
 // TODO: Create a second component meant to be used alongside this one which displays USD value of the asset
 
 // Caution: If the number of decimals changes during operation, the value will not be updated to track it
-export const WeiBox: React.FC<WeiBoxProps> = ({ amount, decimals, setAmount, maxAmount, minAmount, }) => {
+export const WeiBox: React.FC<WeiBoxProps> = ({
+  amount,
+  decimals,
+  setAmount,
+  maxAmount,
+  minAmount,
+}) => {
   return (
-    <WeiBoxWrapper>
-      <div className="content-label">Amount</div>
-      <div className="content-value">
-        <span className="token-amount">
-          Tokens: <FixedDecimalInput amount={amount} setAmount={setAmount} minAmount={minAmount} maxAmount={maxAmount} decimals={decimals}>
-            {(a, sa) => <input value={a} onChange={ev => sa(ev.target.value)} />}
-          </FixedDecimalInput>
-          Wei: <WeiInput amount={amount} setAmount={setAmount} minAmount={minAmount} maxAmount={maxAmount}>
-            {(a, sa) => <input value={a} onChange={ev => sa(ev.target.value)} />}
-          </WeiInput>
-        </span>
-      </div>
-    </WeiBoxWrapper>
+    <Mui.Box>
+      <FixedDecimalInput
+        amount={amount}
+        setAmount={setAmount}
+        minAmount={minAmount}
+        maxAmount={maxAmount}
+        decimals={decimals}
+      >
+        {({ value, setValue, error }) => (
+          <Mui.TextField
+            label="Tokens"
+            variant="outlined"
+            error={error}
+            value={value}
+            onChange={(ev) => setValue(ev.target.value)}
+          />
+        )}
+      </FixedDecimalInput>
+      <WeiInput
+        amount={amount}
+        setAmount={setAmount}
+        minAmount={minAmount}
+        maxAmount={maxAmount}
+      >
+        {({ value, setValue, error }) => (
+          <Mui.TextField
+            label="Wei"
+            variant="outlined"
+            error={error}
+            value={value}
+            onChange={(ev) => setValue(ev.target.value)}
+            type="number"
+          />
+        )}
+      </WeiInput>
+    </Mui.Box>
   );
 };
