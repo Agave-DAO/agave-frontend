@@ -253,46 +253,40 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
 }) => {
   return (
     <Mui.Box>
-      <WeiBoxWrapper>
-        <div className="content-value">
-          <span className="token-amount">
-            <FixedDecimalInput
-              amount={amount}
-              setAmount={setAmount}
-              minAmount={minAmount}
-              maxAmount={maxAmount}
-              decimals={decimals}
-            >
-              {({ value, setValue, error }) => (
-                <Mui.TextField
-                  label="Tokens"
-                  variant="outlined"
-                  error={error}
-                  value={value}
-                  onChange={(ev) => setValue(ev.target.value)}
-                />
-              )}
-            </FixedDecimalInput>
-            <WeiInput
-              amount={amount}
-              setAmount={setAmount}
-              minAmount={minAmount}
-              maxAmount={maxAmount}
-            >
-              {({ value, setValue, error }) => (
-                <Mui.TextField
-                  label="Wei"
-                  variant="outlined"
-                  error={error}
-                  value={value}
-                  onChange={(ev) => setValue(ev.target.value)}
-                  type="number"
-                />
-              )}
-            </WeiInput>
-          </span>
-        </div>
-      </WeiBoxWrapper>
+      <FixedDecimalInput
+        amount={amount}
+        setAmount={setAmount}
+        minAmount={minAmount}
+        maxAmount={maxAmount}
+        decimals={decimals}
+      >
+        {({ value, setValue, error }) => (
+          <Mui.TextField
+            label="Tokens"
+            variant="outlined"
+            error={error}
+            value={value}
+            onChange={(ev) => setValue(ev.target.value)}
+          />
+        )}
+      </FixedDecimalInput>
+      <WeiInput
+        amount={amount}
+        setAmount={setAmount}
+        minAmount={minAmount}
+        maxAmount={maxAmount}
+      >
+        {({ value, setValue, error }) => (
+          <Mui.TextField
+            label="Wei"
+            variant="outlined"
+            error={error}
+            value={value}
+            onChange={(ev) => setValue(ev.target.value)}
+            type="number"
+          />
+        )}
+      </WeiInput>
     </Mui.Box>
   );
 };
