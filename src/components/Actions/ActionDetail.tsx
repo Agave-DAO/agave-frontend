@@ -174,7 +174,7 @@ export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, acti
       });
       return;
     }
-    history.push(`/${actionBaseRoute}/confirm/${asset.name}/${amountStr}`);
+    history.push(`/${actionBaseRoute}/confirm/${asset.name}/${amountStr}/1`);
   };
 
   // TODO: throw out entirely? Move to borrow-specific path?

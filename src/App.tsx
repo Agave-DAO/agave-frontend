@@ -45,7 +45,7 @@ const App: React.FC<IAppProps> = props => {
             {/* <Route path="/dashboard" component={Dashboard} exact /> */}
             <Route path="/deposit" component={Deposit} exact />
             <Route path="/deposit/:assetName" component={DepositDetail} exact />
-            <Route path="/deposit/confirm/:assetName/:amount" component={DepositConfirm} exact />
+            <Route path="/deposit/confirm/:assetName/:amount/:step" component={DepositConfirm} exact />
             <Route path="/borrow" component={Borrow} exact />
             <Route path="/borrow/:assetName" component={BorrowDetail} exact />
             <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />

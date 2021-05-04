@@ -147,17 +147,17 @@ const DepositConfirm: React.FC = () => {
   const match = useRouteMatch<{
     assetName?: string | undefined;
     amount?: string | undefined;
+    step?: string | undefined;
   }>();
 
   const assetName = match.params.assetName;
+  const step = Number(match.params.step ?? 1);
   const [amount, setAmount] = useState<number>(0);
-  // TODO: change this 'step' system to nested routes
-  const [step, setStep] = useState(1);
 
   const { asset } = useAsset(assetName);
   const { approved: approval } = useApproved(asset);
   const { approvalMutation } = useApprovalMutation({ asset, amount, onSuccess: () => {
-    setStep(2);
+    history.push(`/deposit/confirm/${assetName}/${amount}/2`);;
   }});
   const { depositMutation } = useDepositMutation({ asset, amount, onSuccess: () => {}});
 
@@ -239,7 +239,7 @@ const DepositConfirm: React.FC = () => {
                             .mutateAsync(ethers.utils.parseEther(amount.toString()))
                             .then(async (result) => {
                               if (result) {
-                                setStep(step + 1)
+                                history.push(`/deposit/confirm/${assetName}/${amount}/3`);
                               }
                             });
                         }}
