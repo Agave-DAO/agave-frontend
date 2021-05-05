@@ -2,8 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { store as NotificationManager } from 'react-notifications-component';
 import metamask from '../../assets/image/metamask.svg';
-import { useWeb3React } from '@web3-react/core';
+import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
 import { injectedConnector } from '../../hooks/injectedConnectors';
+import { internalAddressesPerNetwork } from '../../utils/contracts/contractAddresses/internalAddresses';
 
 const UnlockWalletWrapper = styled.div`
   display: flex;
@@ -137,8 +138,68 @@ function warnUser(title: string, message?: string | undefined): void {
   });
 }
 
+const PrivacySection = (
+  <div className="privacy">
+    <div className="paragraph">
+      By unlocking Your wallet You agree to our <b>Terms of Service</b>,{" "}
+      <b>Privacy</b> and <b>Cookie Policy</b>.
+    </div>
+    <div className="paragraph">
+      <b>Disclaimer:</b> Wallets are provided by External Providers and by
+      selecting you agree to Terms of those Providers. Your access to the wallet
+      might be reliant on the External Provider being operational.
+    </div>
+  </div>
+);
+
 const UnlockWallet: React.FC<{}> = props => {
-  const { activate } = useWeb3React();
+  const { activate, error } = useWeb3React();
+
+  if (error) {
+    let detail;
+    if (error instanceof UnsupportedChainIdError) {
+      const firstIntegerRegex = /(\d+)/;
+      const selectedChain = error.message.match(firstIntegerRegex)?.[0];
+      detail = (
+        <>
+          <div className="caption">
+            <span className="caption-title">Agave Unsupported Network</span>
+            <div className="caption-content">
+              Please change your wallet selection to one of our supported
+              networks.
+            </div>
+            <div className="caption-content">
+              {selectedChain ? (
+                <>Currently selected chain: {selectedChain}</>
+              ) : null}
+            </div>
+            <div className="caption-content">
+              Supported chains:
+              <ul>
+              {Object.entries(internalAddressesPerNetwork).map(
+                ([name, addrs]) => (
+                  <li key={name}>
+                    {name}: {addrs.chainId}
+                  </li>
+                )
+              )}
+              </ul>
+            </div>
+          </div>
+        </>
+      );
+    } else {
+      detail = null;
+    }
+    return (
+      <UnlockWalletWrapper>
+        <div className="inner">
+          {detail}
+          {PrivacySection}
+        </div>
+      </UnlockWalletWrapper>
+    );
+  }
 
   const onMetamaskConnect = async () => {
     if (typeof (window as any).ethereum === 'undefined') {
@@ -152,7 +213,7 @@ const UnlockWallet: React.FC<{}> = props => {
     <UnlockWalletWrapper>
       <div className="inner">
         <div className="caption">
-          <span className="caption-title">Welcome to Agaave</span>
+          <span className="caption-title">Welcome to Agave</span>
           <div className="caption-content">Connect your wallet and jump into DeFi</div>
         </div>
         <div className="content" onClick={onMetamaskConnect}>
@@ -164,10 +225,7 @@ const UnlockWallet: React.FC<{}> = props => {
             </div>
           </div>
         </div>
-        <div className="privacy">
-          <div className="paragraph">By unlocking Your wallet You agree to our <b>Terms of Service</b>, <b>Privacy</b> and <b>Cookie Policy</b>.</div>
-          <div className="paragraph"><b>Disclaimer:</b> Wallets are provided by External Providers and by selecting you agree to Terms of those Providers. Your access to the wallet might be reliant on the External Provider being operational.</div>
-        </div>
+        {PrivacySection}
       </div>
     </UnlockWalletWrapper>
   );

@@ -4,12 +4,12 @@ import { useAppWeb3 } from "./appWeb3";
 
 export const injectedConnector = new InjectedConnector({
   supportedChainIds: [
-    1, // Mainet
-    3, // Ropsten
+    // 1, // Mainet
+    // 3, // Ropsten
     4, // Rinkeby
-    5, // Goerli
-    42, // Kovan
-    0x64, // XDAI
+    // 5, // Goerli
+    // 42, // Kovan
+    // 0x64, // XDAI
   ],
 });
 
