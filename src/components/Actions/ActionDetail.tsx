@@ -148,7 +148,7 @@ export interface ActionDetailProps {
   actionBaseRoute: string;
 };
 
-export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, actionName, actionBaseRoute }) => {
+export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, actionName }) => {
   const history = useHistory();
   const [amountStr, setAmountStr] = useState<string>("");
   const walletBalance = Number(ethers.utils.formatEther(balance || 0));
@@ -174,7 +174,10 @@ export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, acti
       });
       return;
     }
-    history.push(`/${actionBaseRoute}/confirm/${asset.name}/${amountStr}/1`);
+
+    const route = `/${actionName}/${asset.name}/${amountStr}`;
+    console.log(route)
+    history.push(route);
   };
 
   // TODO: throw out entirely? Move to borrow-specific path?

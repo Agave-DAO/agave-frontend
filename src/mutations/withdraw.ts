@@ -7,19 +7,10 @@ import { internalAddresses } from "../utils/contracts/contractAddresses/internal
 import { ethers } from "ethers";
 import { useApproved } from "../hooks/approved";
 import { useBalance } from "../hooks/balance";
+import { UseActionMutationDto, UseActionMutationProps } from "./action";
 
-export interface UseWithdrawMutationProps {
-  asset: IMarketData | undefined;
-  amount: number;
-  onSuccess: () => void;
-};
 
-export interface UseWithdrawMutationDto {
-  withdrawMutation: UseMutationResult<BigNumber | undefined, unknown, BigNumber, unknown>;
-  withdrawMutationKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined, number];
-};
-
-export const useWithdrawMutation = ({asset, amount, onSuccess}: UseWithdrawMutationProps): UseWithdrawMutationDto => {
+export const useWithdrawMutation = ({asset, amount, onSuccess}: UseActionMutationProps): UseActionMutationDto => {
   const queryClient = useQueryClient();
   // FIXME: would be nice not to invoke a list of hooks just to get query keys
   const { approvedQueryKey } = useApproved(asset);
@@ -58,5 +49,5 @@ export const useWithdrawMutation = ({asset, amount, onSuccess}: UseWithdrawMutat
     }
   );
 
-  return { withdrawMutation, withdrawMutationKey };
+  return { mutation: withdrawMutation, mutationKey: withdrawMutationKey };
 };

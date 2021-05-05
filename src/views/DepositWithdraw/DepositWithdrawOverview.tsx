@@ -1,10 +1,9 @@
-import React from 'react';
 import styled from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import Button from '../../components/Button';
 import { IMarketData } from '../../utils/constants';
 
-const WithdrawOverviewWrapper = styled.div`
+const DepositWithdrawOverviewWrapper = styled.div`
   display: flex;
   flex-direction: column;
 
@@ -184,10 +183,10 @@ const WithdrawOverviewWrapper = styled.div`
   }
 `;
 
-function WithdrawOverview({ asset }: {asset: IMarketData }) {
-    const history = useHistory();
+function DepositWithdrawOverview({ asset }: { asset: IMarketData }) {
+  const history = useHistory();
   return (
-    <WithdrawOverviewWrapper>
+    <DepositWithdrawOverviewWrapper>
       <div className="topContent">
         <div className="topContent-section">
           <span className="topContent-section-title">
@@ -299,8 +298,8 @@ function WithdrawOverview({ asset }: {asset: IMarketData }) {
           </div>
         </div>
       </div>
-    </WithdrawOverviewWrapper>
+    </DepositWithdrawOverviewWrapper>
   );
 }
 
-export default WithdrawOverview;
+export default DepositWithdrawOverview;

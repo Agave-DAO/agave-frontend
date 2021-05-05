@@ -5,20 +5,21 @@ import Page from "../../components/Page";
 import { useAsset } from "../../hooks/asset";
 import { useBalance } from "../../hooks/balance";
 
-import WithdrawOverview from "./WithdrawOverview"
+import DepositWithdrawOverview from "./DepositWithdrawOverview"
 import { ActionDetail } from "../../components/Actions/ActionDetail";
 
-const WithdrawDetailWrapper = styled.div`
+const DepositWithdrawDetailWrapper = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
 `;
 
-const WithdrawDetail: React.FC = () => {
+const DepositWithdrawDetail: React.FC = () => {
   const match = useRouteMatch<{
     assetName: string | undefined,
+    action: string,
   }>();
-  const assetName = match.params.assetName;
+  const { assetName, action } = match.params;
   const { asset } = useAsset(assetName);
   const { library, address, balance } = useBalance(asset);
   if (!asset) {
@@ -31,12 +32,12 @@ const WithdrawDetail: React.FC = () => {
 
   return (
     <Page>
-      <WithdrawDetailWrapper>
-        <WithdrawOverview asset={asset} />
-        <ActionDetail asset={asset} balance={balance} actionName="withdraw" actionBaseRoute="withdraw" />
-      </WithdrawDetailWrapper>
+      <DepositWithdrawDetailWrapper>
+        <DepositWithdrawOverview asset={asset} />
+        <ActionDetail asset={asset} balance={balance} actionName={action} actionBaseRoute={action} />
+      </DepositWithdrawDetailWrapper>
     </Page>
   );
 };
 
-export default withRouter(WithdrawDetail);
+export default withRouter(DepositWithdrawDetail);

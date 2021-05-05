@@ -1,6 +1,4 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { IMarketData } from "../utils/constants";
-import { Web3Provider } from '@ethersproject/providers';
 import { AgaveLendingABI__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
 import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
@@ -8,19 +6,11 @@ import { ethers } from "ethers";
 import { useApproved } from "../hooks/approved";
 import { useBalance } from "../hooks/balance";
 import { useApprovalMutation } from "./approval";
+import { UseActionMutationDto, UseActionMutationProps } from "./action";
 
-export interface UseDepositMutationProps {
-  asset: IMarketData | undefined;
-  amount: number;
-  onSuccess: () => void;
-};
 
-export interface UseDepositMutationDto {
-  depositMutation: UseMutationResult<BigNumber | undefined, unknown, BigNumber, unknown>;
-  depositMutationKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined, number];
-};
 
-export const useDepositMutation = ({asset, amount, onSuccess}: UseDepositMutationProps): UseDepositMutationDto => {
+export const useDepositMutation = ({asset, amount, onSuccess}: UseActionMutationProps): UseActionMutationDto => {
   const queryClient = useQueryClient();
   // FIXME: would be nice not to invoke a list of hooks just to get query keys
   const { approvedQueryKey } = useApproved(asset);
@@ -64,5 +54,5 @@ export const useDepositMutation = ({asset, amount, onSuccess}: UseDepositMutatio
     }
   );
 
-  return { depositMutation, depositMutationKey };
+  return { mutation: depositMutation, mutationKey: depositMutationKey };
 };
