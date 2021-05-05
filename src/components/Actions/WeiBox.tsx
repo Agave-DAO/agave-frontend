@@ -2,7 +2,7 @@ import { BigNumberish, parseFixed } from "@ethersproject/bignumber";
 import { BigNumber, FixedNumber } from "ethers";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
-import * as Mui from "@material-ui/core";
+import { Box, Input } from "@chakra-ui/react";
 
 const WeiBoxWrapper = styled.div`
   margin-bottom: 20px;
@@ -252,7 +252,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
   minAmount,
 }) => {
   return (
-    <Mui.Box>
+    <Box>
       <FixedDecimalInput
         amount={amount}
         setAmount={setAmount}
@@ -261,7 +261,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
         decimals={decimals}
       >
         {({ value, setValue, error }) => (
-          <Mui.TextField
+          <Input
             label="Tokens"
             variant="outlined"
             error={error}
@@ -277,7 +277,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
         maxAmount={maxAmount}
       >
         {({ value, setValue, error }) => (
-          <Mui.TextField
+          <Input
             label="Wei"
             variant="outlined"
             error={error}
@@ -287,6 +287,6 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
           />
         )}
       </WeiInput>
-    </Mui.Box>
+    </Box>
   );
 };

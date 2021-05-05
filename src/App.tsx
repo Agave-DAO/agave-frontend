@@ -5,7 +5,7 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
-import { ThemeProvider } from "styled-components";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import Layout from "./layout";
 import Markets from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
@@ -30,6 +30,21 @@ import "react-notifications-component/dist/theme.css";
 import ReactNotification from "react-notifications-component";
 import { useReduxWeb3Updater } from "./hooks/reduxWeb3";
 
+const theme = extendTheme({
+  colors: {
+    primary: {
+      100: "#eefef7",
+      500: "#019d8b",
+      900: "#007c6e",
+    },
+    secondary: {
+      100: "#019d8b",
+      500: "#007c6e",
+      900: "#044D44",
+    },
+  },
+});
+
 interface IAppProps {}
 
 const App: React.FC<IAppProps> = (props) => {
@@ -37,7 +52,7 @@ const App: React.FC<IAppProps> = (props) => {
 
   useReduxWeb3Updater();
   return (
-    <>
+    <ChakraProvider theme={theme}>
       {notifications}
       <Router>
         <Layout>
@@ -63,7 +78,7 @@ const App: React.FC<IAppProps> = (props) => {
           </Switch>
         </Layout>
       </Router>
-    </>
+    </ChakraProvider>
   );
 };
 
