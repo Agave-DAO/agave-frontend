@@ -1,10 +1,10 @@
-import React from 'react';
-import styled from 'styled-components';
-import { store as NotificationManager } from 'react-notifications-component';
-import metamask from '../../assets/image/metamask.svg';
-import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
-import { injectedConnector } from '../../hooks/injectedConnectors';
-import { internalAddressesPerNetwork } from '../../utils/contracts/contractAddresses/internalAddresses';
+import React from "react";
+import styled from "styled-components";
+import { store as NotificationManager } from "react-notifications-component";
+import metamask from "../../assets/image/metamask.svg";
+import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
+import { injectedConnector } from "../../hooks/injectedConnectors";
+import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
 
 const UnlockWalletWrapper = styled.div`
   display: flex;
@@ -13,7 +13,7 @@ const UnlockWalletWrapper = styled.div`
   position: relative;
   overflow: auto;
   background: rgb(241, 241, 243);
-  color: ${props => props.theme.color.textPrimary};
+  color: black;
 
   .inner {
     display: flex;
@@ -57,19 +57,15 @@ const UnlockWalletWrapper = styled.div`
         width: 200px;
         height: 50px;
         padding: 10px 5px 10px 15px;
-        background: ${props => props.theme.color.bgWhite};
         display: flex;
         align-items: center;
         border-radius: 2px;
-        box-shadow: ${props => props.theme.color.boxShadow};
         transition: box-shadow 0.2s ease;
         border: 1px solid transparent;
         cursor: pointer;
 
         &:hover {
-          box-shadow: ${props => props.theme.color.pink} 0px 0px 10px 0px;
           span {
-            border-color: ${props => props.theme.color.pink};
           }
         }
 
@@ -106,11 +102,9 @@ const UnlockWalletWrapper = styled.div`
       position: relative;
       z-index: 3;
       cursor: pointer;
-      color: ${props => props.theme.color.pink};
       transition: all 0.2s ease 0s;
 
       &:hover {
-        color: ${props => props.theme.color.blue};
       }
     }
 
@@ -152,7 +146,7 @@ const PrivacySection = (
   </div>
 );
 
-const UnlockWallet: React.FC<{}> = props => {
+const UnlockWallet: React.FC<{}> = (props) => {
   const { activate, error } = useWeb3React();
 
   if (error) {
@@ -176,13 +170,13 @@ const UnlockWallet: React.FC<{}> = props => {
             <div className="caption-content">
               Supported chains:
               <ul>
-              {Object.entries(internalAddressesPerNetwork).map(
-                ([name, addrs]) => (
-                  <li key={name}>
-                    {name}: {addrs.chainId}
-                  </li>
-                )
-              )}
+                {Object.entries(internalAddressesPerNetwork).map(
+                  ([name, addrs]) => (
+                    <li key={name}>
+                      {name}: {addrs.chainId}
+                    </li>
+                  )
+                )}
               </ul>
             </div>
           </div>
@@ -202,8 +196,11 @@ const UnlockWallet: React.FC<{}> = props => {
   }
 
   const onMetamaskConnect = async () => {
-    if (typeof (window as any).ethereum === 'undefined') {
-      warnUser("Please install MetaMask!", "Agaave requires Metamask to be installed in your browser to work properly.");
+    if (typeof (window as any).ethereum === "undefined") {
+      warnUser(
+        "Please install MetaMask!",
+        "Agaave requires Metamask to be installed in your browser to work properly."
+      );
       return;
     }
     await activate(injectedConnector);
@@ -214,12 +211,14 @@ const UnlockWallet: React.FC<{}> = props => {
       <div className="inner">
         <div className="caption">
           <span className="caption-title">Welcome to Agave</span>
-          <div className="caption-content">Connect your wallet and jump into DeFi</div>
+          <div className="caption-content">
+            Connect your wallet and jump into DeFi
+          </div>
         </div>
         <div className="content" onClick={onMetamaskConnect}>
           <div className="content-inner">
             <img src={metamask} alt="Browser Wallet" />
-            <div className="content-inner-text" >Browser Wallet</div>
+            <div className="content-inner-text">Browser Wallet</div>
             <div className="content-inner-arrow">
               <span></span>
             </div>
@@ -229,6 +228,6 @@ const UnlockWallet: React.FC<{}> = props => {
       </div>
     </UnlockWalletWrapper>
   );
-}
+};
 
 export default UnlockWallet;

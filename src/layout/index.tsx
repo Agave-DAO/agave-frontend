@@ -1,9 +1,9 @@
-import React from 'react';
-import Header from '../components/Header';
-import Button from '../components/Button';
-import UnlockWallet from '../components/UnlockWallet';
-import styled from 'styled-components';
-import { useAmbientConnection } from '../hooks/injectedConnectors';
+import React from "react";
+import Header from "../components/Header";
+import Button from "../components/Button";
+import UnlockWallet from "../components/UnlockWallet";
+import styled from "styled-components";
+import { useAmbientConnection } from "../hooks/injectedConnectors";
 
 const LayoutWrapper = styled.div`
   width: 100%;
@@ -25,7 +25,7 @@ const LayoutWrapper = styled.div`
     z-index: 2;
 
     .screen-top-content {
-      background-color: ${props => props.theme.color.grey[200]};
+      background-color: red;
       padding: 7px 20px 10px;
       position: relative;
       box-sizing: border-box;
@@ -37,7 +37,7 @@ const LayoutWrapper = styled.div`
         left: 0px;
         height: 90px;
         width: 100%;
-        background-color: ${props => props.theme.color.grey[200]};
+        background-color: red;
         transition: all 0.1s ease-in-out 0s;
         z-index: -1;
       }
@@ -49,7 +49,6 @@ const LayoutWrapper = styled.div`
 
         .ag-balance-button {
           .ag-balance-button-value {
-
           }
         }
       }
@@ -57,16 +56,16 @@ const LayoutWrapper = styled.div`
   }
 `;
 
-const Layout: React.FC<{}> = ({children}) => {
+const Layout: React.FC<{}> = ({ children }) => {
   const { active: activeConnection } = useAmbientConnection();
 
   return (
     <LayoutWrapper>
+      <Header />
       {!activeConnection ? (
         <UnlockWallet />
       ) : (
         <>
-          <Header/>
           <main className="screen">
             <div className="screen-top-content">
               <div className="ag-balance">
@@ -79,6 +78,6 @@ const Layout: React.FC<{}> = ({children}) => {
       )}
     </LayoutWrapper>
   );
-}
+};
 
 export default Layout;

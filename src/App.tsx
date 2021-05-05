@@ -43,6 +43,9 @@ const theme = extendTheme({
       900: "#044D44",
     },
   },
+  fonts: {
+    body: "Lato",
+  },
 });
 
 interface IAppProps {}
