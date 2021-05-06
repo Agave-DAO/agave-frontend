@@ -1,4 +1,5 @@
-import { BigNumber, FixedNumber } from "ethers";
+import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
+import { ErrorCode } from "@ethersproject/logger";
 import React, { PropsWithChildren, useMemo } from "react";
 import { useQuery } from "react-query";
 import { useHistory } from "react-router-dom";
@@ -181,6 +182,23 @@ export const useMarketData = (): UseMarketDataDto => {
     {
       initialData: undefined,
       staleTime: 1 * 60 * 1000,
+      retry: (failureCount, err) => {
+        if (failureCount > 3) {
+          return false;
+        }
+        const code = (err as (Error & { code?: ErrorCode })).code;
+        if (code !== undefined) {
+          switch (code) {
+            case ErrorCode.NETWORK_ERROR:
+            case ErrorCode.TIMEOUT:
+              return true;
+            case ErrorCode.NUMERIC_FAULT:
+            default:
+              return false;
+          }
+        }
+        return true;
+      },
     }
   );
   return useMemo(
