@@ -1,19 +1,18 @@
-import { HamburgerIcon } from "@chakra-ui/icons";
+import { HamburgerIcon } from '@chakra-ui/icons';
 import {
-  Divider,
   Flex,
   HStack,
   IconButton,
   Spacer,
   Stack,
-  TabIndicator,
   TabList,
   Tabs,
+  Divider,
   useColorModeValue as mode,
   useDisclosure,
-} from "@chakra-ui/react";
-import React, { isValidElement, ReactElement } from "react";
-import { MobileNavContent } from "./mobile-nav";
+} from '@chakra-ui/react';
+import React, { isValidElement, ReactElement } from 'react';
+import { MobileNavContent } from './mobile-nav';
 
 export const Template: React.FC = (props) => {
   const children = React.Children.toArray(props.children).filter<ReactElement>(
@@ -24,35 +23,33 @@ export const Template: React.FC = (props) => {
     <Flex
       py={4}
       px={{ base: 4, md: 6, lg: 8 }}
-      boxShadow="none"
-      borderBottomWidth={mode("0", "1px")}
+      boxShadow='none'
+      borderBottomWidth={mode('0', '1px')}
+      bg={mode('primary.900', 'secondary.900')}
+      minH='4.8rem'
     >
       {children.find((child) => child.type === Brand)?.props.children}
-      <HStack display={{ base: "none", md: "flex" }} marginStart={4}>
-        <Tabs colorScheme="blue" variant="unstyled" isFitted>
+      <Spacer />
+      <HStack display={{ base: 'none', md: 'flex' }} marginStart={4}>
+        <Tabs colorScheme='blue' variant='unstyled' isFitted>
           <TabList>
             {children.find((child) => child.type === Links)?.props.children}
           </TabList>
-          <TabIndicator
-            mt="13px"
-            height={1}
-            borderTopRadius="md"
-            bg={mode("blue.500", "blue.200")}
-          />
         </Tabs>
       </HStack>
-      <Spacer />
-      <HStack display={{ base: "none", md: "flex" }} spacing={3}>
+
+      <HStack display={{ base: 'none', md: 'flex' }} spacing={3} ml='4rem'>
         {children.find((child) => child.type === UserProfile)?.props.children}
       </HStack>
 
       <IconButton
-        display={{ base: "flex", md: "none" }}
-        size="sm"
-        aria-label="Open menu"
-        fontSize="20px"
-        variant="ghost"
+        display={{ base: 'flex', md: 'none' }}
+        size='sm'
+        aria-label='Open menu'
+        fontSize='20px'
+        variant='ghost'
         onClick={mobileNav.onOpen}
+        color='white'
         icon={<HamburgerIcon />}
       />
 
@@ -61,16 +58,10 @@ export const Template: React.FC = (props) => {
           <Flex>
             {children.find((child) => child.type === Brand)?.props.children}
           </Flex>
-          <Tabs orientation="vertical" variant="unstyled">
+          <Tabs orientation='vertical' variant='unstyled'>
             <TabList>
               {children.find((child) => child.type === Links)?.props.children}
             </TabList>
-            <TabIndicator
-              marginStart="-3"
-              width={1}
-              borderTopRadius={{ base: "none", md: "md" }}
-              bg={mode("blue.500", "blue.200")}
-            />
           </Tabs>
           <Divider />
 

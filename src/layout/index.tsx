@@ -1,9 +1,9 @@
-import React from "react";
-import Header from "../components/Header";
-import Button from "../components/Button";
-import UnlockWallet from "../components/UnlockWallet";
-import styled from "styled-components";
-import { useAmbientConnection } from "../hooks/injectedConnectors";
+import React from 'react';
+import Header from '../components/Header';
+import Button from '../components/Button';
+import UnlockWallet from '../components/UnlockWallet';
+import styled from 'styled-components';
+import { useAmbientConnection } from '../hooks/injectedConnectors';
 
 const LayoutWrapper = styled.div`
   width: 100%;
@@ -25,19 +25,19 @@ const LayoutWrapper = styled.div`
     z-index: 2;
 
     .screen-top-content {
-      background-color: red;
+      background-color: white;
       padding: 7px 20px 10px;
       position: relative;
       box-sizing: border-box;
 
       &:after {
-        content: "";
+        content: '';
         position: absolute;
         top: 0px;
         left: 0px;
         height: 90px;
         width: 100%;
-        background-color: red;
+        background-color: white;
         transition: all 0.1s ease-in-out 0s;
         z-index: -1;
       }
@@ -66,10 +66,10 @@ const Layout: React.FC<{}> = ({ children }) => {
         <UnlockWallet />
       ) : (
         <>
-          <main className="screen">
-            <div className="screen-top-content">
-              <div className="ag-balance">
-                <Button size="sm" variant="primary" text="0 AG" />
+          <main className='screen'>
+            <div className='screen-top-content'>
+              <div className='ag-balance'>
+                <Button size='sm' variant='primary' text='0 AG' />
               </div>
             </div>
             {children}
