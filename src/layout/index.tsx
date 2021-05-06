@@ -1,68 +1,50 @@
-import React from 'react';
+import React, { ReactElement, isValidElement } from 'react';
+import glowingAgave from '../assets/image/glowing-agave.svg';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import UnlockWallet from '../components/UnlockWallet';
-import styled from 'styled-components';
+import { Box, Center, Image, Text } from '@chakra-ui/react';
 import { useAmbientConnection } from '../hooks/injectedConnectors';
 
-const LayoutWrapper = styled.div`
-  width: 100%;
-  margin: 0 auto;
-  background: rgb(241, 241, 243);
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0%;
-  position: relative;
-  overflow: hidden;
-  height: 100vh;
+const Index: React.FC = (props) => {
+  const children = React.Children.toArray(props.children).filter<ReactElement>(
+    isValidElement
+  );
 
-  .screen {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0%;
-    overflow: auto;
-    position: relative;
-    z-index: 2;
-
-    .screen-top-content {
-      background-color: white;
-      padding: 7px 20px 10px;
-      position: relative;
-      box-sizing: border-box;
-
-      &:after {
-        content: '';
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        height: 90px;
-        width: 100%;
-        background-color: white;
-        transition: all 0.1s ease-in-out 0s;
-        z-index: -1;
-      }
-
-      .ag-balance {
-        display: flex;
-        justify-content: flex-end;
-        z-index: 3;
-
-        .ag-balance-button {
-          .ag-balance-button-value {
-          }
-        }
-      }
-    }
-  }
-`;
-
-const Layout: React.FC<{}> = ({ children }) => {
   const { active: activeConnection } = useAmbientConnection();
 
   return (
-    <LayoutWrapper>
+    <Box position='relative' bg='secondary.900' h='100vh' overflow='hidden'>
       <Header />
-      {!activeConnection ? (
+      <Box minH='11.1rem' bg='primary.500' position='relative' zIndex='2' />
+      <Box
+        position='absolute'
+        zIndex='2'
+        top='9.4rem'
+        left='50%'
+        transform='translateX(-50%)'
+        w='70vw'
+      >
+        <Center rounded='lg' minH='9.6rem' mb='3.5rem' bg='primary.900'>
+          {!activeConnection ? (
+            <Text textAlign='left' w='90%' color='white'>
+              Please connect your wallet
+            </Text>
+          ) : (
+            children.find((child) => child.type === Banner)?.props.children || (
+              <Text textAlign='left' w='90%' color='white'>
+                Welcome
+              </Text>
+            )
+          )}
+        </Center>
+        {!activeConnection ? (
+          <h1>HI</h1>
+        ) : (
+          children.find((child) => child.type === Body)?.props.children
+        )}
+      </Box>
+      {/* {!activeConnection ? (
         <UnlockWallet />
       ) : (
         <>
@@ -75,9 +57,15 @@ const Layout: React.FC<{}> = ({ children }) => {
             {children}
           </main>
         </>
-      )}
-    </LayoutWrapper>
+      )} */}
+      <Center mt='20rem'>
+        <Image src={glowingAgave} boxSize='145rem' alt='glowing agave log' />
+      </Center>
+    </Box>
   );
 };
 
-export default Layout;
+const Banner: React.FC = () => null;
+const Body: React.FC = () => null;
+
+export default Object.assign(Index, { Banner });
