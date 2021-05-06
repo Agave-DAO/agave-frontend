@@ -3,7 +3,7 @@ import glowingAgave from '../assets/image/glowing-agave.svg';
 import Header from '../components/Header';
 import Button from '../components/Button';
 import UnlockWallet from '../components/UnlockWallet';
-import { Box, Center, Image, Text } from '@chakra-ui/react';
+import { Box, Center, HStack, Image, Text } from '@chakra-ui/react';
 import { useAmbientConnection } from '../hooks/injectedConnectors';
 
 const Index: React.FC = (props) => {
@@ -38,26 +38,19 @@ const Index: React.FC = (props) => {
             )
           )}
         </Center>
+
         {!activeConnection ? (
-          <h1>HI</h1>
+          <HStack spacing='1.6rem'>
+            <UnlockWallet />
+            {
+              children.find((child) => child.type === StakingBody)?.props
+                .children
+            }
+          </HStack>
         ) : (
           children.find((child) => child.type === Body)?.props.children
         )}
       </Box>
-      {/* {!activeConnection ? (
-        <UnlockWallet />
-      ) : (
-        <>
-          <main className='screen'>
-            <div className='screen-top-content'>
-              <div className='ag-balance'>
-                <Button size='sm' variant='primary' text='0 AG' />
-              </div>
-            </div>
-            {children}
-          </main>
-        </>
-      )} */}
       <Center mt='20rem'>
         <Image src={glowingAgave} boxSize='145rem' alt='glowing agave log' />
       </Center>
@@ -67,5 +60,6 @@ const Index: React.FC = (props) => {
 
 const Banner: React.FC = () => null;
 const Body: React.FC = () => null;
+const StakingBody: React.FC = () => null;
 
 export default Object.assign(Index, { Banner });
