@@ -15,8 +15,6 @@ import Borrow from './views/Borrow';
 import BorrowDetail from './views/Borrow/BorrowDetail';
 import BorrowConfirm from './views/Borrow/BorrowConfirm';
 import DepositWithdrawDetail from './views/DepositWithdraw/DepositWithdrawDetail';
-import {DepositConfirm} from './views/Deposit/DepositConfirm';
-import {WithdrawConfirm} from './views/Withdraw/WithdrawConfirm';
 // import RepayDetail from './views/Repay/RepayDetail';
 // import RepayConfirm from './views/Repay/RepayConfirm';
 // import Collateral from './views/Collateral';
@@ -32,6 +30,7 @@ import ReactNotification from "react-notifications-component";
 import { useReduxWeb3Updater } from "./hooks/reduxWeb3";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import { DepositWithdrawConfirm } from "./views/DepositWithdraw/DepositWithdrawConfirm";
 
 interface IAppProps {}
 
@@ -101,8 +100,7 @@ const App: React.FC<IAppProps> = (props) => {
               <Route path="/borrow/confirm/:assetName/:amount/:step" component={BorrowConfirm} exact />
               <Route path="/deposit" component={Deposit} exact />
               <Route path="/:action/:assetName" component={DepositWithdrawDetail} exact />
-              <Route path="/deposit/:assetName/:amount/:stepName?" component={DepositConfirm} exact />
-              <Route path="/withdraw/:assetName/:amount/:stepName?" component={WithdrawConfirm} exact />
+              <Route path="/:action/:assetName/:amount/:stepName?" component={DepositWithdrawConfirm} exact />
               {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
               {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
