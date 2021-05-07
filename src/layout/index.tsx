@@ -5,12 +5,35 @@ import UnlockWallet from "../components/UnlockWallet";
 import { Box, Center, HStack, Image, Text } from "@chakra-ui/react";
 import { useAmbientConnection } from "../hooks/injectedConnectors";
 
-const Index: React.FC = props => {
-  const children = React.Children.toArray(props.children).filter<ReactElement>(
-    isValidElement
+export const Layout: React.FC<{ header: React.ReactNode }> = ({
+  header,
+  children,
+}) => {
+  const { active: activeConnection } = useAmbientConnection();
+
+  const headerMemo = React.useMemo(
+    () =>
+      !activeConnection ? (
+        <Text textAlign="left" w="90%" color="white">
+          Please connect your wallet
+        </Text>
+      ) : (
+        header
+      ),
+    [activeConnection, header]
   );
 
-  const { active: activeConnection } = useAmbientConnection();
+  const childrenMemo = React.useMemo(
+    () =>
+      !activeConnection ? (
+        <HStack spacing="1.6rem">
+          <UnlockWallet />
+        </HStack>
+      ) : (
+        children
+      ),
+    [activeConnection, children]
+  );
 
   return (
     <Box position="relative" bg="secondary.900" h="100vh" overflow="hidden">
@@ -30,22 +53,11 @@ const Index: React.FC = props => {
               Please connect your wallet
             </Text>
           ) : (
-            children.find(child => child.type === Banner)?.props.children || (
-              <Text textAlign="left" w="90%" color="white">
-                Welcome
-              </Text>
-            )
+            header
           )}
         </Center>
 
-        {!activeConnection ? (
-          <HStack spacing="1.6rem">
-            <UnlockWallet />
-            {children.find(child => child.type === StakingBody)?.props.children}
-          </HStack>
-        ) : (
-          children.find(child => child.type === Body)?.props.children
-        )}
+        {childrenMemo}
       </Box>
       <Center mt="20rem">
         <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
@@ -53,9 +65,3 @@ const Index: React.FC = props => {
     </Box>
   );
 };
-
-const Banner: React.FC = () => null;
-const Body: React.FC = () => null;
-const StakingBody: React.FC = () => null;
-
-export default Object.assign(Index, { Banner });

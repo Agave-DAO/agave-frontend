@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { ThemeProvider } from "styled-components";
-import Layout from "./layout";
+import { Layout } from "./layout";
 import Markets from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
 // import Dashboard from './views/Dashboard';
@@ -62,7 +62,15 @@ const App: React.FC<IAppProps> = props => {
       <ThemeProvider theme={BaseTheme}>
         {notifications}
         <Router>
-          <Layout>
+          <Layout
+            header={
+              // prettier-ignore
+              <Switch>
+                <Route path="/stake">Agave Staking</Route>
+                <Route path="/">Welcome!</Route>
+              </Switch>
+            }
+          >
             {/* prettier-ignore */}
             <Switch>
               <Route path="/markets" component={Markets} exact />
