@@ -1,5 +1,7 @@
 import React from "react";
 // import { WeiBox } from "../../components/Actions/WeiBox";
+import { BigNumber } from "@ethersproject/bignumber";
+import Layout from "../../layout";
 
 export interface StakingLayoutProps {
   agavePerMonth: number;
@@ -13,6 +15,8 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   stakingAPY: _stakingAPY,
 }) => {
   return (
-    <h1>Hi there</h1>
+    <Layout>
+      <Layout.Body>Hola amigos</Layout.Body>
+    </Layout>
   );
 };
