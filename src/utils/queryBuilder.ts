@@ -35,7 +35,7 @@ export function buildQueryHook<
   buildKey: (...args: TArgs) => TKey,
   buildInitialData?: (() => TData | undefined) | undefined
 ): (...params: TArgs) => QueryHookResult<TData, TKey> {
-  const x = (...params: TArgs) => {
+  function useBuiltQueryHook(...params: TArgs) {
     const { account, library, chainId } = useWeb3React<Web3Provider>();
     const queryKey = React.useMemo(
       () =>
@@ -93,7 +93,7 @@ export function buildQueryHook<
     );
     return { data, error, key: queryKey };
   };
-  return x;
+  return (useBuiltQueryHook as any).bind({});
 }
 
 // Given a tuple type, strips `U` from the types in each slot
