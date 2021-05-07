@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 const SwitchWrapper = styled.div`
   width: 160px;
@@ -63,19 +63,37 @@ const SwitchWrapper = styled.div`
   }
 `;
 
-export function Switch<T>({ values, activeValue, setActiveValue }: {
-  values: [T, T],
-  activeValue: T,
-  setActiveValue: (active: T) => void,
+export function Switch<T>({
+  values,
+  activeValue,
+  setActiveValue,
+}: {
+  values: [T, T];
+  activeValue: T;
+  setActiveValue: (active: T) => void;
 }) {
   return (
     <SwitchWrapper>
       <div className="labeled-switch-inner">
-        <div className={`labeled-switch__pointer ${activeValue === values[1] ? 'active' : ''}`}>
+        <div
+          className={`labeled-switch__pointer ${
+            activeValue === values[1] ? "active" : ""
+          }`}
+        >
           <span></span>
         </div>
-        <div className={`button ${activeValue === values[0] ? 'active' : ''}`} onClick={() => setActiveValue(values[0])}>{values[0]}</div>
-        <div className={`button ${activeValue === values[1] ? 'active' : ''}`} onClick={() => setActiveValue(values[1])}>{values[1]}</div>
+        <div
+          className={`button ${activeValue === values[0] ? "active" : ""}`}
+          onClick={() => setActiveValue(values[0])}
+        >
+          {values[0]}
+        </div>
+        <div
+          className={`button ${activeValue === values[1] ? "active" : ""}`}
+          onClick={() => setActiveValue(values[1])}
+        >
+          {values[1]}
+        </div>
       </div>
     </SwitchWrapper>
   );

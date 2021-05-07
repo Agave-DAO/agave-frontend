@@ -1,14 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+body,
+body * {
+  font-family: 'Arial', 'Inter', sans-serif;
+  font-stretch: normal;
+  font-style: normal;
+  font-size: 1.6rem;
+}
+
 :root {
   /* Common styles */
-  --color-white: #FFFFFF;
+  --color-white: #ffffff;
   --color-black: #000000;
   --color-primary-green: rgb(46, 186, 198);
   --color-primary-purple: rgb(182, 80, 158);
 
   /* Background colors */
   --bg-color-primary: rgb(43, 45, 60);
-  --bg-color-secondary: rgb(56, 61, 81);;
-  --bg-color-white: #FFFFFF;
+  --bg-color-secondary: rgb(56, 61, 81);
+  --bg-color-white: #ffffff;
 
   /* Typography colors */
   --text-color-primary: rgb(56, 61, 81);
@@ -19,18 +42,9 @@
 
   --color-input: #252a4a;
   --color-text-footer: #42434e;
-  --color-border-main: #EAEAEA;
-  --color-primary: #FF481C;
-  --color-secondary: #D3D3D3;
-}
-
-body * {
-  box-sizing: border-box;
-  -webkit-box-sizing: border-box;
-  font-family: roboto-font, sans-serif;
-  font-stretch: normal;
-  font-style: normal;
-  font-size: 14px;
+  --color-border-main: #eaeaea;
+  --color-primary: #ff481c;
+  --color-secondary: #d3d3d3;
 }
 
 .custom-scroll {

@@ -1,84 +1,62 @@
-import React from 'react';
-import Header from '../components/Header';
-import Button from '../components/Button';
-import UnlockWallet from '../components/UnlockWallet';
-import styled from 'styled-components';
-import { useAmbientConnection } from '../hooks/injectedConnectors';
+import React, { ReactElement, isValidElement } from "react";
+import glowingAgave from "../assets/image/glowing-agave.svg";
+import Header from "../components/Header";
+import Button from "../components/Button";
+import UnlockWallet from "../components/UnlockWallet";
+import { Box, Center, HStack, Image, Text } from "@chakra-ui/react";
+import { useAmbientConnection } from "../hooks/injectedConnectors";
 
-const LayoutWrapper = styled.div`
-  width: 100%;
-  margin: 0 auto;
-  background: rgb(241, 241, 243);
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0%;
-  position: relative;
-  overflow: hidden;
-  height: 100vh;
+const Index: React.FC = props => {
+  const children = React.Children.toArray(props.children).filter<ReactElement>(
+    isValidElement
+  );
 
-  .screen {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 0%;
-    overflow: auto;
-    position: relative;
-    z-index: 2;
-
-    .screen-top-content {
-      background-color: ${props => props.theme.color.grey[200]};
-      padding: 7px 20px 10px;
-      position: relative;
-      box-sizing: border-box;
-
-      &:after {
-        content: "";
-        position: absolute;
-        top: 0px;
-        left: 0px;
-        height: 90px;
-        width: 100%;
-        background-color: ${props => props.theme.color.grey[200]};
-        transition: all 0.1s ease-in-out 0s;
-        z-index: -1;
-      }
-
-      .ag-balance {
-        display: flex;
-        justify-content: flex-end;
-        z-index: 3;
-
-        .ag-balance-button {
-          .ag-balance-button-value {
-
-          }
-        }
-      }
-    }
-  }
-`;
-
-const Layout: React.FC<{}> = ({children}) => {
   const { active: activeConnection } = useAmbientConnection();
 
   return (
-    <LayoutWrapper>
-      {!activeConnection ? (
-        <UnlockWallet />
-      ) : (
-        <>
-          <Header/>
-          <main className="screen">
-            <div className="screen-top-content">
-              <div className="ag-balance">
-                <Button size="sm" variant="primary" text="0 AG" />
-              </div>
-            </div>
-            {children}
-          </main>
-        </>
-      )}
-    </LayoutWrapper>
-  );
-}
+    <Box position="relative" bg="secondary.900" h="100vh" overflow="hidden">
+      <Header />
+      <Box minH="11.1rem" bg="primary.500" position="relative" zIndex="2" />
+      <Box
+        position="absolute"
+        zIndex="2"
+        top="9.4rem"
+        left="50%"
+        transform="translateX(-50%)"
+        w="70vw"
+      >
+        <Center rounded="lg" minH="9.6rem" mb="3.5rem" bg="primary.900">
+          {!activeConnection ? (
+            <Text textAlign="left" w="90%" color="white">
+              Please connect your wallet
+            </Text>
+          ) : (
+            children.find(child => child.type === Banner)?.props.children || (
+              <Text textAlign="left" w="90%" color="white">
+                Welcome
+              </Text>
+            )
+          )}
+        </Center>
 
-export default Layout;
+        {!activeConnection ? (
+          <HStack spacing="1.6rem">
+            <UnlockWallet />
+            {children.find(child => child.type === StakingBody)?.props.children}
+          </HStack>
+        ) : (
+          children.find(child => child.type === Body)?.props.children
+        )}
+      </Box>
+      <Center mt="20rem">
+        <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
+      </Center>
+    </Box>
+  );
+};
+
+const Banner: React.FC = () => null;
+const Body: React.FC = () => null;
+const StakingBody: React.FC = () => null;
+
+export default Object.assign(Index, { Banner });

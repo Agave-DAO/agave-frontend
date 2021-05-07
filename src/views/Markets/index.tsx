@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import Page from '../../components/Page';
-import Switch from '../../components/Switch';
-import MarketTable from './MarketTable';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import Page from "../../components/Page";
+import Switch from "../../components/Switch";
+import MarketTable from "./MarketTable";
+import styled from "styled-components";
 
 const MarketsWrapper = styled.div`
   .topContent {
@@ -81,7 +81,7 @@ const MarketsWrapper = styled.div`
           justify-content: center;
           padding: 1px 2px 2px;
           cursor: pointer;
-          color: ${props => props.theme.color.textSecondary};;
+          color: ${props => props.theme.color.textSecondary};
 
           &.active {
             color: ${props => props.theme.color.black};
@@ -102,12 +102,16 @@ const Markets: React.FC = () => {
           <span>$ 0.00{/* TODO: placeholder*/}</span>
         </div>
         <div className="price-switcher">
-          <Switch values={['USD', 'Native']} activeValue={activeValue} setActiveValue={setActiveValue} />
+          <Switch
+            values={["USD", "Native"]}
+            activeValue={activeValue}
+            setActiveValue={setActiveValue}
+          />
         </div>
         <MarketTable activePrice={activeValue} />
       </MarketsWrapper>
     </Page>
   );
-}
+};
 
 export default Markets;

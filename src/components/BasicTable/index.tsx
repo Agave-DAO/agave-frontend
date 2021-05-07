@@ -45,7 +45,8 @@ const TableWrapper = styled.div`
 
               &:hover {
                 &::after {
-                  border-top-color: ${(props) => props.theme.color.pink};
+                  border-top-color: ${props =>
+                    props.theme.color.pink || "pink"};
                   opacity: 1;
                 }
               }
@@ -62,7 +63,7 @@ const TableWrapper = styled.div`
                 border-width: 8px 5px 0px;
                 border-color: transparent;
                 transition: all 0.2s ease 0s;
-                border-top-color: ${(props) => props.theme.color.bgSecondary};
+                border-top-color: ${props => props.theme.color.bgSecondary};
                 opacity: 0.3;
                 box-sizing: border-box;
               }
@@ -70,8 +71,8 @@ const TableWrapper = styled.div`
               &.desc {
                 &::after {
                   border-width: 0px 5px 8px;
-                  border-top-color: ${(props) => props.theme.color.pink};
-                  border-bottom-color: ${(props) => props.theme.color.pink};
+                  border-top-color: ${props => props.theme.color.pink};
+                  border-bottom-color: ${props => props.theme.color.pink};
                   opacity: 1;
                 }
               }
@@ -79,8 +80,8 @@ const TableWrapper = styled.div`
               &.asc {
                 &::after {
                   border-width: 8px 5px 0px;
-                  border-top-color: ${(props) => props.theme.color.pink};
-                  border-bottom-color: ${(props) => props.theme.color.pink};
+                  border-top-color: ${props => props.theme.color.pink};
+                  border-bottom-color: ${props => props.theme.color.pink};
                   opacity: 1;
                 }
               }
@@ -98,15 +99,15 @@ const TableWrapper = styled.div`
         align-items: center;
         justify-content: space-between;
         border-radius: 2px;
-        box-shadow: ${(props) => props.theme.color.boxShadow};
+        box-shadow: ${props => props.theme.color.boxShadow};
         transition: all 0.2s ease 0s;
         border: 1px solid transparent;
-        background: ${(props) => props.theme.color.bgWhite};
-        color: ${(props) => props.theme.color.textPrimary};
+        background: ${props => props.theme.color.bgWhite};
+        color: ${props => props.theme.color.textPrimary};
         cursor: pointer;
 
         &:hover {
-          box-shadow: ${(props) => props.theme.color.pink} 0px 0px 10px 0px;
+          box-shadow: ${props => props.theme.color.pink} 0px 0px 10px 0px;
         }
 
         td {
@@ -138,15 +139,15 @@ const TableWrapper = styled.div`
             font-weight: 600;
 
             &.yellow {
-              color: ${(props) => props.theme.color.yellow};
+              color: ${props => props.theme.color.yellow};
             }
 
             &.blue {
-              color: ${(props) => props.theme.color.blue};
+              color: ${props => props.theme.color.blue};
             }
 
             &.pink {
-              color: ${(props) => props.theme.color.pink};
+              color: ${props => props.theme.color.pink};
             }
           }
         }
