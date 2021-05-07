@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 const SwitchWrapper = styled.div`
   width: 160px;
@@ -9,18 +9,17 @@ const SwitchWrapper = styled.div`
   position: relative;
 
   .labeled-switch-inner {
-    background-color: ${(props) => props.theme?.color?.bgSecondary || 'white'};
+    background-color: ${props => props.theme.color.bgSecondary};
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     border-radius: 1px;
-    border-style: 1px solid
-      ${(props) => props.theme?.color?.bgSecondary || 'white'};
+    border-style: 1px solid ${props => props.theme.color.bgSecondary};
 
     .labeled-switch__pointer {
       transform: translateX(2px);
-      content: '';
+      content: "";
       position: absolute;
       left: 0px;
       top: 0px;
@@ -34,7 +33,7 @@ const SwitchWrapper = styled.div`
       }
 
       span {
-        background: ${(props) => props.theme?.color?.bgWhite || 'white'};
+        background: ${props => props.theme.color.bgWhite};
         display: block;
         border-radius: 1px;
         width: 100%;
@@ -55,10 +54,10 @@ const SwitchWrapper = styled.div`
       justify-content: center;
       padding: 1px 2px 2px;
       cursor: pointer;
-      color: ${(props) => props.theme?.color?.textSecondary || 'grey'};
+      color: ${props => props.theme.color.textSecondary};
 
       &.active {
-        color: ${(props) => props.theme?.color?.black || 'black'};
+        color: ${props => props.theme.color.black};
       }
     }
   }
@@ -75,22 +74,22 @@ export function Switch<T>({
 }) {
   return (
     <SwitchWrapper>
-      <div className='labeled-switch-inner'>
+      <div className="labeled-switch-inner">
         <div
           className={`labeled-switch__pointer ${
-            activeValue === values[1] ? 'active' : ''
+            activeValue === values[1] ? "active" : ""
           }`}
         >
           <span></span>
         </div>
         <div
-          className={`button ${activeValue === values[0] ? 'active' : ''}`}
+          className={`button ${activeValue === values[0] ? "active" : ""}`}
           onClick={() => setActiveValue(values[0])}
         >
           {values[0]}
         </div>
         <div
-          className={`button ${activeValue === values[1] ? 'active' : ''}`}
+          className={`button ${activeValue === values[1] ? "active" : ""}`}
           onClick={() => setActiveValue(values[1])}
         >
           {values[1]}

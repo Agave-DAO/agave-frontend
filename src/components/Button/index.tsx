@@ -1,16 +1,16 @@
-import React, { useContext, useMemo } from 'react';
-import styled, { CSSProperties, ThemeContext } from 'styled-components';
-import { Link, LinkProps } from 'react-router-dom';
+import React, { useContext, useMemo } from "react";
+import styled, { CSSProperties, ThemeContext } from "styled-components";
+import { Link, LinkProps } from "react-router-dom";
 
 const Button: React.FC<
-  Omit<React.HTMLProps<HTMLDivElement>, 'size'> & {
+  Omit<React.HTMLProps<HTMLDivElement>, "size"> & {
     text?: string;
-    size?: string | 'sm' | 'md' | 'lg' | number | undefined;
-    to?: LinkProps['to'] | undefined;
-    variant?: 'secondary' | 'outline' | 'primary' | undefined;
+    size?: string | "sm" | "md" | "lg" | number | undefined;
+    to?: LinkProps["to"] | undefined;
+    variant?: "secondary" | "outline" | "primary" | undefined;
   }
 > = ({ children, disabled, href, onClick, size, text, to, variant }) => {
-  // const { color } = useContext(ThemeContext);
+  const { color } = useContext(ThemeContext);
 
   let buttonColor;
   let borderColor;
@@ -18,44 +18,44 @@ const Button: React.FC<
   let boxShadow;
   let opacity;
   switch (variant) {
-    case 'secondary':
-      buttonColor = 'white';
-      borderColor = 'transparent';
-      backgroundColor = 'pink';
-      boxShadow = `${'pink'} 0px 1px 3px 0px;`;
-      opacity = '1';
+    case "secondary":
+      buttonColor = color.white;
+      borderColor = "transparent";
+      backgroundColor = color.pink;
+      boxShadow = `${color.pink} 0px 1px 3px 0px;`;
+      opacity = "1";
       break;
-    case 'outline':
-      buttonColor = 'grey[200]';
-      borderColor = 'transparent';
-      backgroundColor = 'transparent';
+    case "outline":
+      buttonColor = color.grey[200];
+      borderColor = "transparent";
+      backgroundColor = "transparent";
       boxShadow = `none`;
-      opacity = '0.8';
+      opacity = "0.8";
       break;
-    case 'primary':
+    case "primary":
     default:
-      buttonColor = 'white';
-      borderColor = 'transparent';
-      backgroundColor = 'bgSecondary';
+      buttonColor = color.white;
+      borderColor = "transparent";
+      backgroundColor = color.bgSecondary;
       boxShadow = `none`;
-      opacity = '1';
+      opacity = "1";
   }
 
   let width;
   let height;
   let fontSize;
-  switch (size as 'sm' | 'md' | 'lg' | number | undefined) {
-    case 'sm':
+  switch (size as "sm" | "md" | "lg" | number | undefined) {
+    case "sm":
       width = 70;
       height = 24;
       fontSize = 10;
       break;
-    case 'lg':
+    case "lg":
       width = 120;
       height = 36;
       fontSize = 16;
       break;
-    case 'md':
+    case "md":
     default:
       width = 100;
       height = 32;
@@ -67,7 +67,7 @@ const Button: React.FC<
       return <StyledLink to={to}>{text}</StyledLink>;
     } else if (href) {
       return (
-        <StyledExternalLink href={href} target='__blank'>
+        <StyledExternalLink href={href} target="__blank">
           {text}
         </StyledExternalLink>
       );
@@ -110,7 +110,7 @@ const StyledButton = styled.div<
   font-size: ${(props) => props.fontSize}px;
   width: ${(props) => props.width}px;
   height: ${(props) => props.height}px;
-  pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
+  pointer-events: ${(props) => (!props.disabled ? undefined : "none")};
   transition: all 0.2s ease 0s;
   &:hover {
     box-shadow: ${(props) => props.boxShadow};

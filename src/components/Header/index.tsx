@@ -1,13 +1,13 @@
-import { useMemo, useState } from 'react';
-import { Text, Center, Button, Badge } from '@chakra-ui/react';
-import { Navbar } from './navbar';
-import agaveLogo from '../../assets/image/agave-logo.svg';
-import darkMoon from '../../assets/image/dark-moon.svg';
-import lightMoon from '../../assets/image/light-moon.svg';
-import { selectAddress } from '../../features/auth/authSlice';
-import { useAppSelector } from '../../redux/hooks';
-import { NavLink } from 'react-router-dom';
-import { NavTabLink } from './tab-link';
+import { useMemo, useState } from "react";
+import { Text, Center, Button, Badge } from "@chakra-ui/react";
+import { Navbar } from "./navbar";
+import agaveLogo from "../../assets/image/agave-logo.svg";
+import darkMoon from "../../assets/image/dark-moon.svg";
+import lightMoon from "../../assets/image/light-moon.svg";
+import { selectAddress } from "../../features/auth/authSlice";
+import { useAppSelector } from "../../redux/hooks";
+import { NavLink } from "react-router-dom";
+import { NavTabLink } from "./tab-link";
 
 function Header() {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
@@ -26,69 +26,69 @@ function Header() {
   return (
     <Navbar>
       <Navbar.Brand>
-        <Center as={NavLink} to='/' marginEnd={6}>
-          <img src={agaveLogo} alt='AGAAVE ALT' />
-          <Text color='white' ml={4} fontWeight='bold'>
+        <Center as={NavLink} to="/" marginEnd={6}>
+          <img src={agaveLogo} alt="AGAAVE ALT" />
+          <Text color="white" ml={4} fontWeight="bold">
             AGAAVE
           </Text>
         </Center>
       </Navbar.Brand>
       <Navbar.Links>
-        <NavTabLink exact to='/markets' fontWeight='bold'>
+        <NavTabLink exact to="/markets" fontWeight="bold">
           DASHBOARD
         </NavTabLink>
-        <NavTabLink exact to='/stake' fontWeight='bold'>
+        <NavTabLink exact to="/stake" fontWeight="bold">
           STAKE
         </NavTabLink>
       </Navbar.Links>
       <Navbar.UserProfile>
         <Center
-          width='3rem'
-          height='3rem'
-          rounded='lg'
-          bg='primary.500'
-          cursor='pointer'
+          width="3rem"
+          height="3rem"
+          rounded="lg"
+          bg="primary.500"
+          cursor="pointer"
         >
-          <img src={isDarkMode ? darkMoon : lightMoon} alt='theme-mode' />
+          <img src={isDarkMode ? darkMoon : lightMoon} alt="theme-mode" />
         </Center>
         <Center
-          minWidth='10rem'
-          height='3rem'
-          fontSize='1.4rem'
-          mx='1.5rem'
-          textTransform='uppercase'
-          color='white'
-          bg='primary.500'
-          rounded='lg'
+          minWidth="10rem"
+          height="3rem"
+          fontSize="1.4rem"
+          mx="1.5rem"
+          textTransform="uppercase"
+          color="white"
+          bg="primary.500"
+          rounded="lg"
         >
           0 AGVE
         </Center>
         {addressPretty ? (
           <Center
-            background='primary.500'
-            rounded='lg'
-            minWidth='10rem'
-            height='3rem'
-            color='white'
+            background="primary.500"
+            rounded="lg"
+            minWidth="10rem"
+            height="3rem"
+            color="white"
           >
             <Badge
-              bg='yellow'
-              rounded='full'
-              width='1rem'
-              height='1rem'
-              mr='5px'
+              bg="yellow"
+              rounded="full"
+              width="1rem"
+              height="1rem"
+              mr="5px"
             />
-            <Text fontSize='1.4rem'>{addressPretty}</Text>
+            <Text fontSize="1.4rem">{addressPretty}</Text>
           </Center>
         ) : (
           <Button
-            background='primary.500'
-            rounded='lg'
-            minWidth='10rem'
-            height='3rem'
-            fontSize='1.4rem'
-            fontWeight='normal'
-            color='white'
+            background="primary.500"
+            rounded="lg"
+            minWidth="10rem"
+            height="3rem"
+            fontSize="1.4rem"
+            fontWeight="normal"
+            color="white"
           >
             Connect
           </Button>

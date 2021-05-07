@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import Page from '../../components/Page';
-import Switch from '../../components/Switch';
-import MarketTable from './MarketTable';
-import styled from 'styled-components';
+import React, { useState } from "react";
+import Page from "../../components/Page";
+import Switch from "../../components/Switch";
+import MarketTable from "./MarketTable";
+import styled from "styled-components";
 
 const MarketsWrapper = styled.div`
   .topContent {
     width: 100%;
-    border-radius: ${(props) => props.theme.color.borderRadius}px;
-    box-shadow: ${(props) => props.theme.color.boxShadow};
+    border-radius: ${props => props.theme.color.borderRadius}px;
+    box-shadow: ${props => props.theme.color.boxShadow};
     position: relative;
-    background-color: ${(props) => props.theme.color.bgSecondary};
-    color: ${(props) => props.theme.color.textSecondary};
+    background-color: ${props => props.theme.color.bgSecondary};
+    color: ${props => props.theme.color.textSecondary};
     padding: 15px 50px;
     display: flex;
     flex-direction: column;
@@ -21,7 +21,7 @@ const MarketsWrapper = styled.div`
       width: fit-content;
       font-size: 35px;
       font-weight: 800;
-      color: ${(props) => props.theme.color.textSecondary};
+      color: ${props => props.theme.color.textSecondary};
     }
   }
 
@@ -36,17 +36,17 @@ const MarketsWrapper = styled.div`
       position: relative;
 
       .labeled-switch-inner {
-        background-color: ${(props) => props.theme.color.bgSecondary};
+        background-color: ${props => props.theme.color.bgSecondary};
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
         border-radius: 1px;
-        border-style: 1px solid ${(props) => props.theme.color.bgSecondary};
+        border-style: 1px solid ${props => props.theme.color.bgSecondary};
 
         .labeled-switch__pointer {
           transform: translateX(2px);
-          content: '';
+          content: "";
           position: absolute;
           left: 0px;
           top: 0px;
@@ -60,7 +60,7 @@ const MarketsWrapper = styled.div`
           }
 
           span {
-            background: ${(props) => props.theme.color.bgWhite};
+            background: ${props => props.theme.color.bgWhite};
             display: block;
             border-radius: 1px;
             width: 100%;
@@ -81,10 +81,10 @@ const MarketsWrapper = styled.div`
           justify-content: center;
           padding: 1px 2px 2px;
           cursor: pointer;
-          color: ${(props) => props.theme.color.textSecondary};
+          color: ${props => props.theme.color.textSecondary};
 
           &.active {
-            color: ${(props) => props.theme.color.black};
+            color: ${props => props.theme.color.black};
           }
         }
       }
@@ -93,23 +93,23 @@ const MarketsWrapper = styled.div`
 `;
 
 const Markets: React.FC = () => {
-  const [activeValue, setActiveValue] = useState<'USD' | 'Native'>('USD');
+  const [activeValue, setActiveValue] = useState<"USD" | "Native">("USD");
   return (
     <Page>
-      {/* <MarketsWrapper> */}
-      <div className='topContent'>
-        <div>Current Market Size</div>
-        <span>$ 0.00{/* TODO: placeholder*/}</span>
-      </div>
-      <div className='price-switcher'>
-        <Switch
-          values={['USD', 'Native']}
-          activeValue={activeValue}
-          setActiveValue={setActiveValue}
-        />
-      </div>
-      <MarketTable activePrice={activeValue} />
-      {/* </MarketsWrapper> */}
+      <MarketsWrapper>
+        <div className="topContent">
+          <div>Current Market Size</div>
+          <span>$ 0.00{/* TODO: placeholder*/}</span>
+        </div>
+        <div className="price-switcher">
+          <Switch
+            values={["USD", "Native"]}
+            activeValue={activeValue}
+            setActiveValue={setActiveValue}
+          />
+        </div>
+        <MarketTable activePrice={activeValue} />
+      </MarketsWrapper>
     </Page>
   );
 };

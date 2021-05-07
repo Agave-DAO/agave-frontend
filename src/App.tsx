@@ -1,66 +1,70 @@
-import React from 'react';
+import React from "react";
 import {
   BrowserRouter as Router,
   Route,
   Switch,
   Redirect,
-} from 'react-router-dom';
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
-import Layout from './layout';
-import Markets from './views/Markets';
+} from "react-router-dom";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { ThemeProvider } from "styled-components";
+import Layout from "./layout";
+import Markets from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
 // import Dashboard from './views/Dashboard';
-import Deposit from './views/Deposit';
-import DepositDetail from './views/Deposit/DepositDetail';
-import DepositConfirm from './views/Deposit/DepositConfirm';
-import Borrow from './views/Borrow';
-import BorrowDetail from './views/Borrow/BorrowDetail';
-import BorrowConfirm from './views/Borrow/BorrowConfirm';
-import WithdrawDetail from './views/Withdraw/WithdrawDetail';
-import WithdrawConfirm from './views/Withdraw/WithdrawConfirm';
+import Deposit from "./views/Deposit";
+import DepositDetail from "./views/Deposit/DepositDetail";
+import DepositConfirm from "./views/Deposit/DepositConfirm";
+import Borrow from "./views/Borrow";
+import BorrowDetail from "./views/Borrow/BorrowDetail";
+import BorrowConfirm from "./views/Borrow/BorrowConfirm";
+import WithdrawDetail from "./views/Withdraw/WithdrawDetail";
+import WithdrawConfirm from "./views/Withdraw/WithdrawConfirm";
 // import RepayDetail from './views/Repay/RepayDetail';
 // import RepayConfirm from './views/Repay/RepayConfirm';
 // import Collateral from './views/Collateral';
 // import InterestSwap from './views/InterestSwap';
-import { Staking } from './views/Staking';
-import 'react-notifications-component/dist/theme.css';
-import './App.css';
+import { Staking } from "./views/Staking";
+import "react-notifications-component/dist/theme.css";
+import "./App.css";
 //import "animate.css/animate.min.css";
-import 'react-notifications-component/dist/theme.css';
-import ReactNotification from 'react-notifications-component';
-import { useReduxWeb3Updater } from './hooks/reduxWeb3';
+import "react-notifications-component/dist/theme.css";
+import ReactNotification from "react-notifications-component";
+import { useReduxWeb3Updater } from "./hooks/reduxWeb3";
+
+import BaseTheme from "./theme";
 
 const theme = extendTheme({
   colors: {
     primary: {
-      100: '#eefef7',
-      500: '#019d8b',
-      900: '#007c6e',
+      100: "#eefef7",
+      500: "#019d8b",
+      900: "#007c6e",
     },
     secondary: {
-      100: '#019d8b',
-      500: '#007c6e',
-      900: '#044D44',
+      100: "#019d8b",
+      500: "#007c6e",
+      900: "#044D44",
     },
   },
   fonts: {
-    body: 'Lato',
+    body: "Lato",
   },
 });
 
 interface IAppProps {}
 
-const App: React.FC<IAppProps> = (props) => {
+const App: React.FC<IAppProps> = props => {
   const notifications = React.useMemo(() => <ReactNotification />, []);
 
   useReduxWeb3Updater();
   return (
     <ChakraProvider theme={theme}>
-      {notifications}
-      <Router>
-        <Layout>
-          {/* prettier-ignore */}
-          <Switch>
+      <ThemeProvider theme={BaseTheme}>
+        {notifications}
+        <Router>
+          <Layout>
+            {/* prettier-ignore */}
+            <Switch>
             <Route path="/markets" component={Markets} exact />
             <Route path="/deposit" component={Deposit} exact />
             <Route path="/deposit/:assetName" component={DepositDetail} exact />
@@ -79,8 +83,9 @@ const App: React.FC<IAppProps> = (props) => {
             {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
             <Redirect from="/" to="/markets" />
           </Switch>
-        </Layout>
-      </Router>
+          </Layout>
+        </Router>
+      </ThemeProvider>
     </ChakraProvider>
   );
 };
