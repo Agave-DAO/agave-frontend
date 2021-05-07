@@ -43,7 +43,7 @@ const UnlockWallet: React.FC<{}> = props => {
           mb="6px"
           bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
           backgroundClip="text"
-          textFillColor="transparent"
+          // textFillColor="transparent"
           fontWeight="bold"
         >
           Agave Unsupported Network
@@ -68,6 +68,7 @@ const UnlockWallet: React.FC<{}> = props => {
               )
             )}
           </List>
+          {PrivacySection}
         </Box>
       </>
     );
@@ -77,7 +78,7 @@ const UnlockWallet: React.FC<{}> = props => {
     if (typeof (window as any).ethereum === "undefined") {
       warnUser(
         "Please install MetaMask!",
-        "Agaave requires Metamask to be installed in your browser to work properly."
+        "Agave requires Metamask to be installed in your browser to work properly."
       );
       return;
     }
@@ -105,7 +106,7 @@ const UnlockWallet: React.FC<{}> = props => {
             mb="6px"
             bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
             backgroundClip="text"
-            textFillColor="transparent"
+            // textFillColor="transparent"
             fontWeight="bold"
           >
             Connect your wallet

@@ -1,6 +1,3 @@
-import { useQuery } from "react-query";
-import { useWeb3React } from "@web3-react/core";
-import { Web3Provider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ErrorCode } from "@ethersproject/logger";
 import {
@@ -48,7 +45,7 @@ export const useTotalRewardsBalance = buildQueryHook<
     try {
       balance = await contract.getTotalRewardsBalance(stakerAddress);
     } catch (e) {
-      if (e.code == ErrorCode.CALL_EXCEPTION) {
+      if (e.code === ErrorCode.CALL_EXCEPTION) {
         return BigNumber.from(0);
       }
       throw e;
@@ -84,7 +81,7 @@ export const useStakingEvents = buildQueryHook<
     try {
       balance = await contract.stakersCooldowns(stakerAddress);
     } catch (e) {
-      if (e.code == ErrorCode.CALL_EXCEPTION) {
+      if (e.code === ErrorCode.CALL_EXCEPTION) {
         return BigNumber.from(0);
       }
       throw e;
@@ -125,7 +122,7 @@ export const useTotalStakedForAllUsers = buildQueryHookWhenParamsDefinedChainAdd
     try {
       balance = await contract.totalSupply();
     } catch (e) {
-      if (e.code == ErrorCode.CALL_EXCEPTION) {
+      if (e.code === ErrorCode.CALL_EXCEPTION) {
         return BigNumber.from(0);
       }
       throw e;
@@ -174,7 +171,7 @@ export const useAmountClaimableBy = buildQueryHookWhenParamsDefinedChainAddrs<
     try {
       balance = await contract.stakerRewardsToClaim(stakerAddress);
     } catch (e) {
-      if (e.code == ErrorCode.CALL_EXCEPTION) {
+      if (e.code === ErrorCode.CALL_EXCEPTION) {
         return BigNumber.from(0);
       }
       throw e;

@@ -44,6 +44,7 @@ export function buildQueryHook<
           account ?? undefined,
           ...buildKey(...params),
         ] as const,
+      // eslint-disable-next-line
       [chainId, account, library, ...params]
     );
 
@@ -74,7 +75,7 @@ export function buildQueryHook<
           return true;
         },
       }),
-      [buildInitialData]
+      [] // buildInitialData is provided when declaring the hook type, not per call
     );
 
     const { data, error } = useQuery(

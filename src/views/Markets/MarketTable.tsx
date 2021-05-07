@@ -120,13 +120,13 @@ export const useMarketData = (): UseMarketDataDto => {
         library ?? undefined,
         chainId ?? undefined,
       ] as const,
-    [address, library, chainId] as const
+    [address, library, chainId]
   );
   const { data } = useQuery(
     marketDataQueryKey,
     async (ctx) => {
       const [
-        _marketData,
+        ,
         address,
         library,
         asset,
@@ -324,7 +324,7 @@ export const MarketTable: React.FC<{ activePrice: "USD" | "Native" }> = ({
       //   ),
       // },
     ],
-    [activePrice]
+    []
   );
 
   const {

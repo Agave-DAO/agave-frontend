@@ -10,6 +10,7 @@ import { NavLink } from "react-router-dom";
 import { NavTabLink } from "./tab-link";
 
 function Header() {
+  // eslint-disable-next-line
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const address: string | undefined = useAppSelector(selectAddress);
   const addressPretty = useMemo(
@@ -27,9 +28,9 @@ function Header() {
     <Navbar>
       <Navbar.Brand>
         <Center as={NavLink} to="/" marginEnd={6}>
-          <img src={agaveLogo} alt="AGAAVE ALT" />
+          <img src={agaveLogo} alt="AGAVE ALT" />
           <Text color="white" ml={4} fontWeight="bold">
-            AGAAVE
+            AGAVE
           </Text>
         </Center>
       </Navbar.Brand>

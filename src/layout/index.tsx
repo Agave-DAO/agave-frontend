@@ -1,7 +1,6 @@
 import React, { ReactElement, isValidElement } from "react";
 import glowingAgave from "../assets/image/glowing-agave.svg";
 import Header from "../components/Header";
-import Button from "../components/Button";
 import UnlockWallet from "../components/UnlockWallet";
 import { Box, Center, HStack, Image, Text } from "@chakra-ui/react";
 import { useAmbientConnection } from "../hooks/injectedConnectors";
