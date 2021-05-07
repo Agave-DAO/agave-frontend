@@ -65,23 +65,23 @@ const App: React.FC<IAppProps> = props => {
           <Layout>
             {/* prettier-ignore */}
             <Switch>
-            <Route path="/markets" component={Markets} exact />
-            <Route path="/deposit" component={Deposit} exact />
-            <Route path="/deposit/:assetName" component={DepositDetail} exact />
-            <Route path="/deposit/confirm/:assetName/:amount" component={DepositConfirm} exact />
-            <Route path="/borrow" component={Borrow} exact />
-            <Route path="/borrow/:assetName" component={BorrowDetail} exact />
-            <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />
-            <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
-            <Route path="/withdraw/confirm/:assetName/:amount" component={WithdrawConfirm} exact />
-            <Route path="/stake" component={Staking} exact />
-            {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
-            {/* <Route path="/dashboard" component={Dashboard} exact /> */}
-            {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
-            {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
-            {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
-            {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
-            <Redirect from="/" to="/markets" />
+              <Route path="/markets" component={Markets} exact />
+              {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
+              {/* <Route path="/dashboard" component={Dashboard} exact /> */}
+              <Route path="/deposit" component={Deposit} exact />
+              <Route path="/deposit/:assetName" component={DepositDetail} exact />
+              <Route path="/deposit/confirm/:assetName/:amount" component={DepositConfirm} exact />
+              <Route path="/borrow" component={Borrow} exact />
+              <Route path="/borrow/:assetName" component={BorrowDetail} exact />
+              <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />
+              <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
+              <Route path="/withdraw/confirm/:assetName/:amount" component={WithdrawConfirm} exact />
+              {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
+              {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
+              {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
+              {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
+              <Route path="/stake" component={Staking} />
+              <Redirect from="/" to="/markets" />
           </Switch>
           </Layout>
         </Router>
