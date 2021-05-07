@@ -1,4 +1,4 @@
-import React, { ReactElement, isValidElement } from "react";
+import React from "react";
 import glowingAgave from "../assets/image/glowing-agave.svg";
 import Header from "../components/Header";
 import UnlockWallet from "../components/UnlockWallet";
@@ -48,13 +48,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         w="70vw"
       >
         <Center rounded="lg" minH="9.6rem" mb="3.5rem" bg="primary.900">
-          {!activeConnection ? (
-            <Text textAlign="left" w="90%" color="white">
-              Please connect your wallet
-            </Text>
-          ) : (
-            header
-          )}
+          {headerMemo}
         </Center>
 
         {childrenMemo}

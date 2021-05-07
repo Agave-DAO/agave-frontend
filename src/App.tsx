@@ -5,7 +5,13 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
-import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import {
+  Center,
+  ChakraProvider,
+  extendTheme,
+  Flex,
+  Text,
+} from "@chakra-ui/react";
 import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
 import Markets from "./views/Markets";
@@ -55,6 +61,8 @@ interface IAppProps {}
 
 const App: React.FC<IAppProps> = props => {
   const notifications = React.useMemo(() => <ReactNotification />, []);
+  // TODO: Change this as real time ..
+  const TOTAL_VALUE_LOCKED = (1782531.59).toLocaleString();
 
   useReduxWeb3Updater();
   return (
@@ -64,33 +72,70 @@ const App: React.FC<IAppProps> = props => {
         <Router>
           <Layout
             header={
-              // prettier-ignore
               <Switch>
-                <Route path="/stake">Agave Staking</Route>
-                <Route path="/">Welcome!</Route>
+                <Route path="/stake">
+                  <Flex px="4.7rem" basis="100%" justifyContent="space-between">
+                    <Text fontWeight="bold" color="white" fontSize="2.4rem">
+                      Staking
+                    </Text>
+                    <Center>
+                      <Text color="white" fontSize="1.6rem" mr="1.2rem">
+                        Funds in the Safety Module
+                      </Text>
+                      <Text
+                        fontSize="2.4rem"
+                        fontWeight="bold"
+                        bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+                        backgroundClip="text"
+                      >
+                        $ {TOTAL_VALUE_LOCKED}
+                      </Text>
+                    </Center>
+                  </Flex>
+                </Route>
+                <Route path="/markets">Welcome!</Route>
               </Switch>
             }
           >
-            {/* prettier-ignore */}
             <Switch>
               <Route path="/markets" component={Markets} exact />
               {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
               {/* <Route path="/dashboard" component={Dashboard} exact /> */}
               <Route path="/deposit" component={Deposit} exact />
-              <Route path="/deposit/:assetName" component={DepositDetail} exact />
-              <Route path="/deposit/confirm/:assetName/:amount" component={DepositConfirm} exact />
+              <Route
+                path="/deposit/:assetName"
+                component={DepositDetail}
+                exact
+              />
+              <Route
+                path="/deposit/confirm/:assetName/:amount"
+                component={DepositConfirm}
+                exact
+              />
               <Route path="/borrow" component={Borrow} exact />
               <Route path="/borrow/:assetName" component={BorrowDetail} exact />
-              <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />
-              <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
-              <Route path="/withdraw/confirm/:assetName/:amount" component={WithdrawConfirm} exact />
+              <Route
+                path="/borrow/confirm/:assetName/:amount"
+                component={BorrowConfirm}
+                exact
+              />
+              <Route
+                path="/withdraw/:assetName"
+                component={WithdrawDetail}
+                exact
+              />
+              <Route
+                path="/withdraw/confirm/:assetName/:amount"
+                component={WithdrawConfirm}
+                exact
+              />
               {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
               {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
               {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
               <Route path="/stake" component={Staking} />
               <Redirect from="/" to="/markets" />
-          </Switch>
+            </Switch>
           </Layout>
         </Router>
       </ThemeProvider>
