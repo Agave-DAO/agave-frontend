@@ -4,7 +4,7 @@ import { StakedToken__factory } from "../../contracts";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
-import { useTotalRewardsBalance } from "./queries/totalRewards";
+import { useTotalRewardsBalance } from "./queries";
 
 export interface StakingProps {}
 

@@ -7,13 +7,13 @@ import {
   Erc20abi__factory,
   StakedToken__factory,
   AaveDistributionManager__factory,
-} from "../../../contracts";
-import { getChainAddresses } from "../../../utils/chainAddresses";
+} from "../../contracts";
+import { getChainAddresses } from "../../utils/chainAddresses";
 import {
   Account,
   buildQueryHook,
   buildQueryHookWhenParamsDefinedChainAddrs,
-} from "../../../utils/queryBuilder";
+} from "../../utils/queryBuilder";
 import { constants } from "ethers";
 
 // interface ContractQueryHookParams<TKey extends readonly unknown[]> extends QueryHookParams<TKey> {
@@ -212,16 +212,15 @@ export const useAmountAvailableToStake = buildQueryHookWhenParamsDefinedChainAdd
   () => undefined
 );
 
-export const useStakingPerSecondYield = buildQueryHookWhenParamsDefinedChainAddrs<
+export const useStakingPerSecondPerAgaveYield = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
   [
     _prefixStaking: "staking",
-    _prefixRewards: "perSecondYield",
-    stakedAmount: BigNumber
+    _prefixRewards: "perSecondPerAgaveYield",
   ],
-  [stakedAmount: BigNumber]
+  []
 >(
-  async (params, stakedAmount) => {
+  async (params) => {
     const contract = StakedToken__factory.connect(
       params.chainAddrs.staking,
       params.library.getSigner()
@@ -243,8 +242,11 @@ export const useStakingPerSecondYield = buildQueryHookWhenParamsDefinedChainAddr
       stakedTokenAddress
     );
     const emissionPerSecond = stakedTokenAssetInfo.emissionPerSecond;
-    return emissionPerSecond.mul(stakedAmount).div(totalStaked);
+    const AGAVE_DECIMALS = 18; // HACK: Embedded constant
+    return emissionPerSecond
+      .mul(BigNumber.from(10).pow(AGAVE_DECIMALS))
+      .div(totalStaked);
   },
-  (stakedAmount) => ["staking", "perSecondYield", stakedAmount],
+  () => ["staking", "perSecondPerAgaveYield"],
   () => undefined
 );
