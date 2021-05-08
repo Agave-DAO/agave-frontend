@@ -165,6 +165,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </VStack>
         </Box>
         <Button
+          mt="2.4rem"
           textTransform="uppercase"
           background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
           color="secondary.900"
@@ -225,7 +226,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           width="100%"
         >
           <Flex width="100%" justifyContent="space-between">
-            <Text>Agaave per month</Text>
+            <Text>Agave per month</Text>
             <Text fontWeight="bold">1.98</Text>
           </Flex>
           <Flex width="100%" justifyContent="space-between">

@@ -10,6 +10,7 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputProps,
   InputRightAddon,
   InputRightElement,
   Text,
@@ -80,6 +81,27 @@ export interface WeiBoxProps {
   minAmount?: BigNumber | undefined;
   maxAmount?: BigNumber | undefined;
 }
+
+const TextInput: React.FC<InputProps> = props => {
+  return (
+    <Input
+      size="lg"
+      pl="5rem"
+      pr="15rem"
+      py="2rem"
+      fontSize="1.6rem"
+      alignItems="center"
+      _hover={{ background: "primary.500", color: "secondary.900" }}
+      _focus={{ background: "secondary.900", color: "white" }}
+      variant="filled"
+      background="secondary.900"
+      placeholder="Enter amount"
+      color="white"
+      rounded="xl"
+      {...props}
+    />
+  );
+};
 
 export const WeiInput: React.FC<WeiInputProps> = ({
   amount,
@@ -233,16 +255,19 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
     () =>
       icon ? (
         <InputLeftElement
+          boxSizing="content-box"
+          w="max-content"
+          mx={4}
           h="100%"
           children={
             typeof icon === "string" ? (
-              <>
+              <Center>
                 <Image
                   src={icon}
                   boxSize="3rem"
                   alt="Image left element for WeiBox"
                 />
-              </>
+              </Center>
             ) : (
               icon
             )
@@ -254,34 +279,38 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
 
   const rightElem = React.useMemo(
     () => (
-      <InputRightElement width="4.5rem">
-        <Text color="white">{weiView ? " Wei" : " Tokens"}</Text>
-        <Button
-          h="100%"
-          size="xl"
-          background="transparent"
-          color="white"
-          fontWeight="bold"
-          onClick={() => setWeiView(!weiView)}
-          alt="Change input mode between Wei and decimal number of Tokens"
-        >
-          <RepeatIcon pointerEvents="none" />
-        </Button>
-        {maxAmount !== undefined ? (
-          <>
-            &nbsp;
-            <Button
-              h="100%"
-              size="xl"
-              background="transparent"
-              color="white"
-              fontWeight="bold"
-              onClick={() => setAmount(maxAmount)}
-            >
-              MAX
-            </Button>
-          </>
-        ) : null}
+      <InputRightElement minWidth="4.5rem" height="100%" w="max-content">
+        <HStack spacing="1rem" mr="1rem" height="100%">
+          <Text color="white">{weiView ? " Wei" : " Tokens"}</Text>
+          <Button
+            h="100%"
+            size="xl"
+            background="transparent"
+            _hover={{ background: "transparent", outline: "none" }}
+            color="white"
+            fontWeight="bold"
+            onClick={() => setWeiView(!weiView)}
+            alt="Change input mode between Wei and decimal number of Tokens"
+          >
+            <RepeatIcon pointerEvents="none" />
+          </Button>
+          {maxAmount !== undefined ? (
+            <>
+              &nbsp;
+              <Button
+                h="100%"
+                size="xl"
+                background="transparent"
+                _hover={{ background: "transparent", outline: "none" }}
+                color="white"
+                fontWeight="bold"
+                onClick={() => setAmount(maxAmount)}
+              >
+                MAX
+              </Button>
+            </>
+          ) : null}
+        </HStack>
       </InputRightElement>
     ),
     [weiView, setWeiView, setAmount, maxAmount]
@@ -297,14 +326,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
           maxAmount={maxAmount}
         >
           {({ value, setValue, error }) => (
-            <Input
-              _hover={{ background: "primary.500", color: "secondary.900" }}
-              pr="4.5rem"
-              variant="filled"
-              background="secondary.900"
-              placeholder="Enter amount"
-              color="white"
-              rounded="full"
+            <TextInput
               value={value}
               onChange={ev => setValue(ev.target.value)}
               isInvalid={error !== undefined}
@@ -320,14 +342,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
           decimals={decimals}
         >
           {({ value, setValue, error }) => (
-            <Input
-              _hover={{ background: "primary.500", color: "secondary.900" }}
-              pr="4.5rem"
-              variant="filled"
-              background="secondary.900"
-              color="white"
-              placeholder="Enter amount"
-              rounded="full"
+            <TextInput
               value={value}
               onChange={ev => setValue(ev.target.value)}
               isInvalid={error !== undefined}
@@ -339,7 +354,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
   );
 
   return (
-    <InputGroup size="lg">
+    <InputGroup>
       {leftElem}
       {inputElem}
       {rightElem}
