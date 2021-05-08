@@ -43,7 +43,6 @@ const UnlockWallet: React.FC<{}> = props => {
           mb="6px"
           bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
           backgroundClip="text"
-          // textFillColor="transparent"
           fontWeight="bold"
         >
           Agave Unsupported Network

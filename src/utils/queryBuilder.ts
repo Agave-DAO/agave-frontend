@@ -86,14 +86,20 @@ export function buildQueryHook<
           return undefined;
         }
         return await invoke(
-          { account, chainId, library, key: innerKey },
+          {
+            account,
+            chainId: chainId as number,
+            library,
+            // HACK: Any Cast to fix unexpected type error
+            key: innerKey as any,
+          },
           ...params
         );
       },
       queryOpts
     );
     return { data, error, key: queryKey };
-  };
+  }
   return (useBuiltQueryHook as any).bind({});
 }
 
@@ -118,7 +124,7 @@ export function buildQueryHookWhenParamsDefined<
 ): (...params: TArgs) => QueryHookResult<TData, TKey> {
   return buildQueryHook(
     (hookParams, ...args: TArgs) =>
-      args.every((a) => a !== undefined)
+      args.every(a => a !== undefined)
         ? invokeWhenDefined(hookParams, ...(args as AllDefined<TArgs>))
         : Promise.resolve(undefined),
     buildKey,
@@ -149,7 +155,7 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
         hookParams.chainId !== undefined
           ? getChainAddresses(hookParams.chainId)
           : undefined;
-      return chainAddrs !== undefined && args.every((a) => a !== undefined)
+      return chainAddrs !== undefined && args.every(a => a !== undefined)
         ? invokeWhenDefined(
             { chainAddrs, ...hookParams },
             ...(args as AllDefined<TArgs>)

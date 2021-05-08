@@ -52,7 +52,7 @@ export const useTotalRewardsBalance = buildQueryHook<
     }
     return balance;
   },
-  (addr) => ["staking", "rewards", addr],
+  addr => ["staking", "rewards", addr],
   () => constants.Zero
 );
 
@@ -88,7 +88,7 @@ export const useStakingEvents = buildQueryHook<
     }
     return balance;
   },
-  (stakerAddress) => ["staking", "events", stakerAddress],
+  stakerAddress => ["staking", "events", stakerAddress],
   () => constants.Zero
 );
 
@@ -97,7 +97,7 @@ export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
   [_prefixStaking: "staking", _prefixRewards: "cooldown"],
   []
 >(
-  async (params) => {
+  async params => {
     const contract = StakedToken__factory.connect(
       params.chainAddrs.staking,
       params.library.getSigner()
@@ -113,7 +113,7 @@ export const useTotalStakedForAllUsers = buildQueryHookWhenParamsDefinedChainAdd
   [_prefixStaking: "staking", _prefixRewards: "totalSupply"],
   []
 >(
-  async (params) => {
+  async params => {
     const contract = StakedToken__factory.connect(
       params.chainAddrs.staking,
       params.library.getSigner()
@@ -149,7 +149,7 @@ export const useAmountStakedBy = buildQueryHookWhenParamsDefinedChainAddrs<
     );
     return await contract.balanceOf(stakerAddress);
   },
-  (stakerAddress) => ["staking", "amountStaked", stakerAddress],
+  stakerAddress => ["staking", "amountStaked", stakerAddress],
   () => undefined
 );
 
@@ -178,7 +178,7 @@ export const useAmountClaimableBy = buildQueryHookWhenParamsDefinedChainAddrs<
     }
     return balance;
   },
-  (stakerAddress) => ["staking", "claimable", stakerAddress],
+  stakerAddress => ["staking", "claimable", stakerAddress],
   () => undefined
 );
 
@@ -198,26 +198,23 @@ export const useAmountAvailableToStake = buildQueryHookWhenParamsDefinedChainAdd
     );
     return await contract
       .STAKED_TOKEN()
-      .then((stakedToken) =>
+      .then(stakedToken =>
         Erc20abi__factory.connect(
           stakedToken,
           params.library.getSigner()
         ).balanceOf(stakerAddress)
       );
   },
-  (stakerAddress) => ["staking", "availableToStake", stakerAddress],
+  stakerAddress => ["staking", "availableToStake", stakerAddress],
   () => undefined
 );
 
 export const useStakingPerSecondPerAgaveYield = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
-  [
-    _prefixStaking: "staking",
-    _prefixRewards: "perSecondPerAgaveYield",
-  ],
+  [_prefixStaking: "staking", _prefixRewards: "perSecondPerAgaveYield"],
   []
 >(
-  async (params) => {
+  async params => {
     const contract = StakedToken__factory.connect(
       params.chainAddrs.staking,
       params.library.getSigner()
