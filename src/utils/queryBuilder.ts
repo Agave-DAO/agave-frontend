@@ -90,8 +90,8 @@ export function buildQueryHook<
             account,
             chainId: chainId as number,
             library,
-            // @ts-ignore (I DONT KNOW HOW TO FIX AS OF NOW)
-            key: innerKey,
+            // HACK: Any Cast to fix unexpected type error
+            key: innerKey as any,
           },
           ...params
         );
