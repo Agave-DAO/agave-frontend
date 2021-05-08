@@ -12,6 +12,7 @@ import {
   InputLeftElement,
   InputRightAddon,
   InputRightElement,
+  Text,
   VStack,
 } from "@chakra-ui/react";
 import { CheckIcon, RepeatIcon } from "@chakra-ui/icons";
@@ -254,7 +255,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
   const rightElem = React.useMemo(
     () => (
       <InputRightElement width="4.5rem">
-        {weiView ? " Wei" : " Tokens"}
+        <Text color="white">{weiView ? " Wei" : " Tokens"}</Text>
         <Button
           h="100%"
           size="xl"
@@ -297,11 +298,12 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
         >
           {({ value, setValue, error }) => (
             <Input
-              _hover={{ background: "primary.500" }}
+              _hover={{ background: "primary.500", color: "secondary.900" }}
               pr="4.5rem"
               variant="filled"
               background="secondary.900"
               placeholder="Enter amount"
+              color="white"
               rounded="full"
               value={value}
               onChange={ev => setValue(ev.target.value)}
@@ -319,10 +321,11 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
         >
           {({ value, setValue, error }) => (
             <Input
-              _hover={{ background: "primary.500" }}
+              _hover={{ background: "primary.500", color: "secondary.900" }}
               pr="4.5rem"
               variant="filled"
               background="secondary.900"
+              color="white"
               placeholder="Enter amount"
               rounded="full"
               value={value}
