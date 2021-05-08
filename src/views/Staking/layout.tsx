@@ -1,5 +1,5 @@
 import React from "react";
-// import { WeiBox } from "../../components/Actions/WeiBox";
+import { WeiBox } from "../../components/Actions/WeiBox";
 import {
   Center,
   HStack,
@@ -13,8 +13,13 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Box,
+  Flex,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
+import ColoredText from "../../components/ColoredText";
+import { BigNumber } from "ethers";
+import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 
 export interface StakingLayoutProps {
   agavePerMonth: number;
@@ -69,15 +74,7 @@ const StakingSubCard: React.FC<{
       <Text color="white" fontSize="1.7rem">
         {title}
       </Text>
-      <Text
-        color="white"
-        fontSize="2.4rem"
-        fontWeight="bold"
-        bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-        backgroundClip="text"
-      >
-        {value}
-      </Text>
+      <ColoredText>{value}</ColoredText>
       <Text color="white" fontSize="1.2rem">
         {subValue}
       </Text>
@@ -132,21 +129,58 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   cooldownPeriodSeconds: _cooldownPeriodSeconds,
   stakingAPY: _stakingAPY,
 }) => {
+  const [amount, setAmount] = React.useState<BigNumber | undefined>(
+    BigNumber.from(0)
+  );
   return (
     <HStack spacing="1.6rem">
       <Center
-        flexBasis="100%"
+        flexDirection="column"
         rounded="xl"
         minH="33.6rem"
+        flex={1}
         bg="primary.900"
         px="5.2rem"
       >
-        hi
+        <ColoredText fontSize="1.8rem" marginBottom="1.3rem">
+          How much you would like to stake?
+        </ColoredText>
+        <Text color="white" textAlign="center" marginBottom="2.8rem">
+          Staking Agave in the Safety Module helps to secure the protocol in
+          exchange for protocol incentives
+        </Text>
+        <Box w="100%">
+          <VStack fontSize="1.5rem">
+            <Flex w="100%" justifyContent="space-between">
+              <Text color="white">Available to Stake</Text>
+              <Text color="white">9.99 Agave</Text>
+            </Flex>
+            <WeiBox
+              amount={amount}
+              decimals={18}
+              setAmount={setAmount}
+              icon={coloredAgaveLogo}
+              maxAmount={BigNumber.from(10).pow(18)}
+            />
+          </VStack>
+        </Box>
+        <Button
+          textTransform="uppercase"
+          background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+          color="secondary.900"
+          fontWeight="bold"
+          px="6rem"
+          py="1.5rem"
+          fontSize="1.4rem"
+        >
+          Stake
+        </Button>
       </Center>
       <Center
-        flexBasis="100%"
+        flexDirection="column"
         rounded="xl"
         minH="33.6rem"
+        flex={1}
         bg="primary.900"
         px="5.2rem"
       >
@@ -183,6 +217,26 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             onClick={() => {}}
           />
         </HStack>
+        <VStack
+          mt="1.7rem"
+          color="white"
+          fontSize="1.4rem"
+          spacing=".5rem"
+          width="100%"
+        >
+          <Flex width="100%" justifyContent="space-between">
+            <Text>Agaave per month</Text>
+            <Text fontWeight="bold">1.98</Text>
+          </Flex>
+          <Flex width="100%" justifyContent="space-between">
+            <Text>Cooldown period</Text>
+            <Text fontWeight="bold">12 days</Text>
+          </Flex>
+          <Flex width="100%" justifyContent="space-between">
+            <Text>Staking APY</Text>
+            <Text fontWeight="bold">79.1%</Text>
+          </Flex>
+        </VStack>
       </Center>
     </HStack>
   );

@@ -45,7 +45,8 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         top="9.4rem"
         left="50%"
         transform="translateX(-50%)"
-        w="70vw"
+        // lg, md, sm
+        minW={["70vw", "80vw", "90vw"]}
       >
         <Center rounded="lg" minH="9.6rem" mb="3.5rem" bg="primary.900">
           {headerMemo}
