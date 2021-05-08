@@ -2,6 +2,7 @@
   "name": "agaave-app",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "dependencies": {
     "@apollo/client": "^3.2.9",
     "@chakra-ui/icons": "^1.0.13",

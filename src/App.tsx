@@ -4,6 +4,7 @@ import {
   Route,
   Switch,
   Redirect,
+  HashRouter,
 } from "react-router-dom";
 import {
   Center,
@@ -70,7 +71,7 @@ const App: React.FC<IAppProps> = props => {
     <ChakraProvider theme={theme}>
       <ThemeProvider theme={BaseTheme}>
         {notifications}
-        <Router>
+        <HashRouter>
           <Layout
             header={
               // prettier-ignore
@@ -120,7 +121,7 @@ const App: React.FC<IAppProps> = props => {
               <Redirect from="/" to="/markets" />
           </Switch>
           </Layout>
-        </Router>
+        </HashRouter>
       </ThemeProvider>
     </ChakraProvider>
   );
