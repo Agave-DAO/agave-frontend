@@ -2,21 +2,17 @@ import { BigNumberish, parseFixed } from "@ethersproject/bignumber";
 import { BigNumber, FixedNumber } from "ethers";
 import React, { ReactNode, useEffect, useMemo, useState } from "react";
 import {
-  Box,
   Button,
-  Center,
   HStack,
   Image,
   Input,
   InputGroup,
   InputLeftElement,
   InputProps,
-  InputRightAddon,
   InputRightElement,
   Text,
-  VStack,
 } from "@chakra-ui/react";
-import { CheckIcon, RepeatIcon } from "@chakra-ui/icons";
+import { RepeatIcon } from "@chakra-ui/icons";
 
 // Equate (BigNumber | undefined) instances with eachother
 function eqBigNumberOptions(
@@ -261,13 +257,11 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
           h="100%"
           children={
             typeof icon === "string" ? (
-              <Center>
-                <Image
-                  src={icon}
-                  boxSize="3rem"
-                  alt="Image left element for WeiBox"
-                />
-              </Center>
+              <Image
+                src={icon}
+                boxSize="3rem"
+                alt="Image left element for WeiBox"
+              />
             ) : (
               icon
             )

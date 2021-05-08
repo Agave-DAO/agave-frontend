@@ -27,6 +27,27 @@ export interface StakingLayoutProps {
   stakingAPY: number;
 }
 
+export const StakingBanner: React.FC<{ tvl: string }> = props => (
+  <Flex px="4.7rem" basis="100%" justifyContent="space-between">
+    <Text fontWeight="bold" color="white" fontSize="2.4rem">
+      Staking
+    </Text>
+    <Center>
+      <Text color="white" fontSize="1.6rem" mr="1.2rem">
+        Funds in the Safety Module
+      </Text>
+      <Text
+        fontSize="2.4rem"
+        fontWeight="bold"
+        bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+        backgroundClip="text"
+      >
+        ${props.tvl}
+      </Text>
+    </Center>
+  </Flex>
+);
+
 const StakingSubCard: React.FC<{
   isModalTrigger?: boolean;
   onClick: React.MouseEventHandler;

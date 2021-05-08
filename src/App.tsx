@@ -5,13 +5,7 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
-import {
-  Center,
-  ChakraProvider,
-  extendTheme,
-  Flex,
-  Text,
-} from "@chakra-ui/react";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
 import Markets from "./views/Markets";
@@ -30,6 +24,7 @@ import WithdrawConfirm from "./views/Withdraw/WithdrawConfirm";
 // import Collateral from './views/Collateral';
 // import InterestSwap from './views/InterestSwap';
 import { Staking } from "./views/Staking";
+import { StakingBanner } from "./views/Staking/layout";
 import "react-notifications-component/dist/theme.css";
 import "./App.css";
 //import "animate.css/animate.min.css";
@@ -76,24 +71,7 @@ const App: React.FC<IAppProps> = props => {
               // prettier-ignore
               <Switch>
                 <Route path="/stake">
-                  <Flex px="4.7rem" basis="100%" justifyContent="space-between">
-                    <Text fontWeight="bold" color="white" fontSize="2.4rem">
-                      Staking
-                    </Text>
-                    <Center>
-                      <Text color="white" fontSize="1.6rem" mr="1.2rem">
-                        Funds in the Safety Module
-                      </Text>
-                      <Text
-                        fontSize="2.4rem"
-                        fontWeight="bold"
-                        bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-                        backgroundClip="text"
-                      >
-                        $ {TOTAL_VALUE_LOCKED}
-                      </Text>
-                    </Center>
-                  </Flex>
+                  <StakingBanner tvl={TOTAL_VALUE_LOCKED} />
                 </Route>
                 <Route path="/markets">Welcome!</Route>
               </Switch>

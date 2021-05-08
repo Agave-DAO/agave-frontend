@@ -10,7 +10,7 @@ export interface StakingProps {}
 const StakingErrorWrapper: React.FC = ({ children }) => {
   return (
     <Center
-      minW="31vw"
+      minW={["31vw"]}
       maxW="53.6rem"
       minH="40vh"
       maxH="33.6rem"
