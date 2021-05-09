@@ -5,78 +5,186 @@ import {
   AaveDistributionManager__factory,
 } from "../../contracts";
 import { getChainAddresses } from "../../utils/chainAddresses";
-import {
-  Account,
-  buildQueryHook,
-  buildQueryHookWhenParamsDefinedChainAddrs,
-  ChainId,
-} from "../../utils/queryBuilder";
+import { Account, ChainId } from "../../utils/queryBuilder";
 import { constants } from "ethers";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
-import { ethers } from "ethers";
 import React from "react";
 import { useAmountAvailableToStake, useAmountStakedBy } from "./queries";
+import {
+  ReactNotificationOptions,
+  store as NotificationManager,
+} from "react-notifications-component";
 
 export interface StakeMutationProps {
   chainId: ChainId | undefined;
-  address: string | undefined;
-};
+  address: Account | undefined;
+}
 
 export interface StakeMutationArgs {
   amount: BigNumber;
   library: JsonRpcProvider;
-};
+}
 
 export interface StakeMutationResult {
   txHash: string;
-};
+}
 
-export interface StakeMutationDto extends UseMutationResult<StakeMutationResult | undefined, unknown, StakeMutationArgs, unknown> {
-  key: readonly [ChainId | undefined, string | undefined];
-};
+export interface StakeMutationDto
+  extends UseMutationResult<
+    StakeMutationResult | undefined,
+    unknown,
+    StakeMutationArgs,
+    unknown
+  > {
+  key: readonly [ChainId | undefined, Account | undefined];
+}
 
-export const useStakeMutation = ({ chainId, address }: StakeMutationProps): StakeMutationDto => {
+async function usingProgressNotification<T>(
+  title: string,
+  message: string,
+  notificationType: ReactNotificationOptions["type"],
+  promise: Promise<T>
+): Promise<T> {
+  const notification = NotificationManager.addNotification({
+    container: "center",
+    title: title,
+    dismiss: {
+      click: false,
+      touch: false,
+      duration: 0,
+    },
+    message: message,
+    type: notificationType,
+  });
+  try {
+    return await promise;
+  } finally {
+    NotificationManager.removeNotification(notification);
+  }
+}
+
+export const useStakeMutation = ({
+  chainId,
+  address,
+}: StakeMutationProps): StakeMutationDto => {
   const queryClient = useQueryClient();
-  const mutationKey = React.useMemo(() => [chainId, address] as const, [chainId, address]);
-  
-  const mutation = useMutation<StakeMutationResult | undefined, unknown, StakeMutationArgs, unknown>(
+  const mutationKey = React.useMemo(() => [chainId, address] as const, [
+    chainId,
+    address,
+  ]);
+
+  const mutation = useMutation<
+    StakeMutationResult | undefined,
+    unknown,
+    StakeMutationArgs,
+    unknown
+  >(
     mutationKey,
     async (args): Promise<StakeMutationResult | undefined> => {
       const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
-      if (chainId === undefined || address === undefined || chainAddrs === undefined) {
+      if (
+        chainId === undefined ||
+        address === undefined ||
+        chainAddrs === undefined
+      ) {
         return undefined;
       }
-      const contract = StakedToken__factory.connect(
+      const signer = args.library.getSigner();
+      const stakingContract = StakedToken__factory.connect(
         chainAddrs.staking,
-        args.library.getSigner(),
+        signer
       );
-      console.log("useStakeMutation", "attempting to stake", args.amount.toString());
-      const tx = await contract.stake(address, args.amount);
-      const receipt = await tx.wait();
-      console.log("useStakeMutation", "events produced", receipt.events);
-      return receipt.status ? { txHash: tx.hash } : undefined;
+      const stakedToken = await stakingContract
+        .STAKED_TOKEN()
+        .then(stakedTokenAddr =>
+          Erc20abi__factory.connect(stakedTokenAddr, signer)
+        );
+      if (
+        (await stakedToken.allowance(address, stakingContract.address)).lt(
+          args.amount
+        )
+      ) {
+        const approval = stakedToken.approve(
+          stakingContract.address,
+          args.amount
+        );
+        const approvalConfirmation = await usingProgressNotification(
+          "Awaiting spend approval",
+          "Please commit the transaction for ERC20 approval for the requested staking cost with your wallet.",
+          "info",
+          approval
+        );
+        await usingProgressNotification(
+          "Awaiting approval confirmation",
+          "Please wait while the blockchain processes your transaction",
+          "info",
+          approvalConfirmation.wait()
+        );
+      }
+      console.log(
+        "useStakeMutation",
+        "attempting to stake",
+        args.amount.toString()
+      );
+      const stakingRequest = stakingContract.stake(address, args.amount);
+      const stakingConfirmation = await usingProgressNotification(
+        "Awaiting stake transaction approval",
+        "Please commit the staking transaction with your wallet.",
+        "info",
+        stakingRequest
+      );
+      const stakingReceipt = await usingProgressNotification(
+        "Awaiting staking confirmation",
+        "Please wait while the blockchain processes your transaction",
+        "success",
+        stakingConfirmation.wait()
+      );
+      return stakingReceipt.status &&
+        stakingReceipt.events?.some(ev => ev.event === "Staked")
+        ? { txHash: stakingReceipt.transactionHash }
+        : undefined;
     },
     {
+      useErrorBoundary: false,
       retry: false,
       onSuccess: async (_output, _vars, _context) => {
         const clearanceTasks = [
-          queryClient.invalidateQueries(
-            mutationKey,
-            { exact: true, active: false, inactive: true, refetchInactive: false, refetchActive: false })
+          queryClient.invalidateQueries(mutationKey, {
+            exact: true,
+            active: false,
+            inactive: true,
+            refetchInactive: false,
+            refetchActive: false,
+          }),
         ];
         if (address !== undefined) {
-          const amountAvailableKey = useAmountAvailableToStake.buildKey(chainId, address, address);
-          clearanceTasks.push(queryClient.invalidateQueries(amountAvailableKey));
-          const amountStakedKey = useAmountStakedBy.buildKey(chainId, address, address);
+          const amountAvailableKey = useAmountAvailableToStake.buildKey(
+            chainId,
+            address,
+            address
+          );
+          clearanceTasks.push(
+            queryClient.invalidateQueries(amountAvailableKey)
+          );
+          const amountStakedKey = useAmountStakedBy.buildKey(
+            chainId,
+            address,
+            address
+          );
           clearanceTasks.push(queryClient.invalidateQueries(amountStakedKey));
         }
         await Promise.allSettled(clearanceTasks);
       },
+      onError: async (_err, _vars, _context) => {
+        await queryClient.invalidateQueries(mutationKey);
+      },
     }
   );
 
-  return React.useMemo(() => ({ ...mutation, key: mutationKey }), [mutation, mutationKey]);
+  return React.useMemo(() => ({ ...mutation, key: mutationKey }), [
+    mutation,
+    mutationKey,
+  ]);
 };
-

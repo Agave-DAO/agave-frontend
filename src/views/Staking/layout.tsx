@@ -331,7 +331,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           py="1.5rem"
           fontSize="1.4rem"
           disabled={amount === undefined || amount.lte(0) || availableToStake === undefined || amount.gt(availableToStake)}
-          onClick={() => { if (amount) { stake(amount); } }}
+          onClick={() => { if (amount) { setAmount(constants.Zero); stake(amount); } }}
         >
           Stake
         </Button>

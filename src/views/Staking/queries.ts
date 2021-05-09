@@ -174,7 +174,7 @@ export const useAmountClaimableBy = buildQueryHookWhenParamsDefinedChainAddrs<
   [
     _prefixStaking: "staking",
     _prefixRewards: "claimable",
-    stakerAddress: string | undefined,
+    stakerAddress: string | undefined
   ],
   [stakerAddress: string]
 >(
@@ -244,9 +244,7 @@ export const useStakingPerSecondPerAgaveYield = buildQueryHookWhenParamsDefinedC
       params.chainAddrs.staking
     );
     const emissionPerSecond = stakedTokenAssetInfo.emissionPerSecond;
-    return emissionPerSecond
-      .mul(constants.WeiPerEther)
-      .div(totalStaked);
+    return emissionPerSecond.mul(constants.WeiPerEther).div(totalStaked);
   },
   () => ["staking", "perSecondPerAgaveYield"],
   () => undefined

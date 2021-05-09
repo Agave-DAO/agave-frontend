@@ -115,13 +115,12 @@ export function buildQueryHook<
     );
     return { data, error, key: queryKey };
   }
-  useBuiltQueryHook.buildKey =
+  useBuiltQueryHook.buildKey = (
     (chainId: ChainId | undefined, address: string | undefined, ...args: TArgs): [ChainId | undefined, string | undefined, ...TKey] =>
-      [chainId, address, ...buildKey(...args)];
+      [chainId, address, ...buildKey(...args)]);
   useBuiltQueryHook.invoke = invoke;
   const bound: QueryHook<TData, TKey, TArgs> = useBuiltQueryHook;
-
-  return (bound as any).bind({});
+  return bound;
 }
 
 // Given a tuple type, strips `U` from the types in each slot
