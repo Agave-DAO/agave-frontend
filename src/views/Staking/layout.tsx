@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { WeiBox } from "../../components/Actions/WeiBox";
 import {
   Center,
@@ -15,6 +15,7 @@ import {
   ModalFooter,
   Box,
   Flex,
+  Input,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
@@ -197,6 +198,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   stake,
   unstake,
 }) => {
+  const [customAddress, setCustomAddress] = useState<string>("");
   function dollarValueStringOf(agaveAmount: BigNumber | undefined): String {
     return "-";
   }
@@ -207,12 +209,12 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
     }
     const cdps = BigNumber.from(cooldownPeriodSeconds);
     if (cdps.lt(60 * 60)) {
-      return `${Math.round(cdps.toNumber() / 60 * 10) / 10} minutes`;
+      return `${Math.round((cdps.toNumber() / 60) * 10) / 10} minutes`;
     }
     if (cdps.lt(60 * 60 * 24)) {
-      return `${Math.round(cdps.toNumber() / (60 * 60) * 10) / 10} hours`;
+      return `${Math.round((cdps.toNumber() / (60 * 60)) * 10) / 10} hours`;
     }
-    return `${Math.round(cdps.toNumber() / (60 * 60 * 24) * 10) / 10} days`;
+    return `${Math.round((cdps.toNumber() / (60 * 60 * 24)) * 10) / 10} days`;
   }, [cooldownPeriodSeconds]);
   const [amount, setAmount] = React.useState<BigNumber | undefined>(
     BigNumber.from(0)
@@ -225,13 +227,16 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           amountStaked
             .add(yieldPerYear)
             // .div(constants.WeiPerEther)
-            .sub(amountStaked)
+            .sub(amountStaked),
           // .divUnsafe(FixedNumber.fromValue(amountStaked.add(yieldPerYear), 18))
           // .subUnsafe(FixedNumber.fromValue(constants.WeiPerEther, 18))
-          , 18)
+          18
+        )
           .round(2)
           .toString()
-      : (amountStaked !== undefined && yieldPerYear !== undefined ? "0" : "-");
+      : amountStaked !== undefined && yieldPerYear !== undefined
+      ? "0"
+      : "-";
   return (
     <HStack
       boxSizing="border-box"
@@ -242,7 +247,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
       <Center
         flexDirection="column"
         rounded="xl"
-        minH="33.6rem"
+        minH="35.6rem"
         minW={{ base: "100%", md: "inherit" }}
         flex={1}
         bg="primary.900"
@@ -276,7 +281,9 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 Available to Stake
               </Text>
               <Text color="white" fontSize="inherit">
-                {availableToStake && FixedNumber.fromValue(availableToStake, 18).toString()} Agave
+                {availableToStake &&
+                  FixedNumber.fromValue(availableToStake, 18).toString()}{" "}
+                Agave
               </Text>
             </Flex>
             <WeiBox
@@ -305,7 +312,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
       <Center
         flexDirection="column"
         rounded="xl"
-        minH="33.6rem"
+        minH="35.6rem"
         minW={{ base: "100%", md: "inherit" }}
         flex={1}
         bg="primary.900"
@@ -317,7 +324,11 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             isModalTrigger
             buttonText="Activate cooldown"
             title="Agave staked"
-            value={amountStaked ? FixedNumber.fromValue(amountStaked, 18).toString() : "-"}
+            value={
+              amountStaked
+                ? FixedNumber.fromValue(amountStaked, 18).toString()
+                : "-"
+            }
             subValue={`$ ${dollarValueStringOf(amountStaked)}`}
             disabled={!(amountStaked?.gt(0) ?? false)}
             onClick={() => {}}
@@ -340,15 +351,34 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </StakingSubCard>
           <StakingSubCard
             title="Claimable Agave"
-            value={availableToClaim ? FixedNumber.fromValue(availableToClaim, 18).toString() : "-"}
+            value={
+              availableToClaim
+                ? FixedNumber.fromValue(availableToClaim, 18).toString()
+                : "-"
+            }
             subValue={`$ ${dollarValueStringOf(availableToClaim)}`}
             buttonText="Claim"
             disabled={!(availableToClaim?.gt(0) ?? false)}
             onClick={() => {}}
           />
         </HStack>
+        <Input
+          size="lg"
+          py="1.5rem"
+          variant="filled"
+          my="2rem"
+          placeholder="Custom Recipient Address (Current Account Default)"
+          _hover={{ background: "secondary.900" }}
+          _focus={{ background: "secondary.900" }}
+          background="secondary.900"
+          fontSize={{ base: "1.4rem", md: "1.6rem" }}
+          width="100%"
+          color="white"
+          name="customAddress"
+          onChange={e => setCustomAddress(e.target.value)}
+          value={customAddress}
+        />
         <VStack
-          mt={{ base: "2.2rem", md: "1.7rem" }}
           color="white"
           fontSize="1.4rem"
           spacing={{ base: "1rem", md: ".5rem" }}
@@ -356,7 +386,11 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         >
           <Flex width="100%" justifyContent="space-between">
             <Text>Agave per month</Text>
-            <Text fontWeight="bold">{yieldPerMonth ? FixedNumber.fromValue(yieldPerMonth, 18).round(2).toString() : "-"}</Text>
+            <Text fontWeight="bold">
+              {yieldPerMonth
+                ? FixedNumber.fromValue(yieldPerMonth, 18).round(2).toString()
+                : "-"}
+            </Text>
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Cooldown period</Text>
@@ -364,7 +398,12 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Staking APY</Text>
-            <Text fontWeight="bold">{yieldPerYear ? FixedNumber.fromValue(yieldPerYear, 18).round().toString() : "-"}/yr or %{stakingAPY}</Text>
+            <Text fontWeight="bold">
+              {yieldPerYear
+                ? FixedNumber.fromValue(yieldPerYear, 18).round().toString()
+                : "-"}
+              /yr or %{stakingAPY}
+            </Text>
           </Flex>
         </VStack>
       </Center>
