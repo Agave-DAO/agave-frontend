@@ -81,33 +81,39 @@ const StakingSubCard: React.FC<{
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <VStack
-      minW="20.8rem"
-      px="2.2rem"
-      py="1.9rem"
+      w="50%"
+      justifyContent="space-between"
+      px={{ base: "1.1rem", md: "2.2rem" }}
+      py={{ base: "1.3rem", md: "1.9rem" }}
       bg="secondary.900"
       rounded="2xl"
       position="relative"
+      minH="14.4rem"
     >
       {isModalTrigger && (
         <Circle
-          borderWidth="2px"
-          minWidth="1.5rem"
-          minHeight="1.5rem"
+          borderWidth={{ base: "1px", md: "2px" }}
+          width={{ base: "1.2rem", md: "1.5rem" }}
+          minHeight={{ base: "1.2rem", md: "1.5rem" }}
           boxSizing="content-box"
           as={Center}
-          fontSize="1rem"
+          fontSize={{ base: ".85rem", md: "1rem" }}
           color="#FFC01B"
           borderColor="#FFC01B"
           position="absolute"
-          top="1rem"
-          right="1rem"
+          top={{ base: "0.75rem", md: "1rem" }}
+          right={{ base: "0.75rem", md: "1rem" }}
           cursor="pointer"
           onClick={onOpen}
         >
           ?
         </Circle>
       )}
-      <Text color="white" fontSize="1.7rem">
+      <Text
+        color="white"
+        fontSize={{ base: "1.2rem", md: "1.5rem" }}
+        textAlign="center"
+      >
         {title}
       </Text>
       <ColoredText>{value}</ColoredText>
@@ -116,13 +122,13 @@ const StakingSubCard: React.FC<{
       </Text>
       <Button
         color="white"
-        fontSize="1.4rem"
+        fontSize={{ base: "1rem", md: "1.4rem" }}
         fontWeight="normal"
         bg="primary.300"
         py="1rem"
         my="1.2rem"
         width="100%"
-        px="2.171rem"
+        px={{ base: "5%", md: "2.171rem" }}
       >
         {buttonText}
       </Button>
@@ -132,19 +138,19 @@ const StakingSubCard: React.FC<{
           <ModalContent
             color="primary.900"
             bg="linear-gradient(180deg, #F3FFF7 8.89%, #DCFFF1 146.53%)"
-            px="2.9rem"
+            px={{ base: "1.5rem", md: "2.9rem" }}
             py="3.5rem"
             rounded="lg"
-            minW="30vw"
-            minH="30vh"
+            minW={{ base: "80%", md: "30vw" }}
+            minH={{ base: "50%", md: "30vh" }}
           >
             {modalChildren}
             <ModalFooter>
               <Button
-                w="60%"
+                w={{ base: "100%", md: "60%" }}
                 m="auto"
                 py="1.5rem"
-                fontSize="1.4rem"
+                fontSize={{ base: "1.6rem", md: "1.4rem" }}
                 bg="secondary.100"
                 color="white"
                 fontWeight="normal"
@@ -244,10 +250,10 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         minW={{ base: "100%", md: "inherit" }}
         flex={1}
         bg="primary.900"
-        px={{ base: "3rem", md: "5.2rem" }}
+        px={{ base: "2rem", md: "5rem" }}
         mb={{ base: "2.6rem", md: "0" }}
       >
-        <HStack spacing="3rem">
+        <HStack spacing={{ base: "1rem", md: "2rem" }} w="100%">
           <StakingSubCard
             isModalTrigger
             buttonText="Activate cooldown"
@@ -281,10 +287,10 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           />
         </HStack>
         <VStack
-          mt="1.7rem"
+          mt={{ base: "2.2rem", md: "1.7rem" }}
           color="white"
           fontSize="1.4rem"
-          spacing=".5rem"
+          spacing={{ base: "1rem", md: ".5rem" }}
           width="100%"
         >
           <Flex width="100%" justifyContent="space-between">
