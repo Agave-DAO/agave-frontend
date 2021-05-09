@@ -28,7 +28,11 @@ export interface StakingLayoutProps {
 }
 
 export const StakingBanner: React.FC<{ tvl: string }> = props => (
-  <Center px="4.7rem" width="100%" justifyContent="space-between">
+  <Center
+    px={{ base: "2.3rem", md: "4.7rem" }}
+    width="100%"
+    justifyContent="space-between"
+  >
     <Text
       fontWeight="bold"
       color="white"
@@ -165,27 +169,51 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
     BigNumber.from(0)
   );
   return (
-    <HStack spacing="1.6rem">
+    <HStack
+      boxSizing="border-box"
+      spacing={{ md: "1.6rem" }}
+      flexDirection={{ base: "column", md: "row" }}
+      px={{ base: "2.4rem", md: "0" }}
+    >
       <Center
         flexDirection="column"
         rounded="xl"
         minH="33.6rem"
+        minW={{ base: "100%", md: "inherit" }}
         flex={1}
         bg="primary.900"
-        px="5.2rem"
+        px={{ base: "2rem", md: "5.2rem" }}
+        mb={{ base: "2.6rem", md: "0" }}
       >
-        <ColoredText fontSize="1.8rem" marginBottom="1.3rem">
+        <ColoredText
+          fontSize={{ base: "1.6rem", md: "1.8rem" }}
+          marginBottom="1.3rem"
+          textAlign="center"
+        >
           How much you would like to stake?
         </ColoredText>
-        <Text color="white" textAlign="center" marginBottom="2.8rem">
+        <Text
+          color="white"
+          textAlign="center"
+          marginBottom="2.8rem"
+          fontSize={{ base: "1.4rem", md: "inherit" }}
+        >
           Staking Agave in the Safety Module helps to secure the protocol in
           exchange for protocol incentives
         </Text>
         <Box w="100%">
           <VStack fontSize="1.5rem">
-            <Flex w="100%" justifyContent="space-between">
-              <Text color="white">Available to Stake</Text>
-              <Text color="white">9.99 Agave</Text>
+            <Flex
+              w="100%"
+              justifyContent="space-between"
+              fontSize={{ base: "1.4rem", md: "inherit" }}
+            >
+              <Text color="white" fontSize="inherit">
+                Available to Stake
+              </Text>
+              <Text color="white" fontSize="inherit">
+                9.99 Agave
+              </Text>
             </Flex>
             <WeiBox
               amount={amount}
@@ -202,7 +230,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
           color="secondary.900"
           fontWeight="bold"
-          px="6rem"
+          px={{ base: "10rem", md: "6rem" }}
           py="1.5rem"
           fontSize="1.4rem"
         >
@@ -213,9 +241,11 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         flexDirection="column"
         rounded="xl"
         minH="33.6rem"
+        minW={{ base: "100%", md: "inherit" }}
         flex={1}
         bg="primary.900"
-        px="5.2rem"
+        px={{ base: "3rem", md: "5.2rem" }}
+        mb={{ base: "2.6rem", md: "0" }}
       >
         <HStack spacing="3rem">
           <StakingSubCard
