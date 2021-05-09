@@ -138,7 +138,7 @@ export const useAmountStakedBy = buildQueryHookWhenParamsDefinedChainAddrs<
   [
     _prefixStaking: "staking",
     _prefixRewards: "amountStaked",
-    stakerAddress: string
+    stakerAddress: string | undefined
   ],
   [stakerAddress: string]
 >(
@@ -158,7 +158,7 @@ export const useAmountClaimableBy = buildQueryHookWhenParamsDefinedChainAddrs<
   [
     _prefixStaking: "staking",
     _prefixRewards: "claimable",
-    stakerAddress: string
+    stakerAddress: string | undefined,
   ],
   [stakerAddress: string]
 >(
@@ -187,7 +187,7 @@ export const useAmountAvailableToStake = buildQueryHookWhenParamsDefinedChainAdd
   [
     _prefixStaking: "staking",
     _prefixRewards: "availableToStake",
-    stakerAddress: string
+    stakerAddress: string | undefined
   ],
   [stakerAddress: string]
 >(
@@ -219,26 +219,17 @@ export const useStakingPerSecondPerAgaveYield = buildQueryHookWhenParamsDefinedC
       params.chainAddrs.staking,
       params.library.getSigner()
     );
-    const [
-      stakedTokenAddress,
-      emissionManagerAddress,
-      totalStaked,
-    ] = await Promise.all([
-      contract.STAKED_TOKEN(),
-      contract.EMISSION_MANAGER(),
-      contract.totalSupply(),
-    ]);
+    const totalStaked = await contract.totalSupply();
     const emissionManager = AaveDistributionManager__factory.connect(
-      emissionManagerAddress,
+      params.chainAddrs.staking,
       params.library.getSigner()
     );
     const stakedTokenAssetInfo = await emissionManager.assets(
-      stakedTokenAddress
+      params.chainAddrs.staking
     );
     const emissionPerSecond = stakedTokenAssetInfo.emissionPerSecond;
-    const AGAVE_DECIMALS = 18; // HACK: Embedded constant
     return emissionPerSecond
-      .mul(BigNumber.from(10).pow(AGAVE_DECIMALS))
+      .mul(constants.WeiPerEther)
       .div(totalStaked);
   },
   () => ["staking", "perSecondPerAgaveYield"],
