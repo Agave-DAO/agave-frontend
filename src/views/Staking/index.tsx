@@ -4,6 +4,7 @@ import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
+import { useStakeMutation } from "./mutations";
 import { useAmountAvailableToStake, useAmountClaimableBy, useAmountStakedBy, useStakingCooldown, useStakingPerSecondPerAgaveYield, useTotalStakedForAllUsers, useUnstakeWindow } from "./queries";
 
 export interface StakingProps {}
@@ -34,6 +35,7 @@ export const Staking: React.FC<StakingProps> = _props => {
   const { data: availableToClaim } = useAmountClaimableBy(w3.account ?? undefined);
   const cooldownPeriodSeconds = useStakingCooldown().data;
   const unstakeWindowSeconds = useUnstakeWindow().data;
+  const stakeMutation = useStakeMutation({ chainId: w3.chainId ?? undefined, address: w3.account ?? undefined });
   if (w3.library == null) {
     return (
       <StakingErrorWrapper>
@@ -65,7 +67,7 @@ export const Staking: React.FC<StakingProps> = _props => {
       availableToStake={availableToStake}
       activateCooldown={() => {}}
       claimRewards={(toAddress: string) => {}}
-      stake={(amount: BigNumber) => {}}
+      stake={(amount: BigNumber) => stakeMutation.mutate({ amount, library: w3.library })}
       unstake={() => {}}
     />
   );

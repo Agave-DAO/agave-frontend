@@ -16,7 +16,7 @@ export interface QueryHook<
   TArgs extends unknown[]
 > {
   (this: void, ...params: TArgs): QueryHookResult<TData, TKey>;
-  buildKey: (this: void, ...args: TArgs) => TKey;
+  buildKey: (this: void, chainId: ChainId | undefined, address: string | undefined, ...args: TArgs) => [ChainId | undefined, string | undefined, ...TKey];
   invoke: (
     this: void,
     hookParams: QueryHookParams<TKey>,
@@ -115,7 +115,9 @@ export function buildQueryHook<
     );
     return { data, error, key: queryKey };
   }
-  useBuiltQueryHook.buildKey = buildKey;
+  useBuiltQueryHook.buildKey =
+    (chainId: ChainId | undefined, address: string | undefined, ...args: TArgs): [ChainId | undefined, string | undefined, ...TKey] =>
+      [chainId, address, ...buildKey(...args)];
   useBuiltQueryHook.invoke = invoke;
   const bound: QueryHook<TData, TKey, TArgs> = useBuiltQueryHook;
 
