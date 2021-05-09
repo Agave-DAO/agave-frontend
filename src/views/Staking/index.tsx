@@ -4,7 +4,7 @@ import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
-import { useAmountAvailableToStake, useAmountClaimableBy, useAmountStakedBy, useStakingCooldown, useStakingPerSecondPerAgaveYield, useTotalStakedForAllUsers } from "./queries";
+import { useAmountAvailableToStake, useAmountClaimableBy, useAmountStakedBy, useStakingCooldown, useStakingPerSecondPerAgaveYield, useTotalStakedForAllUsers, useUnstakeWindow } from "./queries";
 
 export interface StakingProps {}
 
@@ -32,7 +32,8 @@ export const Staking: React.FC<StakingProps> = _props => {
   const { data: amountStaked } = useAmountStakedBy(w3.account ?? undefined);
   const { data: availableToStake } = useAmountAvailableToStake(w3.account ?? undefined);
   const { data: availableToClaim } = useAmountClaimableBy(w3.account ?? undefined);
-  const cooldownPeriodSeconds = useStakingCooldown().data ?? 60 * 60 * 24 * 10;
+  const cooldownPeriodSeconds = useStakingCooldown().data;
+  const unstakeWindowSeconds = useUnstakeWindow().data;
   if (w3.library == null) {
     return (
       <StakingErrorWrapper>
@@ -58,6 +59,7 @@ export const Staking: React.FC<StakingProps> = _props => {
     <StakingLayout
       yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}
       cooldownPeriodSeconds={cooldownPeriodSeconds}
+      unstakeWindowSeconds={unstakeWindowSeconds}
       amountStaked={amountStaked}
       availableToClaim={availableToClaim}
       availableToStake={availableToStake}

@@ -28,6 +28,7 @@ export interface StakingBannerProps {}
 export interface StakingLayoutProps {
   yieldPerAgavePerSecond: BigNumber | undefined;
   cooldownPeriodSeconds: BigNumberish | undefined;
+  unstakeWindowSeconds: BigNumberish | undefined;
   amountStaked: BigNumber | undefined;
   availableToClaim: BigNumber | undefined;
   availableToStake: BigNumber | undefined;
@@ -187,9 +188,24 @@ const StakingSubCard: React.FC<{
   );
 };
 
+export function secondsToString(numSeconds: BigNumberish): String {
+  const cdps = BigNumber.from(numSeconds);
+  if (cdps.lt(60)) {
+    return `${Math.round((cdps.toNumber()) * 10) / 10} seconds`;
+  }
+  if (cdps.lt(60 * 60)) {
+    return `${Math.round((cdps.toNumber() / 60) * 10) / 10} minutes`;
+  }
+  if (cdps.lt(60 * 60 * 24)) {
+    return `${Math.round((cdps.toNumber() / (60 * 60)) * 10) / 10} hours`;
+  }
+  return `${Math.round((cdps.toNumber() / (60 * 60 * 24)) * 10) / 10} days`;
+}
+
 export const StakingLayout: React.FC<StakingLayoutProps> = ({
   yieldPerAgavePerSecond,
   cooldownPeriodSeconds,
+  unstakeWindowSeconds,
   amountStaked,
   availableToClaim,
   availableToStake,
@@ -207,21 +223,30 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
     if (cooldownPeriodSeconds === undefined) {
       return "-";
     }
-    const cdps = BigNumber.from(cooldownPeriodSeconds);
-    if (cdps.lt(60 * 60)) {
-      return `${Math.round((cdps.toNumber() / 60) * 10) / 10} minutes`;
-    }
-    if (cdps.lt(60 * 60 * 24)) {
-      return `${Math.round((cdps.toNumber() / (60 * 60)) * 10) / 10} hours`;
-    }
-    return `${Math.round((cdps.toNumber() / (60 * 60 * 24)) * 10) / 10} days`;
+    return secondsToString(cooldownPeriodSeconds);
   }, [cooldownPeriodSeconds]);
+
+  const unstakeWindow = React.useMemo(() => {
+    if (unstakeWindowSeconds === undefined) {
+      return "-";
+    }
+    return secondsToString(unstakeWindowSeconds);
+  }, [unstakeWindowSeconds]);
+
   const [amount, setAmount] = React.useState<BigNumber | undefined>(
     BigNumber.from(0)
   );
-  const yieldPerMonth = yieldPerAgavePerSecond?.mul(60 * 60 * 24 * 31);
-  const yieldPerYear = yieldPerAgavePerSecond?.mul(60 * 60 * 24 * 365);
-  const stakingAPY =
+  const yieldPerSecond = React.useMemo(() =>
+    amountStaked ? yieldPerAgavePerSecond?.mul(amountStaked).div(constants.WeiPerEther) : undefined,
+    [amountStaked, yieldPerAgavePerSecond]);
+
+  const [yieldPerMonth, yieldPerYear] = React.useMemo(() =>
+    [
+      yieldPerSecond?.mul(60 * 60 * 24 * 31),
+      yieldPerSecond?.mul(60 * 60 * 24 * 365),
+    ],
+    [yieldPerSecond]);
+  const stakingAPY = React.useMemo(() =>
     amountStaked?.gt(0) && yieldPerYear?.gt(0)
       ? FixedNumber.fromValue(
           amountStaked
@@ -236,7 +261,8 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           .toString()
       : amountStaked !== undefined && yieldPerYear !== undefined
       ? "0"
-      : "-";
+      : "-",
+      [amountStaked, yieldPerYear]);
   return (
     <HStack
       boxSizing="border-box"
@@ -395,6 +421,10 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           <Flex width="100%" justifyContent="space-between">
             <Text>Cooldown period</Text>
             <Text fontWeight="bold">{cooldownPeriod}</Text>
+          </Flex>
+          <Flex width="100%" justifyContent="space-between">
+            <Text>Unstake Window</Text>
+            <Text fontWeight="bold">{unstakeWindow}</Text>
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Staking APY</Text>
