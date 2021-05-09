@@ -108,6 +108,22 @@ export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
   () => constants.Zero
 );
 
+export const useUnstakeWindow = buildQueryHookWhenParamsDefinedChainAddrs<
+  BigNumber,
+  [_prefixStaking: "staking", _prefixRewards: "unstakeWindow"],
+  []
+>(
+  async params => {
+    const contract = StakedToken__factory.connect(
+      params.chainAddrs.staking,
+      params.library.getSigner()
+    );
+    return await contract.UNSTAKE_WINDOW();
+  },
+  () => ["staking", "unstakeWindow"],
+  () => constants.Zero
+);
+
 export const useTotalStakedForAllUsers = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
   [_prefixStaking: "staking", _prefixRewards: "totalSupply"],
