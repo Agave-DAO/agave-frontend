@@ -18,8 +18,11 @@ import {
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
-import { BigNumber } from "ethers";
+import { BigNumber, FixedNumber } from "ethers";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
+import { useTotalStakedForAllUsers } from "./queries";
+
+export interface StakingBannerProps {}
 
 export interface StakingLayoutProps {
   agavePerMonth: number;
@@ -27,41 +30,49 @@ export interface StakingLayoutProps {
   stakingAPY: number;
 }
 
-export const StakingBanner: React.FC<{ tvl: string }> = props => (
-  <Center
-    px={{ base: "2.3rem", md: "4.7rem" }}
-    width="100%"
-    justifyContent="space-between"
-  >
-    <Text
-      fontWeight="bold"
-      color="white"
-      fontSize={{ base: "1.8rem", md: "2.4rem" }}
-    >
-      Staking
-    </Text>
+export const StakingBanner: React.FC<StakingBannerProps> = props => {
+  // TODO: Change TVL to dollar amount rather than AGVE ammount
+  const { data: totalAgaveStaked } = useTotalStakedForAllUsers();
+  const tvl = totalAgaveStaked
+    ? FixedNumber.fromValue(totalAgaveStaked, 18).round(4).toString()
+    : "0"; //(1782531.59).toLocaleString();
+
+  return (
     <Center
-      flexDirection={{ base: "column", md: "row" }}
-      alignItems={{ base: "flex-end", md: "center" }}
+      px={{ base: "2.3rem", md: "4.7rem" }}
+      width="100%"
+      justifyContent="space-between"
     >
       <Text
-        color="white"
-        fontSize={{ base: "1.2rem", md: "1.6rem" }}
-        mr={{ md: "1.2rem" }}
-      >
-        Funds in the Safety Module
-      </Text>
-      <Text
-        fontSize={{ base: "1.6rem", md: "2.4rem" }}
         fontWeight="bold"
-        bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-        backgroundClip="text"
+        color="white"
+        fontSize={{ base: "1.8rem", md: "2.4rem" }}
       >
-        ${props.tvl}
+        Staking
       </Text>
+      <Center
+        flexDirection={{ base: "column", md: "row" }}
+        alignItems={{ base: "flex-end", md: "center" }}
+      >
+        <Text
+          color="white"
+          fontSize={{ base: "1.2rem", md: "1.6rem" }}
+          mr={{ md: "1.2rem" }}
+        >
+          Funds in the Safety Module
+        </Text>
+        <Text
+          fontSize={{ base: "1.6rem", md: "2.4rem" }}
+          fontWeight="bold"
+          bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+          backgroundClip="text"
+        >
+          {tvl} AGVE
+        </Text>
+      </Center>
     </Center>
-  </Center>
-);
+  );
+};
 
 const StakingSubCard: React.FC<{
   isModalTrigger?: boolean;

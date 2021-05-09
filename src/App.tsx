@@ -58,8 +58,6 @@ interface IAppProps {}
 
 const App: React.FC<IAppProps> = props => {
   const notifications = React.useMemo(() => <ReactNotification />, []);
-  // TODO: Change this as real time ..
-  const TOTAL_VALUE_LOCKED = (1782531.59).toLocaleString();
 
   useReduxWeb3Updater();
   return (
@@ -72,7 +70,7 @@ const App: React.FC<IAppProps> = props => {
               // prettier-ignore
               <Switch>
                 <Route path="/stake">
-                  <StakingBanner tvl={TOTAL_VALUE_LOCKED} />
+                  <StakingBanner/>
                 </Route>
                 <Route path="/markets">Welcome!</Route>
               </Switch>
