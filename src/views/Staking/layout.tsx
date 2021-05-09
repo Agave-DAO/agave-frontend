@@ -28,16 +28,27 @@ export interface StakingLayoutProps {
 }
 
 export const StakingBanner: React.FC<{ tvl: string }> = props => (
-  <Flex px="4.7rem" basis="100%" justifyContent="space-between">
-    <Text fontWeight="bold" color="white" fontSize="2.4rem">
+  <Center px="4.7rem" width="100%" justifyContent="space-between">
+    <Text
+      fontWeight="bold"
+      color="white"
+      fontSize={{ base: "1.8rem", md: "2.4rem" }}
+    >
       Staking
     </Text>
-    <Center>
-      <Text color="white" fontSize="1.6rem" mr="1.2rem">
+    <Center
+      flexDirection={{ base: "column", md: "row" }}
+      alignItems={{ base: "flex-end", md: "center" }}
+    >
+      <Text
+        color="white"
+        fontSize={{ base: "1.2rem", md: "1.6rem" }}
+        mr={{ md: "1.2rem" }}
+      >
         Funds in the Safety Module
       </Text>
       <Text
-        fontSize="2.4rem"
+        fontSize={{ base: "1.6rem", md: "2.4rem" }}
         fontWeight="bold"
         bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
         backgroundClip="text"
@@ -45,7 +56,7 @@ export const StakingBanner: React.FC<{ tvl: string }> = props => (
         ${props.tvl}
       </Text>
     </Center>
-  </Flex>
+  </Center>
 );
 
 const StakingSubCard: React.FC<{

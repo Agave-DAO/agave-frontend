@@ -16,16 +16,24 @@ function warnUser(title: string, message?: string | undefined): void {
 }
 
 const PrivacySection = (
-  <Box className="privacy">
-    <Box className="paragraph">
-      By unlocking Your wallet You agree to our <b>Terms of Service</b>,{" "}
-      <b>Privacy</b> and <b>Cookie Policy</b>.
-    </Box>
-    <Box className="paragraph">
-      <b>Disclaimer:</b> Wallets are provided by External Providers and by
-      selecting you agree to Terms of those Providers. Your access to the wallet
-      might be reliant on the External Provider being operational.
-    </Box>
+  <Box
+    fontSize={{ base: "1rem", md: "1.4rem" }}
+    color="white"
+    className="privacy"
+    my="2rem"
+  >
+    <Text fontSize={{ base: "1.2rem", md: "1.4rem" }}>
+      By unlocking Your wallet You agree to our{" "}
+      <strong style={{ fontSize: "inherit" }}>Terms of Service</strong>,{" "}
+      <strong style={{ fontSize: "inherit" }}>Privacy</strong> and{" "}
+      <strong style={{ fontSize: "inherit" }}>Cookie Policy</strong>.
+    </Text>
+    <Text my="1.5rem" fontSize={{ base: "1.2rem", md: "1.4rem" }}>
+      <strong style={{ fontSize: "inherit" }}>Disclaimer:</strong> Wallets are
+      provided by External Providers and by selecting you agree to Terms of
+      those Providers. Your access to the wallet might be reliant on the
+      External Provider being operational.
+    </Text>
   </Box>
 );
 
@@ -37,9 +45,10 @@ const UnlockWallet: React.FC<{}> = props => {
     const firstIntegerRegex = /(\d+)/;
     const selectedChain = error.message.match(firstIntegerRegex)?.[0];
     detail = (
-      <>
+      <Center flexDirection="column">
         <Text
           mt="1.3rem"
+          fontSize={{ base: "1.6rem", md: "inherit" }}
           mb="6px"
           bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
           backgroundClip="text"
@@ -47,12 +56,22 @@ const UnlockWallet: React.FC<{}> = props => {
         >
           Agave Unsupported Network
         </Text>
-        <Text color="white" textAlign="center" mb="1.6rem">
+        <Text
+          color="white"
+          textAlign="center"
+          fontSize={{ base: "1.4rem", md: "inherit" }}
+          mb={{ base: ".8rem", md: "1.6rem" }}
+        >
           Please change your wallet selection to one of our supported networks.
         </Text>
 
         {selectedChain ? (
-          <Text color="white" textAlign="center" mb="1.6rem">
+          <Text
+            color="white"
+            textAlign="center"
+            mb={{ base: ".8rem", md: "1.6rem" }}
+            fontSize={{ base: "1.4rem", md: "inherit" }}
+          >
             Currently selected chain: {selectedChain}
           </Text>
         ) : null}
@@ -69,7 +88,7 @@ const UnlockWallet: React.FC<{}> = props => {
           </List>
           {PrivacySection}
         </Box>
-      </>
+      </Center>
     );
   }
 
@@ -86,15 +105,16 @@ const UnlockWallet: React.FC<{}> = props => {
 
   return (
     <Center
-      minW="31vw"
-      maxW="53.6rem"
-      minH="40vh"
-      maxH="33.6rem"
+      minW={{ md: "31vw" }}
+      maxW={{ base: "90vw", md: "53.6rem" }}
+      minH={{ base: "33.6rem", md: "40vh" }}
+      maxH="max-content"
       m="auto"
-      px="7.2rem"
-      bg="primary.500"
+      px={{ base: "4.3rem", md: "7.2rem" }}
+      bg="primary.900"
       flexDirection="column"
       rounded="lg"
+      py={{ base: "4rem", md: "5rem" }}
     >
       <img src={coloredAgaveLogo} alt="Colored Agave" />
       {detail || (
@@ -107,16 +127,23 @@ const UnlockWallet: React.FC<{}> = props => {
             backgroundClip="text"
             // textFillColor="transparent"
             fontWeight="bold"
+            fontSize={{ base: "1.6rem", md: "inherit" }}
           >
             Connect your wallet
           </Text>
-          <Text color="white" textAlign="center" mb="2.6rem">
+          <Text
+            color="white"
+            textAlign="center"
+            mb="2.6rem"
+            fontSize={{ base: "1.4rem", md: "inherit" }}
+          >
             To see your deposited / borrowed assets, you need to connect your
             wallet to xDai network.
           </Text>
           <Button
-            minW="15.8rem"
-            py=".8rem"
+            minW={{ base: "100%", md: "15.8rem" }}
+            fontSize={{ base: "1.4rem", md: "inherit" }}
+            py={{ base: "1.5rem", md: ".8rem" }}
             color="secondary.900"
             bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
             onClick={onMetamaskConnect}

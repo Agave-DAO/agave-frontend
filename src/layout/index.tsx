@@ -26,7 +26,10 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
   const childrenMemo = React.useMemo(
     () =>
       !activeConnection ? (
-        <HStack spacing="1.6rem">
+        <HStack
+          spacing={{ base: "2.4rem", md: "1.6rem" }}
+          height={{ base: "100%" }}
+        >
           <UnlockWallet />
         </HStack>
       ) : (
@@ -38,20 +41,30 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
   return (
     <Box position="relative" bg="secondary.900" h="100vh" overflow="hidden">
       <Header />
-      <Box minH="11.1rem" bg="primary.500" position="relative" zIndex="2" />
       <Box
-        position="absolute"
+        minH="11.1rem"
+        bg="primary.500"
+        position="relative"
         zIndex="2"
-        top="9.4rem"
+        display={{ base: "none", md: "block" }}
+      />
+      <Box
+        position={{ base: "relative", md: "absolute" }}
+        zIndex="2"
+        top={{ md: "9.4rem" }}
         left="50%"
         transform="translateX(-50%)"
         // lg, md, sm
-        minW={["70vw", "80vw", "90vw"]}
+        minW={{ base: "70vw", md: "80vw", lg: "90vw" }}
       >
-        <Center rounded="lg" minH="9.6rem" mb="3.5rem" bg="primary.900">
+        <Center
+          rounded={{ md: "lg" }}
+          minH={{ base: "6.6rem", md: "9.6rem" }}
+          mb={{ base: "2.6rem", md: "3.5rem" }}
+          bg={{ base: "primary.500", md: "primary.900" }}
+        >
           {headerMemo}
         </Center>
-
         {childrenMemo}
       </Box>
       <Center mt="20rem">
