@@ -86,12 +86,14 @@ const StakingSubCard: React.FC<{
   title: string;
   value: string;
   subValue: string;
+  disabled?: boolean;
   buttonText: string;
 }> = ({
   isModalTrigger,
   title,
   value,
   subValue,
+  disabled,
   buttonText,
   children: modalChildren,
 }) => {
@@ -146,6 +148,7 @@ const StakingSubCard: React.FC<{
         my="1.2rem"
         width="100%"
         px={{ base: "5%", md: "2.171rem" }}
+        disabled={disabled}
       >
         {buttonText}
       </Button>
@@ -316,12 +319,12 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             title="Agave staked"
             value={amountStaked ? FixedNumber.fromValue(amountStaked, 18).toString() : "-"}
             subValue={`$ ${dollarValueStringOf(amountStaked)}`}
-            // enabled={amountStaked?.gt(0) ?? false}
+            disabled={!(amountStaked?.gt(0) ?? false)}
             onClick={() => {}}
           >
             <>
               <ModalHeader fontSize="1.6rem" fontWeight="bold">
-                Cooldown & Unstake Window Period
+                Cooldown &amp; Unstake Window Period
               </ModalHeader>
               <ModalBody>
                 You can only withdraw your assets from the Security Module after
@@ -340,7 +343,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             value={availableToClaim ? FixedNumber.fromValue(availableToClaim, 18).toString() : "-"}
             subValue={`$ ${dollarValueStringOf(availableToClaim)}`}
             buttonText="Claim"
-            // enabled={availableToClaim?.gt(0) ?? false}
+            disabled={!(availableToClaim?.gt(0) ?? false)}
             onClick={() => {}}
           />
         </HStack>
