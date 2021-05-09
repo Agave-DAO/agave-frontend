@@ -294,6 +294,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           px={{ base: "10rem", md: "6rem" }}
           py="1.5rem"
           fontSize="1.4rem"
+          disabled={amount === undefined || amount.lte(0)}
         >
           Stake
         </Button>
