@@ -18,16 +18,22 @@ import {
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
-import { BigNumber, FixedNumber } from "ethers";
+import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 import { useTotalStakedForAllUsers } from "./queries";
 
 export interface StakingBannerProps {}
 
 export interface StakingLayoutProps {
-  agavePerMonth: number;
-  cooldownPeriodSeconds: number;
-  stakingAPY: number;
+  yieldPerAgavePerSecond: BigNumber | undefined;
+  cooldownPeriodSeconds: BigNumberish | undefined;
+  amountStaked: BigNumber | undefined;
+  availableToClaim: BigNumber | undefined;
+  availableToStake: BigNumber | undefined;
+  activateCooldown: () => void;
+  claimRewards: (toAddress: string) => void;
+  stake: (amount: BigNumber) => void;
+  unstake: () => void;
 }
 
 export const StakingBanner: React.FC<StakingBannerProps> = props => {
@@ -178,13 +184,34 @@ const StakingSubCard: React.FC<{
 };
 
 export const StakingLayout: React.FC<StakingLayoutProps> = ({
-  agavePerMonth: _agavePerMonth,
-  cooldownPeriodSeconds: _cooldownPeriodSeconds,
-  stakingAPY: _stakingAPY,
+  yieldPerAgavePerSecond,
+  cooldownPeriodSeconds,
+  amountStaked,
+  availableToClaim,
+  availableToStake,
+  activateCooldown,
+  claimRewards,
+  stake,
+  unstake,
 }) => {
   const [amount, setAmount] = React.useState<BigNumber | undefined>(
     BigNumber.from(0)
   );
+  const yieldPerMonth = yieldPerAgavePerSecond?.mul(60 * 60 * 24 * 31);
+  const yieldPerYear = yieldPerAgavePerSecond?.mul(60 * 60 * 24 * 365);
+  const stakingAPY =
+    amountStaked?.gt(0) && yieldPerYear?.gt(0)
+      ? FixedNumber.fromValue(
+          amountStaked
+            .add(yieldPerYear)
+            // .div(constants.WeiPerEther)
+            .sub(amountStaked)
+          // .divUnsafe(FixedNumber.fromValue(amountStaked.add(yieldPerYear), 18))
+          // .subUnsafe(FixedNumber.fromValue(constants.WeiPerEther, 18))
+          , 18)
+          .round(2)
+          .toString()
+      : (amountStaked !== undefined && yieldPerYear !== undefined ? "0" : "-");
   return (
     <HStack
       boxSizing="border-box"
@@ -306,7 +333,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         >
           <Flex width="100%" justifyContent="space-between">
             <Text>Agave per month</Text>
-            <Text fontWeight="bold">1.98</Text>
+            <Text fontWeight="bold">{yieldPerMonth ? FixedNumber.fromValue(yieldPerMonth, 18).round(2).toString() : "-"}</Text>
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Cooldown period</Text>
@@ -314,7 +341,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Staking APY</Text>
-            <Text fontWeight="bold">79.1%</Text>
+            <Text fontWeight="bold">{yieldPerYear ? FixedNumber.fromValue(yieldPerYear, 18).round().toString() : "-"}/yr or %{stakingAPY}</Text>
           </Flex>
         </VStack>
       </Center>

@@ -1,9 +1,10 @@
 import { Center, Text } from "@chakra-ui/react";
+import { BigNumber, constants } from "ethers";
 import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
-import { useTotalStakedForAllUsers } from "./queries";
+import { useAmountStakedBy, useStakingPerSecondPerAgaveYield, useTotalStakedForAllUsers } from "./queries";
 
 export interface StakingProps {}
 
@@ -27,7 +28,8 @@ const StakingErrorWrapper: React.FC = ({ children }) => {
 
 export const Staking: React.FC<StakingProps> = _props => {
   const w3 = useAppWeb3(); // We don't unpack because otherwise typescript loses useAppWeb3's magic
-  const rewards = useTotalStakedForAllUsers();
+  const { data: stakingPerSecondPerAgaveYield } = useStakingPerSecondPerAgaveYield();
+  const { data: amountStaked } = useAmountStakedBy(w3.account ?? undefined);
   if (w3.library == null) {
     return (
       <StakingErrorWrapper>
@@ -49,15 +51,18 @@ export const Staking: React.FC<StakingProps> = _props => {
     );
   }
 
-  console.log("Total rewards: ", rewards);
-  const agavePerMonth = 1.98;
   const cooldownPeriodSeconds = 60 * 60 * 24 * 10;
-  const stakingAPY = 0.791;
   return (
     <StakingLayout
-      agavePerMonth={agavePerMonth}
+      yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}
       cooldownPeriodSeconds={cooldownPeriodSeconds}
-      stakingAPY={stakingAPY}
+      amountStaked={BigNumber.from(1).mul(constants.WeiPerEther)}
+      availableToClaim={BigNumber.from(0)}
+      availableToStake={BigNumber.from(0)}
+      activateCooldown={() => {}}
+      claimRewards={(toAddress: string) => {}}
+      stake={(amount: BigNumber) => {}}
+      unstake={() => {}}
     />
   );
 };
