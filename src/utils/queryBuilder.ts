@@ -109,6 +109,9 @@ type ExcludeTuple<T, U> = T extends unknown[]
   : never;
 // Given a tuple type, strips `undefined` from all slots
 type AllDefined<T> = ExcludeTuple<T, undefined>;
+type AllOrUndefined<T> = T extends unknown[]
+  ? { [K in keyof T]: T[K] | undefined }
+  : never;
 
 export function buildQueryHookWhenParamsDefined<
   TData,
@@ -119,11 +122,11 @@ export function buildQueryHookWhenParamsDefined<
     hookParams: QueryHookParams<TKey>,
     ...args: AllDefined<TArgs>
   ) => Promise<TData>,
-  buildKey: (...args: TArgs) => TKey,
+  buildKey: (...args: AllOrUndefined<TArgs>) => TKey,
   buildInitialData?: (() => TData | undefined) | undefined
-): (...params: TArgs) => QueryHookResult<TData, TKey> {
-  return buildQueryHook(
-    (hookParams, ...args: TArgs) =>
+): (...params: AllOrUndefined<TArgs>) => QueryHookResult<TData, TKey> {
+  return buildQueryHook<TData, TKey, AllOrUndefined<TArgs>>(
+    (hookParams, ...args: AllOrUndefined<TArgs>) =>
       args.every(a => a !== undefined)
         ? invokeWhenDefined(hookParams, ...(args as AllDefined<TArgs>))
         : Promise.resolve(undefined),
@@ -146,11 +149,11 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
     hookParams: ContractQueryHookParams<TKey>,
     ...args: AllDefined<TArgs>
   ) => Promise<TData>,
-  buildKey: (...args: TArgs) => TKey,
+  buildKey: (...args: AllOrUndefined<TArgs>) => TKey,
   buildInitialData?: (() => TData | undefined) | undefined
-): (...params: TArgs) => QueryHookResult<TData, TKey> {
-  return buildQueryHook(
-    (hookParams, ...args: TArgs) => {
+): (...params: AllOrUndefined<TArgs>) => QueryHookResult<TData, TKey> {
+  return buildQueryHook<TData, TKey, AllOrUndefined<TArgs>>(
+    (hookParams, ...args: AllOrUndefined<TArgs>) => {
       const chainAddrs =
         hookParams.chainId !== undefined
           ? getChainAddresses(hookParams.chainId)
