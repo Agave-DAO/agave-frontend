@@ -4,7 +4,7 @@ import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
-import { useAmountStakedBy, useStakingPerSecondPerAgaveYield, useTotalStakedForAllUsers } from "./queries";
+import { useAmountAvailableToStake, useAmountClaimableBy, useAmountStakedBy, useStakingCooldown, useStakingPerSecondPerAgaveYield, useTotalStakedForAllUsers } from "./queries";
 
 export interface StakingProps {}
 
@@ -30,6 +30,9 @@ export const Staking: React.FC<StakingProps> = _props => {
   const w3 = useAppWeb3(); // We don't unpack because otherwise typescript loses useAppWeb3's magic
   const { data: stakingPerSecondPerAgaveYield } = useStakingPerSecondPerAgaveYield();
   const { data: amountStaked } = useAmountStakedBy(w3.account ?? undefined);
+  const { data: availableToStake } = useAmountAvailableToStake(w3.account ?? undefined);
+  const { data: availableToClaim } = useAmountClaimableBy(w3.account ?? undefined);
+  const cooldownPeriodSeconds = useStakingCooldown().data ?? 60 * 60 * 24 * 10;
   if (w3.library == null) {
     return (
       <StakingErrorWrapper>
@@ -51,14 +54,13 @@ export const Staking: React.FC<StakingProps> = _props => {
     );
   }
 
-  const cooldownPeriodSeconds = 60 * 60 * 24 * 10;
   return (
     <StakingLayout
       yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}
       cooldownPeriodSeconds={cooldownPeriodSeconds}
-      amountStaked={BigNumber.from(1).mul(constants.WeiPerEther)}
-      availableToClaim={BigNumber.from(0)}
-      availableToStake={BigNumber.from(0)}
+      amountStaked={amountStaked}
+      availableToClaim={availableToClaim}
+      availableToStake={availableToStake}
       activateCooldown={() => {}}
       claimRewards={(toAddress: string) => {}}
       stake={(amount: BigNumber) => {}}

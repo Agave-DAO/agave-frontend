@@ -194,6 +194,23 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   stake,
   unstake,
 }) => {
+  function dollarValueStringOf(agaveAmount: BigNumber | undefined): String {
+    return "-";
+  }
+
+  const cooldownPeriod = React.useMemo(() => {
+    if (cooldownPeriodSeconds === undefined) {
+      return "-";
+    }
+    const cdps = BigNumber.from(cooldownPeriodSeconds);
+    if (cdps.lt(60 * 60)) {
+      return `${Math.round(cdps.toNumber() / 60 * 10) / 10} minutes`;
+    }
+    if (cdps.lt(60 * 60 * 24)) {
+      return `${Math.round(cdps.toNumber() / (60 * 60) * 10) / 10} hours`;
+    }
+    return `${Math.round(cdps.toNumber() / (60 * 60 * 24) * 10) / 10} days`;
+  }, [cooldownPeriodSeconds]);
   const [amount, setAmount] = React.useState<BigNumber | undefined>(
     BigNumber.from(0)
   );
@@ -256,7 +273,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 Available to Stake
               </Text>
               <Text color="white" fontSize="inherit">
-                9.99 Agave
+                {availableToStake && FixedNumber.fromValue(availableToStake, 18).toString()} Agave
               </Text>
             </Flex>
             <WeiBox
@@ -264,7 +281,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
               decimals={18}
               setAmount={setAmount}
               icon={coloredAgaveLogo}
-              maxAmount={BigNumber.from(10).pow(18)}
+              maxAmount={availableToStake}
             />
           </VStack>
         </Box>
@@ -296,8 +313,9 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             isModalTrigger
             buttonText="Activate cooldown"
             title="Agave staked"
-            value="8.782"
-            subValue="$ 87893.23"
+            value={amountStaked ? FixedNumber.fromValue(amountStaked, 18).toString() : "-"}
+            subValue={`$ ${dollarValueStringOf(amountStaked)}`}
+            // enabled={amountStaked?.gt(0) ?? false}
             onClick={() => {}}
           >
             <>
@@ -318,9 +336,10 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </StakingSubCard>
           <StakingSubCard
             title="Claimable Agave"
-            value="0.23"
-            subValue="$ 87893.23"
+            value={availableToClaim ? FixedNumber.fromValue(availableToClaim, 18).toString() : "-"}
+            subValue={`$ ${dollarValueStringOf(availableToClaim)}`}
             buttonText="Claim"
+            // enabled={availableToClaim?.gt(0) ?? false}
             onClick={() => {}}
           />
         </HStack>
@@ -337,7 +356,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Cooldown period</Text>
-            <Text fontWeight="bold">12 days</Text>
+            <Text fontWeight="bold">{cooldownPeriod}</Text>
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Staking APY</Text>
