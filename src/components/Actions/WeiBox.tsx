@@ -82,10 +82,10 @@ const TextInput: React.FC<InputProps> = props => {
   return (
     <Input
       size="lg"
-      pl="5rem"
-      pr="15rem"
+      pl={{ base: "3.5rem", md: "5rem" }}
+      pr={{ base: "13rem", md: "15rem" }}
       py="2rem"
-      fontSize="1.6rem"
+      fontSize={{ base: "1.4rem", md: "1.6rem" }}
       alignItems="center"
       _hover={{ background: "primary.500", color: "secondary.900" }}
       _focus={{ background: "secondary.900", color: "white" }}
@@ -259,7 +259,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
             typeof icon === "string" ? (
               <Image
                 src={icon}
-                boxSize="3rem"
+                boxSize={{ base: "2rem", md: "3rem" }}
                 alt="Image left element for WeiBox"
               />
             ) : (
@@ -275,8 +275,11 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
     () => (
       <InputRightElement minWidth="4.5rem" height="100%" w="max-content">
         <HStack spacing="1rem" mr="1rem" height="100%">
-          <Text color="white">{weiView ? " Wei" : " Tokens"}</Text>
+          <Text fontSize={{ base: "1.4rem", md: "inherit" }} color="white">
+            {weiView ? " Wei" : " Tokens"}
+          </Text>
           <Button
+            fontSize={{ base: "1.4rem", md: "inherit" }}
             h="100%"
             size="xl"
             background="transparent"
@@ -292,6 +295,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
             <>
               &nbsp;
               <Button
+                fontSize={{ base: "1.4rem", md: "inherit" }}
                 h="100%"
                 size="xl"
                 background="transparent"
