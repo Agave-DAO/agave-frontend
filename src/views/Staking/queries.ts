@@ -53,7 +53,7 @@ export const useTotalRewardsBalance = buildQueryHook<
     return balance;
   },
   addr => ["staking", "rewards", addr],
-  () => constants.Zero
+  () => undefined
 );
 
 export const useStakingEvents = buildQueryHook<
@@ -89,7 +89,7 @@ export const useStakingEvents = buildQueryHook<
     return balance;
   },
   stakerAddress => ["staking", "events", stakerAddress],
-  () => constants.Zero
+  () => undefined
 );
 
 export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -105,7 +105,7 @@ export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
     return await contract.COOLDOWN_SECONDS();
   },
   () => ["staking", "cooldown"],
-  () => constants.Zero
+  () => undefined
 );
 
 export const useUnstakeWindow = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -121,7 +121,7 @@ export const useUnstakeWindow = buildQueryHookWhenParamsDefinedChainAddrs<
     return await contract.UNSTAKE_WINDOW();
   },
   () => ["staking", "unstakeWindow"],
-  () => constants.Zero
+  () => undefined
 );
 
 export const useTotalStakedForAllUsers = buildQueryHookWhenParamsDefinedChainAddrs<
