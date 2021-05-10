@@ -9,6 +9,7 @@ import {
   useAmountAvailableToStake,
   useAmountClaimableBy,
   useAmountStakedBy,
+  useStakingAgavePrice,
   useStakingCooldown,
   useStakingPerSecondPerAgaveYield,
   useTotalStakedForAllUsers,
@@ -53,6 +54,8 @@ export const Staking: React.FC<StakingProps> = _props => {
     chainId: w3.chainId ?? undefined,
     address: w3.account ?? undefined,
   });
+  const agavePriceInNative = useStakingAgavePrice().data;
+  console.log(agavePriceInNative);
   const stakeMutationCall = React.useMemo(
     () => (amount: BigNumber) =>
       w3.library
@@ -88,6 +91,7 @@ export const Staking: React.FC<StakingProps> = _props => {
       yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}
       cooldownPeriodSeconds={cooldownPeriodSeconds}
       unstakeWindowSeconds={unstakeWindowSeconds}
+      agavePriceUsd={agavePriceInNative}
       amountStaked={amountStaked}
       availableToClaim={availableToClaim}
       availableToStake={availableToStake}

@@ -13,6 +13,7 @@ import {
   QueryClientProvider,
   QueryCache,
 } from "react-query";
+import { BigNumber, FixedNumber } from 'ethers';
 
 const reactQueryClient = new QueryClient({
   queryCache: new QueryCache(),
@@ -49,5 +50,7 @@ reportWebVitals();
 
 
 if (process.env.NODE_ENV === "development" && module.hot) {
+  (window as any).FixedNumber = FixedNumber;
+  (window as any).BigNumber = BigNumber;
   module.hot.accept("./App", renderApp)
 }

@@ -4,6 +4,9 @@ import {
   Erc20abi__factory,
   StakedToken__factory,
   AaveDistributionManager__factory,
+  AgaveLendingABI__factory,
+  ILendingPoolAddressesProvider__factory,
+  IPriceOracleGetter__factory,
 } from "../../contracts";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import {
@@ -247,5 +250,38 @@ export const useStakingPerSecondPerAgaveYield = buildQueryHookWhenParamsDefinedC
     return emissionPerSecond.mul(constants.WeiPerEther).div(totalStaked);
   },
   () => ["staking", "perSecondPerAgaveYield"],
+  () => undefined
+);
+
+export const useStakingAgavePrice = buildQueryHookWhenParamsDefinedChainAddrs<
+  BigNumber,
+  [_prefixStaking: "staking", _prefixAgavePrice: "agavePrice"],
+  []
+>(
+  async params => {
+    const signer = params.library.getSigner();
+    const stakingContract = StakedToken__factory.connect(
+      params.chainAddrs.staking,
+      signer
+    );
+    const lendingPool = AgaveLendingABI__factory.connect(
+      params.chainAddrs.lendingPool,
+      signer
+    );
+    const [addressProvider, stakedTokenAddress] = await Promise.all([
+      lendingPool
+        .getAddressesProvider()
+        .then(addr =>
+          ILendingPoolAddressesProvider__factory.connect(addr, signer)
+        ),
+      stakingContract.STAKED_TOKEN(),
+    ]);
+    const priceOracle = await addressProvider
+      .getPriceOracle()
+      .then(addr => IPriceOracleGetter__factory.connect(addr, signer));
+    const price = await priceOracle.getAssetPrice(stakedTokenAddress);
+    return price;
+  },
+  () => ["staking", "agavePrice"],
   () => undefined
 );

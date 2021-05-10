@@ -21,7 +21,7 @@ import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
-import { useTotalStakedForAllUsers } from "./queries";
+import { useStakingAgavePrice, useTotalStakedForAllUsers } from "./queries";
 
 export interface StakingBannerProps {}
 
@@ -29,6 +29,7 @@ export interface StakingLayoutProps {
   yieldPerAgavePerSecond: BigNumber | undefined;
   cooldownPeriodSeconds: BigNumberish | undefined;
   unstakeWindowSeconds: BigNumberish | undefined;
+  agavePriceUsd: BigNumber | undefined;
   amountStaked: BigNumber | undefined;
   availableToClaim: BigNumber | undefined;
   availableToStake: BigNumber | undefined;
@@ -39,11 +40,29 @@ export interface StakingLayoutProps {
 }
 
 export const StakingBanner: React.FC<StakingBannerProps> = props => {
-  // TODO: Change TVL to dollar amount rather than AGVE ammount
-  const { data: totalAgaveStaked } = useTotalStakedForAllUsers();
-  const tvl = totalAgaveStaked
-    ? FixedNumber.fromValue(totalAgaveStaked, 18).round(4).toString()
-    : "0"; //(1782531.59).toLocaleString();
+  const totalAgaveStaked = useTotalStakedForAllUsers().data;
+  const agavePriceInNative = useStakingAgavePrice().data;
+  const tokensLocked = totalAgaveStaked
+    ? (totalAgaveStaked
+        ? FixedNumber.fromValue(totalAgaveStaked, 18).round(2).toString()
+        : "0") + " AGVE"
+    : undefined;
+  const tvl =
+    agavePriceInNative !== undefined
+      ? "$ " +
+        (totalAgaveStaked
+          ? FixedNumber.fromValue(
+              totalAgaveStaked
+                .mul(agavePriceInNative)
+                .div(constants.WeiPerEther),
+              18
+            )
+              .round(2)
+              .toUnsafeFloat()
+              .toLocaleString()
+          : "0.00") +
+        ` (${tokensLocked})`
+      : tokensLocked;
 
   return (
     <Center
@@ -62,21 +81,25 @@ export const StakingBanner: React.FC<StakingBannerProps> = props => {
         flexDirection={{ base: "column", md: "row" }}
         alignItems={{ base: "flex-end", md: "center" }}
       >
-        <Text
-          color="white"
-          fontSize={{ base: "1.2rem", md: "1.6rem" }}
-          mr={{ md: "1.2rem" }}
-        >
-          Funds in the Safety Module
-        </Text>
-        <Text
-          fontSize={{ base: "1.6rem", md: "2.4rem" }}
-          fontWeight="bold"
-          bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-          backgroundClip="text"
-        >
-          {tvl} AGVE
-        </Text>
+        {tvl ? (
+          <>
+            <Text
+              color="white"
+              fontSize={{ base: "1.2rem", md: "1.6rem" }}
+              mr={{ md: "1.2rem" }}
+            >
+              Funds in the Safety Module
+            </Text>
+            <Text
+              fontSize={{ base: "1.6rem", md: "2.4rem" }}
+              fontWeight="bold"
+              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+              backgroundClip="text"
+            >
+              {tvl}
+            </Text>
+          </>
+        ) : null}
       </Center>
     </Center>
   );
@@ -209,6 +232,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   amountStaked,
   availableToClaim,
   availableToStake,
+  agavePriceUsd,
   activateCooldown,
   claimRewards,
   stake,
@@ -216,7 +240,15 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
 }) => {
   const [customAddress, setCustomAddress] = useState<string>("");
   function dollarValueStringOf(agaveAmount: BigNumber | undefined): String {
-    return "-";
+    if (agavePriceUsd === undefined || agaveAmount === undefined) {
+      return "-";
+    }
+    return FixedNumber.fromValue(
+      agavePriceUsd.mul(agaveAmount).div(constants.WeiPerEther),
+      18
+    )
+      .round(2)
+      .toString();
   }
 
   const cooldownPeriod = React.useMemo(() => {
