@@ -322,16 +322,21 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
     () =>
       amountStaked?.gt(0) && yieldPerYear?.gt(0)
         ? FixedNumber.fromValue(
-            amountStaked
-              .add(yieldPerYear)
-              // .div(constants.WeiPerEther)
-              .sub(amountStaked),
-            // .divUnsafe(FixedNumber.fromValue(amountStaked.add(yieldPerYear), 18))
-            // .subUnsafe(FixedNumber.fromValue(constants.WeiPerEther, 18))
+            yieldPerAgavePerSecond
+              ? yieldPerAgavePerSecond
+                  .mul(60 * 60 * 24 * 365)
+                  .sub(constants.WeiPerEther)
+                  .mul(100)
+              : yieldPerYear
+                  .mul(constants.WeiPerEther)
+                  .div(amountStaked)
+                  .sub(constants.WeiPerEther)
+                  .mul(100),
             18
           )
             .round(2)
-            .toString()
+            .toUnsafeFloat()
+            .toLocaleString()
         : amountStaked !== undefined && yieldPerYear !== undefined
         ? "0"
         : "-",
@@ -452,8 +457,8 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                     activeCooldown
                       .add(cooldownInfo?.cooldownPeriodSeconds ?? 0)
                       .toNumber() * 1000
-                  ).toLocaleString()}
-                  {" "}Until{" "}
+                  ).toLocaleString()}{" "}
+                  Until{" "}
                   {new Date(
                     activeCooldown
                       .add(cooldownInfo?.cooldownPeriodSeconds ?? 0)
@@ -533,7 +538,10 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             <Text>Agave per month</Text>
             <Text fontWeight="bold">
               {yieldPerMonth
-                ? FixedNumber.fromValue(yieldPerMonth, 18).round(2).toString()
+                ? FixedNumber.fromValue(yieldPerMonth, 18)
+                    .round(2)
+                    .toUnsafeFloat()
+                    .toLocaleString()
                 : "-"}
             </Text>
           </Flex>
@@ -547,12 +555,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </Flex>
           <Flex width="100%" justifyContent="space-between">
             <Text>Staking APY</Text>
-            <Text fontWeight="bold">
-              {yieldPerYear
-                ? FixedNumber.fromValue(yieldPerYear, 18).round().toString()
-                : "-"}
-              /yr or %{stakingAPY}
-            </Text>
+            <Text fontWeight="bold">{stakingAPY} %</Text>
           </Flex>
         </VStack>
       </Center>
