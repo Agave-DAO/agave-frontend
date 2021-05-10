@@ -481,7 +481,11 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
               ) : undefined
             }
             disabled={
-              activeCooldown !== undefined && activeUnstakeWindow === undefined
+              !(
+                (activeCooldown === undefined ||
+                  activeUnstakeWindow !== undefined) &&
+                amountStaked?.gt(0)
+              )
             }
             onClick={() => {
               if (

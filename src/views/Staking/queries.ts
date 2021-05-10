@@ -96,8 +96,8 @@ export const useStakingEvents = buildQueryHook<
 );
 
 export interface StakingCooldownInfo {
-  cooldownPeriodSeconds: BigNumber,
-  unstakeWindowSeconds: BigNumber,
+  cooldownPeriodSeconds: BigNumber;
+  unstakeWindowSeconds: BigNumber;
 }
 
 export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -110,7 +110,10 @@ export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
       params.chainAddrs.staking,
       params.library.getSigner()
     );
-    const [cooldownPeriodSeconds, unstakeWindowSeconds] = await Promise.all([contract.COOLDOWN_SECONDS(), contract.UNSTAKE_WINDOW()]);
+    const [cooldownPeriodSeconds, unstakeWindowSeconds] = await Promise.all([
+      contract.COOLDOWN_SECONDS(),
+      contract.UNSTAKE_WINDOW(),
+    ]);
     return { cooldownPeriodSeconds, unstakeWindowSeconds };
   },
   () => ["staking", "cooldown"],
@@ -237,14 +240,18 @@ export const useStakingPerSecondPerAgaveYield = buildQueryHookWhenParamsDefinedC
       params.chainAddrs.staking
     );
     const emissionPerSecond = stakedTokenAssetInfo.emissionPerSecond;
-    return emissionPerSecond.mul(constants.WeiPerEther).div(totalStaked);
+    if (totalStaked.gt(0)) {
+      return emissionPerSecond.mul(constants.WeiPerEther).div(totalStaked);
+    } else {
+      return emissionPerSecond;
+    }
   },
   () => ["staking", "perSecondPerAgaveYield"],
   () => undefined
 );
 
 export const useStakingAgavePrice = buildQueryHookWhenParamsDefinedChainAddrs<
-  BigNumber,
+  BigNumber | undefined,
   [_prefixStaking: "staking", _prefixAgavePrice: "agavePrice"],
   []
 >(
@@ -269,8 +276,17 @@ export const useStakingAgavePrice = buildQueryHookWhenParamsDefinedChainAddrs<
     const priceOracle = await addressProvider
       .getPriceOracle()
       .then(addr => IPriceOracleGetter__factory.connect(addr, signer));
-    const price = await priceOracle.getAssetPrice(stakedTokenAddress);
-    return price;
+    console.log("PriceOracle at:", priceOracle.address);
+    console.log("StakedToken:", stakedTokenAddress);
+    try {
+      return await priceOracle.getAssetPrice(stakedTokenAddress);
+    } catch (e) {
+      if (e.code === -32603) {
+        console.log("Price oracle missing for token");
+        return undefined;
+      }
+      throw e;
+    }
   },
   () => ["staking", "agavePrice"],
   () => undefined
