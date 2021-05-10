@@ -35,9 +35,6 @@ function Header() {
         </Center>
       </Navbar.Brand>
       <Navbar.Links>
-        <NavTabLink exact to="/markets" fontWeight="bold">
-          DASHBOARD
-        </NavTabLink>
         <NavTabLink exact to="/stake" fontWeight="bold">
           STAKE
         </NavTabLink>

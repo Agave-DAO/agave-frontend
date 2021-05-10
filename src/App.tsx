@@ -94,7 +94,7 @@ const App: React.FC<IAppProps> = props => {
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
               {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
               <Route path="/stake" component={Staking} />
-              <Redirect from="/" to="/markets" />
+              <Redirect from="/" to="/stake" />
           </Switch>
           </Layout>
         </HashRouter>
