@@ -188,7 +188,7 @@ export const useAmountClaimableBy = buildQueryHookWhenParamsDefinedChainAddrs<
     );
     let balance;
     try {
-      balance = await contract.stakerRewardsToClaim(stakerAddress);
+      balance = await contract.getTotalRewardsBalance(stakerAddress);
     } catch (e) {
       if (e.code === ErrorCode.CALL_EXCEPTION) {
         return BigNumber.from(0);
