@@ -75,7 +75,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         {childrenMemo}
       </Box>
       <Center mt="20rem" display={{ base: "none", md: "block" }}>
-        <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
+        <Image m="auto" src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
       </Center>
     </Box>
   );
