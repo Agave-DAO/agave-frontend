@@ -503,9 +503,9 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             }
             subValue={`$ ${dollarValueStringOf(availableToClaim)}`}
             buttonText="Claim"
-            // disabled={!(availableToClaim?.gt(0) ?? false)}
+            disabled={!(availableToClaim?.gt(0) ?? false)}
             onClick={() => {
-              if (account != null && availableToClaim?.gte(0)) {
+              if (account != null && availableToClaim?.gt(0)) {
                 claimRewards(availableToClaim, account);
               }
             }}
