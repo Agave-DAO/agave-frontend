@@ -42,10 +42,9 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
     <Box
       position="relative"
       bg="secondary.900"
-      minH="100vh"
-      maxH="100%"
+      minH={{ base: "100vh", md: "100%" }}
+      maxH={{ base: "100%", md: "100vh" }}
       overflow={{ base: "visible", md: "hidden" }}
-      pb={{ base: "5rem", md: "0" }}
     >
       <Header />
       <Box
@@ -67,15 +66,15 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         <Center
           rounded={{ md: "lg" }}
           minH={{ base: "6.6rem", md: "9.6rem" }}
-          mb={{ base: "2.6rem", md: "3.5rem" }}
+          mb={{ md: "3.5rem" }}
           bg={{ base: "primary.500", md: "primary.900" }}
         >
           {headerMemo}
         </Center>
-        {childrenMemo}
+        <Box p="2.6rem">{childrenMemo}</Box>
       </Box>
-      <Center mt="20rem" display={{ base: "none", md: "block" }}>
-        <Image m="auto" src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
+      <Center mt="25rem" display={{ base: "none", md: "flex" }}>
+        <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
       </Center>
     </Box>
   );
