@@ -41,7 +41,7 @@ export interface StakingLayoutProps {
   activateCooldown: () => void;
   claimRewards: (amount: BigNumber, toAddress: string) => void;
   stake: (amount: BigNumber) => void;
-  unstake: () => void;
+  unstake: (amount: BigNumber, toAddress: string) => void;
 }
 
 export const StakingBanner: React.FC<StakingBannerProps> = props => {
@@ -300,6 +300,13 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
       ? currentStakerCooldown
       : undefined;
 
+  const activeUnstakeWindow =
+    activeCooldown !== undefined &&
+    cooldownInfo !== undefined &&
+    currentTimeStamp.gte(activeCooldown.add(cooldownInfo.cooldownPeriodSeconds))
+      ? activeCooldown
+      : undefined;
+
   const [amount, setAmount] = React.useState<BigNumber | undefined>(
     BigNumber.from(0)
   );
@@ -441,7 +448,11 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         <HStack spacing={{ base: "1rem", md: "2rem" }} w="100%">
           <StakingSubCard
             isModalTrigger
-            buttonText="Activate cooldown"
+            buttonText={
+              activeUnstakeWindow === undefined
+                ? "Activate cooldown"
+                : "Unstake all"
+            }
             title="Agave staked"
             value={
               amountStaked
@@ -450,7 +461,8 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             }
             subValue={`$ ${dollarValueStringOf(amountStaked)}`}
             buttonOverrideContent={
-              activeCooldown !== undefined ? (
+              activeCooldown !== undefined &&
+              activeUnstakeWindow === undefined ? (
                 <Text align="center" color="white">
                   Ready{" "}
                   {new Date(
@@ -468,10 +480,19 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 </Text>
               ) : undefined
             }
-            disabled={activeCooldown !== undefined}
+            disabled={
+              activeCooldown !== undefined && activeUnstakeWindow === undefined
+            }
             onClick={() => {
-              if (activeCooldown === undefined) {
-                console.log("Activating cooldown:", currentStakerCooldown);
+              if (
+                activeUnstakeWindow !== undefined &&
+                amountStaked?.gt(0) &&
+                account
+              ) {
+                console.log("Attempting unstake");
+                unstake(amountStaked, account);
+              } else if (activeCooldown === undefined) {
+                console.log("Activating cooldown");
                 activateCooldown();
               } else {
                 console.log("Current cooldown:", currentStakerCooldown);
