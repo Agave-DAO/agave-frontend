@@ -1,5 +1,5 @@
 import { Center, Text } from "@chakra-ui/react";
-import { BigNumber, constants } from "ethers";
+import { BigNumber } from "ethers";
 import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
