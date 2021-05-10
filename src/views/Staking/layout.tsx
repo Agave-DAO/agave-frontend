@@ -331,13 +331,11 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         ? FixedNumber.fromValue(
             yieldPerAgavePerSecond
               ? yieldPerAgavePerSecond
-                  .mul(60 * 60 * 24 * 365)
-                  .sub(constants.WeiPerEther)
+                  .mul(60 * 60 * 24 * 365) // per year
                   .mul(100)
               : yieldPerYear
                   .mul(constants.WeiPerEther)
                   .div(amountStaked)
-                  .sub(constants.WeiPerEther)
                   .mul(100),
             18
           )
