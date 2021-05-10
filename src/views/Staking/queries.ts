@@ -95,8 +95,13 @@ export const useStakingEvents = buildQueryHook<
   () => undefined
 );
 
+export interface StakingCooldownInfo {
+  cooldownPeriodSeconds: BigNumber,
+  unstakeWindowSeconds: BigNumber,
+}
+
 export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
-  BigNumber,
+  StakingCooldownInfo,
   [_prefixStaking: "staking", _prefixRewards: "cooldown"],
   []
 >(
@@ -105,25 +110,10 @@ export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
       params.chainAddrs.staking,
       params.library.getSigner()
     );
-    return await contract.COOLDOWN_SECONDS();
+    const [cooldownPeriodSeconds, unstakeWindowSeconds] = await Promise.all([contract.COOLDOWN_SECONDS(), contract.UNSTAKE_WINDOW()]);
+    return { cooldownPeriodSeconds, unstakeWindowSeconds };
   },
   () => ["staking", "cooldown"],
-  () => undefined
-);
-
-export const useUnstakeWindow = buildQueryHookWhenParamsDefinedChainAddrs<
-  BigNumber,
-  [_prefixStaking: "staking", _prefixRewards: "unstakeWindow"],
-  []
->(
-  async params => {
-    const contract = StakedToken__factory.connect(
-      params.chainAddrs.staking,
-      params.library.getSigner()
-    );
-    return await contract.UNSTAKE_WINDOW();
-  },
-  () => ["staking", "unstakeWindow"],
   () => undefined
 );
 

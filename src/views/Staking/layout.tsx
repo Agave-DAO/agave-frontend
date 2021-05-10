@@ -21,15 +21,18 @@ import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
-import { useStakingAgavePrice, useTotalStakedForAllUsers } from "./queries";
+import {
+  StakingCooldownInfo,
+  useStakingAgavePrice,
+  useTotalStakedForAllUsers,
+} from "./queries";
 
 export interface StakingBannerProps {}
 
 export interface StakingLayoutProps {
   yieldPerAgavePerSecond: BigNumber | undefined;
-  cooldownPeriodSeconds: BigNumberish | undefined;
+  cooldownInfo: StakingCooldownInfo | undefined;
   currentStakerCooldown: BigNumber | undefined;
-  unstakeWindowSeconds: BigNumberish | undefined;
   agavePriceUsd: BigNumber | undefined;
   amountStaked: BigNumber | undefined;
   availableToClaim: BigNumber | undefined;
@@ -114,6 +117,7 @@ const StakingSubCard: React.FC<{
   subValue: string;
   disabled?: boolean;
   buttonText: string;
+  buttonOverrideContent?: React.ReactNode | undefined;
 }> = ({
   isModalTrigger,
   title,
@@ -122,6 +126,7 @@ const StakingSubCard: React.FC<{
   disabled,
   onClick,
   buttonText,
+  buttonOverrideContent,
   children: modalChildren,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -166,20 +171,24 @@ const StakingSubCard: React.FC<{
       <Text color="white" fontSize="1.2rem">
         {subValue}
       </Text>
-      <Button
-        color="white"
-        fontSize={{ base: "1rem", md: "1.4rem" }}
-        fontWeight="normal"
-        bg="primary.300"
-        py="1rem"
-        my="1.2rem"
-        width="100%"
-        px={{ base: "5%", md: "2.171rem" }}
-        disabled={disabled}
-        onClick={onClick}
-      >
-        {buttonText}
-      </Button>
+      {buttonOverrideContent === undefined ? (
+        <Button
+          color="white"
+          fontSize={{ base: "1rem", md: "1.4rem" }}
+          fontWeight="normal"
+          bg="primary.300"
+          py="1rem"
+          my="1.2rem"
+          width="100%"
+          px={{ base: "5%", md: "2.171rem" }}
+          disabled={disabled}
+          onClick={onClick}
+        >
+          {buttonText}
+        </Button>
+      ) : (
+        <>{buttonOverrideContent}</>
+      )}
       {isModalTrigger && (
         <Modal isOpen={isOpen} onClose={onClose} isCentered>
           <ModalOverlay />
@@ -230,9 +239,8 @@ export function secondsToString(numSeconds: BigNumberish): String {
 
 export const StakingLayout: React.FC<StakingLayoutProps> = ({
   yieldPerAgavePerSecond,
-  cooldownPeriodSeconds,
+  cooldownInfo,
   currentStakerCooldown,
-  unstakeWindowSeconds,
   amountStaked,
   availableToClaim,
   availableToStake,
@@ -256,18 +264,39 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   }
 
   const cooldownPeriod = React.useMemo(() => {
-    if (cooldownPeriodSeconds === undefined) {
+    if (cooldownInfo?.cooldownPeriodSeconds === undefined) {
       return "-";
     }
-    return secondsToString(cooldownPeriodSeconds);
-  }, [cooldownPeriodSeconds]);
+    return secondsToString(cooldownInfo?.cooldownPeriodSeconds);
+  }, [cooldownInfo?.cooldownPeriodSeconds]);
 
   const unstakeWindow = React.useMemo(() => {
-    if (unstakeWindowSeconds === undefined) {
+    if (cooldownInfo?.unstakeWindowSeconds === undefined) {
       return "-";
     }
-    return secondsToString(unstakeWindowSeconds);
-  }, [unstakeWindowSeconds]);
+    return secondsToString(cooldownInfo?.unstakeWindowSeconds);
+  }, [cooldownInfo?.unstakeWindowSeconds]);
+
+  const currentTimeStamp = BigNumber.from((Date.now() / 1000) | 0);
+  console.log(
+    "Current cooldown:",
+    currentStakerCooldown,
+    currentStakerCooldown?.toString(),
+    currentStakerCooldown
+      ? new Date(currentStakerCooldown.toNumber() * 1000)
+      : undefined
+  );
+  const activeCooldown =
+    currentStakerCooldown !== undefined &&
+    cooldownInfo !== undefined &&
+    currentStakerCooldown.gt(0) &&
+    currentStakerCooldown.lt(
+      currentTimeStamp
+        .add(cooldownInfo.cooldownPeriodSeconds)
+        .add(cooldownInfo.unstakeWindowSeconds)
+    )
+      ? currentStakerCooldown
+      : undefined;
 
   const [amount, setAmount] = React.useState<BigNumber | undefined>(
     BigNumber.from(0)
@@ -413,14 +442,10 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 : "-"
             }
             subValue={`$ ${dollarValueStringOf(amountStaked)}`}
-            disabled={
-              !(amountStaked?.gt(0) ?? false) || currentStakerCooldown?.gt(0)
-            }
+            buttonOverrideContent={activeCooldown !== undefined ? <Text align="center" color="white">Ready {new Date(activeCooldown.toNumber() * 1000).toLocaleString()}</Text> : undefined}
+            disabled={activeCooldown !== undefined}
             onClick={() => {
-              if (
-                amountStaked?.gt(0) &&
-                currentStakerCooldown?.gt(0) !== true
-              ) {
+              if (activeCooldown === undefined) {
                 console.log("Activating cooldown:", currentStakerCooldown);
                 activateCooldown();
               } else {

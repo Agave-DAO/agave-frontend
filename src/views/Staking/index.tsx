@@ -13,8 +13,6 @@ import {
   useStakingCooldown,
   useStakingEvents,
   useStakingPerSecondPerAgaveYield,
-  useTotalStakedForAllUsers,
-  useUnstakeWindow,
 } from "./queries";
 
 export interface StakingProps {}
@@ -49,9 +47,8 @@ export const Staking: React.FC<StakingProps> = _props => {
   const { data: availableToClaim } = useAmountClaimableBy(
     w3.account ?? undefined
   );
-  const cooldownPeriodSeconds = useStakingCooldown().data;
+  const cooldownInfo = useStakingCooldown().data;
   const currentStakerCooldown = useStakingEvents(w3.account ?? undefined).data;
-  const unstakeWindowSeconds = useUnstakeWindow().data;
   const agavePriceInNative = useStakingAgavePrice().data;
 
   // Mutations
@@ -73,9 +70,7 @@ export const Staking: React.FC<StakingProps> = _props => {
   });
   const cooldownMutationCall = React.useMemo(
     () => () =>
-      w3.library
-        ? cooldownMutation.mutate({ library: w3.library })
-        : undefined,
+      w3.library ? cooldownMutation.mutate({ library: w3.library }) : undefined,
     [cooldownMutation, w3.library]
   );
 
@@ -104,9 +99,8 @@ export const Staking: React.FC<StakingProps> = _props => {
   return (
     <StakingLayout
       yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}
-      cooldownPeriodSeconds={cooldownPeriodSeconds}
+      cooldownInfo={cooldownInfo}
       currentStakerCooldown={currentStakerCooldown}
-      unstakeWindowSeconds={unstakeWindowSeconds}
       agavePriceUsd={agavePriceInNative}
       amountStaked={amountStaked}
       availableToClaim={availableToClaim}
