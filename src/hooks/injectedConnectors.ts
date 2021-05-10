@@ -1,16 +1,10 @@
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { useEffect, useMemo, useState } from "react";
+import { ValidNetworkIds } from "../utils/contracts/contractAddresses/internalAddresses";
 import { useAppWeb3 } from "./appWeb3";
 
 export const injectedConnector = new InjectedConnector({
-  supportedChainIds: [
-    // 1, // Mainet
-    // 3, // Ropsten
-    4, // Rinkeby
-    // 5, // Goerli
-    // 42, // Kovan
-    // 0x64, // XDAI
-  ],
+  supportedChainIds: Object.values(ValidNetworkIds),
 });
 
 export function useAmbientConnection(
