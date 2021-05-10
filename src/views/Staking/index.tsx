@@ -4,7 +4,7 @@ import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
-import { useCooldownMutation, useStakeMutation } from "./mutations";
+import { useClaimMutation, useCooldownMutation, useStakeMutation } from "./mutations";
 import {
   useAmountAvailableToStake,
   useAmountClaimableBy,
@@ -74,6 +74,16 @@ export const Staking: React.FC<StakingProps> = _props => {
     [cooldownMutation, w3.library]
   );
 
+  const claimMutation = useClaimMutation({
+    chainId: w3.chainId ?? undefined,
+    address: w3.account ?? undefined,
+  });
+  const claimMutationCall = React.useMemo(
+    () => (amount: BigNumber, toAddress: string) =>
+      w3.library ? claimMutation.mutate({ amount, recipient: toAddress, library: w3.library }) : undefined,
+    [claimMutation, w3.library]
+  );
+
   if (w3.library == null) {
     return (
       <StakingErrorWrapper>
@@ -106,7 +116,7 @@ export const Staking: React.FC<StakingProps> = _props => {
       availableToClaim={availableToClaim}
       availableToStake={availableToStake}
       activateCooldown={cooldownMutationCall}
-      claimRewards={(toAddress: string) => {}}
+      claimRewards={claimMutationCall}
       stake={stakeMutationCall}
       unstake={() => {}}
     />

@@ -26,6 +26,7 @@ import {
   useStakingAgavePrice,
   useTotalStakedForAllUsers,
 } from "./queries";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 export interface StakingBannerProps {}
 
@@ -38,7 +39,7 @@ export interface StakingLayoutProps {
   availableToClaim: BigNumber | undefined;
   availableToStake: BigNumber | undefined;
   activateCooldown: () => void;
-  claimRewards: (toAddress: string) => void;
+  claimRewards: (amount: BigNumber, toAddress: string) => void;
   stake: (amount: BigNumber) => void;
   unstake: () => void;
 }
@@ -250,7 +251,8 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   stake,
   unstake,
 }) => {
-  const [customAddress, setCustomAddress] = useState<string>("");
+  const { account } = useAppWeb3();
+  // const [customAddress, setCustomAddress] = useState<string>("");
   function dollarValueStringOf(agaveAmount: BigNumber | undefined): String {
     if (agavePriceUsd === undefined || agaveAmount === undefined) {
       return "-";
@@ -278,20 +280,20 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   }, [cooldownInfo?.unstakeWindowSeconds]);
 
   const currentTimeStamp = BigNumber.from((Date.now() / 1000) | 0);
-  console.log(
-    "Current cooldown:",
-    currentStakerCooldown,
-    currentStakerCooldown?.toString(),
-    currentStakerCooldown
-      ? new Date(currentStakerCooldown.toNumber() * 1000)
-      : undefined
-  );
+  // console.log(
+  //   "Current cooldown:",
+  //   currentStakerCooldown,
+  //   currentStakerCooldown?.toString(),
+  //   currentStakerCooldown
+  //     ? new Date(currentStakerCooldown.toNumber() * 1000)
+  //     : undefined
+  // );
   const activeCooldown =
     currentStakerCooldown !== undefined &&
     cooldownInfo !== undefined &&
     currentStakerCooldown.gt(0) &&
-    currentStakerCooldown.lt(
-      currentTimeStamp
+    currentTimeStamp.lt(
+      currentStakerCooldown
         .add(cooldownInfo.cooldownPeriodSeconds)
         .add(cooldownInfo.unstakeWindowSeconds)
     )
@@ -442,7 +444,25 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 : "-"
             }
             subValue={`$ ${dollarValueStringOf(amountStaked)}`}
-            buttonOverrideContent={activeCooldown !== undefined ? <Text align="center" color="white">Ready {new Date(activeCooldown.toNumber() * 1000).toLocaleString()}</Text> : undefined}
+            buttonOverrideContent={
+              activeCooldown !== undefined ? (
+                <Text align="center" color="white">
+                  Ready{" "}
+                  {new Date(
+                    activeCooldown
+                      .add(cooldownInfo?.cooldownPeriodSeconds ?? 0)
+                      .toNumber() * 1000
+                  ).toLocaleString()}
+                  {" "}Until{" "}
+                  {new Date(
+                    activeCooldown
+                      .add(cooldownInfo?.cooldownPeriodSeconds ?? 0)
+                      .add(cooldownInfo?.unstakeWindowSeconds ?? 0)
+                      .toNumber() * 1000
+                  ).toLocaleString()}
+                </Text>
+              ) : undefined
+            }
             disabled={activeCooldown !== undefined}
             onClick={() => {
               if (activeCooldown === undefined) {
@@ -478,11 +498,16 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             }
             subValue={`$ ${dollarValueStringOf(availableToClaim)}`}
             buttonText="Claim"
-            disabled={!(availableToClaim?.gt(0) ?? false)}
-            onClick={() => {}}
+            // disabled={!(availableToClaim?.gt(0) ?? false)}
+            onClick={() => {
+              if (account != null && availableToClaim?.gte(0)) {
+                claimRewards(availableToClaim, account);
+              }
+            }}
           />
         </HStack>
-        <Input
+        {/* TODO: Allow custom recipients */}
+        {/* <Input
           size="lg"
           py="1.5rem"
           variant="filled"
@@ -497,7 +522,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           name="customAddress"
           onChange={e => setCustomAddress(e.target.value)}
           value={customAddress}
-        />
+        /> */}
         <VStack
           color="white"
           fontSize="1.4rem"
