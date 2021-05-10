@@ -1,17 +1,17 @@
-import { ErrorCode } from "@ethersproject/logger";
-import {
-  Erc20abi__factory,
-  StakedToken__factory,
-  AaveDistributionManager__factory,
-} from "../../contracts";
+import { Erc20abi__factory, StakedToken__factory } from "../../contracts";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { Account, ChainId } from "../../utils/queryBuilder";
-import { constants } from "ethers";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import React from "react";
-import { useAmountAvailableToStake, useAmountStakedBy, useTotalStakedForAllUsers } from "./queries";
+import {
+  useAmountAvailableToStake,
+  useAmountStakedBy,
+  useStakingCooldown,
+  useStakingEvents,
+  useTotalStakedForAllUsers,
+} from "./queries";
 import {
   ReactNotificationOptions,
   store as NotificationManager,
@@ -48,7 +48,7 @@ async function usingProgressNotification<T>(
   promise: Promise<T>
 ): Promise<T> {
   const notification = NotificationManager.addNotification({
-    container: "center",
+    container: "bottom-center",
     title: title,
     dismiss: {
       click: false,
@@ -179,7 +179,117 @@ export const useStakeMutation = ({
           chainId,
           address
         );
-        clearanceTasks.push(queryClient.invalidateQueries(totalAmountStakedKey));
+        clearanceTasks.push(
+          queryClient.invalidateQueries(totalAmountStakedKey)
+        );
+        await Promise.allSettled(clearanceTasks);
+      },
+      onError: async (_err, _vars, _context) => {
+        await queryClient.invalidateQueries(mutationKey);
+      },
+    }
+  );
+
+  return React.useMemo(() => ({ ...mutation, key: mutationKey }), [
+    mutation,
+    mutationKey,
+  ]);
+};
+
+export interface CooldownMutationProps {
+  chainId: ChainId | undefined;
+  address: Account | undefined;
+}
+
+export interface CooldownMutationArgs {
+  library: JsonRpcProvider;
+}
+
+export interface CooldownMutationResult {
+  txHash: string;
+}
+
+export interface CooldownMutationDto
+  extends UseMutationResult<
+    CooldownMutationResult | undefined,
+    unknown,
+    CooldownMutationArgs,
+    unknown
+  > {
+  key: readonly [ChainId | undefined, Account | undefined];
+}
+
+export const useCooldownMutation = ({
+  chainId,
+  address,
+}: CooldownMutationProps): CooldownMutationDto => {
+  const queryClient = useQueryClient();
+  const mutationKey = React.useMemo(() => [chainId, address] as const, [
+    chainId,
+    address,
+  ]);
+
+  const mutation = useMutation<
+    CooldownMutationResult | undefined,
+    unknown,
+    CooldownMutationArgs,
+    unknown
+  >(
+    mutationKey,
+    async (args): Promise<CooldownMutationResult | undefined> => {
+      const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
+      if (
+        chainId === undefined ||
+        address === undefined ||
+        chainAddrs === undefined
+      ) {
+        return undefined;
+      }
+      const signer = args.library.getSigner();
+      const stakingContract = StakedToken__factory.connect(
+        chainAddrs.staking,
+        signer
+      );
+      console.log("useCooldownMutation", "attempting to start cooldown");
+      const cooldownRequest = stakingContract.cooldown();
+      const cooldownConfirmation = await usingProgressNotification(
+        "Awaiting cooldown transaction approval",
+        "Please commit the cooldown transaction with your wallet.",
+        "info",
+        cooldownRequest
+      );
+      const cooldownReceipt = await usingProgressNotification(
+        "Awaiting cooldown transaction confirmation",
+        "Please wait while the blockchain processes your transaction",
+        "success",
+        cooldownConfirmation.wait()
+      );
+      return cooldownReceipt.status &&
+        cooldownReceipt.events?.some(ev => ev.event === "Cooldown")
+        ? { txHash: cooldownReceipt.transactionHash }
+        : undefined;
+    },
+    {
+      useErrorBoundary: false,
+      retry: false,
+      onSuccess: async (_output, _vars, _context) => {
+        const clearanceTasks = [
+          queryClient.invalidateQueries(mutationKey, {
+            exact: true,
+            active: false,
+            inactive: true,
+            refetchInactive: false,
+            refetchActive: false,
+          }),
+        ];
+        const currentCooldownKey = useStakingEvents.buildKey(
+          chainId,
+          address,
+          address
+        );
+        clearanceTasks.push(queryClient.invalidateQueries(currentCooldownKey));
+        const cooldownKey = useStakingCooldown.buildKey(chainId, address);
+        clearanceTasks.push(queryClient.invalidateQueries(cooldownKey));
         await Promise.allSettled(clearanceTasks);
       },
       onError: async (_err, _vars, _context) => {

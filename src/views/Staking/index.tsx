@@ -4,13 +4,14 @@ import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
-import { useStakeMutation } from "./mutations";
+import { useCooldownMutation, useStakeMutation } from "./mutations";
 import {
   useAmountAvailableToStake,
   useAmountClaimableBy,
   useAmountStakedBy,
   useStakingAgavePrice,
   useStakingCooldown,
+  useStakingEvents,
   useStakingPerSecondPerAgaveYield,
   useTotalStakedForAllUsers,
   useUnstakeWindow,
@@ -49,19 +50,33 @@ export const Staking: React.FC<StakingProps> = _props => {
     w3.account ?? undefined
   );
   const cooldownPeriodSeconds = useStakingCooldown().data;
+  const currentStakerCooldown = useStakingEvents(w3.account ?? undefined).data;
   const unstakeWindowSeconds = useUnstakeWindow().data;
+  const agavePriceInNative = useStakingAgavePrice().data;
+
+  // Mutations
   const stakeMutation = useStakeMutation({
     chainId: w3.chainId ?? undefined,
     address: w3.account ?? undefined,
   });
-  const agavePriceInNative = useStakingAgavePrice().data;
-  console.log(agavePriceInNative);
   const stakeMutationCall = React.useMemo(
     () => (amount: BigNumber) =>
       w3.library
         ? stakeMutation.mutate({ amount, library: w3.library })
         : undefined,
     [stakeMutation, w3.library]
+  );
+
+  const cooldownMutation = useCooldownMutation({
+    chainId: w3.chainId ?? undefined,
+    address: w3.account ?? undefined,
+  });
+  const cooldownMutationCall = React.useMemo(
+    () => () =>
+      w3.library
+        ? cooldownMutation.mutate({ library: w3.library })
+        : undefined,
+    [cooldownMutation, w3.library]
   );
 
   if (w3.library == null) {
@@ -90,12 +105,13 @@ export const Staking: React.FC<StakingProps> = _props => {
     <StakingLayout
       yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}
       cooldownPeriodSeconds={cooldownPeriodSeconds}
+      currentStakerCooldown={currentStakerCooldown}
       unstakeWindowSeconds={unstakeWindowSeconds}
       agavePriceUsd={agavePriceInNative}
       amountStaked={amountStaked}
       availableToClaim={availableToClaim}
       availableToStake={availableToStake}
-      activateCooldown={() => {}}
+      activateCooldown={cooldownMutationCall}
       claimRewards={(toAddress: string) => {}}
       stake={stakeMutationCall}
       unstake={() => {}}

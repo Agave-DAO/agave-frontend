@@ -28,6 +28,7 @@ export interface StakingBannerProps {}
 export interface StakingLayoutProps {
   yieldPerAgavePerSecond: BigNumber | undefined;
   cooldownPeriodSeconds: BigNumberish | undefined;
+  currentStakerCooldown: BigNumber | undefined;
   unstakeWindowSeconds: BigNumberish | undefined;
   agavePriceUsd: BigNumber | undefined;
   amountStaked: BigNumber | undefined;
@@ -119,6 +120,7 @@ const StakingSubCard: React.FC<{
   value,
   subValue,
   disabled,
+  onClick,
   buttonText,
   children: modalChildren,
 }) => {
@@ -174,6 +176,7 @@ const StakingSubCard: React.FC<{
         width="100%"
         px={{ base: "5%", md: "2.171rem" }}
         disabled={disabled}
+        onClick={onClick}
       >
         {buttonText}
       </Button>
@@ -228,6 +231,7 @@ export function secondsToString(numSeconds: BigNumberish): String {
 export const StakingLayout: React.FC<StakingLayoutProps> = ({
   yieldPerAgavePerSecond,
   cooldownPeriodSeconds,
+  currentStakerCooldown,
   unstakeWindowSeconds,
   amountStaked,
   availableToClaim,
@@ -409,8 +413,20 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 : "-"
             }
             subValue={`$ ${dollarValueStringOf(amountStaked)}`}
-            disabled={!(amountStaked?.gt(0) ?? false)}
-            onClick={() => {}}
+            disabled={
+              !(amountStaked?.gt(0) ?? false) || currentStakerCooldown?.gt(0)
+            }
+            onClick={() => {
+              if (
+                amountStaked?.gt(0) &&
+                currentStakerCooldown?.gt(0) !== true
+              ) {
+                console.log("Activating cooldown:", currentStakerCooldown);
+                activateCooldown();
+              } else {
+                console.log("Current cooldown:", currentStakerCooldown);
+              }
+            }}
           >
             <>
               <ModalHeader fontSize="1.6rem" fontWeight="bold">
