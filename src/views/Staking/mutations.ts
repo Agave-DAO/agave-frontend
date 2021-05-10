@@ -11,7 +11,7 @@ import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import React from "react";
-import { useAmountAvailableToStake, useAmountStakedBy } from "./queries";
+import { useAmountAvailableToStake, useAmountStakedBy, useTotalStakedForAllUsers } from "./queries";
 import {
   ReactNotificationOptions,
   store as NotificationManager,
@@ -175,6 +175,11 @@ export const useStakeMutation = ({
           );
           clearanceTasks.push(queryClient.invalidateQueries(amountStakedKey));
         }
+        const totalAmountStakedKey = useTotalStakedForAllUsers.buildKey(
+          chainId,
+          address
+        );
+        clearanceTasks.push(queryClient.invalidateQueries(totalAmountStakedKey));
         await Promise.allSettled(clearanceTasks);
       },
       onError: async (_err, _vars, _context) => {
