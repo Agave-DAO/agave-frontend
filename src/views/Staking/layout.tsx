@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { WeiBox } from "../../components/Actions/WeiBox";
 import {
   Center,
@@ -15,7 +15,6 @@ import {
   ModalFooter,
   Box,
   Flex,
-  Input,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
@@ -345,7 +344,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         : amountStaked !== undefined && yieldPerYear !== undefined
         ? "0"
         : "-",
-    [amountStaked, yieldPerYear]
+    [amountStaked, yieldPerYear, yieldPerAgavePerSecond]
   );
   return (
     <HStack

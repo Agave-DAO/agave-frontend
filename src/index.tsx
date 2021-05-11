@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import { Provider } from 'react-redux';
-import store, { } from './redux/store';
+import store from './redux/store';
 import reportWebVitals from './reportWebVitals';
 import type { AbstractConnector } from '@web3-react/abstract-connector';
 import { Web3ReactProvider } from "@web3-react/core";
@@ -14,6 +14,7 @@ import {
   QueryCache,
 } from "react-query";
 import { BigNumber, FixedNumber } from 'ethers';
+import { useAmbientConnection } from './hooks/injectedConnectors';
 
 const reactQueryClient = new QueryClient({
   queryCache: new QueryCache(),
@@ -25,9 +26,9 @@ function getWeb3Library(provider: any, connector?: AbstractConnector | undefined
   return library;
 }
 
-// function wrapper is used to enable HMR
-function renderApp() {
-  ReactDOM.render(
+const AppRoot: React.FC<{}> = () => {
+  useAmbientConnection();
+  return (
     <Web3ReactProvider getLibrary={getWeb3Library}>
       <Provider store={store}>
         <QueryClientProvider client={reactQueryClient}>
@@ -36,8 +37,13 @@ function renderApp() {
           </React.StrictMode>
         </QueryClientProvider>
       </Provider>
-    </Web3ReactProvider>,
-    document.getElementById("root")
+    </Web3ReactProvider>
+  );
+}
+
+// function wrapper is used to enable HMR
+function renderApp() {
+  ReactDOM.render(<AppRoot/>, document.getElementById("root")
   );
 }
 
