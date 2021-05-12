@@ -324,28 +324,36 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
     ],
     [yieldPerSecond]
   );
-  const stakingAPY = React.useMemo(
-    () =>
-      amountStaked?.gt(0) && yieldPerYear?.gt(0)
+  const stakingAPY = React.useMemo(() => {
+    if (!yieldPerAgavePerSecond?.gt(0)) {
+      return "-";
+    }
+    if (amountStaked?.gt(0) && yieldPerYear?.gt(0)) {
+      return FixedNumber.fromValue(
+        yieldPerAgavePerSecond
+          ? yieldPerAgavePerSecond
+              .mul(60 * 60 * 24 * 365) // per year
+              .mul(100)
+          : yieldPerYear.mul(constants.WeiPerEther).div(amountStaked).mul(100),
+        18
+      )
+        .round(2)
+        .toUnsafeFloat()
+        .toLocaleString();
+    } else {
+      return yieldPerAgavePerSecond !== undefined
         ? FixedNumber.fromValue(
             yieldPerAgavePerSecond
-              ? yieldPerAgavePerSecond
-                  .mul(60 * 60 * 24 * 365) // per year
-                  .mul(100)
-              : yieldPerYear
-                  .mul(constants.WeiPerEther)
-                  .div(amountStaked)
-                  .mul(100),
+              .mul(60 * 60 * 24 * 365) // per year
+              .mul(100),
             18
           )
             .round(2)
             .toUnsafeFloat()
             .toLocaleString()
-        : amountStaked !== undefined && yieldPerYear !== undefined
-        ? "0"
-        : "-",
-    [amountStaked, yieldPerYear, yieldPerAgavePerSecond]
-  );
+        : "-";
+    }
+  }, [amountStaked, yieldPerYear, yieldPerAgavePerSecond]);
   return (
     <HStack
       spacing={{ md: "1.6rem" }}
