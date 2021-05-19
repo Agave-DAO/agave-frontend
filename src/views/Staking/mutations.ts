@@ -6,17 +6,15 @@ import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber } from "@ethersproject/bignumber";
 import React from "react";
 import {
-  useAmountAvailableToStake,
-  useAmountClaimableBy,
-  useAmountStakedBy,
-  useStakingCooldown,
-  useStakingEvents,
-  useTotalStakedForAllUsers,
-} from "./queries";
-import {
   ReactNotificationOptions,
   store as NotificationManager,
 } from "react-notifications-component";
+import { useAmountAvailableToStake } from "../../queries/amountAvailableToStake";
+import { useAmountClaimableBy } from "../../queries/amountClaimableBy";
+import { useAmountStakedBy } from "../../queries/amountStakedBy";
+import { useStakingCooldown } from "../../queries/stakingCooldown";
+import { useStakingEvents } from "../../queries/stakingEvents";
+import { useTotalStakedForAllUsers } from "../../queries/totalStakedForAllUsers";
 
 export interface StakeMutationProps {
   chainId: ChainId | undefined;

@@ -4,16 +4,21 @@ import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
-import { useClaimMutation, useCooldownMutation, useRedeemMutation, useStakeMutation } from "./mutations";
+
+import { useAmountAvailableToStake } from "../../queries/amountAvailableToStake";
+import { useAmountClaimableBy } from "../../queries/amountClaimableBy";
+import { useAmountStakedBy } from "../../queries/amountStakedBy";
+import { useStakingAgavePrice } from "../../queries/stakingAgavePrice";
+import { useStakingCooldown } from "../../queries/stakingCooldown";
+import { useStakingEvents } from "../../queries/stakingEvents";
+import { useStakingPerSecondPerAgaveYield } from "../../queries/stakingPerSecondPerAgaveYield";
+
 import {
-  useAmountAvailableToStake,
-  useAmountClaimableBy,
-  useAmountStakedBy,
-  useStakingAgavePrice,
-  useStakingCooldown,
-  useStakingEvents,
-  useStakingPerSecondPerAgaveYield,
-} from "./queries";
+  useClaimMutation,
+  useCooldownMutation,
+  useRedeemMutation,
+  useStakeMutation,
+} from "./mutations";
 
 export interface StakingProps {}
 
@@ -37,9 +42,8 @@ const StakingErrorWrapper: React.FC = ({ children }) => {
 
 export const Staking: React.FC<StakingProps> = _props => {
   const w3 = useAppWeb3(); // We don't unpack because otherwise typescript loses useAppWeb3's magic
-  const {
-    data: stakingPerSecondPerAgaveYield,
-  } = useStakingPerSecondPerAgaveYield();
+  const { data: stakingPerSecondPerAgaveYield } =
+    useStakingPerSecondPerAgaveYield();
   const { data: amountStaked } = useAmountStakedBy(w3.account ?? undefined);
   const { data: availableToStake } = useAmountAvailableToStake(
     w3.account ?? undefined
@@ -80,7 +84,13 @@ export const Staking: React.FC<StakingProps> = _props => {
   });
   const claimMutationCall = React.useMemo(
     () => (amount: BigNumber, toAddress: string) =>
-      w3.library ? claimMutation.mutate({ amount, recipient: toAddress, library: w3.library }) : undefined,
+      w3.library
+        ? claimMutation.mutate({
+            amount,
+            recipient: toAddress,
+            library: w3.library,
+          })
+        : undefined,
     [claimMutation, w3.library]
   );
 
@@ -90,7 +100,13 @@ export const Staking: React.FC<StakingProps> = _props => {
   });
   const redeemMutationCall = React.useMemo(
     () => (amount: BigNumber, toAddress: string) =>
-      w3.library ? redeemMutation.mutate({ amount, recipient: toAddress, library: w3.library }) : undefined,
+      w3.library
+        ? redeemMutation.mutate({
+            amount,
+            recipient: toAddress,
+            library: w3.library,
+          })
+        : undefined,
     [redeemMutation, w3.library]
   );
 
