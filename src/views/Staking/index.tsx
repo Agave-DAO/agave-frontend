@@ -13,12 +13,10 @@ import { useStakingCooldown } from "../../queries/stakingCooldown";
 import { useStakingEvents } from "../../queries/stakingEvents";
 import { useStakingPerSecondPerAgaveYield } from "../../queries/stakingPerSecondPerAgaveYield";
 
-import {
-  useClaimMutation,
-  useCooldownMutation,
-  useRedeemMutation,
-  useStakeMutation,
-} from "./mutations";
+import { useClaimMutation } from "../../mutations/claim";
+import { useCooldownMutation } from "../../mutations/cooldown";
+import { useRedeemMutation } from "../../mutations/redeem";
+import { useStakeMutation } from "../../mutations/stake";
 
 export interface StakingProps {}
 
