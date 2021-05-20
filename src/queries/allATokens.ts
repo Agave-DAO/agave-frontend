@@ -20,5 +20,9 @@ export const useAllATokens =
       return await contract.getAllATokens();
     },
     () => ["AaveProtocolDataProvider", "getAllATokens"],
-    () => undefined
+    () => undefined,
+    {
+      cacheTime: Infinity,
+      staleTime: Infinity,
+    }
   );

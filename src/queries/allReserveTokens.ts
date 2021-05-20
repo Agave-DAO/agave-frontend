@@ -20,5 +20,9 @@ export const useAllReserveTokens =
       return await contract.getAllATokens();
     },
     () => ["AaveProtocolDataProvider", "getAllReserveTokens"],
-    () => undefined
+    () => undefined,
+    {
+      cacheTime: Infinity,
+      staleTime: Infinity,
+    }
   );

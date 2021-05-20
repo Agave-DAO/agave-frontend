@@ -20,5 +20,9 @@ export const useWrappedNativeAddress =
       return await contract.getWETHAddress();
     },
     () => ["WrappedNative", "address"],
-    () => undefined
+    () => undefined,
+    {
+      cacheTime: Infinity,
+      staleTime: Infinity,
+    }
   );
