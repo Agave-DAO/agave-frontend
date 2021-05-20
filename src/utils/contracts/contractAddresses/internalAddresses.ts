@@ -46,9 +46,9 @@ export const internalAddressesPerNetwork: Record<
     lendingPool: "0x207E9def17B4bd1045F5Af2C651c081F9FDb0842",
     staking: "0x610525b415c1BFAeAB1a3fc3d85D87b92f048221",
 
-    agaveOracle: "0xACABACABACABACABACABACABACABACABACABACAB",
-    aaveProtocolDataProvider: "0xACABACABACABACABACABACABACABACABACABACAB",
-    wrappedNativeGateway: "0xACABACABACABACABACABACABACABACABACABACAB",
+    agaveOracle: "0x80E08A2042F4135f6cA72BA2fd0e7cAEb2Ee30ef",
+    aaveProtocolDataProvider: "0xa874f66342a04c24b213BF0715dFf18818D24014",
+    wrappedNativeGateway: "0x0bb31c42D0692369Ba681A925C254fEB605c327b",
   },
 } as const;
 
