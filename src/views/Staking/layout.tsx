@@ -20,12 +20,10 @@ import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
-import {
-  StakingCooldownInfo,
-  useStakingAgavePrice,
-  useTotalStakedForAllUsers,
-} from "./queries";
 import { useAppWeb3 } from "../../hooks/appWeb3";
+import { useStakingAgavePrice } from "../../queries/stakingAgavePrice";
+import { StakingCooldownInfo } from "../../queries/stakingCooldown";
+import { useTotalStakedForAllUsers } from "../../queries/totalStakedForAllUsers";
 
 export interface StakingBannerProps {}
 
@@ -131,8 +129,8 @@ const StakingSubCard: React.FC<{
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
-    <VStack
-      w="50%"
+    <Box
+      w="100%"
       justifyContent="space-between"
       px={{ base: "1.1rem", md: "2.2rem" }}
       py={{ base: "1.3rem", md: "1.9rem" }}
@@ -140,6 +138,9 @@ const StakingSubCard: React.FC<{
       rounded="2xl"
       position="relative"
       minH="14.4rem"
+	  minW="40%"
+	  m="0.5em"
+	  align="center"
     >
       {isModalTrigger && (
         <Circle
@@ -219,7 +220,7 @@ const StakingSubCard: React.FC<{
           </ModalContent>
         </Modal>
       )}
-    </VStack>
+    </Box>
   );
 };
 
@@ -355,22 +356,20 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
     }
   }, [amountStaked, yieldPerYear, yieldPerAgavePerSecond]);
   return (
-    <HStack
-      spacing={{ md: "1.6rem" }}
-      flexDirection={{ base: "column", md: "row" }}
-      px={{ base: "2.4rem", md: "0" }}
+    <Flex
+	  align="center" flexBasis="auto" spacing="1em" w="100%" flexDirection={{ base: "column", lg: "row" }} m="auto"
     >
       <Center
         boxSizing="content-box"
         flexDirection="column"
         rounded="xl"
         minH="35.6rem"
-        minW={{ base: "100%", md: "inherit" }}
+        minW={{ base: "100%", lg: "inherit" }}
         flex={1}
         bg="primary.900"
         px={{ base: "2rem", md: "4rem" }}
         py="2.4rem"
-        mb={{ base: "2.6rem", md: "0" }}
+        m={{ base: "2.6rem" }}
       >
         <ColoredText
           fontSize={{ base: "1.6rem", md: "1.8rem" }}
@@ -443,14 +442,14 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         flexDirection="column"
         rounded="xl"
         minH="35.6rem"
-        minW={{ base: "100%", md: "inherit" }}
+        minW={{ base: "100%", lg: "inherit" }}
         flex={1}
         bg="primary.900"
         px={{ base: "2rem", md: "4rem" }}
         py="2.4rem"
-        mb={{ base: "2.6rem", md: "0" }}
+        m={{ base: "2.rem" }}
       >
-        <HStack spacing={{ base: "1rem", md: "2rem" }} w="100%">
+        <Flex align="center" flexBasis="auto" spacing="1em" w="100%" flexDirection={{ base: "column", lg: "row" }} m="auto">
           <StakingSubCard
             isModalTrigger
             buttonText={
@@ -459,6 +458,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 : "Unstake all"
             }
             title="Agave staked"
+
             value={
               amountStaked
                 ? FixedNumber.fromValue(amountStaked, 18).toString()
@@ -528,7 +528,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             title="Claimable Agave"
             value={
               availableToClaim
-                ? FixedNumber.fromValue(availableToClaim, 18).toString()
+                ? FixedNumber.fromValue(availableToClaim, 18).toString().slice(0,10)
                 : "-"
             }
             subValue={`$ ${dollarValueStringOf(availableToClaim)}`}
@@ -540,7 +540,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
               }
             }}
           />
-        </HStack>
+        </Flex>
         {/* TODO: Allow custom recipients */}
         {/* <Input
           size="lg"
@@ -589,6 +589,6 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           </Flex>
         </VStack>
       </Center>
-    </HStack>
+    </Flex>
   );
 };

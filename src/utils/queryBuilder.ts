@@ -16,7 +16,12 @@ export interface QueryHook<
   TArgs extends unknown[]
 > {
   (this: void, ...params: TArgs): QueryHookResult<TData, TKey>;
-  buildKey: (this: void, chainId: ChainId | undefined, address: string | undefined, ...args: TArgs) => [ChainId | undefined, string | undefined, ...TKey];
+  buildKey: (
+    this: void,
+    chainId: ChainId | undefined,
+    address: string | undefined,
+    ...args: TArgs
+  ) => [ChainId | undefined, string | undefined, ...TKey];
   invoke: (
     this: void,
     hookParams: QueryHookParams<TKey>,
@@ -48,7 +53,13 @@ export function buildQueryHook<
     ...args: TArgs
   ) => Promise<TData | undefined>,
   buildKey: (this: void, ...args: TArgs) => TKey,
-  buildInitialData?: ((this: void) => TData | undefined) | undefined
+  buildInitialData?: ((this: void) => TData | undefined) | undefined,
+  optionOverrides?: UseQueryOptions<
+    TData | undefined,
+    unknown,
+    TData,
+    readonly [number | undefined, string | undefined, ...TKey]
+  >
 ): QueryHook<TData, TKey, TArgs> {
   function useBuiltQueryHook(...params: TArgs) {
     const { account, library, chainId } = useWeb3React<Web3Provider>();
@@ -71,7 +82,7 @@ export function buildQueryHook<
     > = React.useMemo(
       () => ({
         initialData: buildInitialData?.(),
-        staleTime: 1 * 60 * 1000,
+        staleTime: optionOverrides?.staleTime ?? 1 * 60 * 1000,
         retry: (failureCount, err) => {
           if (failureCount > 3) {
             return false;
@@ -89,6 +100,7 @@ export function buildQueryHook<
           }
           return true;
         },
+        ...(optionOverrides ?? {}),
       }),
       [] // buildInitialData is provided when declaring the hook type, not per call
     );
@@ -116,8 +128,14 @@ export function buildQueryHook<
     return { data, error, key: queryKey };
   }
   useBuiltQueryHook.buildKey = (
-    (chainId: ChainId | undefined, address: string | undefined, ...args: TArgs): [ChainId | undefined, string | undefined, ...TKey] =>
-      [chainId, address, ...buildKey(...args)]);
+    chainId: ChainId | undefined,
+    address: string | undefined,
+    ...args: TArgs
+  ): [ChainId | undefined, string | undefined, ...TKey] => [
+    chainId,
+    address,
+    ...buildKey(...args),
+  ];
   useBuiltQueryHook.invoke = invoke;
   const bound: QueryHook<TData, TKey, TArgs> = useBuiltQueryHook;
   return bound;
@@ -156,7 +174,13 @@ export function buildQueryHookWhenParamsDefined<
     ...args: AllDefined<TArgs>
   ) => Promise<TData>,
   buildKey: (...args: AllOrUndefined<TArgs>) => TKey,
-  buildInitialData?: (() => TData | undefined) | undefined
+  buildInitialData?: (() => TData | undefined) | undefined,
+  optionOverrides?: UseQueryOptions<
+    TData | undefined,
+    unknown,
+    TData,
+    readonly [number | undefined, string | undefined, ...TKey]
+  >
 ): DefinedParamQueryHook<TData, TKey, TArgs> {
   const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>>(
     (hookParams, ...args: AllOrUndefined<TArgs>) =>
@@ -164,13 +188,11 @@ export function buildQueryHookWhenParamsDefined<
         ? invokeWhenDefined(hookParams, ...(args as AllDefined<TArgs>))
         : Promise.resolve(undefined),
     buildKey,
-    buildInitialData
+    buildInitialData,
+    optionOverrides
   );
-  (newHook as DefinedParamQueryHook<
-    TData,
-    TKey,
-    TArgs
-  >).invokeWhenDefined = invokeWhenDefined;
+  (newHook as DefinedParamQueryHook<TData, TKey, TArgs>).invokeWhenDefined =
+    invokeWhenDefined;
   return newHook as DefinedParamQueryHook<TData, TKey, TArgs>;
 }
 
@@ -202,7 +224,13 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
     ...args: AllDefined<TArgs>
   ) => Promise<TData>,
   buildKey: (...args: AllOrUndefined<TArgs>) => TKey,
-  buildInitialData?: (() => TData | undefined) | undefined
+  buildInitialData?: (() => TData | undefined) | undefined,
+  optionOverrides?: UseQueryOptions<
+    TData | undefined,
+    unknown,
+    TData,
+    readonly [number | undefined, string | undefined, ...TKey]
+  >
 ): DefinedParamContractQueryHook<TData, TKey, TArgs> {
   const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>>(
     (hookParams: QueryHookParams<TKey>, ...args: AllOrUndefined<TArgs>) => {
@@ -218,12 +246,11 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
         : Promise.resolve(undefined);
     },
     buildKey,
-    buildInitialData
+    buildInitialData,
+    optionOverrides
   );
-  (newHook as DefinedParamContractQueryHook<
-    TData,
-    TKey,
-    TArgs
-  >).invokeWhenDefined = invokeWhenDefined;
+  (
+    newHook as DefinedParamContractQueryHook<TData, TKey, TArgs>
+  ).invokeWhenDefined = invokeWhenDefined;
   return newHook as DefinedParamContractQueryHook<TData, TKey, TArgs>;
 }
