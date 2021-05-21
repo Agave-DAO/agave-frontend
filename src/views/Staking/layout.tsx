@@ -369,7 +369,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         bg="primary.900"
         px={{ base: "2rem", md: "4rem" }}
         py="2.4rem"
-        m={{ base: "2.6rem" }}
+        mr={{ base: "2.6rem" }}
       >
         <ColoredText
           fontSize={{ base: "1.6rem", md: "1.8rem" }}
