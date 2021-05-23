@@ -85,6 +85,7 @@ export function buildQueryHook<
       typeof queryKey
     > = React.useMemo(
       () => ({
+        enabled: chainId !== undefined && account !== undefined && library !== undefined,
         initialData: buildInitialData?.(),
         staleTime: optionOverrides?.staleTime ?? 1 * 60 * 1000,
         retry: (failureCount, err) => {
@@ -106,7 +107,7 @@ export function buildQueryHook<
         },
         ...(optionOverrides ?? {}),
       }),
-      [] // buildInitialData is provided when declaring the hook type, not per call
+      [chainId, account, library] // buildInitialData is provided when declaring the hook type, not per call
     );
 
     const { data, error } = useQuery(
