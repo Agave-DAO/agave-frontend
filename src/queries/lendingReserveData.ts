@@ -97,7 +97,7 @@ export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
   assetAddress => ["AgaveLendingPool", "reserveData", assetAddress],
   () => undefined,
   {
-    cacheTime: Infinity,
-    staleTime: Infinity,
+    cacheTime: 60 * 15,
+    staleTime: 60 * 5,
   }
 );
