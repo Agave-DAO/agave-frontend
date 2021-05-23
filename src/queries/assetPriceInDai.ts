@@ -1,7 +1,10 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
+import { parseUnits } from "@ethersproject/units";
 import { constants } from "ethers";
-import { AaveOracle__factory } from "../contracts";
+import React from "react";
+import { AaveOracle__factory, WETHGateway__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { useWrappedNativeAddress } from "./wrappedNativeAddress";
 
 type Tail<T extends [unknown, ...unknown[]]> = T extends [unknown, ...infer X]
   ? [...X]
@@ -43,7 +46,7 @@ export const useAssetPriceInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   },
   () => undefined,
   undefined,
-  res => FixedNumber.fromValue(res, 18),
+  res => FixedNumber.fromValue(res, 18)
 );
 
 export const useAssetPricesInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -66,3 +69,53 @@ export const useAssetPricesInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
   assetAddresses => ["prices", "dai", "assets", assetAddresses],
   () => undefined
 );
+
+// (dai / source) / (dai / target) = (target / source)
+export function calculateRelativeTokenPrice(
+  daiPerSourceToken: FixedNumber,
+  daiPerTargetToken: FixedNumber
+): FixedNumber {
+  const maxDecimals = Math.max(
+    daiPerSourceToken.format.decimals,
+    daiPerTargetToken.format.decimals
+  );
+  const aWei = parseUnits(daiPerSourceToken.toString(), maxDecimals);
+  const bWei = parseUnits(daiPerTargetToken.toString(), maxDecimals);
+  return FixedNumber.fromValue(
+    aWei.mul(constants.WeiPerEther).div(bWei),
+    maxDecimals
+  );
+}
+
+export function useAssetPriceInNative(
+  assetAddress: string | undefined
+):
+  | { data: undefined; error: unknown }
+  | { data: FixedNumber; error: undefined }
+  | undefined {
+  const { data: nativeAddress, error: eNativeAddress } =
+    useWrappedNativeAddress();
+  const { data: assetPrice, error: eDaiPrice } =
+    useAssetPriceInDai(assetAddress);
+  const { data: wethPrice, error: eNativePrice } =
+    useAssetPriceInDai(nativeAddress);
+  return React.useMemo(() => {
+    const error = eNativeAddress ?? eDaiPrice ?? eNativePrice;
+    if (error) {
+      return {
+        error,
+        data: undefined,
+      };
+    } else {
+      // (dai / token) / (dai / weth) = (weth / token)
+      const wethPerDai =
+        assetPrice && wethPrice
+          ? calculateRelativeTokenPrice(assetPrice, wethPrice)
+          : undefined;
+      return {
+        data: wethPerDai,
+        error: undefined,
+      };
+    }
+  }, [assetPrice, wethPrice, eNativeAddress, eDaiPrice, eNativePrice]);
+}
