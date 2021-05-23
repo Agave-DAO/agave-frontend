@@ -236,7 +236,7 @@ export interface DefinedParamContractQueryHook<
     this: void,
     hookParams: ContractQueryHookParams<TKey>,
     ...args: AllDefined<TArgs>
-  ) => Promise<TData | undefined>;
+  ) => Promise<TData>;
 }
 
 export function buildQueryHookWhenParamsDefinedChainAddrs<
