@@ -13,9 +13,10 @@ export type ContractAddress = string;
 export interface QueryHook<
   TData,
   TKey extends readonly unknown[],
-  TArgs extends unknown[]
+  TArgs extends unknown[],
+  TResult = TData
 > {
-  (this: void, ...params: TArgs): QueryHookResult<TData, TKey>;
+  (this: void, ...params: TArgs): QueryHookResult<TResult, TKey>;
   buildKey: (
     this: void,
     chainId: ChainId | undefined,
@@ -27,6 +28,7 @@ export interface QueryHook<
     hookParams: QueryHookParams<TKey>,
     ...args: TArgs
   ) => Promise<TData | undefined>;
+  mapper?: ((input: TData) => TResult) | undefined;
 }
 
 export interface QueryHookParams<TKey extends readonly unknown[]> {
@@ -45,7 +47,8 @@ export interface QueryHookResult<TData, TKey extends readonly unknown[]> {
 export function buildQueryHook<
   TData,
   TKey extends readonly unknown[],
-  TArgs extends unknown[]
+  TArgs extends unknown[],
+  TResult = TData
 >(
   invoke: (
     this: void,
@@ -59,8 +62,9 @@ export function buildQueryHook<
     unknown,
     TData,
     readonly [number | undefined, string | undefined, ...TKey]
-  >
-): QueryHook<TData, TKey, TArgs> {
+  >,
+  mapper?: ((input: TData) => TResult) | undefined
+): QueryHook<TData, TKey, TArgs, TResult> {
   function useBuiltQueryHook(...params: TArgs) {
     const { account, library, chainId } = useWeb3React<Web3Provider>();
     const queryKey = React.useMemo(
@@ -125,7 +129,21 @@ export function buildQueryHook<
       },
       queryOpts
     );
-    return { data, error, key: queryKey };
+    const mappedData = React.useMemo(() => {
+      if (data !== undefined && mapper !== undefined) {
+        return mapper(data);
+      } else {
+        // This trick works because TResult must extend TData for TData
+        // to be undefined or returnable if it reaches this branch
+        //
+        // Still... This should be redesigned to have more-sound types,
+        // as this may trick the compiler, but it can be broken through
+        // clever misuse of conflicting types. Those scenarios can't
+        // happen by accident though, as they would require an any-cast.
+        return data as TResult extends TData ? TResult : undefined;
+      }
+    }, [data]);
+    return { data: mappedData, error, key: queryKey };
   }
   useBuiltQueryHook.buildKey = (
     chainId: ChainId | undefined,
@@ -137,7 +155,7 @@ export function buildQueryHook<
     ...buildKey(...args),
   ];
   useBuiltQueryHook.invoke = invoke;
-  const bound: QueryHook<TData, TKey, TArgs> = useBuiltQueryHook;
+  const bound: QueryHook<TData, TKey, TArgs, TResult> = useBuiltQueryHook;
   return bound;
 }
 
@@ -154,8 +172,9 @@ type AllOrUndefined<T> = T extends unknown[]
 export interface DefinedParamQueryHook<
   TData,
   TKey extends readonly unknown[],
-  TArgs extends unknown[]
-> extends QueryHook<TData, TKey, AllOrUndefined<TArgs>> {
+  TArgs extends unknown[],
+  TResult = TData
+> extends QueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult> {
   (...params: AllOrUndefined<TArgs>): QueryHookResult<TData, TKey>;
   invokeWhenDefined: (
     this: void,
@@ -167,7 +186,8 @@ export interface DefinedParamQueryHook<
 export function buildQueryHookWhenParamsDefined<
   TData,
   TKey extends readonly unknown[],
-  TArgs extends unknown[]
+  TArgs extends unknown[],
+  TResult = TData
 >(
   invokeWhenDefined: (
     hookParams: QueryHookParams<TKey>,
@@ -180,20 +200,23 @@ export function buildQueryHookWhenParamsDefined<
     unknown,
     TData,
     readonly [number | undefined, string | undefined, ...TKey]
-  >
-): DefinedParamQueryHook<TData, TKey, TArgs> {
-  const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>>(
+  >,
+  mapper?: ((input: TData) => TResult) | undefined
+): DefinedParamQueryHook<TData, TKey, TArgs, TResult> {
+  const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult>(
     (hookParams, ...args: AllOrUndefined<TArgs>) =>
       args.every(a => a !== undefined)
         ? invokeWhenDefined(hookParams, ...(args as AllDefined<TArgs>))
         : Promise.resolve(undefined),
     buildKey,
     buildInitialData,
-    optionOverrides
+    optionOverrides,
+    mapper
   );
-  (newHook as DefinedParamQueryHook<TData, TKey, TArgs>).invokeWhenDefined =
-    invokeWhenDefined;
-  return newHook as DefinedParamQueryHook<TData, TKey, TArgs>;
+  (
+    newHook as DefinedParamQueryHook<TData, TKey, TArgs, TResult>
+  ).invokeWhenDefined = invokeWhenDefined;
+  return newHook as DefinedParamQueryHook<TData, TKey, TArgs, TResult>;
 }
 
 export interface ContractQueryHookParams<TKey extends readonly unknown[]>
@@ -204,8 +227,9 @@ export interface ContractQueryHookParams<TKey extends readonly unknown[]>
 export interface DefinedParamContractQueryHook<
   TData,
   TKey extends readonly unknown[],
-  TArgs extends unknown[]
-> extends QueryHook<TData, TKey, AllOrUndefined<TArgs>> {
+  TArgs extends unknown[],
+  TResult = TData
+> extends QueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult> {
   (...params: AllOrUndefined<TArgs>): QueryHookResult<TData, TKey>;
   invokeWhenDefined: (
     this: void,
@@ -217,7 +241,8 @@ export interface DefinedParamContractQueryHook<
 export function buildQueryHookWhenParamsDefinedChainAddrs<
   TData,
   TKey extends readonly unknown[],
-  TArgs extends unknown[]
+  TArgs extends unknown[],
+  TResult = TData
 >(
   invokeWhenDefined: (
     hookParams: ContractQueryHookParams<TKey>,
@@ -230,9 +255,10 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
     unknown,
     TData,
     readonly [number | undefined, string | undefined, ...TKey]
-  >
-): DefinedParamContractQueryHook<TData, TKey, TArgs> {
-  const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>>(
+  >,
+  mapper?: ((input: TData) => TResult) | undefined
+): DefinedParamContractQueryHook<TData, TKey, TArgs, TResult> {
+  const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult>(
     (hookParams: QueryHookParams<TKey>, ...args: AllOrUndefined<TArgs>) => {
       const chainAddrs =
         hookParams.chainId !== undefined
@@ -247,10 +273,11 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
     },
     buildKey,
     buildInitialData,
-    optionOverrides
+    optionOverrides,
+    mapper
   );
   (
-    newHook as DefinedParamContractQueryHook<TData, TKey, TArgs>
+    newHook as DefinedParamContractQueryHook<TData, TKey, TArgs, TResult>
   ).invokeWhenDefined = invokeWhenDefined;
-  return newHook as DefinedParamContractQueryHook<TData, TKey, TArgs>;
+  return newHook as DefinedParamContractQueryHook<TData, TKey, TArgs, TResult>;
 }
