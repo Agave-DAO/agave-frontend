@@ -1,4 +1,4 @@
-import { BigNumber } from "@ethersproject/bignumber";
+import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
 import { AaveOracle__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
@@ -28,7 +28,8 @@ export const useAssetPriceInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
   // A trick to compensate for buildKey including chainId and account
   Tail<Tail<ReturnType<typeof useAssetPriceInDaiWei.buildKey>>>,
-  [assetAddress: string]
+  [assetAddress: string],
+  FixedNumber
 >(
   useAssetPriceInDaiWei.invokeWhenDefined,
   // HACK: make a buildKey utility on queryBuilder that doesn't include chainId and account
@@ -42,7 +43,7 @@ export const useAssetPriceInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   },
   () => undefined,
   undefined,
-  res => res.div(constants.WeiPerEther)
+  res => FixedNumber.fromValue(res, 18),
 );
 
 export const useAssetPricesInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
