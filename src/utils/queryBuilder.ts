@@ -176,7 +176,7 @@ export interface DefinedParamQueryHook<
   TArgs extends unknown[],
   TResult = TData
 > extends QueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult> {
-  (...params: AllOrUndefined<TArgs>): QueryHookResult<TData, TKey>;
+  (...params: AllOrUndefined<TArgs>): QueryHookResult<TResult, TKey>;
   invokeWhenDefined: (
     this: void,
     hookParams: QueryHookParams<TKey>,
@@ -231,7 +231,7 @@ export interface DefinedParamContractQueryHook<
   TArgs extends unknown[],
   TResult = TData
 > extends QueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult> {
-  (...params: AllOrUndefined<TArgs>): QueryHookResult<TData, TKey>;
+  (...params: AllOrUndefined<TArgs>): QueryHookResult<TResult, TKey>;
   invokeWhenDefined: (
     this: void,
     hookParams: ContractQueryHookParams<TKey>,
