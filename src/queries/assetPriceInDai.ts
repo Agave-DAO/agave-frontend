@@ -3,7 +3,9 @@ import { parseUnits } from "@ethersproject/units";
 import { constants } from "ethers";
 import React from "react";
 import { AaveOracle__factory, WETHGateway__factory } from "../contracts";
+import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { useAllReserveTokens } from "./allReserveTokens";
 import { useWrappedNativeAddress } from "./wrappedNativeAddress";
 
 type Tail<T extends [unknown, ...unknown[]]> = T extends [unknown, ...infer X]
@@ -69,6 +71,48 @@ export const useAssetPricesInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
   assetAddresses => ["prices", "dai", "assets", assetAddresses],
   () => undefined
 );
+
+export interface AllAssetPricesInDaiWeiResult {
+  symbol: string;
+  tokenAddress: string;
+  price: BigNumber;
+}
+
+export const useAllAssetPricesInDaiWei =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    ReadonlyArray<Readonly<AllAssetPricesInDaiWeiResult>>,
+    [_p1: "prices", _p2: "dai", _p3: "allAssets"],
+    []
+  >(
+    async params => {
+      const allAssets = await useAllReserveTokens.fetchQueryDefined(params);
+      const contract = AaveOracle__factory.connect(
+        params.chainAddrs.agaveOracle,
+        params.library.getSigner()
+      );
+      const prices = await contract.getAssetsPrices(
+        allAssets.map(asset => asset.tokenAddress)
+      ); // price in dai per token
+      const items = prices.map((entry, idx) => ({
+        ...allAssets[idx],
+        price: entry,
+      }));
+      // Update cached values for all single-element entries
+      for (const { tokenAddress, price } of items) {
+        // TODO: Make set-cache and clear-cache utilities on QueryHook for doing this with `params` with strong types
+        //       When making said utilities, apply options to the setQueryData call automatically
+        const assetKey = useAssetPriceInDaiWei.buildKey(
+          params.chainId,
+          params.account,
+          tokenAddress
+        );
+        params.queryClient.setQueryData(assetKey, price);
+      }
+      return items;
+    },
+    () => ["prices", "dai", "allAssets"],
+    () => undefined
+  );
 
 // (dai / source) / (dai / target) = (target / source)
 export function calculateRelativeTokenPrice(
