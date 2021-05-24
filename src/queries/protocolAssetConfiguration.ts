@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, FixedNumber } from "@ethersproject/bignumber";
+import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import {
   AaveProtocolDataProvider,
   AaveProtocolDataProvider__factory,
@@ -66,7 +66,7 @@ type Web3ProtocolReserveDataResult = PromisedType<
   ReturnType<typeof AaveProtocolDataProvider.prototype.getReserveConfigurationData>
 >;
 
-export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
+export const useProtocolReserveConfiguration = buildQueryHookWhenParamsDefinedChainAddrs<
   ReserveAssetConfiguration,
   [
     _p1: "AaveProtocolDataProvider",
