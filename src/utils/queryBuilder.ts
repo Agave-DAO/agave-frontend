@@ -3,6 +3,7 @@ import {
   QueryFunctionContext,
   QueryOptions,
   useQuery,
+  useQueryClient,
   UseQueryOptions,
 } from "react-query";
 import { useWeb3React } from "@web3-react/core";
@@ -37,13 +38,13 @@ export interface QueryHook<
   mapper?: ((input: TData) => TResult) | undefined;
   fetchQuery: (
     this: void,
-    queryClient: QueryClient,
-    hookParams: Omit<QueryHookParams<TKey>, "key">,
+    hookParams: Readonly<Omit<QueryHookParams<TKey>, "key">>,
     ...args: TArgs
   ) => Promise<TResult | undefined>;
 }
 
 export interface QueryHookParams<TKey extends readonly unknown[]> {
+  queryClient: QueryClient;
   account: string;
   chainId: number;
   library: Web3Provider;
@@ -125,6 +126,8 @@ export function buildQueryHook<
       [chainId, account, library] // buildInitialData is provided when declaring the hook type, not per call
     );
 
+    const queryClient = useQueryClient();
+
     const { data, error } = useQuery(
       queryKey,
       async (ctx): Promise<TData | undefined> => {
@@ -138,6 +141,7 @@ export function buildQueryHook<
             chainId: chainId as number,
             library,
             key: innerKey as [...TKey],
+            queryClient,
           },
           ...params
         );
@@ -170,14 +174,14 @@ export function buildQueryHook<
     ...buildKey(...args),
   ];
   useBuiltQueryHook.invoke = invoke;
-  useBuiltQueryHook.fetchQuery = (async (queryClient, hookParams, ...args) => {
+  useBuiltQueryHook.fetchQuery = (async (hookParams, ...args) => {
     const key = useBuiltQueryHook.buildKey(
       hookParams.chainId,
       hookParams.account,
       ...args
     );
     const [, , ...innerKey] = key;
-    const res = await queryClient.fetchQuery<
+    const res = await hookParams.queryClient.fetchQuery<
       TData | undefined,
       unknown,
       TData,
@@ -254,8 +258,7 @@ export interface DefinedParamQueryHook<
   ) => Promise<TData | undefined>;
   fetchQueryDefined: (
     this: void,
-    queryClient: QueryClient,
-    hookParams: Omit<QueryHookParams<TKey>, "key">,
+    hookParams: Readonly<Omit<QueryHookParams<TKey>, "key">>,
     ...args: AllDefined<TArgs>
   ) => Promise<TResult>;
 }
@@ -297,8 +300,8 @@ export function buildQueryHookWhenParamsDefined<
   // We throw our own exception here if an undefined occurs
   (
     newHook as DefinedParamQueryHook<TData, TKey, TArgs, TResult>
-  ).fetchQueryDefined = (...args) =>
-    newHook.fetchQuery(...args).then(async res => {
+  ).fetchQueryDefined = (hookParams, ...args) =>
+    newHook.fetchQuery(hookParams, ...args).then(async res => {
       if (res === undefined) {
         throw new Error("Defined fetcher returned undefined result");
       } else {
@@ -327,8 +330,7 @@ export interface DefinedParamContractQueryHook<
   ) => Promise<TData>;
   fetchQueryDefined: (
     this: void,
-    queryClient: QueryClient,
-    hookParams: Omit<ContractQueryHookParams<TKey>, "key">,
+    hookParams: Readonly<Omit<ContractQueryHookParams<TKey>, "key">>,
     ...args: AllDefined<TArgs>
   ) => Promise<TResult>;
 }
@@ -379,8 +381,8 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
   // NOTE: in chainAddr hooks, this
   (
     newHook as DefinedParamContractQueryHook<TData, TKey, TArgs, TResult>
-  ).fetchQueryDefined = (queryClient, hookParams, ...args) =>
-    newHook.fetchQuery(queryClient, hookParams, ...args).then(async res => {
+  ).fetchQueryDefined = (hookParams, ...args) =>
+    newHook.fetchQuery(hookParams, ...args).then(async res => {
       if (res === undefined) {
         throw new Error("Defined fetcher returned undefined result");
       } else {

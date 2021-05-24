@@ -87,7 +87,35 @@ export function calculateRelativeTokenPrice(
   );
 }
 
-export function useAssetPriceInNative(
+export const useAssetPriceInNative = buildQueryHookWhenParamsDefinedChainAddrs<
+  FixedNumber,
+  [
+    _p1: "prices",
+    _p2: "native",
+    _p3: "asset",
+    assetAddress: string | undefined
+  ],
+  [assetAddress: string],
+  FixedNumber
+>(
+  async (params, assetAddress) => {
+    const [assetPrice, wethPrice] = await Promise.all([
+      useAssetPriceInDai.fetchQueryDefined(params, assetAddress),
+      useWrappedNativeAddress
+        .fetchQueryDefined(params)
+        .then(nativeAddr =>
+          useAssetPriceInDai.fetchQueryDefined(params, nativeAddr)
+        ),
+    ]);
+    return calculateRelativeTokenPrice(assetPrice, wethPrice);
+  },
+  assetAddress => ["prices", "native", "asset", assetAddress],
+  () => undefined,
+  undefined
+);
+
+// An example of how older hook composition worked:
+export function _useAssetPriceInNativeCompositeHook(
   assetAddress: string | undefined
 ):
   | { data: undefined; error: unknown }
