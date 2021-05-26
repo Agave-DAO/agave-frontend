@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 import React from "react";
 import { UseMutationResult, useQueryClient, useMutation } from "react-query";
 import { StakedToken__factory, Erc20abi__factory } from "../contracts";
@@ -70,27 +70,47 @@ export const useStakeMutation = ({
         .then(stakedTokenAddr =>
           Erc20abi__factory.connect(stakedTokenAddr, signer)
         );
-      if (
-        (await stakedToken.allowance(address, stakingContract.address)).lt(
-          args.amount
-        )
-      ) {
-        const approval = stakedToken.approve(
-          stakingContract.address,
-          args.amount
-        );
-        const approvalConfirmation = await usingProgressNotification(
-          "Awaiting spend approval",
-          "Please commit the transaction for ERC20 approval for the requested staking cost with your wallet.",
-          "info",
-          approval
-        );
-        await usingProgressNotification(
-          "Awaiting approval confirmation",
-          "Please wait while the blockchain processes your transaction",
-          "info",
-          approvalConfirmation.wait()
-        );
+      const priorAllowance = await stakedToken.allowance(
+        address,
+        stakingContract.address
+      );
+      if (priorAllowance.lt(args.amount)) {
+        if (!priorAllowance.isZero()) {
+          const approvalReset = stakedToken.approve(
+            stakingContract.address,
+            constants.Zero
+          );
+          const approvalResetConfirmation = await usingProgressNotification(
+            "Awaiting approval reset",
+            "MiniMe tokens require setting your allowance to 0 before changing it. Please commit the transaction resetting MiniMe approval to 0 to patch inconsistent state",
+            "warning",
+            approvalReset
+          );
+          await usingProgressNotification(
+            "Awaiting approval reset confirmation",
+            "Please wait while the blockchain processes your transaction",
+            "info",
+            approvalResetConfirmation.wait()
+          );
+        }
+        {
+          const approval = stakedToken.approve(
+            stakingContract.address,
+            args.amount
+          );
+          const approvalConfirmation = await usingProgressNotification(
+            "Awaiting spend approval",
+            "Please commit the transaction for ERC20 approval for the requested staking cost with your wallet.",
+            "info",
+            approval
+          );
+          await usingProgressNotification(
+            "Awaiting approval confirmation",
+            "Please wait while the blockchain processes your transaction",
+            "info",
+            approvalConfirmation.wait()
+          );
+        }
       }
       console.log(
         "useStakeMutation",
