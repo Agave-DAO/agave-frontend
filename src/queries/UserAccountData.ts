@@ -2,6 +2,8 @@ import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { useAssetPriceInDaiWei } from "./assetPriceInDai";
+import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
 
 export interface UserAccountData {
   // TODO: Is this actually in "native" tokens?
@@ -9,7 +11,10 @@ export interface UserAccountData {
   totalDebtEth: BigNumber; // e.g. 91611984393903 in wei
   availableBorrowsEth: BigNumber; // e.g. 21566601559458 in wei
   currentLiquidationThreshold: FixedNumber; //  Fixed4 e.g. 7021 = 70.21%
-  ltv: FixedNumber; //  Fixed4 e.g. 5781 = 57.81 MaximumLTV
+  maximumLtv: FixedNumber; //  Fixed4 e.g. 5781 = 57.81 MaximumLTV
+  maximumLtvDiscrete: BigNumber; //  Fixed4 e.g. 5781 = 57.81 MaximumLTV
+  currentLtv: FixedNumber; // 0 <-> Math.min(maximumLtv, 1), totalDebt / totalCollateral
+  usedBorrowingPower: FixedNumber;
   healthFactor: FixedNumber; //  Ray e.g. 1500403183017056862 = 1.50
 }
 
@@ -25,6 +30,10 @@ export function userAccountDataFromWeb3Result({
   ltv, //  Fixed4 e.g. 5781 = 57.81 MaximumLTV
   healthFactor, //  Ray e.g. 1500403183017056862 = 1.50
 }: Web3UserAccountData): UserAccountData {
+  const maximumLtv = FixedNumber.fromValue(ltv, 4);
+  const currentLtv = FixedNumber.fromValue(totalDebtETH, 18).divUnsafe(
+    FixedNumber.fromValue(totalCollateralETH, 18)
+  );
   return {
     totalCollateralEth: totalCollateralETH,
     totalDebtEth: totalDebtETH,
@@ -33,7 +42,10 @@ export function userAccountDataFromWeb3Result({
       currentLiquidationThreshold,
       4
     ),
-    ltv: FixedNumber.fromValue(ltv, 4),
+    maximumLtvDiscrete: ltv,
+    maximumLtv,
+    currentLtv,
+    usedBorrowingPower: currentLtv.divUnsafe(maximumLtv),
     healthFactor: rayFixed(healthFactor),
   };
 }
@@ -42,26 +54,62 @@ type Web3UserAccountData = PromisedType<
   ReturnType<typeof AgaveLendingABI.prototype.getUserAccountData>
 >;
 
-export const useProtocolReserveConfiguration =
+export const useUserAccountData = buildQueryHookWhenParamsDefinedChainAddrs<
+  UserAccountData,
+  [
+    _p1: "LendingPool",
+    _p2: "userAccountData",
+    accountAddress: string | undefined
+  ],
+  [accountAddress: string]
+>(
+  async (params, accountAddress) => {
+    const contract = AgaveLendingABI__factory.connect(
+      params.chainAddrs.lendingPool,
+      params.library.getSigner()
+    );
+    return await contract
+      .getUserAccountData(accountAddress)
+      .then(userAccountDataFromWeb3Result);
+  },
+  accountAddress => ["LendingPool", "userAccountData", accountAddress],
+  () => undefined,
+  {
+    cacheTime: 60 * 15 * 1000,
+    staleTime: 60 * 5 * 1000,
+  }
+);
+
+export const useAvailableToBorrowAssetWei =
   buildQueryHookWhenParamsDefinedChainAddrs<
-    UserAccountData,
+    BigNumber,
     [
       _p1: "LendingPool",
       _p2: "userAccountData",
-      accountAddress: string | undefined
+      accountAddress: string | undefined,
+      _p3: "availableToBorrow",
+      assetAddress: string | undefined
     ],
-    [accountAddress: string]
+    [accountAddress: string, assetAddress: string]
   >(
-    async (params, accountAddress) => {
-      const contract = AgaveLendingABI__factory.connect(
-        params.chainAddrs.lendingPool,
-        params.library.getSigner()
-      );
-      return await contract
-        .getUserAccountData(accountAddress)
-        .then(userAccountDataFromWeb3Result);
+    async (params, accountAddress, assetAddress) => {
+      const [accountData, assetPrice, assetDecimals] = await Promise.all([
+        useUserAccountData.fetchQueryDefined(params, accountAddress),
+        useAssetPriceInDaiWei.fetchQueryDefined(params, assetAddress),
+        useDecimalCountForToken.fetchQueryDefined(params, assetAddress),
+      ]);
+
+      return accountData.availableBorrowsEth
+        .mul(weiPerToken(assetDecimals))
+        .div(assetPrice);
     },
-    accountAddress => ["LendingPool", "userAccountData", accountAddress],
+    (accountAddress, assetAddress) => [
+      "LendingPool",
+      "userAccountData",
+      accountAddress,
+      "availableToBorrow",
+      assetAddress,
+    ],
     () => undefined,
     {
       cacheTime: 60 * 15 * 1000,
