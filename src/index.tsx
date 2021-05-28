@@ -11,6 +11,7 @@ import { Web3Provider } from "@ethersproject/providers";
 import { QueryClient, QueryClientProvider, QueryCache } from "react-query";
 import { BigNumber, FixedNumber } from "ethers";
 import { useAmbientConnection } from "./hooks/injectedConnectors";
+import { ReactQueryDevtools } from "react-query/devtools";
 
 const reactQueryClient = new QueryClient({
   queryCache: new QueryCache(),
@@ -39,6 +40,7 @@ function renderApp() {
           <React.StrictMode>
             <AppRoot />
           </React.StrictMode>
+          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </Provider>
     </Web3ReactProvider>,
