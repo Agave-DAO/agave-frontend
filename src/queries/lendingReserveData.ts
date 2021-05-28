@@ -87,7 +87,7 @@ export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
 >(
   async (params, assetAddress) => {
     const contract = AgaveLendingABI__factory.connect(
-      params.chainAddrs.aaveProtocolDataProvider,
+      params.chainAddrs.lendingPool,
       params.library.getSigner()
     );
     return await contract
