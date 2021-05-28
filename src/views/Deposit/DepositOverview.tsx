@@ -1,310 +1,252 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
-import Button from '../../components/Button';
+import { 
+  Box,
+  Center,
+  Circle,
+  Spacer,
+  StackDivider,
+  Text,
+  VStack
+} from "@chakra-ui/react";
 import { IMarketData } from '../../utils/constants';
 
-const DepositOverviewWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
+export interface DepositOverviewProps {
+  asset: IMarketData;
+  agaveBalance: Number;
+  walletBalance: Number;
+  healthFactor: Number;
+  utilizationRate: Number;
+  availableLiquidity: Number;
+  depositAPY: Number;
+  usedAsCollateral: Boolean;
+  assetPrice: Number;
+  maxLTV: Number;
+}
 
-  .topContent {
-    display: flex;
-    margin-bottom: 5px;
-
-    .topContent-section {
-      margin-right: 30px;
-
-      .topContent-section-title {
-        font-size: 12px;
-        color: ${props => props.theme.color.textSecondary};
-        margin-right: 10px;
-      }
-
-      .topContent-section-value {
-        font-size: 12px;
-        color: ${props => props.theme.color.textSecondary};
-
-        &.green {
-          color: ${props => props.theme.color.green}
-        }
-      }
-    }
-  }
-
-  .top-overview {
-    width: 100%;
-    border-radius: 2px;
-    box-shadow: ${props => props.theme.color.boxShadow};
-    background: ${props => props.theme.color.bgSecondary};
-
-    .top-overview-header {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 10px 20px;
-      position: relative;
-      border-bottom: 2px solid ${props => props.theme.color.white};
-
-      .top-overview-title {
-        position: absolute;
-        left: 20px;
-        font-weight: 600;
-        color: ${props => props.theme.color.textSecondary};
-      }
-
-      .top-overview-reserve {
-        display: flex;
-        align-items: center;
-        cursor: pointer;
-        transition: all 0.2s ease 0s;
-
-        &:hover {
-          opacity: 0.7;
-        }
-
-        .reserve-name {
-          color: ${props => props.theme.color.textSecondary};
-          font-size: 14px;
-          margin-left: 10px;
-        }
-      }
-    }
-
-    .top-overview-content {
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-
-      .top-overview-content-left {
-        display: flex;
-        justify-content: space-between;
-        flex: 1 1 0%;
-        margin-right: 50px;
-
-        .currency-overview {
-          width: 45%;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-
-          .currency-overview-row {
-            display: flex;
-            flex-flow: row wrap;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 12px;
-
-            &:last-child {
-              margin-bottom: 0;
-            }
-
-            .currency-overview-row-title {
-              font-size: 14px;
-              color: ${props => props.theme.color.textSecondary};
-            }
-
-            .currency-overview-row-content {
-              font-size: 16px;
-              font-weight: 400;
-              color: ${props => props.theme.color.textSecondary};
-
-              span {
-                font-size: 16px;
-                font-weight: 600;
-
-                &.yellow {
-                  color: ${props => props.theme.color.yellow};
-                }
-
-                &.green {
-                  color: ${props => props.theme.color.green};
-                }
-              }
-            }
-          }
-        }
-      }
-
-      .top-overview-content-right {
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        color: rgb(56, 61, 81);
-        width: 640px;
-        border-radius: 2px;
-        padding: 0px 2px;
-        display: flex;
-        flex-direction: column;
-
-        .top-graph-header {
-          padding: 5px 8px;
-          display: flex;
-          flex-flow: row wrap;
-          justify-content: space-between;
-          align-items: center;
-
-          .top-graph-header-title {
-            color: ${props => props.theme.color.textSecondary};
-          }
-
-          .top-graph-header-button {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            flex: 1 1 0%;
-
-            .filter-section {
-              display: flex;
-            }
-          }
-        }
-
-        .top-graph-content {
-          flex: 1 1 0%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: ${props => props.theme.color.textSecondary};
-        }
-      }
-    }
-  }
-`;
-
-function DepositOverview({ asset }: {asset: IMarketData }) {
-  const history = useHistory();
+export const DepositOverview: React.FC<DepositOverviewProps> = props => {
   return (
-    <DepositOverviewWrapper>
-      <div className="topContent">
-        <div className="topContent-section">
-          <span className="topContent-section-title">
-            Your balance in Aave
-          </span>
-          <span className="topContent-section-value">
-            500.0091 {asset.name}
-          </span>
-        </div>
-        <div className="topContent-section">
-          <span className="topContent-section-title">
-            Your wallet balance
-          </span>
-          <span className="topContent-section-value">
-            9,499.9973 {asset.name}
-          </span>
-        </div>
-        <div className="topContent-section">
-          <span className="topContent-section-title">
-            Health factor
-          </span>
-          <span className="topContent-section-value green">
-            20.31
-          </span>
-        </div>
-      </div>
-      <div className="top-overview">
-        <div className="top-overview-header">
-          <div className="top-overview-title">
-            Deposit {asset.name}
-          </div>
-          <div className="top-overview-reserve" onClick={() => history.push(`/reserve-overview/${asset.name}`)}>
-            <img src={asset.img} alt="" width={20} height={20} />
-            <span className="reserve-name">{asset.name} Reserve Overview</span>
-          </div>
-        </div>
-        <div className="top-overview-content">
-          <div className="top-overview-content-left">
-            <div className="currency-overview">
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Utilization rate
-                </div>
-                <div className="currency-overview-row-content">
-                  <span>8.52</span> %
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Available Liquidity
-                </div>
-                <div className="currency-overview-row-content">
-                  <span>13,234,234.5324</span> {asset.name}
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Deposit APY
-                </div>
-                <div className="currency-overview-row-content">
-                  <span className="yellow">0.04</span> %
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Can be used as collateral
-                </div>
-                <div className="currency-overview-row-content">
-                  <span className="green">Yes</span>
-                </div>
-              </div>
-            </div>
-            <div className="currency-overview">
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Asset Price
-                </div>
-                <div className="currency-overview-row-content">
-                  <span>0.99</span> USD
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Maximum LTV
-                </div>
-                <div className="currency-overview-row-content">
-                  <span>75</span> %
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Liquidation threshold
-                </div>
-                <div className="currency-overview-row-content">
-                  <span>80</span> %
-                </div>
-              </div>
-              <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Liquidation penalty
-                </div>
-                <div className="currency-overview-row-content">
-                  <span>5</span> %
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="top-overview-content-right">
-            <div className="top-graph-header">
-              <div className="top-graph-header-title">
-                Historical rates
-              </div>
-              <div className="top-graph-header-button">
-                <div className="filter-section">
-                  <Button size="sm">Daily</Button>
-                  <Button size="sm">Weekly</Button>
-                  <Button size="sm">Monthly</Button>
-                  <Button size="sm">All</Button>
-                </div>
-              </div>
-            </div>
-            <div className="top-graph-content">
-              No data to show yet
-            </div>
-          </div>
-        </div>
-      </div>
-    </DepositOverviewWrapper>
+    <Center
+      boxSizing="content-box"
+      rounded="xl"
+      minH="12.75rem"
+      minW={{ base: "100%", md: "inherit" }}
+      bg="primary.900"
+      py="2.4rem"
+      mb={{ base: "0.1rem", md: "0" }}
+      color="white"
+    >
+      <VStack
+        divider={<StackDivider borderColor="#36CFA2" h="0.188rem" backgroundColor="#36CFA2"/>}
+        spacing={4}
+        w='100%'
+        align="stretch"
+        flexDirection="column"
+      >
+        <Box 
+          h={{
+            base: 100, // 0-48em
+            md: 45, // 48em-80em,
+            xl: 30, // 80em+
+          }}
+          ml={{
+            md: 27,
+            xl: 27
+          }}
+          mb={{
+            base: 5,
+            md: 5,
+            xl: 0
+          }}
+          maxW={{
+            base: "100%", // 0-48em
+            md: "90%", // 48em-80em,
+            xl: "70%", // 80em+
+          }}
+          d="flex"
+          flexDirection={{ base: "column", md: "row", xl: "row" }}
+        >
+          <Box
+            d="flex"
+            flexDirection={{ base: "row", md: "column", xl: "row" }}
+            justifyContent="center"
+          >
+            <Text>
+              Your balance in Agave
+            </Text>
+            <Text
+              ml="0.813rem"
+            >
+              <b>{props.agaveBalance}</b> {props.asset.name}
+            </Text>
+          </Box>
+          <Spacer />
+          <Box
+            d="flex"
+            flexDirection={{ base: "row", md: "column", xl: "row" }}
+            justifyContent="center"
+          >
+            <Text>
+              Your wallet balance
+            </Text>
+            <Text
+              ml="0.813rem"
+            >
+              <b>{props.walletBalance}</b> {props.asset.name}
+            </Text>
+          </Box>
+          <Spacer />
+          <Box
+            d="flex"
+            flexDirection={{ base: "row", md: "column", xl: "row" }}
+            justifyContent="center"
+          >
+            <Box
+              d="flex"
+            >
+              <Text>
+                Health factor
+              </Text>
+              <IconQuestion onClick={()=>{}} />
+            </Box>
+            <Text
+              ml="0.813rem"
+              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+              backgroundClip="text"
+              fontWeight="bold"
+            >
+              {props.healthFactor}
+            </Text>
+          </Box>
+        </Box>
+        <Box 
+          w="100%"
+          h={{
+            base: 380, // 0-48em
+            md: 100, // 48em-80em,
+            xl: 90, // 80em+
+          }}
+          pl={27}
+          pr={27}
+          pt={5}
+          d="flex"
+          flexDirection={{ base: "column", md: "row", xl: "row" }}
+          justifyContent="space-between"
+        >
+          <VStack
+            mt={5}
+          >
+            <Text
+              color="white"
+              textAlign="center"
+            >
+              Utilization rate
+            </Text>
+            <Text fontWeight="bold">
+              {props.utilizationRate} %
+            </Text>
+          </VStack>
+          <Spacer />
+          <VStack
+            mt={5}
+          >
+            <Text
+              color="white"
+              textAlign="center"
+            >
+              Available Liquidity
+            </Text>
+            <Text fontWeight="bold">
+              {props.availableLiquidity + " " + props.asset.name}
+            </Text>
+          </VStack>
+          <Spacer />
+          <VStack
+            mt={5}
+          >
+            <Text
+              color="white"
+              textAlign="center"
+            >
+              Deposit APY
+            </Text>
+            <Text fontWeight="bold">
+              {props.depositAPY} %
+            </Text>
+          </VStack>
+          <Spacer />
+          <VStack
+            mt={5}
+          >
+            <Text
+              color="white"
+              textAlign="center"
+            >
+              Can be used as collateral
+            </Text>
+            <Text fontWeight="700" color="#FFC01B">
+              {props.usedAsCollateral ? "Yes" : "No"}
+            </Text>
+          </VStack>
+          <Spacer />
+          <VStack
+            mt={5}
+          >
+            <Text
+              color="white"
+              textAlign="center"
+            >
+              Asset Price
+            </Text>
+            <Text fontWeight="bold">
+              {props.assetPrice} USD
+            </Text>
+          </VStack>
+          <Spacer />
+          <VStack
+            mt={5}
+          >
+            <Box d="flex" alignItems="center">
+            <Text
+              color="white"
+              textAlign="center"
+            >
+              Maximum LTV
+            </Text>
+            <IconQuestion onClick={()=>{}} />
+            </Box>
+            <Text fontWeight="bold">
+              {props.maxLTV} %
+            </Text>
+          </VStack>
+        </Box>
+      </VStack>   
+    </Center>
   );
 }
 
 export default DepositOverview;
+
+const IconQuestion: React.FC<{
+  onClick: React.MouseEventHandler;
+}> = ({
+  onClick
+}) => {
+  return(
+    <Circle
+      borderWidth={{ base: "1px", md: "2px" }}
+      width={{ base: "10px", md: "15px" }}
+      height={15}
+      minHeight={{ base: "10px", md: "15px" }}
+      ml={3}
+      boxSizing="content-box"
+      as={Center}
+      fontSize={{ base: ".85rem", md: "1rem" }}
+      color="#FFC01B"
+      borderColor="#FFC01B"
+      cursor="pointer"
+      onClick={onClick}
+    >
+      ?
+    </Circle>
+  )
+};
