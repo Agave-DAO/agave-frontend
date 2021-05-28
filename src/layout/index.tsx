@@ -68,10 +68,13 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
           minH={{ base: "6.6rem", md: "9.6rem" }}
           mb={{ md: "3.5rem" }}
           bg={{ base: "primary.500", md: "primary.900" }}
+          fg={{ base: "primary.100", md: "primary.100" }}
+          color={{ base: "primary.100", md: "primary.100" }}
+          px={{ base: "2.3rem", md: "4.7rem" }}
         >
           {headerMemo}
         </Center>
-        <Box>{childrenMemo}</Box>
+        {childrenMemo}
       </Box>
       <Center mt="25rem" display={{ base: "none", md: "flex" }}>
         <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
