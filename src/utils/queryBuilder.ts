@@ -56,6 +56,25 @@ export interface QueryHookResult<TData, TKey extends readonly unknown[]> {
   key: readonly [ChainId | undefined, Account | undefined, ...TKey];
 }
 
+function baseWeb3RetryHandler(failureCount: number, err: unknown): boolean {
+  if (failureCount > 3) {
+    return false;
+  }
+  const code = (err as Error & { code?: ErrorCode }).code;
+  if (code !== undefined) {
+    switch (code) {
+      case ErrorCode.NETWORK_ERROR:
+      case ErrorCode.TIMEOUT:
+        return true;
+      case ErrorCode.NUMERIC_FAULT:
+      case ErrorCode.CALL_EXCEPTION:
+      default:
+        return false;
+    }
+  }
+  return true;
+}
+
 export function buildQueryHook<
   TData,
   TKey extends readonly unknown[],
@@ -103,23 +122,7 @@ export function buildQueryHook<
           library !== undefined,
         initialData: buildInitialData?.(),
         staleTime: optionOverrides?.staleTime ?? 1 * 60 * 1000,
-        retry: (failureCount, err) => {
-          if (failureCount > 3) {
-            return false;
-          }
-          const code = (err as Error & { code?: ErrorCode }).code;
-          if (code !== undefined) {
-            switch (code) {
-              case ErrorCode.NETWORK_ERROR:
-              case ErrorCode.TIMEOUT:
-                return true;
-              case ErrorCode.NUMERIC_FAULT:
-              default:
-                return false;
-            }
-          }
-          return true;
-        },
+        retry: (optionOverrides?.retry ?? baseWeb3RetryHandler),
         ...(optionOverrides ?? {}),
       }),
       [chainId, account, library] // buildInitialData is provided when declaring the hook type, not per call
@@ -134,16 +137,21 @@ export function buildQueryHook<
         if (!account || !chainId || !library) {
           return undefined;
         }
-        return await invoke(
-          {
-            account,
-            chainId: chainId as number,
-            library,
-            key: innerKey as [...TKey],
-            queryClient,
-          },
-          ...params
-        );
+        try {
+          return await invoke(
+            {
+              account,
+              chainId: chainId as number,
+              library,
+              key: innerKey as [...TKey],
+              queryClient,
+            },
+            ...params
+          );
+        } catch (e) {
+          e._queryKey = Array.from(ctx.queryKey);
+          throw e;
+        }
       },
       queryOpts
     );
@@ -187,39 +195,28 @@ export function buildQueryHook<
       typeof key
     >(
       key,
-      () => {
-        return useBuiltQueryHook.invoke(
-          {
-            // This also merges properties which come from derived implementations,
-            // such as chainAddrs from the ContractQueryHookParams variant.
-            ...hookParams,
-            key: innerKey as [...TKey],
-          },
-          ...args
-        );
+      async (ctx) => {
+        try {
+          return await useBuiltQueryHook.invoke(
+            {
+              // This also merges properties which come from derived implementations,
+              // such as chainAddrs from the ContractQueryHookParams variant.
+              ...hookParams,
+              key: innerKey as [...TKey],
+            },
+            ...args
+          );
+        } catch (e) {
+          e._queryKey = Array.from(ctx.queryKey);
+          throw e;
+        }
       },
       {
-        ...optionOverrides,
         queryKey: undefined,
         initialData: buildInitialData?.(),
         staleTime: optionOverrides?.staleTime ?? 1 * 60 * 1000,
-        retry: (failureCount, err) => {
-          if (failureCount > 3) {
-            return false;
-          }
-          const code = (err as Error & { code?: ErrorCode }).code;
-          if (code !== undefined) {
-            switch (code) {
-              case ErrorCode.NETWORK_ERROR:
-              case ErrorCode.TIMEOUT:
-                return true;
-              case ErrorCode.NUMERIC_FAULT:
-              default:
-                return false;
-            }
-          }
-          return true;
-        },
+        retry: (optionOverrides?.retry ?? baseWeb3RetryHandler),
+        ...optionOverrides,
       } as QueryOptions<TData | undefined, unknown, TData, typeof key>
     );
     if (res !== undefined) {
@@ -355,17 +352,17 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
   mapper?: ((input: TData) => TResult) | undefined
 ): DefinedParamContractQueryHook<TData, TKey, TArgs, TResult> {
   const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult>(
-    (hookParams: QueryHookParams<TKey>, ...args: AllOrUndefined<TArgs>) => {
+    async function hookInvocationContext(this: void, hookParams: QueryHookParams<TKey>, ...args: AllOrUndefined<TArgs>) {
       const chainAddrs =
         hookParams.chainId !== undefined
           ? getChainAddresses(hookParams.chainId)
           : undefined;
       return chainAddrs !== undefined && args.every(a => a !== undefined)
-        ? invokeWhenDefined(
+        ? await invokeWhenDefined(
             { ...hookParams, chainAddrs },
             ...(args as AllDefined<TArgs>)
           )
-        : Promise.resolve(undefined);
+        : undefined;
     },
     buildKey,
     buildInitialData,
