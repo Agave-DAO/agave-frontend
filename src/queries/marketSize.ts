@@ -11,7 +11,7 @@ export function weiPerToken(decimals: BigNumberish): BigNumber {
 }
 
 export const useMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
-  BigNumber,
+  BigNumber | null,
   [_p1: "market", _p2: "size", assetAddress: string | undefined],
   [assetAddress: string]
 >(
@@ -25,9 +25,11 @@ export const useMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
       reserveData.aTokenAddress,
       params.library.getSigner()
     );
-    const atokenTotalSupply = await atoken.totalSupply();
+    const atokenTotalSupply = await atoken.totalSupply({
+      gasPrice: 1, gasLimit: constants.WeiPerEther,
+    });
 
-    return atokenTotalSupply.mul(priceInDaiWei);
+    return priceInDaiWei ? atokenTotalSupply.mul(priceInDaiWei) : null;
   },
   assetAddress => ["market", "size", assetAddress],
   () => undefined,
@@ -49,7 +51,7 @@ export const useTotalMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
         useMarketSize.fetchQueryDefined(params, reserve.tokenAddress)
       )
     );
-    return sizes.reduce((a, b) => a.add(b), constants.Zero);
+    return sizes.reduce((a: BigNumber, b: BigNumber | null): BigNumber => a.add(b ?? constants.Zero), constants.Zero);
   },
   () => ["market", "size", "total"],
   () => undefined,

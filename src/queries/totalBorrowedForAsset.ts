@@ -7,7 +7,7 @@ import { useProtocolReserveData } from "./protocolReserveData";
 
 export const useTotalBorrowedForAsset =
   buildQueryHookWhenParamsDefinedChainAddrs<
-    { wei: BigNumber; dai: FixedNumber },
+    { wei: BigNumber; dai: FixedNumber | null; },
     [_p1: "asset", assetAddress: string | undefined, _p2: "borrowed"],
     [assetAddress: string]
   >(
@@ -23,13 +23,13 @@ export const useTotalBorrowedForAsset =
         reserveData.totalVariableDebt
       );
 
-      const daiBorrowed = FixedNumber.fromValue(
+      const daiBorrowed = assetPriceInDaiWei !== null ? FixedNumber.fromValue(
         totalBorrowedWei
           .mul(assetPriceInDaiWei)
           .mul(constants.WeiPerEther)
           .div(weiPerToken(assetDecimals)),
         18
-      );
+      ) : null;
 
       return {
         wei: totalBorrowedWei,

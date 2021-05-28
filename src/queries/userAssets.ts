@@ -60,8 +60,8 @@ interface ReserveAssetBalancesDaiWei {
   tokenAddress: string;
   balance: BigNumber;
   decimals: BigNumberish;
-  daiWeiPricePer: BigNumber;
-  daiWeiPriceTotal: BigNumber;
+  daiWeiPricePer: BigNumber | null;
+  daiWeiPriceTotal: BigNumber | null;
 }
 
 export const useUserReserveAssetBalancesDaiWei =
@@ -88,9 +88,10 @@ export const useUserReserveAssetBalancesDaiWei =
           ]).then(([daiPricePerToken, decimals]) => ({
             ...reserve,
             daiWeiPricePer: daiPricePerToken,
-            daiWeiPriceTotal: daiPricePerToken
-              .mul(reserve.balance)
-              .div(weiPerToken(decimals)),
+            daiWeiPriceTotal:
+              daiPricePerToken
+                ?.mul(reserve.balance)
+                .div(weiPerToken(decimals)) ?? null,
             decimals,
           }))
         )
@@ -141,8 +142,8 @@ interface DepositAssetBalancesDaiWei {
   tokenAddress: string;
   aTokenAddress: string;
   balance: BigNumber;
-  daiWeiPricePer: BigNumber;
-  daiWeiPriceTotal: BigNumber;
+  daiWeiPricePer: BigNumber | null;
+  daiWeiPriceTotal: BigNumber | null;
 }
 
 export const useUserDepositAssetBalancesDaiWei =
@@ -186,9 +187,11 @@ export const useUserDepositAssetBalancesDaiWei =
           tokenAddress: reserve.tokenAddress,
           balance: at.balance,
           daiWeiPricePer: reserve.daiWeiPricePer,
-          daiWeiPriceTotal: at.balance
-            .mul(reserve.daiWeiPricePer)
-            .div(weiPerToken(reserve.decimals)),
+          daiWeiPriceTotal: reserve.daiWeiPricePer
+            ? at.balance
+                .mul(reserve.daiWeiPricePer)
+                .div(weiPerToken(reserve.decimals))
+            : null,
         });
       }
 

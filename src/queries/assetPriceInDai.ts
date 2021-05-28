@@ -12,7 +12,7 @@ type Tail<T extends [unknown, ...unknown[]]> = T extends [unknown, ...infer X]
   : never;
 
 export const useAssetPriceInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
-  BigNumber,
+  BigNumber | null,
   [_p1: "prices", _p2: "dai", _p3: "asset", assetAddress: string | undefined],
   [assetAddress: string]
 >(
@@ -21,7 +21,13 @@ export const useAssetPriceInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
       params.chainAddrs.agaveOracle,
       params.library.getSigner()
     );
-    return await contract.getAssetPrice(assetAddress); // price in dai per token
+    try {
+      return await contract.getAssetPrice(assetAddress, {
+        gasPrice: 1, gasLimit: constants.WeiPerEther,
+      }); // price in dai per token
+    } catch (e) {
+      return null;
+    }
   },
   assetAddress => ["prices", "dai", "asset", assetAddress],
   () => undefined
@@ -29,11 +35,11 @@ export const useAssetPriceInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
 
 // Mappers apply *after* the cache, so we can reuse the same cache and invocation when mapping
 export const useAssetPriceInDai = buildQueryHookWhenParamsDefinedChainAddrs<
-  BigNumber,
+  BigNumber | null,
   // A trick to compensate for buildKey including chainId and account
   Tail<Tail<ReturnType<typeof useAssetPriceInDaiWei.buildKey>>>,
   [assetAddress: string],
-  FixedNumber
+  FixedNumber | null
 >(
   useAssetPriceInDaiWei.invokeWhenDefined,
   // HACK: make a buildKey utility on queryBuilder that doesn't include chainId and account
@@ -47,7 +53,7 @@ export const useAssetPriceInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   },
   () => undefined,
   undefined,
-  res => FixedNumber.fromValue(res, 18)
+  res => res ? FixedNumber.fromValue(res, 18) : null
 );
 
 export const useAssetPricesInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -131,7 +137,7 @@ export function calculateRelativeTokenPrice(
 }
 
 export const useAssetPriceInNative = buildQueryHookWhenParamsDefinedChainAddrs<
-  FixedNumber,
+  FixedNumber | null,
   [
     _p1: "prices",
     _p2: "native",
@@ -139,7 +145,7 @@ export const useAssetPriceInNative = buildQueryHookWhenParamsDefinedChainAddrs<
     assetAddress: string | undefined
   ],
   [assetAddress: string],
-  FixedNumber
+  FixedNumber | null
 >(
   async (params, assetAddress) => {
     const [assetPrice, wethPrice] = await Promise.all([
@@ -150,7 +156,7 @@ export const useAssetPriceInNative = buildQueryHookWhenParamsDefinedChainAddrs<
           useAssetPriceInDai.fetchQueryDefined(params, nativeAddr)
         ),
     ]);
-    return calculateRelativeTokenPrice(assetPrice, wethPrice);
+    return assetPrice !== null ? calculateRelativeTokenPrice(assetPrice, wethPrice!) : null;
   },
   assetAddress => ["prices", "native", "asset", assetAddress],
   () => undefined,

@@ -82,7 +82,7 @@ export const useUserAccountData = buildQueryHookWhenParamsDefinedChainAddrs<
 
 export const useAvailableToBorrowAssetWei =
   buildQueryHookWhenParamsDefinedChainAddrs<
-    BigNumber,
+    BigNumber | null,
     [
       _p1: "LendingPool",
       _p2: "userAccountData",
@@ -99,9 +99,9 @@ export const useAvailableToBorrowAssetWei =
         useDecimalCountForToken.fetchQueryDefined(params, assetAddress),
       ]);
 
-      return accountData.availableBorrowsEth
+      return assetPrice ? accountData.availableBorrowsEth
         .mul(weiPerToken(assetDecimals))
-        .div(assetPrice);
+        .div(assetPrice) : null;
     },
     (accountAddress, assetAddress) => [
       "LendingPool",
