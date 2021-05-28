@@ -3,6 +3,7 @@ import {
   AaveProtocolDataProvider,
   AaveProtocolDataProvider__factory,
 } from "../contracts";
+import { FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 
@@ -32,10 +33,6 @@ export interface ReserveAssetConfiguration {
 //bit 64-79: reserve factor
 export interface ReserveConfigurationMap extends BigNumber {}
 
-function rayFixed(input: BigNumber): FixedNumber {
-  return FixedNumber.fromValue(input, 27);
-}
-
 export function reserveConfigurationFromWeb3Result({
   decimals,
   ltv,
@@ -51,9 +48,9 @@ export function reserveConfigurationFromWeb3Result({
   return {
     decimals,
     ltv: FixedNumber.fromValue(ltv, 4),
-    liquidationThreshold: rayFixed(liquidationThreshold),
-    liquidationBonus: rayFixed(liquidationBonus),
-    reserveFactor: rayFixed(reserveFactor),
+    liquidationThreshold: FixedFromRay(liquidationThreshold),
+    liquidationBonus: FixedFromRay(liquidationBonus),
+    reserveFactor: FixedFromRay(reserveFactor),
     usageAsCollateralEnabled,
     borrowingEnabled,
     stableBorrowRateEnabled,

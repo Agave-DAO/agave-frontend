@@ -1,5 +1,6 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
+import { FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
@@ -16,10 +17,6 @@ export interface UserAccountData {
   currentLtv: FixedNumber; // 0 <-> Math.min(maximumLtv, 1), totalDebt / totalCollateral
   usedBorrowingPower: FixedNumber;
   healthFactor: FixedNumber; //  Ray e.g. 1500403183017056862 = 1.50
-}
-
-function rayFixed(input: BigNumber): FixedNumber {
-  return FixedNumber.fromValue(input, 27);
 }
 
 export function userAccountDataFromWeb3Result({
@@ -46,7 +43,7 @@ export function userAccountDataFromWeb3Result({
     maximumLtv,
     currentLtv,
     usedBorrowingPower: currentLtv.divUnsafe(maximumLtv),
-    healthFactor: rayFixed(healthFactor),
+    healthFactor: FixedFromRay(healthFactor),
   };
 }
 

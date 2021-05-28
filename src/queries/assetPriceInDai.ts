@@ -22,9 +22,7 @@ export const useAssetPriceInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
       params.library.getSigner()
     );
     try {
-      return await contract.getAssetPrice(assetAddress, {
-        gasPrice: 1, gasLimit: constants.WeiPerEther,
-      }); // price in dai per token
+      return await contract.getAssetPrice(assetAddress); // price in dai per token
     } catch (e) {
       return null;
     }

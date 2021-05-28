@@ -1,5 +1,6 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
+import { FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 
@@ -55,14 +56,11 @@ export function reserveDataFromWeb3Result({
 }: Web3ReserveDataResult): LendingReserveData {
   return {
     configuration,
-    liquidityIndex: FixedNumber.fromValue(liquidityIndex, 27),
-    variableBorrowIndex: FixedNumber.fromValue(variableBorrowIndex, 27),
-    currentLiquidityRate: FixedNumber.fromValue(currentLiquidityRate, 27),
-    currentVariableBorrowRate: FixedNumber.fromValue(
-      currentVariableBorrowRate,
-      27
-    ),
-    currentStableBorrowRate: FixedNumber.fromValue(currentStableBorrowRate, 27),
+    liquidityIndex: FixedFromRay(liquidityIndex),
+    variableBorrowIndex: FixedFromRay(variableBorrowIndex),
+    currentLiquidityRate: FixedFromRay(currentLiquidityRate),
+    currentVariableBorrowRate: FixedFromRay(currentVariableBorrowRate),
+    currentStableBorrowRate: FixedFromRay(currentStableBorrowRate),
     lastUpdateTimestamp,
     aTokenAddress,
     stableDebtTokenAddress,

@@ -25,17 +25,15 @@ export const useMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
       reserveData.aTokenAddress,
       params.library.getSigner()
     );
-    const atokenTotalSupply = await atoken.totalSupply({
-      gasPrice: 1, gasLimit: constants.WeiPerEther,
-    });
+    const atokenTotalSupply = await atoken.totalSupply();
 
-    return priceInDaiWei ? atokenTotalSupply.mul(priceInDaiWei) : null;
+    return priceInDaiWei ? atokenTotalSupply.mul(priceInDaiWei).div(weiPerToken(await atoken.decimals())) : null;
   },
   assetAddress => ["market", "size", assetAddress],
   () => undefined,
   {
-    staleTime: 15 * 1000,
-    cacheTime: 120 * 1000,
+    staleTime: 30 * 1000,
+    cacheTime: 360 * 1000,
   }
 );
 
