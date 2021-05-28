@@ -68,7 +68,6 @@ export const StakingBanner: React.FC<StakingBannerProps> = props => {
 
   return (
     <Center
-      px={{ base: "2.3rem", md: "4.7rem" }}
       width="100%"
       justifyContent="space-between"
     >
