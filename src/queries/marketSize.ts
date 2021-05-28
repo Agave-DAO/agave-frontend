@@ -4,11 +4,9 @@ import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAllReserveTokens } from "./allReserveTokens";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
+import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
 import { useLendingReserveData } from "./lendingReserveData";
-
-export function weiPerToken(decimals: BigNumberish): BigNumber {
-  return BigNumber.from(10).pow(decimals);
-}
+import { useTokenTotalSupply } from "./tokenTotalSupply";
 
 export const useMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber | null,
@@ -21,13 +19,17 @@ export const useMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
       useLendingReserveData.fetchQueryDefined(params, assetAddress),
     ]);
 
-    const atoken = Erc20abi__factory.connect(
-      reserveData.aTokenAddress,
-      params.library.getSigner()
-    );
-    const atokenTotalSupply = await atoken.totalSupply();
+    const [aTokenTotalSupply, aTokenDecimals] = await Promise.all([
+      useTokenTotalSupply.fetchQueryDefined(params, reserveData.aTokenAddress),
+      useDecimalCountForToken.fetchQueryDefined(
+        params,
+        reserveData.aTokenAddress
+      ),
+    ]);
 
-    return priceInDaiWei ? atokenTotalSupply.mul(priceInDaiWei).div(weiPerToken(await atoken.decimals())) : null;
+    return priceInDaiWei
+      ? aTokenTotalSupply.mul(priceInDaiWei).div(weiPerToken(aTokenDecimals))
+      : null;
   },
   assetAddress => ["market", "size", assetAddress],
   () => undefined,
@@ -49,7 +51,11 @@ export const useTotalMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
         useMarketSize.fetchQueryDefined(params, reserve.tokenAddress)
       )
     );
-    return sizes.reduce((a: BigNumber, b: BigNumber | null): BigNumber => a.add(b ?? constants.Zero), constants.Zero);
+    return sizes.reduce(
+      (a: BigNumber, b: BigNumber | null): BigNumber =>
+        a.add(b ?? constants.Zero),
+      constants.Zero
+    );
   },
   () => ["market", "size", "total"],
   () => undefined,
