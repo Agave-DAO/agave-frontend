@@ -17,7 +17,7 @@ export const useAllReserveTokens =
         params.chainAddrs.aaveProtocolDataProvider,
         params.library.getSigner()
       );
-      return await contract.getAllATokens();
+      return await contract.getAllReservesTokens();
     },
     () => ["AaveProtocolDataProvider", "getAllReserveTokens"],
     () => undefined,
