@@ -178,7 +178,7 @@ const DepositConfirm: React.FC = () => {
   return (
     <Page>
       <DepositConfirmWrapper>
-        {asset ? <DepositOverview asset={asset} /> : <></>}
+        {/* {asset ? <DepositOverview asset={asset} /> : <></>} */}
         <div className="content-wrapper">
           <div className="basic-form">
             <div className="basic-form-header">

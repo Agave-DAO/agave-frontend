@@ -1,13 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 import { useRouteMatch, withRouter } from "react-router-dom";
-import Page from "../../components/Page";
 import { useAsset } from "../../hooks/asset";
 import { useBalance } from "../../hooks/balance";
-// import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
-
 import DepositOverview from "./DepositOverview";
-import { ActionDetail } from "../../components/Actions/ActionDetail";
 
 const DepositDetailWrapper = styled.div`
   height: 100%;
@@ -31,12 +27,20 @@ const DepositDetail: React.FC = () => {
   }
 
   return (
-    <Page>
-      <DepositDetailWrapper>
-        <DepositOverview asset={asset} />
-        <ActionDetail asset={asset} balance={balance} actionName="deposit" actionBaseRoute="deposit" />
-      </DepositDetailWrapper>
-    </Page>
+    <DepositDetailWrapper>
+      <DepositOverview
+        asset={asset}
+        agaveBalance={200.22}
+        walletBalance={4883.33}
+        healthFactor={3.91}
+        utilizationRate={38.4}
+        availableLiquidity={223362.22}
+        depositAPY={11.07}
+        usedAsCollateral={true}
+        assetPrice={50}
+        maxLTV={1003}
+      />
+    </DepositDetailWrapper>
   );
 };
 
