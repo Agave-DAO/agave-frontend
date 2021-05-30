@@ -8,7 +8,7 @@ import {
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
-import Markets from "./views/Markets";
+import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
 // import Dashboard from './views/Dashboard';
 import Deposit from "./views/Deposit";
@@ -72,8 +72,8 @@ const App: React.FC<IAppProps> = props => {
                 <Route path="/stake">
                   <StakingBanner/>
                 </Route>
-                <Route path="/markets">Welcome!</Route>
-				<Route path="/deposit">
+                <Route path="/markets"><MarketsBanner/></Route>
+                <Route path="/deposit">
                   <DepositBanner/>
                 </Route>
               </Switch>
