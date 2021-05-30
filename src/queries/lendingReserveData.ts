@@ -3,6 +3,10 @@ import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
 import { FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import {
+  ReserveTokenDefinition,
+  useAllReserveTokens,
+} from "./allReserveTokens";
 
 export interface LendingReserveData {
   //stores the reserve configuration
@@ -99,3 +103,39 @@ export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
     staleTime: 60 * 5 * 1000,
   }
 );
+
+export interface ExtendedReserveTokenDefinition
+  extends ReserveTokenDefinition,
+    LendingReserveData {}
+
+export const useAllReserveTokensWithData =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    ExtendedReserveTokenDefinition[],
+    [_p1: "AgaveLendingPool", _p2: "allReserveTokensWithData"],
+    []
+  >(
+    async params => {
+      const allReserves = await useAllReserveTokens.fetchQueryDefined(params);
+
+      const reservesWithData = await Promise.all(
+        allReserves.map(reserve =>
+          useLendingReserveData
+            .fetchQueryDefined(params, reserve.tokenAddress)
+            .then(
+              (data): ExtendedReserveTokenDefinition => ({
+                ...data,
+                ...reserve,
+              })
+            )
+        )
+      );
+
+      return reservesWithData;
+    },
+    () => ["AgaveLendingPool", "allReserveTokensWithData"],
+    () => undefined,
+    {
+      cacheTime: 60 * 15 * 1000,
+      staleTime: 60 * 5 * 1000,
+    }
+  );
