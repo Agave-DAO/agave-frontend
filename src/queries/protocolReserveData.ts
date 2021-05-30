@@ -5,6 +5,7 @@ import {
 } from "../contracts";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { FixedFromRay } from "../utils/fixedPoint";
 
 export interface ProtocolReserveData {
   // ERC20(LendingPoolReserveData.aTokenAddress).balanceOf(reserve.aTokenAddress)
@@ -29,10 +30,6 @@ export interface ProtocolReserveData {
   lastUpdateTimestamp: number;
 }
 
-function rayFixed(input: BigNumber): FixedNumber {
-  return FixedNumber.fromValue(input, 27);
-}
-
 export function reserveDataFromWeb3Result({
   availableLiquidity,
   totalStableDebt,
@@ -49,12 +46,12 @@ export function reserveDataFromWeb3Result({
     availableLiquidity,
     totalStableDebt,
     totalVariableDebt,
-    liquidityRate: rayFixed(liquidityRate),
-    variableBorrowRate: rayFixed(variableBorrowRate),
-    stableBorrowRate: rayFixed(stableBorrowRate),
-    averageStableBorrowRate: rayFixed(averageStableBorrowRate),
-    liquidityIndex: rayFixed(liquidityIndex),
-    variableBorrowIndex: rayFixed(variableBorrowIndex),
+    liquidityRate: FixedFromRay(liquidityRate),
+    variableBorrowRate: FixedFromRay(variableBorrowRate),
+    stableBorrowRate: FixedFromRay(stableBorrowRate),
+    averageStableBorrowRate: FixedFromRay(averageStableBorrowRate),
+    liquidityIndex: FixedFromRay(liquidityIndex),
+    variableBorrowIndex: FixedFromRay(variableBorrowIndex),
     lastUpdateTimestamp,
   };
 }
