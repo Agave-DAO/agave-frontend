@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { BigNumber, BigNumberish, FixedNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
 import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
@@ -63,4 +63,17 @@ export const useTotalMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
     staleTime: 30 * 1000,
     cacheTime: 120 * 1000,
   }
+);
+
+export const useMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
+  FixedNumber | null,
+  [_p1: "market", _p2: "size", assetAddress: string | undefined, _p3: "dai"],
+  [assetAddress: string]
+>(
+  async (params, assetAddress) => {
+    const totalWei = await useMarketSize.fetchQueryDefined(params, assetAddress);
+    return totalWei ? FixedNumber.fromValue(totalWei, 18) : null; // HACK: Assumes DAI are always 18 decimals
+  },
+  assetAddress => ["market", "size", assetAddress, "dai"],
+  () => undefined
 );
