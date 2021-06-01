@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Route,
-  Switch,
-  Redirect,
-  HashRouter,
-} from "react-router-dom";
+import { Route, Switch, Redirect, HashRouter } from "react-router-dom";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
@@ -12,7 +7,8 @@ import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
 // import Dashboard from './views/Dashboard';
 import Deposit from "./views/Deposit";
-import {DepositBanner} from "./views/Deposit/layout";
+import { DepositBanner } from "./views/Deposit/layout";
+import { WithdrawBanner } from "./views/Withdraw/layout";
 import DepositDetail from "./views/Deposit/DepositDetail";
 import DepositConfirm from "./views/Deposit/DepositConfirm";
 import Borrow from "./views/Borrow";
@@ -34,10 +30,12 @@ import ReactNotification from "react-notifications-component";
 import { useReduxWeb3Updater } from "./hooks/reduxWeb3";
 
 import BaseTheme from "./theme";
+import Withdraw from "./views/Withdraw";
 
 const theme = extendTheme({
   colors: {
     primary: {
+      50: "#36CFA2",
       100: "#eefef7",
       300: "#00a490",
       500: "#019d8b",
@@ -47,6 +45,9 @@ const theme = extendTheme({
       100: "#019d8b",
       500: "#007c6e",
       900: "#044D44",
+    },
+    yellow: {
+      100: "#FFC01B",
     },
   },
   fonts: {
@@ -76,6 +77,9 @@ const App: React.FC<IAppProps> = props => {
                 <Route path="/deposit">
                   <DepositBanner/>
                 </Route>
+                <Route path="/withdraw">
+                  <WithdrawBanner />
+                </Route>
               </Switch>
             }
           >
@@ -90,6 +94,7 @@ const App: React.FC<IAppProps> = props => {
               <Route path="/borrow" component={Borrow} exact />
               <Route path="/borrow/:assetName" component={BorrowDetail} exact />
               <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />
+              <Route exact path="/withdraw" component={Withdraw} />
               <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
               <Route path="/withdraw/confirm/:assetName/:amount" component={WithdrawConfirm} exact />
               {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
