@@ -26,7 +26,7 @@ export interface DepositBannerProps {}
 
 export interface DepositLayoutProps {}
 
-export const DepositBanner: React.FC<DepositBannerProps> = props =>  {
+export const DepositBanner: React.FC<DepositBannerProps> = props => {
   return (
     <Center
       px={{ base: "2.3rem", md: "4.7rem" }}
@@ -38,7 +38,7 @@ export const DepositBanner: React.FC<DepositBannerProps> = props =>  {
         color="white"
         fontSize={{ base: "1.8rem", md: "2.4rem" }}
       >
-      	Deposit
+        Deposit
       </Text>
     </Center>
   );
@@ -65,8 +65,8 @@ const DepositSubCard: React.FC = () => {
           boxSizing="content-box"
           as={Center}
           fontSize={{ base: ".85rem", md: "1rem" }}
-          color="#FFC01B"
-          borderColor="#FFC01B"
+          color="yellow.100"
+          borderColor="yellow.100"
           position="absolute"
           top={{ base: "0.75rem", md: "1rem" }}
           right={{ base: "0.75rem", md: "1rem" }}
@@ -140,10 +140,8 @@ const DepositSubCard: React.FC = () => {
 };
 */
 
-
 export const DepositLayout: React.FC<DepositLayoutProps> = () => {
-  
-	return (
+  return (
     <VStack
       spacing={{ md: "1.6rem" }}
       flexDirection={{ base: "column", md: "row" }}
@@ -168,7 +166,6 @@ export const DepositLayout: React.FC<DepositLayoutProps> = () => {
         >
           How much you would like to stake?
         </ColoredText>
-        
       </Center>
     </VStack>
   );

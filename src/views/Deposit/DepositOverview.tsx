@@ -1,14 +1,14 @@
-import React from 'react';
-import { 
+import React from "react";
+import {
   Box,
   Center,
   Circle,
   Spacer,
   StackDivider,
   Text,
-  VStack
+  VStack,
 } from "@chakra-ui/react";
-import { IMarketData } from '../../utils/constants';
+import { IMarketData } from "../../utils/constants";
 
 export interface DepositOverviewProps {
   asset: IMarketData;
@@ -36,13 +36,19 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
       color="white"
     >
       <VStack
-        divider={<StackDivider borderColor="#36CFA2" h="0.188rem" backgroundColor="#36CFA2"/>}
+        divider={
+          <StackDivider
+            borderColor="#36CFA2"
+            h="0.188rem"
+            backgroundColor="#36CFA2"
+          />
+        }
         spacing={4}
-        w='100%'
+        w="100%"
         align="stretch"
         flexDirection="column"
       >
-        <Box 
+        <Box
           h={{
             base: 100, // 0-48em
             md: 45, // 48em-80em,
@@ -50,12 +56,12 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
           }}
           ml={{
             md: 27,
-            xl: 27
+            xl: 27,
           }}
           mb={{
             base: 5,
             md: 5,
-            xl: 0
+            xl: 0,
           }}
           maxW={{
             base: "100%", // 0-48em
@@ -70,12 +76,8 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
             flexDirection={{ base: "row", md: "column", xl: "row" }}
             justifyContent="center"
           >
-            <Text>
-              Your balance in Agave
-            </Text>
-            <Text
-              ml="0.813rem"
-            >
+            <Text>Your balance in Agave</Text>
+            <Text ml="0.813rem">
               <b>{props.agaveBalance}</b> {props.asset.name}
             </Text>
           </Box>
@@ -85,12 +87,8 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
             flexDirection={{ base: "row", md: "column", xl: "row" }}
             justifyContent="center"
           >
-            <Text>
-              Your wallet balance
-            </Text>
-            <Text
-              ml="0.813rem"
-            >
+            <Text>Your wallet balance</Text>
+            <Text ml="0.813rem">
               <b>{props.walletBalance}</b> {props.asset.name}
             </Text>
           </Box>
@@ -100,13 +98,9 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
             flexDirection={{ base: "row", md: "column", xl: "row" }}
             justifyContent="center"
           >
-            <Box
-              d="flex"
-            >
-              <Text>
-                Health factor
-              </Text>
-              <IconQuestion onClick={()=>{}} />
+            <Box d="flex">
+              <Text>Health factor</Text>
+              <IconQuestion onClick={() => {}} />
             </Box>
             <Text
               ml="0.813rem"
@@ -118,7 +112,7 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
             </Text>
           </Box>
         </Box>
-        <Box 
+        <Box
           w="100%"
           h={{
             base: 380, // 0-48em
@@ -132,27 +126,15 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
           flexDirection={{ base: "column", md: "row", xl: "row" }}
           justifyContent="space-between"
         >
-          <VStack
-            mt={5}
-          >
-            <Text
-              color="white"
-              textAlign="center"
-            >
+          <VStack mt={5}>
+            <Text color="white" textAlign="center">
               Utilization rate
             </Text>
-            <Text fontWeight="bold">
-              {props.utilizationRate} %
-            </Text>
+            <Text fontWeight="bold">{props.utilizationRate} %</Text>
           </VStack>
           <Spacer />
-          <VStack
-            mt={5}
-          >
-            <Text
-              color="white"
-              textAlign="center"
-            >
+          <VStack mt={5}>
+            <Text color="white" textAlign="center">
               Available Liquidity
             </Text>
             <Text fontWeight="bold">
@@ -160,78 +142,50 @@ export const DepositOverview: React.FC<DepositOverviewProps> = props => {
             </Text>
           </VStack>
           <Spacer />
-          <VStack
-            mt={5}
-          >
-            <Text
-              color="white"
-              textAlign="center"
-            >
+          <VStack mt={5}>
+            <Text color="white" textAlign="center">
               Deposit APY
             </Text>
-            <Text fontWeight="bold">
-              {props.depositAPY} %
-            </Text>
+            <Text fontWeight="bold">{props.depositAPY} %</Text>
           </VStack>
           <Spacer />
-          <VStack
-            mt={5}
-          >
-            <Text
-              color="white"
-              textAlign="center"
-            >
+          <VStack mt={5}>
+            <Text color="white" textAlign="center">
               Can be used as collateral
             </Text>
-            <Text fontWeight="700" color="#FFC01B">
+            <Text fontWeight="700" color="yellow.100">
               {props.usedAsCollateral ? "Yes" : "No"}
             </Text>
           </VStack>
           <Spacer />
-          <VStack
-            mt={5}
-          >
-            <Text
-              color="white"
-              textAlign="center"
-            >
+          <VStack mt={5}>
+            <Text color="white" textAlign="center">
               Asset Price
             </Text>
-            <Text fontWeight="bold">
-              {props.assetPrice} USD
-            </Text>
+            <Text fontWeight="bold">{props.assetPrice} USD</Text>
           </VStack>
           <Spacer />
-          <VStack
-            mt={5}
-          >
+          <VStack mt={5}>
             <Box d="flex" alignItems="center">
-            <Text
-              color="white"
-              textAlign="center"
-            >
-              Maximum LTV
-            </Text>
-            <IconQuestion onClick={()=>{}} />
+              <Text color="white" textAlign="center">
+                Maximum LTV
+              </Text>
+              <IconQuestion onClick={() => {}} />
             </Box>
-            <Text fontWeight="bold">
-              {props.maxLTV} %
-            </Text>
+            <Text fontWeight="bold">{props.maxLTV} %</Text>
           </VStack>
         </Box>
-      </VStack>   
+      </VStack>
     </Center>
   );
-}
+};
 
 export default DepositOverview;
 
 const IconQuestion: React.FC<{
   onClick: React.MouseEventHandler;
-}> = ({
-  onClick
-}) => {
-  return(
+}> = ({ onClick }) => {
+  return (
     <Circle
       borderWidth={{ base: "1px", md: "2px" }}
       width={{ base: "10px", md: "15px" }}
@@ -241,12 +195,12 @@ const IconQuestion: React.FC<{
       boxSizing="content-box"
       as={Center}
       fontSize={{ base: ".85rem", md: "1rem" }}
-      color="#FFC01B"
-      borderColor="#FFC01B"
+      color="yellow.100"
+      borderColor="yellow.100"
       cursor="pointer"
       onClick={onClick}
     >
       ?
     </Circle>
-  )
+  );
 };
