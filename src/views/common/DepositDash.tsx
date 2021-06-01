@@ -17,7 +17,7 @@ type DepositDashProps = {
 
 const DepositDash: React.FC = () => {
   return (
-    <VStack spacing="0" w="100%" bg="primary.900" rounded="lg" color="white">
+    <VStack spacing="0" w="100%" bg="primary.900" rounded="lg">
       <HStack
         w="100%"
         justifyContent="flex-start"

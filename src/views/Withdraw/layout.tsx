@@ -22,7 +22,7 @@ const WithdrawLayout: React.FC = () => {
   }, []);
 
   return (
-    <VStack spacing="3.5rem" mt="3.5rem">
+    <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
       <DepositDash />
       <DashOverview mode="withdraw" />
     </VStack>

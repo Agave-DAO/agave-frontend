@@ -2,11 +2,9 @@ import React from "react";
 import { WeiBox } from "../../components/Actions/WeiBox";
 import {
   Center,
-  HStack,
   Text,
   Button,
   VStack,
-  Circle,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -25,6 +23,7 @@ import { useStakingAgavePrice } from "../../queries/stakingAgavePrice";
 import { StakingCooldownInfo } from "../../queries/stakingCooldown";
 import { useTotalStakedForAllUsers } from "../../queries/totalStakedForAllUsers";
 import ModalIcon from "../../components/ModalIcon";
+import InfoWeiBox from "../common/InfoWeiBox";
 
 export interface StakingBannerProps {}
 
@@ -372,29 +371,14 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           exchange for protocol incentives
         </Text>
         <Box w="100%">
-          <VStack fontSize="1.5rem">
-            <Flex
-              w="100%"
-              justifyContent="space-between"
-              fontSize={{ base: "1.4rem", md: "inherit" }}
-            >
-              <Text color="white" fontSize="inherit">
-                Available to Stake
-              </Text>
-              <Text color="white" fontSize="inherit">
-                {availableToStake &&
-                  FixedNumber.fromValue(availableToStake, 18).toString()}{" "}
-                Agave
-              </Text>
-            </Flex>
-            <WeiBox
-              amount={amount}
-              decimals={18}
-              setAmount={setAmount}
-              icon={coloredAgaveLogo}
-              maxAmount={availableToStake}
-            />
-          </VStack>
+          <InfoWeiBox
+            balance={availableToStake}
+            amount={amount}
+            setAmount={setAmount}
+            icon={coloredAgaveLogo}
+            mode="stake"
+            currency="agave"
+          />
         </Box>
         <Button
           mt="2.4rem"
