@@ -4,6 +4,7 @@ import { useRouteMatch, withRouter } from "react-router-dom";
 import { useAsset } from "../../hooks/asset";
 import { useBalance } from "../../hooks/balance";
 import DepositOverview from "./DepositOverview";
+import DepositActionHolder from "./DepositFlow/DepositActionHolder";
 
 const DepositDetailWrapper = styled.div`
   height: 100%;
@@ -40,6 +41,7 @@ const DepositDetail: React.FC = () => {
         assetPrice={50}
         maxLTV={1003}
       />
+      <DepositActionHolder />
     </DepositDetailWrapper>
   );
 };

@@ -3,47 +3,45 @@ import styled from "styled-components";
 
 const SwitchWrapper = styled.div`
   width: 160px;
-  min-height: 32px;
-  border-radius: 1px;
+  height: 32px;
   padding: 1px;
   position: relative;
 
   .labeled-switch-inner {
-    background-color: ${props => props.theme.color.bgSecondary};
+    background-color: ${props => props.theme.color.primary[500]};
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    border-radius: 1px;
-    border-style: 1px solid ${props => props.theme.color.bgSecondary};
+    border-radius: 6px 6px 6px 6px;
 
     .labeled-switch__pointer {
       transform: translateX(2px);
       content: "";
       position: absolute;
-      left: 0px;
-      top: 0px;
+      left: -1px;
+      
       width: 50%;
       height: 100%;
       transition: all 0.4s ease 0s;
-      padding: 4px 2px;
+      
 
       &.active {
         transform: translateX(78px);
       }
 
       span {
-        background: ${props => props.theme.color.bgWhite};
+        background: ${props => props.theme.color.secondary[900]};
         display: block;
-        border-radius: 1px;
         width: 100%;
         height: 100%;
         box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 5px 0px;
+        
       }
     }
 
     .button {
-      min-height: 30px;
+      min-height: 32px;
       font-size: 11px;
       width: 50%;
       position: relative;
@@ -54,11 +52,9 @@ const SwitchWrapper = styled.div`
       justify-content: center;
       padding: 1px 2px 2px;
       cursor: pointer;
-      color: ${props => props.theme.color.textSecondary};
+      color: ${props => props.theme.color.white};
 
-      &.active {
-        color: ${props => props.theme.color.black};
-      }
+      
     }
   }
 `;

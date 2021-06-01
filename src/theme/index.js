@@ -6,6 +6,17 @@ const theme = {
     mobile: 400,
   },
   color: {
+    primary: {
+      100: "#eefef7",
+      300: "#00a490",
+      500: "#019d8b",
+      900: "#007c6e",
+    },
+    secondary: {
+      100: "#019d8b",
+      500: "#007c6e",
+      900: "#044D44",
+    },
     textPrimary: grey[100],
     textSecondary: white,
     bgPrimary: grey[200],

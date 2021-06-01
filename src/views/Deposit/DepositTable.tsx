@@ -59,7 +59,7 @@ const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
       columns,
       data: Array.from(data),
     },
-    useSortBy
+    // useSortBy
   );
 
   return (
@@ -69,7 +69,7 @@ const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                <th {...column.getHeaderProps()}>
                   <div className="header-column">
                     <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
                       {column.render('Header')}
