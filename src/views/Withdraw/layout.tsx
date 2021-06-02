@@ -1,5 +1,5 @@
 import { Center, Text, VStack } from "@chakra-ui/layout";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import DashOverview from "../common/DashOverview";
 import DepositDash from "../common/DepositDash";
 
@@ -14,13 +14,6 @@ export const WithdrawBanner: React.FC = () => {
 };
 
 const WithdrawLayout: React.FC = () => {
-  const [step, setStep] = useState<number>(1);
-
-  useEffect(() => {
-    // This would probably be used if user refreshes, and needed to update the step.
-    // setStep(3);
-  }, []);
-
   return (
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
       <DepositDash />

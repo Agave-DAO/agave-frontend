@@ -7,15 +7,12 @@ import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
 // import Dashboard from './views/Dashboard';
 import Deposit from "./views/Deposit";
+import Withdraw from "./views/Withdraw";
 import { DepositBanner } from "./views/Deposit/layout";
 import { WithdrawBanner } from "./views/Withdraw/layout";
-import DepositDetail from "./views/Deposit/DepositDetail";
-import DepositConfirm from "./views/Deposit/DepositConfirm";
 import Borrow from "./views/Borrow";
 import BorrowDetail from "./views/Borrow/BorrowDetail";
 import BorrowConfirm from "./views/Borrow/BorrowConfirm";
-import WithdrawDetail from "./views/Withdraw/WithdrawDetail";
-import WithdrawConfirm from "./views/Withdraw/WithdrawConfirm";
 // import RepayDetail from './views/Repay/RepayDetail';
 // import RepayConfirm from './views/Repay/RepayConfirm';
 // import Collateral from './views/Collateral';
@@ -30,7 +27,6 @@ import ReactNotification from "react-notifications-component";
 import { useReduxWeb3Updater } from "./hooks/reduxWeb3";
 
 import BaseTheme from "./theme";
-import Withdraw from "./views/Withdraw";
 
 const theme = extendTheme({
   colors: {
@@ -89,14 +85,11 @@ const App: React.FC<IAppProps> = props => {
               {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
               {/* <Route path="/dashboard" component={Dashboard} exact /> */}
               <Route path="/deposit" component={Deposit} exact /> 
-              <Route path="/deposit/:assetName" component={DepositDetail} exact />
-              <Route path="/deposit/confirm/:assetName/:amount" component={DepositConfirm} exact />
+              <Route path="/withdraw" component={Withdraw} exact />
               <Route path="/borrow" component={Borrow} exact />
               <Route path="/borrow/:assetName" component={BorrowDetail} exact />
               <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />
               <Route exact path="/withdraw" component={Withdraw} />
-              <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
-              <Route path="/withdraw/confirm/:assetName/:amount" component={WithdrawConfirm} exact />
               {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
               {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}

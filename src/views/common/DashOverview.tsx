@@ -32,6 +32,9 @@ const fakeDeposit = async () =>
 const sleep = async (time: number) =>
   new Promise(resolve => setTimeout(resolve, time));
 
+const getStepData = () =>
+  JSON.parse(sessionStorage.getItem("currentStep") || "{}");
+
 const WITHDRAW_STEPS = [
   { number: 1, name: "Approve" },
   { number: 2, name: "Withdraw" },
@@ -125,10 +128,10 @@ const ControllerItem: React.FC<{
 };
 
 /** STEPPER CONTROLLERS */
+
 const WithdrawController: React.FC<{
   onStepInitiate: (txData: TxData) => void;
   onStepComplete: (txHash: string, stepName: string) => void;
-  logs: Record<string, TxData>;
   currentStep: number;
 }> = ({ currentStep, onStepComplete, onStepInitiate }) => {
   const processTransaction = useCallback(
@@ -221,10 +224,76 @@ const WithdrawController: React.FC<{
 const DepositController: React.FC<{
   onStepInitiate: (txData: TxData) => void;
   onStepComplete: (txHash: string, stepName: string) => void;
-  logs: Record<string, TxData>;
   currentStep: number;
-}> = () => {
-  return <></>;
+}> = ({ currentStep, onStepComplete, onStepInitiate }) => {
+  const processTransaction = useCallback(
+    async (txHash: string, stepName: string) => {
+      const tx: TxData = {
+        txHash,
+        completedAt: null,
+        isComplete: false,
+        stepName,
+      };
+      onStepInitiate(tx);
+      await sleep(2000);
+      onStepComplete(txHash, stepName);
+    },
+    [onStepComplete, onStepInitiate]
+  );
+
+  const handleDeposit = useCallback(async () => {
+    const txHash = await fakeDeposit();
+    await processTransaction(txHash, "Deposit");
+  }, [processTransaction]);
+
+  const currentStepElement = useMemo(() => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <ControllerItem
+            stepNumber={1}
+            stepName="Deposit"
+            stepDesc="Please submit to deposit"
+            onActionClick={handleDeposit}
+            mode="deposit"
+          />
+        );
+      case 2:
+        return (
+          <ControllerItem
+            stepNumber={2}
+            stepName="Success"
+            stepDesc={null}
+            onActionClick={() => window.location.replace("/#/stake")}
+            mode="deposit"
+          />
+        );
+      default:
+        return null;
+    }
+  }, [currentStep, handleDeposit]);
+
+  return (
+    <>
+      <HStack w="100%" spacing="0">
+        {DEPOSIT_STEPS.map(step => (
+          <Center
+            key={step.number}
+            flex={1}
+            background={
+              step.number === currentStep ? LINEAR_GRADIENT_BG : "primary.300"
+            }
+            color="secondary.900"
+            fontSize="1rem"
+            padding=".3rem"
+          >
+            {step.number} {step.name}
+          </Center>
+        ))}
+      </HStack>
+      {currentStepElement}
+    </>
+  );
 };
 
 /** STEPPER MASTER SWITCH */
@@ -235,7 +304,11 @@ const DashOverviewStepper: React.FC<{
   mode: string;
   onModalOpen: () => void;
 }> = ({ mode, onModalOpen }) => {
-  const [step, changeStep] = useState(1);
+  const [step, changeStep] = useState(() =>
+    parseInt(
+      JSON.parse(sessionStorage.getItem("currentStep") || "1")?.[mode] || "1"
+    )
+  );
   const [stepLogs, setStepLogs] = useState<Record<string, TxData>>(() =>
     JSON.parse(sessionStorage.getItem("stepLogs") || "{}")
   );
@@ -254,12 +327,19 @@ const DashOverviewStepper: React.FC<{
     }));
 
     changeStep(prevStep => prevStep + 1);
+    const stepData = getStepData();
+    sessionStorage.setItem(
+      "currentStep",
+      JSON.stringify({ ...stepData, [mode]: step + 1 })
+    );
   };
 
-  const handleStepInitiate = (txData: TxData) => {
+  const handleStepInitiate = (txData: TxData) =>
     setStepLogs(prevLogs => ({ ...prevLogs, [txData.txHash]: { ...txData } }));
+
+  useEffect(() => {
     sessionStorage.setItem("stepLogs", JSON.stringify(stepLogs));
-  };
+  }, [stepLogs]);
 
   useEffect(() => {
     if (
@@ -267,8 +347,19 @@ const DashOverviewStepper: React.FC<{
       (mode === "withdraw" && step === 3)
     ) {
       sessionStorage.removeItem("stepLogs");
+      const stepData = getStepData();
+      delete stepData[mode];
+      sessionStorage.setItem("currentStep", JSON.stringify(stepData));
     }
   }, [mode, step]);
+
+  useEffect(() => {
+    step === 1 &&
+      sessionStorage.setItem(
+        "currentStep",
+        JSON.stringify({ ...getStepData(), [mode]: 1 })
+      );
+  }, [step, mode]);
 
   return (
     <VStack w="50%" spacing="0">
@@ -340,14 +431,12 @@ const DashOverviewStepper: React.FC<{
           <WithdrawController
             onStepComplete={handleStepComplete}
             onStepInitiate={handleStepInitiate}
-            logs={stepLogs}
             currentStep={step}
           />
         ) : (
           <DepositController
             onStepComplete={handleStepComplete}
             onStepInitiate={handleStepInitiate}
-            logs={stepLogs}
             currentStep={step}
           />
         )}
@@ -408,6 +497,10 @@ const DashOverview: React.FC<{ mode: string }> = ({ mode }) => {
     console.log(value, value.toString());
     setToggleExecution(true);
   };
+
+  useEffect(() => {
+    if (getStepData()[mode] > 1) setToggleExecution(true);
+  }, [mode]);
 
   return (
     <Center

@@ -1,5 +1,4 @@
 import React from "react";
-import { WeiBox } from "../../components/Actions/WeiBox";
 import {
   Center,
   Text,
