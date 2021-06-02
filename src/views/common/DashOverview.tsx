@@ -1,22 +1,50 @@
-import { Center, HStack, Text, VStack } from "@chakra-ui/layout";
-import { useMemo, useState } from "react";
+import { Center, Circle, HStack, Link, Text, VStack } from "@chakra-ui/layout";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ColoredText from "../../components/ColoredText";
-import daiLogo from "../../assets/image/coins/dai.svg";
 import InfoWeiBox from "./InfoWeiBox";
 import { BigNumber } from "ethers";
 import { Button } from "@chakra-ui/button";
 import ModalIcon from "../../components/ModalIcon";
 import { Image } from "@chakra-ui/image";
 
+import daiLogo from "../../assets/image/coins/dai.svg";
+import externalLink from "../../assets/image/external-link.svg";
+import pendingSymb from "../../assets/image/loading.svg";
+
 type TxData = {
   txHash: string;
-  completedAt: Date;
-  stepNumber: number;
+  completedAt: Date | null;
+  stepName: string;
   isComplete: boolean;
 };
 
 const LINEAR_GRADIENT_BG =
   "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%)";
+
+// TODO: DELETE ONCE DONE WITH LOGIC :)
+const fakeApprove = async () =>
+  "0x41d7990d940f8fb6198b2a7b33940bd0526ed17b8695e7e09f9e1a3d21c0adb1";
+const fakeWithdraw = async () =>
+  "0x41d7990d940f8fb6198b2a7b33940bd0526ed17b8695e7e09f9e1a3d21c0adc1";
+const fakeDeposit = async () =>
+  "0x41d7990d940f8fb6198b2a7b33940bd0526ed17b8695e7e09f9e1a3d21c0ade1";
+
+const sleep = async (time: number) =>
+  new Promise(resolve => setTimeout(resolve, time));
+
+const WITHDRAW_STEPS = [
+  { number: 1, name: "Approve" },
+  { number: 2, name: "Withdraw" },
+  { number: 3, name: "Finished" },
+];
+
+const DEPOSIT_STEPS = [
+  {
+    number: 1,
+    name: "Deposit",
+  },
+  { number: 2, name: "Finished" },
+];
 
 /** INTRO SECTION */
 const DashOverviewIntro: React.FC<{
@@ -60,19 +88,143 @@ const DashOverviewIntro: React.FC<{
   );
 };
 
+/** STEPPER CONTROLLER ITEM */
+const ControllerItem: React.FC<{
+  stepName: string;
+  stepDesc: string | null;
+  stepNumber: number;
+  onActionClick: () => void;
+  mode: string;
+}> = ({ stepDesc, stepName, onActionClick, mode, stepNumber }) => {
+  const STEPS_LENGTH = useMemo(
+    () => (mode === "withdraw" ? WITHDRAW_STEPS : DEPOSIT_STEPS).length,
+    [mode]
+  );
+
+  return (
+    <Center w="100%" justifyContent="space-between" p="1.2rem">
+      <VStack spacing="0" alignItems="flex-start">
+        <Text fontSize="1.3rem" color="yellow.100">
+          {stepNumber}/{STEPS_LENGTH} {stepName}
+        </Text>
+        {stepDesc && <Text fontSize="1rem">{stepDesc}</Text>}
+      </VStack>
+      <Button
+        bg={LINEAR_GRADIENT_BG}
+        fontSize="1.2rem"
+        textTransform="capitalize"
+        color="secondary.900"
+        fontWeight="light"
+        _hover={{ background: LINEAR_GRADIENT_BG }}
+        onClick={onActionClick}
+      >
+        {stepNumber === STEPS_LENGTH ? "Dashboard" : stepName}
+      </Button>
+    </Center>
+  );
+};
+
 /** STEPPER CONTROLLERS */
 const WithdrawController: React.FC<{
   onStepInitiate: (txData: TxData) => void;
-  onStepComplete: (txHash: string) => void;
-}> = () => {
-  return <h1>Withdraw Controller</h1>;
+  onStepComplete: (txHash: string, stepName: string) => void;
+  logs: Record<string, TxData>;
+  currentStep: number;
+}> = ({ currentStep, onStepComplete, onStepInitiate }) => {
+  const processTransaction = useCallback(
+    async (txHash: string, stepName: string) => {
+      const tx: TxData = {
+        txHash,
+        completedAt: null,
+        isComplete: false,
+        stepName,
+      };
+      onStepInitiate(tx);
+      await sleep(2000);
+      onStepComplete(txHash, stepName);
+    },
+    [onStepComplete, onStepInitiate]
+  );
+
+  // FAKE HANDLERS
+  const handleApprove = useCallback(async () => {
+    const txHash = await fakeApprove();
+    await processTransaction(txHash, "Approve");
+  }, [processTransaction]);
+
+  const handleWithdraw = useCallback(async () => {
+    const txHash = await fakeWithdraw();
+    await processTransaction(txHash, "Withdraw");
+  }, [processTransaction]);
+
+  const currentStepElement = useMemo(() => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <ControllerItem
+            stepNumber={1}
+            stepName="Approve"
+            stepDesc="Please approve before withdrawal"
+            onActionClick={handleApprove}
+            mode="withdraw"
+          />
+        );
+      case 2:
+        return (
+          <ControllerItem
+            stepNumber={2}
+            stepName="Withdraw"
+            stepDesc="Please submit to withdraw"
+            onActionClick={handleWithdraw}
+            mode="withdraw"
+          />
+        );
+      case 3:
+        return (
+          <ControllerItem
+            stepNumber={3}
+            stepName="Success"
+            stepDesc={null}
+            onActionClick={() => window.location.replace("/#/stake")}
+            mode="withdraw"
+          />
+        );
+      default:
+        return null;
+    }
+  }, [currentStep, handleApprove, handleWithdraw]);
+
+  return (
+    <>
+      <HStack w="100%" spacing="0">
+        {WITHDRAW_STEPS.map(step => (
+          <Center
+            key={step.number}
+            flex={1}
+            background={
+              step.number === currentStep ? LINEAR_GRADIENT_BG : "primary.300"
+            }
+            color="secondary.900"
+            fontSize="1rem"
+            padding=".3rem"
+          >
+            {step.number} {step.name}
+          </Center>
+        ))}
+      </HStack>
+      {currentStepElement}
+      {}
+    </>
+  );
 };
 
 const DepositController: React.FC<{
   onStepInitiate: (txData: TxData) => void;
-  onStepComplete: (txHash: string) => void;
+  onStepComplete: (txHash: string, stepName: string) => void;
+  logs: Record<string, TxData>;
+  currentStep: number;
 }> = () => {
-  return <h1>Deposit Controller</h1>;
+  return <></>;
 };
 
 /** STEPPER MASTER SWITCH */
@@ -84,10 +236,39 @@ const DashOverviewStepper: React.FC<{
   onModalOpen: () => void;
 }> = ({ mode, onModalOpen }) => {
   const [step, changeStep] = useState(1);
-  const [stepLogs, setStepLogs] = useState<Record<string, TxData>>({});
+  const [stepLogs, setStepLogs] = useState<Record<string, TxData>>(() =>
+    JSON.parse(sessionStorage.getItem("stepLogs") || "{}")
+  );
 
-  const handleStepComplete = (txHash: string) => {};
-  const handleStepInitiate = (txData: TxData) => {};
+  const stepLogsArr = useMemo(() => Object.values(stepLogs), [stepLogs]);
+
+  const handleStepComplete = (txHash: string, stepName: string) => {
+    setStepLogs(prevLogs => ({
+      ...prevLogs,
+      [txHash]: {
+        txHash,
+        stepName,
+        completedAt: new Date(),
+        isComplete: true,
+      },
+    }));
+
+    changeStep(prevStep => prevStep + 1);
+  };
+
+  const handleStepInitiate = (txData: TxData) => {
+    setStepLogs(prevLogs => ({ ...prevLogs, [txData.txHash]: { ...txData } }));
+    sessionStorage.setItem("stepLogs", JSON.stringify(stepLogs));
+  };
+
+  useEffect(() => {
+    if (
+      (mode === "deposit" && step === 2) ||
+      (mode === "withdraw" && step === 3)
+    ) {
+      sessionStorage.removeItem("stepLogs");
+    }
+  }, [mode, step]);
 
   return (
     <VStack w="50%" spacing="0">
@@ -153,18 +334,63 @@ const DashOverviewStepper: React.FC<{
         bg="secondary.900"
         mt="1.4rem !important"
         rounded="lg"
+        overflow="hidden"
       >
         {mode === "withdraw" ? (
           <WithdrawController
             onStepComplete={handleStepComplete}
             onStepInitiate={handleStepInitiate}
+            logs={stepLogs}
+            currentStep={step}
           />
         ) : (
           <DepositController
             onStepComplete={handleStepComplete}
             onStepInitiate={handleStepInitiate}
+            logs={stepLogs}
+            currentStep={step}
           />
         )}
+        {
+          /* {stepLogsArr.length > 1 && */
+          stepLogsArr.reverse().map(log => {
+            return (
+              <Center
+                w="100%"
+                key={log.txHash}
+                borderTop="1px solid"
+                borderTopColor="yellow.100"
+                justifyContent="space-between"
+                fontSize="1rem"
+                px="1.2rem"
+                py=".3rem"
+              >
+                <Text fontSize="1rem">{log.stepName}</Text>
+                {log.isComplete ? (
+                  <HStack alignItems="center">
+                    <Text fontSize="1rem">Confirmed </Text>
+                    <Circle bg={LINEAR_GRADIENT_BG} w=".6rem" h=".6rem" />
+                  </HStack>
+                ) : (
+                  <HStack alignItems="center">
+                    <Text fontSize="1rem">Pending</Text>
+                    <Image src={pendingSymb} boxSize="1.1rem" />
+                  </HStack>
+                )}
+                <HStack
+                  as={Link}
+                  href={`https://blockscout.com/xdai/mainnet/tx/${log.txHash}`}
+                  textDecoration="none !important"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Text fontSize="1rem">Explorer</Text>
+                  <Image src={externalLink} boxSize=".8rem" />
+                </HStack>
+              </Center>
+            );
+          })
+        }
       </VStack>
     </VStack>
   );
