@@ -1,16 +1,10 @@
 import React from "react";
-import styled from "styled-components";
+import { VStack } from "@chakra-ui/layout";
 import { useRouteMatch, withRouter } from "react-router-dom";
 import { useAsset } from "../../hooks/asset";
 import { useBalance } from "../../hooks/balance";
-import DepositOverview from "./DepositOverview";
-import DepositActionHolder from "./DepositFlow/DepositActionHolder";
-
-const DepositDetailWrapper = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-`;
+import DepositDash from "../common/DepositDash"
+import DashOverview from "../common/DashOverview"
 
 const DepositDetail: React.FC = () => {
   const match = useRouteMatch<{
@@ -18,7 +12,7 @@ const DepositDetail: React.FC = () => {
   }>();
   const assetName = match.params.assetName;
   const { asset } = useAsset(assetName);
-  const { library, address, balance } = useBalance(asset);
+  const { library, address } = useBalance(asset);
   if (!asset) {
     return <>No asset found with details </>;
   }
@@ -28,21 +22,10 @@ const DepositDetail: React.FC = () => {
   }
 
   return (
-    <DepositDetailWrapper>
-      <DepositOverview
-        asset={asset}
-        agaveBalance={200.22}
-        walletBalance={4883.33}
-        healthFactor={3.91}
-        utilizationRate={38.4}
-        availableLiquidity={223362.22}
-        depositAPY={11.07}
-        usedAsCollateral={true}
-        assetPrice={50}
-        maxLTV={1003}
-      />
-      <DepositActionHolder />
-    </DepositDetailWrapper>
+    <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
+      <DepositDash />
+      <DashOverview mode="deposit" />
+    </VStack>
   );
 };
 

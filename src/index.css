@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap");
 
 *,
 *::before,
@@ -15,7 +15,7 @@ html {
 
 body,
 body * {
-  font-family: 'Arial', 'Inter', sans-serif;
+  font-family: "Arial", "Inter", sans-serif;
   font-stretch: normal;
   font-style: normal;
   font-size: 1.6rem;
@@ -58,6 +58,7 @@ body * {
 
 .custom-scroll::-webkit-scrollbar-thumb {
   -webkit-border-radius: 3px;
+  border-radius: 3px;
   background-color: var(--color-primary);
 }
 
