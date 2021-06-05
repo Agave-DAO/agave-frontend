@@ -21,8 +21,9 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useStakingAgavePrice } from "../../queries/stakingAgavePrice";
 import { StakingCooldownInfo } from "../../queries/stakingCooldown";
 import { useTotalStakedForAllUsers } from "../../queries/totalStakedForAllUsers";
-import ModalIcon from "../../components/ModalIcon";
+import { ModalIcon } from "../../utils/icons";
 import InfoWeiBox from "../common/InfoWeiBox";
+import { fontSizes, spacings } from "../../utils/constants";
 
 export interface StakingBannerProps {}
 
@@ -128,7 +129,7 @@ const StakingSubCard: React.FC<{
       w="100%"
       justifyContent="space-between"
       px={{ base: "1.1rem", md: "2.2rem" }}
-      py={{ base: "1.3rem", md: "1.9rem" }}
+      py={{ base: spacings.md, md: "1.9rem" }}
       bg="secondary.900"
       rounded="2xl"
       position="relative"
@@ -152,7 +153,7 @@ const StakingSubCard: React.FC<{
       {buttonOverrideContent === undefined ? (
         <Button
           color="white"
-          fontSize={{ base: "1rem", md: "1.4rem" }}
+          fontSize={{ base: "1rem", md: fontSizes.md }}
           fontWeight="normal"
           bg="primary.300"
           py="1rem"
@@ -185,7 +186,7 @@ const StakingSubCard: React.FC<{
                 w={{ base: "100%", md: "60%" }}
                 m="auto"
                 py="1.5rem"
-                fontSize={{ base: "1.6rem", md: "1.4rem" }}
+                fontSize={{ base: "1.6rem", md: fontSizes.md }}
                 bg="secondary.100"
                 color="white"
                 fontWeight="normal"
@@ -355,7 +356,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
       >
         <ColoredText
           fontSize={{ base: "1.6rem", md: "1.8rem" }}
-          marginBottom="1.3rem"
+          marginBottom={spacings.md}
           textAlign="center"
         >
           How much you would like to stake?
@@ -364,7 +365,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           color="white"
           textAlign="center"
           marginBottom="2.8rem"
-          fontSize={{ base: "1.4rem", md: "inherit" }}
+          fontSize={{ base: fontSizes.md, md: "inherit" }}
         >
           Staking Agave in the Safety Module helps to secure the protocol in
           exchange for protocol incentives
@@ -387,7 +388,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           fontWeight="bold"
           px={{ base: "10rem", md: "6rem" }}
           py="1.5rem"
-          fontSize="1.4rem"
+          fontSize={fontSizes.md}
           disabled={
             amount === undefined ||
             amount.lte(0) ||
@@ -526,7 +527,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           _hover={{ background: "secondary.900" }}
           _focus={{ background: "secondary.900" }}
           background="secondary.900"
-          fontSize={{ base: "1.4rem", md: "1.6rem" }}
+          fontSize={{ base: fontSizes.md, md: "1.6rem" }}
           width="100%"
           color="white"
           name="customAddress"
@@ -535,7 +536,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         /> */}
         <VStack
           color="white"
-          fontSize="1.4rem"
+          fontSize={fontSizes.md}
           spacing={{ base: "1rem", md: ".5rem" }}
           width="100%"
         >

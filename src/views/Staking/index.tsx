@@ -1,4 +1,4 @@
-import { Center, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";

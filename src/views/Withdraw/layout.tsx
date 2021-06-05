@@ -1,4 +1,5 @@
 import { Center, Text, VStack } from "@chakra-ui/layout";
+import { BigNumber } from "ethers";
 import React from "react";
 import DashOverview from "../common/DashOverview";
 import DepositDash from "../common/DepositDash";
@@ -16,7 +17,17 @@ export const WithdrawBanner: React.FC = () => {
 const WithdrawLayout: React.FC = () => {
   return (
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
-      <DepositDash />
+      <DepositDash
+        healthFactor={3.91}
+        assetPrice={BigNumber.from(1.0003)}
+        utilRate={38.42}
+        agaveBalance={BigNumber.from(362.52)}
+        walletBalance={BigNumber.from(4883.37)}
+        isCollateralized={true}
+        maxLTV={50}
+        depositAPY={11.07}
+        liquidityAvailable={BigNumber.from(223362346.7)}
+      />
       <DashOverview mode="withdraw" />
     </VStack>
   );
