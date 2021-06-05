@@ -4,17 +4,17 @@ import React from "react";
 import DashOverview from "../common/DashOverview";
 import DepositDash from "../common/DepositDash";
 
-export const DepositBanner: React.FC = () => {
+export const WithdrawBanner: React.FC = () => {
   return (
     <Center justifyContent="flex-start" w="100%">
       <Text fontSize="2.4rem" fontWeight="bold">
-        Deposit XDAI
+        Withdraw XDAI
       </Text>
     </Center>
   );
 };
 
-const DepositLayout: React.FC = () => {
+const WithdrawLayout: React.FC = () => {
   return (
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
       <DepositDash
@@ -28,9 +28,9 @@ const DepositLayout: React.FC = () => {
         depositAPY={11.07}
         liquidityAvailable={BigNumber.from(223362346)}
       />
-      <DashOverview mode="deposit" />
+      <DashOverview mode="withdraw" />
     </VStack>
   );
 };
 
-export default DepositLayout;
+export default WithdrawLayout;
