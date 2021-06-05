@@ -47,7 +47,7 @@ const DepositDash: React.FC<DepositDashProps> = ({
             XDAI
           </Box>
         </HStack>
-        <HStack spacing={spacings.md} mr="12.1rem !important" ml="0">
+        <HStack spacing={spacings.md} ml="0">
           <Text fontSize={fontSizes.md}>Your wallet balance</Text>
           <Box>
             <Text display="inline-block" fontWeight="bold">
@@ -56,6 +56,7 @@ const DepositDash: React.FC<DepositDashProps> = ({
             XDAI
           </Box>
         </HStack>
+        <Box w="12.1rem" />
         <HStack spacing={spacings.md}>
           <Text fontSize={fontSizes.md}>Health factor</Text>
           <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />

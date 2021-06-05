@@ -1,4 +1,4 @@
-import { Center, HStack, Text, VStack } from "@chakra-ui/layout";
+import { Box, Center, HStack, Text, VStack } from "@chakra-ui/layout";
 import React, { useEffect, useMemo, useState } from "react";
 import ColoredText from "../../components/ColoredText";
 import InfoWeiBox from "./InfoWeiBox";
@@ -26,14 +26,14 @@ const DashOverviewIntro: React.FC<{
   setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
 }> = ({ mode, onSubmit, amount, setAmount }) => {
   return (
-    <VStack w="50%">
+    <VStack w="50%" spacing="0">
       <ColoredText fontSize="1.8rem" textTransform="capitalize">
         {mode}
       </ColoredText>
       <Text fontSize={fontSizes.md}>How much do you want to {mode}?</Text>
+      <Box h="3.3rem" />
       <InfoWeiBox
         w="100%"
-        mt="3.3rem !important"
         currency="xDAI"
         icon={daiLogo}
         amount={amount}
@@ -41,8 +41,8 @@ const DashOverviewIntro: React.FC<{
         mode={mode}
         balance={BigNumber.from(0)}
       />
+      <Box h="4.3rem" />
       <Button
-        mt="4.3rem !important"
         disabled={!amount?.gt(0)}
         bg={LINEAR_GRADIENT_BG}
         _hover={{
@@ -127,19 +127,16 @@ const DashOverviewStepper: React.FC<{
 
   return (
     <VStack w="50%" spacing="0">
-      <ColoredText
-        textTransform="capitalize"
-        fontSize="1.8rem"
-        mb="1.3rem !important"
-      >
+      <ColoredText textTransform="capitalize" fontSize="1.8rem">
         {mode} overview
       </ColoredText>
+      <Box h="1.3rem" />
       <Text fontSize={fontSizes.md}>
         These are your transaction details. Make sure to check if this is
         correct before submitting.
       </Text>
+      <Box h={fontSizes.xl} />
       <VStack
-        mt={`${fontSizes.xl} !important`}
         spacing=".5rem"
         p="1.5rem"
         w="30rem"
@@ -182,11 +179,11 @@ const DashOverviewStepper: React.FC<{
           <ColoredText fontSize="1.2rem">5.11</ColoredText>
         </HStack>
       </VStack>
+      <Box h={fontSizes.md} />
       <VStack
         w="30rem"
         minH="8rem"
         bg="secondary.900"
-        mt={`${fontSizes.md} !important`}
         rounded="lg"
         overflow="hidden"
       >

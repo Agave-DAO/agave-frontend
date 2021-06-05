@@ -19,14 +19,14 @@ const DepositLayout: React.FC = () => {
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
       <DepositDash
         healthFactor={3.91}
-        assetPrice={BigNumber.from(1.0003)}
+        assetPrice={BigNumber.from(1)}
         utilRate={38.42}
-        agaveBalance={BigNumber.from(362.52)}
-        walletBalance={BigNumber.from(4883.37)}
+        agaveBalance={BigNumber.from(362)}
+        walletBalance={BigNumber.from(4883)}
         isCollateralized={true}
         maxLTV={50}
         depositAPY={11.07}
-        liquidityAvailable={BigNumber.from(223362346.7)}
+        liquidityAvailable={BigNumber.from(223362346)}
       />
       <DashOverview mode="deposit" />
     </VStack>
