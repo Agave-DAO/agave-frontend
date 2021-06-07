@@ -2,6 +2,7 @@ import { VStack, Flex, Text, StackProps } from "@chakra-ui/react";
 import { BigNumber, FixedNumber } from "ethers";
 import React from "react";
 import { WeiBox } from "../../components/Actions/WeiBox";
+import { fontSizes } from "../../utils/constants";
 
 const InfoWeiBox: React.FC<
   {
@@ -18,7 +19,7 @@ const InfoWeiBox: React.FC<
       <Flex
         w="100%"
         justifyContent="space-between"
-        fontSize={{ base: "1.4rem", md: "inherit" }}
+        fontSize={{ base: fontSizes.md, md: "inherit" }}
       >
         <Text color="white" fontSize="inherit">
           Available to {mode}

@@ -24,7 +24,6 @@ export function SortedHtmlTable<TRecord extends object>({
   return React.useMemo(
     () => (
       <Table
-        variant="striped"
         colorScheme="blackAlpha"
         {...getTableProps()}
         margin={0}
@@ -48,7 +47,7 @@ export function SortedHtmlTable<TRecord extends object>({
           {rows.map((row, i) => {
             prepareRow(row);
             return (
-              <Tr {...row.getRowProps()}>
+              <Tr {...row.getRowProps()} >
                 {row.cells.map(cell => {
                   return (
                     <Td {...cell.getCellProps()}>{cell.render("Cell")}</Td>

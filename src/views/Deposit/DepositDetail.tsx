@@ -23,7 +23,17 @@ const DepositDetail: React.FC = () => {
 
   return (
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
-      <DepositDash />
+      <DepositDash 
+        agaveBalance={3.31}
+        walletBalance={3.2}
+        healthFactor={12}
+        utilRate={2}
+        liquidityAvailable={123}
+        isCollateralized={true}
+        maxLTV={123}
+        assetPrice={333}
+        depositAPY={1122}
+      />
       <DashOverview mode="deposit" />
     </VStack>
   );

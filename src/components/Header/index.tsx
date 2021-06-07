@@ -8,6 +8,7 @@ import { selectAddress } from "../../features/auth/authSlice";
 import { useAppSelector } from "../../redux/hooks";
 import { NavLink } from "react-router-dom";
 import { NavTabLink } from "./tab-link";
+import { fontSizes } from "../../utils/constants";
 
 function Header() {
   // eslint-disable-next-line
@@ -58,7 +59,7 @@ function Header() {
         <Center
           minWidth="10rem"
           height="3rem"
-          fontSize="1.4rem"
+          fontSize={fontSizes.md}
           mx="1.5rem"
           textTransform="uppercase"
           color="white"
@@ -82,7 +83,7 @@ function Header() {
               height="1rem"
               mr="5px"
             />
-            <Text fontSize="1.4rem">{addressPretty}</Text>
+            <Text fontSize={fontSizes.md}>{addressPretty}</Text>
           </Center>
         ) : (
           <Button
@@ -90,7 +91,7 @@ function Header() {
             rounded="lg"
             minWidth="10rem"
             height="3rem"
-            fontSize="1.4rem"
+            fontSize={fontSizes.md}
             fontWeight="normal"
             color="white"
           >

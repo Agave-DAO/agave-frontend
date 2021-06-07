@@ -1,7 +1,8 @@
 import { Box, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import { BigNumberish } from "ethers";
 import ColoredText from "../../components/ColoredText";
-import ModalIcon from "../../components/ModalIcon";
+import { fontSizes, spacings } from "../../utils/constants";
+import { ModalIcon } from "../../utils/icons";
 
 type DepositDashProps = {
   agaveBalance?: BigNumberish; // IDK about this one, as this could be got by a hook as well.
@@ -15,7 +16,17 @@ type DepositDashProps = {
   depositAPY: number;
 };
 
-const DepositDash: React.FC = () => {
+const DepositDash: React.FC<DepositDashProps> = ({
+  agaveBalance,
+  walletBalance,
+  healthFactor,
+  utilRate,
+  liquidityAvailable,
+  isCollateralized,
+  maxLTV,
+  assetPrice,
+  depositAPY,
+}) => {
   return (
     <VStack spacing="0" w="100%" bg="primary.900" rounded="lg">
       <HStack
@@ -27,58 +38,59 @@ const DepositDash: React.FC = () => {
         py="2.4rem"
         px="2.6rem"
       >
-        <HStack spacing="1.3rem" mr="8.5rem">
-          <Text fontSize="1.4rem">Your balance in Agave</Text>
+        <HStack spacing={spacings.md} mr="8.5rem">
+          <Text fontSize={fontSizes.md}>Your balance in Agave</Text>
           <Box>
             <Text display="inline-block" fontWeight="bold">
-              3.37
+              {agaveBalance?.toLocaleString()}
             </Text>{" "}
             XDAI
           </Box>
         </HStack>
-        <HStack spacing="1.3rem" mr="12.1rem !important" ml="0">
-          <Text fontSize="1.4rem">Your wallet balance</Text>
+        <HStack spacing={spacings.md} ml="0">
+          <Text fontSize={fontSizes.md}>Your wallet balance</Text>
           <Box>
             <Text display="inline-block" fontWeight="bold">
-              4883.37
+              {walletBalance?.toLocaleString()}
             </Text>{" "}
             XDAI
           </Box>
         </HStack>
-        <HStack spacing="1.3rem">
-          <Text fontSize="1.4rem">Health factor</Text>
+        <Box w="12.1rem" />
+        <HStack spacing={spacings.md}>
+          <Text fontSize={fontSizes.md}>Health factor</Text>
           <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />
-          <ColoredText fontSize="1.4rem">1.2</ColoredText>
+          <ColoredText fontSize={fontSizes.md}>{healthFactor}</ColoredText>
         </HStack>
       </HStack>
       <HStack w="100%" py="2.4rem" px="2.6rem" justifyContent="space-between">
         <Stack justifyContent="flex-start">
-          <Text fontSize="1.4rem">Utilization Rate</Text>
-          <Text fontSize="1.7rem" fontWeight="bold">
-            38.42%
+          <Text fontSize={fontSizes.md}>Utilization Rate</Text>
+          <Text fontSize={fontSizes.xl} fontWeight="bold">
+            {utilRate}
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
-          <Text fontSize="1.4rem">Available Liquidity</Text>
-          <Text fontSize="1.7rem" fontWeight="bold">
-            223,362,346.70 XDAI
+          <Text fontSize={fontSizes.md}>Available Liquidity</Text>
+          <Text fontSize={fontSizes.xl} fontWeight="bold">
+            {liquidityAvailable.toLocaleString()} XDAI
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
-          <Text fontSize="1.4rem">Deposit APY</Text>
-          <Text fontSize="1.7rem" fontWeight="bold">
-            11.07 %
+          <Text fontSize={fontSizes.md}>Deposit APY</Text>
+          <Text fontSize={fontSizes.xl} fontWeight="bold">
+            {depositAPY}
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
-          <Text fontSize="1.4rem">Can be used as collateral</Text>
-          <Text fontSize="1.7rem" fontWeight="bold" color="yellow.100">
-            Yes
+          <Text fontSize={fontSizes.md}>Can be used as collateral</Text>
+          <Text fontSize={fontSizes.xl} fontWeight="bold" color="yellow.100">
+            {isCollateralized ? "Yes" : "No"}
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
           <HStack spacing="1rem">
-            <Text fontSize="1.4rem">Maximum LTV</Text>
+            <Text fontSize={fontSizes.md}>Maximum LTV</Text>
             <ModalIcon
               position="relative"
               top="0"
@@ -86,14 +98,14 @@ const DepositDash: React.FC = () => {
               onOpen={() => {}}
             />
           </HStack>
-          <Text fontSize="1.7rem" fontWeight="bold">
-            50%
+          <Text fontSize={fontSizes.xl} fontWeight="bold">
+            {maxLTV.toLocaleString()}
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
-          <Text fontSize="1.4rem">Asset price</Text>
-          <Text fontSize="1.7rem" fontWeight="bold">
-            $ 1.0003 USD
+          <Text fontSize={fontSizes.md}>Asset price</Text>
+          <Text fontSize={fontSizes.xl} fontWeight="bold">
+            $ {assetPrice.toLocaleString()} USD
           </Text>
         </Stack>
       </HStack>

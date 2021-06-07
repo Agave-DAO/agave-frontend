@@ -2,19 +2,28 @@ import React, { useMemo } from "react";
 import { useHistory } from "react-router-dom";
 import { useTable, useSortBy, Column } from "react-table";
 import BasicTable from "../../components/BasicTable";
-import { IMarketData, marketData } from "../../utils/constants";
+import { IMarketDataTable, marketData } from "../../utils/constants";
+import { SortedHtmlTable } from "../../utils/htmlTable";
 
-const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
-  const history = useHistory();
+const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
   const data = useMemo(() => {
     if (activeType === "All") {
-      return marketData;
+      return( marketData?.map(
+        ({ name, img, deposit_apy, wallet_balance }): IMarketDataTable => ({
+          name,
+          img,
+          deposit_apy,
+          wallet_balance,
+        })
+      ) ?? []
+      );
     }
 
-    return marketData.slice(0, 3);
+    return []
   }, [activeType]);
 
-  const columns: Column<IMarketData>[] = useMemo(
+  
+  const columns: Column<IMarketDataTable>[] = useMemo(
     () => [
       {
         Header: 'Asset',
@@ -48,19 +57,74 @@ const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
     []
   );
 
+    return (
+      <div>
+        <BasicTable>
+          <SortedHtmlTable columns={columns} data={data} />
+        </BasicTable>
+      </div>
+  );
+}
+
+const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
+  const history = useHistory();
+  const data = useMemo(() => {
+    if (activeType === "All") {
+      return marketData;
+    }
+
+    return marketData.slice(0, 3);
+  }, [activeType]);
+
+  const columns: Column<IMarketDataTable>[] = useMemo(
+    () => [
+      {
+        Header: 'Asset',
+        accessor: 'name',
+        Cell: row => {
+          return (
+            <div>
+              <img src={row.row.original.img} width="20" height="20" alt="" />
+              <span>{row.value}</span>
+            </div>
+          )
+        }
+      },
+      {
+        Header: 'Your wallet balance',
+        accessor: 'wallet_balance',
+        Cell: row => (
+            <span className="value">{row.value}</span>
+        )
+      },
+      {
+        Header: 'APY',
+        accessor: 'deposit_apy',
+        Cell: row => (
+          <div className="value-section">
+            <span className="value yellow">{row.value}</span> %
+          </div>
+        )
+      },
+    ],
+    []
+  );
+  
+  const tableData = React.useMemo(
+    () => ({
+      columns: columns,
+      data: Array.from(data),
+    }),
+    [columns, data]
+  );
+
   const {
     getTableProps,
     getTableBodyProps,
     headerGroups,
     rows,
     prepareRow,
-  } = useTable<IMarketData>(
-    {
-      columns,
-      data: Array.from(data),
-    },
-    // useSortBy
-  );
+  } = useTable(tableData, useSortBy);
 
   return (
     <BasicTable>
@@ -101,4 +165,4 @@ const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
   )
 }
 
-export default DepositTable;
+export default DTable;

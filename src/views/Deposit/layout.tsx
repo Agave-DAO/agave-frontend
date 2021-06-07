@@ -1,3 +1,5 @@
+// import { Center, Text, VStack } from "@chakra-ui/layout";
+import { BigNumber } from "ethers";
 import React from "react";
 import {
   Box,
@@ -8,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import Switch from '../../components/Switch'
 import Search from '../../components/Search'
-import DepositTable from './DepositTable'
+import DTable from './DepositTable'
 
 export interface DepositBannerProps {}
 
@@ -34,9 +36,7 @@ export const DepositBanner: React.FC<{}> = () =>  {
   );
 };
 
-
 export const DepositLayout: React.FC<DepositLayoutProps> = props => {
-  
 	return (
     <VStack
       spacing={{ md: "1.6rem" }}
@@ -129,7 +129,7 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               overflow="scroll"
               bottom={10}
             >
-              <DepositTable activeType="All"/>
+              <DTable activeType="All"/>
             </Box>
           </Box>
         </VStack>   
