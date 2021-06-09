@@ -113,7 +113,7 @@ const MarketSizeView: React.FC<{ tokenAddress: string }> = ({
 const TotalBorrowedView: React.FC<{
   assetSymbol: string;
   tokenAddress: string;
-}> = ({ assetSymbol, tokenAddress }) => {
+}> = ({ tokenAddress }) => {
   const totalBorrowed = useTotalBorrowedForAsset(tokenAddress);
 
   return React.useMemo(() => {
@@ -136,7 +136,7 @@ const TotalBorrowedView: React.FC<{
     } else {
       return <Text>$ -</Text>;
     }
-  }, [totalBorrowed.data?.wei, totalBorrowed.data?.dai]);
+  }, [totalBorrowed.data]);
 };
 
 const DepositAPYView: React.FC<{ tokenAddress: string }> = ({

@@ -1,5 +1,4 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
-import { constants } from "ethers";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
