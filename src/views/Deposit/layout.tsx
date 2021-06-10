@@ -118,11 +118,12 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
                 activeValue={props.activeValue}
                 setActiveValue={props.setActiveValue}
               />
-              <Search
+              {/* Disabled for now, no enough rows to be filtered */}
+              {/* <Search
                 placeholder="Search"
                 w={185}
                 h={26}
-              />
+              /> */}
             </Box>
             <Box
               mt={5}

@@ -1,67 +1,134 @@
 import React, { useMemo } from "react";
-import { useHistory } from "react-router-dom";
-import { useTable, useSortBy, Column } from "react-table";
-import BasicTable from "../../components/BasicTable";
-import { IMarketDataTable, marketData } from "../../utils/constants";
-import { SortedHtmlTable } from "../../utils/htmlTable";
+import { CellProps, Column, Renderer } from "react-table";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import { useDepositAPY } from "../../queries/depositAPY";
+import { BasicTableRenderer, SortedHtmlTable, TableRenderer } from "../../utils/htmlTable";
+import { Box, Text } from "@chakra-ui/layout";
+import { Center, Flex } from "@chakra-ui/react";
+import { TokenIcon } from "../../utils/icons";
 
 const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
-  const data = useMemo(() => {
-    if (activeType === "All") {
-      return( marketData?.map(
-        ({ name, img, deposit_apy, wallet_balance }): IMarketDataTable => ({
-          name,
-          img,
-          deposit_apy,
-          wallet_balance,
+
+  interface AssetRecord {
+    symbol: string;
+    tokenAddress: string;
+    aTokenAddress: string;
+  }
+
+  const reserves = useAllReserveTokensWithData();
+  const assetRecords = React.useMemo(() => {
+    return (
+      reserves.data?.map(
+        ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
+          symbol,
+          tokenAddress,
+          aTokenAddress,
         })
       ) ?? []
-      );
-    }
+    );
+  }, [reserves]);
 
-    return []
-  }, [activeType]);
+  console.log(reserves)
 
+  const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
+    tokenAddress,
+  }) => {
+    const query = useDepositAPY(tokenAddress);
+    return React.useMemo(() => {
+      if (query.data === undefined) {
+        return <>-</>;
+      }
   
-  const columns: Column<IMarketDataTable>[] = useMemo(
-    () => [
+      return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
+    }, [query.data]);
+  };
+
+  const PercentageView: React.FC<{
+    lowerIsBetter?: boolean;
+    positiveOnly?: boolean;
+    value: number;
+  }> = ({ lowerIsBetter, value, positiveOnly }) => {
+    if (lowerIsBetter) {
+      throw new Error('PercentageView Mode "lowerIsBetter" not yet supported');
+    }
+    if (positiveOnly) {
+      throw new Error('PercentageView Mode "positiveOnly" not yet supported');
+    }
+    return (
+      <Text color={value >= 0 ? "green.300" : "red.600"}>% {value * 100}</Text>
+    );
+  };
+
+  const columns: Column<AssetRecord>[] = [
       {
         Header: 'Asset',
-        accessor: 'name',
-        Cell: row => {
-          return (
-            <div>
-              <img src={row.row.original.img} width="35" height="35" alt="" />
-              <span>{row.value}</span>
-            </div>
-          )
-        }
+        accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+        Cell: (({ value, row }) => (
+          <Flex alignItems={"center"}>
+            <Box>
+              <TokenIcon symbol={value} />
+            </Box>
+            <Box w="1rem"></Box>
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
         Header: 'Your wallet balance',
-        accessor: 'wallet_balance',
-        Cell: row => (
-            <span className="value">{row.value}</span>
-        )
+        accessor: row => row.tokenAddress,
+        Cell: (() => (
+          <Flex alignItems={"center"}>
+            <Box>
+              0 {/* here will be added the value coming from the wallet */}
+            </Box>
+          </Flex>
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
         Header: 'APY',
-        accessor: 'deposit_apy',
-        Cell: row => (
-          <div className="value-section">
-            <span className="value yellow">{row.value}</span> %
-          </div>
-        )
-      },
-    ],
-    []
-  );
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+          <DepositAPYView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
+      }
+    ];
+
+    const renderer = React.useMemo<TableRenderer<AssetRecord>>(
+      () => table =>
+        (
+          <BasicTableRenderer
+            table={table}
+            tableProps={{
+              style: {
+                borderSpacing: "0 1.5em",
+                borderCollapse: "separate",
+              },
+            }}
+            headProps={{
+              fontSize : "12px",
+              fontFamily: "inherit",
+              color: "white",
+              border: "none",
+            }}
+            rowProps={{
+              // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
+              bg: { base: "secondary.500", md: "secondary.900" },
+            }}
+            cellProps={{
+              borderBottom: "none",
+            }}
+          />
+        ),
+      []
+    );
 
     return (
       <div>
-        <BasicTable>
-          <SortedHtmlTable columns={columns} data={data} />
-        </BasicTable>
+        <SortedHtmlTable columns={columns} data={assetRecords} >
+          {renderer}
+        </SortedHtmlTable>
       </div>
   );
 }
