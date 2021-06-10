@@ -1,9 +1,8 @@
-// import { Center, Text, VStack } from "@chakra-ui/layout";
-import { BigNumber } from "ethers";
 import React from "react";
 import {
   Box,
   Center,
+  Link,
   StackDivider,
   Text,
   VStack,
@@ -31,6 +30,9 @@ export const DepositBanner: React.FC<{}> = () =>  {
         fontSize={{ base: "1.8rem", md: "2.4rem" }}
       >
       	Deposit
+      </Text>
+      <Text>
+        Need your Polygon (Matic) or BSC assets on xDai? Please visit <Link fontWeight="bold">xpollinate.io</Link>
       </Text>
     </Center>
   );
