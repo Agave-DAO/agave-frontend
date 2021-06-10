@@ -54,9 +54,9 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
 
     const price = useAssetPriceInDai(tokenAddress);
     useTokenBalance(tokenAddress)?.then((value: BigNumber) => {
-      setBalance(Number(ethers.utils.formatEther(value) || 0).toFixed(2))
-      console.log(price)
-      setBalanceUSD((Number(balance) * Number(price.data)).toFixed(4))
+      const result = Number(ethers.utils.formatEther(value) || 0).toFixed(2)
+      setBalance(result)
+      setBalanceUSD((Number(result) * Number(price.data ?? 0)).toFixed(4))
     });
     
     return React.useMemo(() => {
