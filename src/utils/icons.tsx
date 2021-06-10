@@ -59,8 +59,8 @@ export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
     return (
       <Image
         src={svg}
-        width="24"
-        height="24"
+        width="14"
+        height="14"
         alt="token icon"
         {...imageProps}
       />
