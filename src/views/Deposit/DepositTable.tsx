@@ -1,11 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useState } from "react";
+import { ethers } from "ethers";
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
+import { useTokenBalance } from "../../hooks/balance"
+import { usePromise } from "../../hooks/promise"
 import { useDepositAPY } from "../../queries/depositAPY";
 import { BasicTableRenderer, SortedHtmlTable, TableRenderer } from "../../utils/htmlTable";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
+import { BigNumber } from "ethers";
 
 const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
 
@@ -28,8 +33,6 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
     );
   }, [reserves]);
 
-  console.log(reserves)
-
   const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     tokenAddress,
   }) => {
@@ -38,9 +41,38 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
       if (query.data === undefined) {
         return <>-</>;
       }
-  
+      
       return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
     }, [query.data]);
+  };
+
+  const BalanceView: React.FC<{ tokenAddress: string }> = ({  
+    tokenAddress,
+  }) => {
+    const [ balance, setBalance ] = useState('')
+    const [ balanceUSD, setBalanceUSD ] = useState('')
+
+    const price = useAssetPriceInDai(tokenAddress);
+    useTokenBalance(tokenAddress)?.then((value: BigNumber) => {
+      setBalance(Number(ethers.utils.formatEther(value) || 0).toFixed(2))
+      console.log(price)
+      setBalanceUSD((Number(balance) * Number(price.data)).toFixed(4))
+    });
+    
+    return React.useMemo(() => {
+      return (
+        <Flex direction="column" minH={30} ml={2}>
+          <Box w="14rem" textAlign="center">
+            <Text p={3} fontWeight="bold">
+              {balanceUSD ?? "-"}
+            </Text>
+            <Text p={3}>
+              $ {balance ?? "-"}
+            </Text>
+          </Box>
+        </Flex>
+      );
+    }, [balanceUSD, balance]);
   };
 
   const PercentageView: React.FC<{
@@ -78,12 +110,8 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
       {
         Header: 'Your wallet balance',
         accessor: row => row.tokenAddress,
-        Cell: (() => (
-          <Flex alignItems={"center"}>
-            <Box>
-              0 {/* here will be added the value coming from the wallet */}
-            </Box>
-          </Flex>
+        Cell: (({ value }) => (
+          <BalanceView tokenAddress={value} />
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
@@ -102,7 +130,7 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
             table={table}
             tableProps={{
               style: {
-                borderSpacing: "0 1.5em",
+                borderSpacing: "0 1em",
                 borderCollapse: "separate",
               },
             }}
