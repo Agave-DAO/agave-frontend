@@ -41,3 +41,19 @@ export const useBalance = (asset: IMarketData | undefined): UseBalanceDto => {
   );
   return { balance, address, library, balanceQueryKey };
 };
+
+export const useTokenBalance = (tokenAddress: string): Promise<BigNumber> | undefined => {
+  
+  const { account: address, library } = useWeb3React<Web3Provider>();
+  if (!address || !library ) {
+    return undefined;
+  }
+
+  const contract = Erc20abi__factory.connect(
+    tokenAddress,
+    library.getSigner()
+  );
+  const balancePromise = contract.balanceOf(address)
+  
+  return balancePromise
+}
