@@ -1,4 +1,4 @@
-import { BigNumber, BigNumberish, FixedNumber } from "@ethersproject/bignumber";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 

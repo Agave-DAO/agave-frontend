@@ -1,14 +1,46 @@
-import { Table, Tbody, Td, Thead, Tr } from "@chakra-ui/react";
+import {
+  Table,
+  TableCellProps,
+  TableProps,
+  TableRowProps,
+  TableColumnHeaderProps,
+  Tbody,
+  Td,
+  Thead,
+  Th,
+  Tr,
+} from "@chakra-ui/react";
+import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons"
 import React from "react";
-import { Column, useTable, useSortBy } from "react-table";
+import { Column, useTable, useSortBy, TableInstance } from "react-table";
+
+export type TableRenderingProps =
+  | "getTableProps"
+  | "getTableBodyProps"
+  | "headerGroups"
+  | "rows"
+  | "prepareRow";
+export type TableRenderingInstance<TRecord extends object> = Pick<
+  TableInstance<TRecord>,
+  TableRenderingProps
+>;
+export interface TableRenderer<TData extends object> {
+  (tableInstance: TableRenderingInstance<TData>): React.ReactElement | null;
+}
 
 export function SortedHtmlTable<TRecord extends object>({
   columns,
   data,
+  children,
 }: {
   columns: Column<TRecord>[];
   data: TRecord[];
+  children?: undefined | TableRenderer<TRecord>;
 }) {
+  const tableRenderer: TableRenderer<TRecord> = React.useMemo(
+    () => children ?? (table => <BasicTableRenderer table={table} />),
+    [children]
+  );
   const memoColumns = React.useMemo(() => columns, [columns]);
   const memoData = React.useMemo(() => data, [data]);
   const tableInputs = React.useMemo(
@@ -21,24 +53,61 @@ export function SortedHtmlTable<TRecord extends object>({
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
     useTable(tableInputs, useSortBy);
 
+  // Create a new object because useTable isn't guaranteed
+  // to alter identity of the passed object when it updates
+  const tableInstance = React.useMemo(
+    () => ({
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      rows,
+      prepareRow,
+    }),
+    [getTableProps, getTableBodyProps, headerGroups, rows, prepareRow]
+  );
+
+  return React.useMemo(
+    () => tableRenderer(tableInstance),
+    [tableRenderer, tableInstance]
+  );
+}
+
+export interface BasicTableRendererProps<TRecord extends object> {
+  table: TableRenderingInstance<TRecord>;
+  tableProps?: TableProps;
+  headProps?: TableColumnHeaderProps;
+  rowProps?: TableRowProps;
+  cellProps?: TableCellProps;
+}
+
+export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
+  table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
+  tableProps: tableStyle,
+  headProps: headStyle,
+  rowProps: rowStyle,
+  cellProps: cellStyle,
+}) => {
   return React.useMemo(
     () => (
-      <Table
-        colorScheme="blackAlpha"
-        {...getTableProps()}
-        margin={0}
-      >
+      <Table {...getTableProps()} margin={0} {...tableStyle}>
         <Thead>
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                <Th {...column.getHeaderProps(column.getSortByToggleProps())} {...headStyle}>
                   {column.render("Header")}
-                  {/* Add a sort direction indicator */}
                   <span>
-                    {column.isSorted ? (column.isSortedDesc ? " v" : " ^") : ""}
+                    {
+                      column.isSorted ? (
+                        column.isSortedDesc ? (
+                          <TriangleDownIcon ml={3}/>
+                        ) : (
+                          <TriangleUpIcon ml={3}/>
+                        )
+                      ) : null
+                    }
                   </span>
-                </th>
+                </Th>
               ))}
             </tr>
           ))}
@@ -47,10 +116,12 @@ export function SortedHtmlTable<TRecord extends object>({
           {rows.map((row, i) => {
             prepareRow(row);
             return (
-              <Tr {...row.getRowProps()} >
+              <Tr {...row.getRowProps()} {...rowStyle}>
                 {row.cells.map(cell => {
                   return (
-                    <Td {...cell.getCellProps()}>{cell.render("Cell")}</Td>
+                    <Td {...cell.getCellProps()} {...cellStyle}>
+                      {cell.render("Cell")}
+                    </Td>
                   );
                 })}
               </Tr>
@@ -59,6 +130,16 @@ export function SortedHtmlTable<TRecord extends object>({
         </Tbody>
       </Table>
     ),
-    [getTableProps, getTableBodyProps, headerGroups, rows, prepareRow]
+    [
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      rows,
+      prepareRow,
+      tableStyle,
+      headStyle,
+      rowStyle,
+      cellStyle,
+    ]
   );
-}
+};

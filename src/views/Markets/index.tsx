@@ -1,10 +1,7 @@
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { Box, Text } from "@chakra-ui/layout";
-import {
-  Center,
-  Flex,
-} from "@chakra-ui/react";
+import { Center, Flex } from "@chakra-ui/react";
 import {
   useMarketSizeInDai,
   useTotalMarketSize,
@@ -22,7 +19,11 @@ import {
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
 import { TokenIcon } from "../../utils/icons";
-import { SortedHtmlTable } from "../../utils/htmlTable";
+import {
+  BasicTableRenderer,
+  SortedHtmlTable,
+  TableRenderer,
+} from "../../utils/htmlTable";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -112,7 +113,7 @@ const MarketSizeView: React.FC<{ tokenAddress: string }> = ({
 const TotalBorrowedView: React.FC<{
   assetSymbol: string;
   tokenAddress: string;
-}> = ({ assetSymbol, tokenAddress }) => {
+}> = ({ tokenAddress }) => {
   const totalBorrowed = useTotalBorrowedForAsset(tokenAddress);
 
   return React.useMemo(() => {
@@ -125,13 +126,9 @@ const TotalBorrowedView: React.FC<{
       ).toLocaleString();
       return (
         <Flex dir={"columns"} justify={"space-between"}>
-            <Text>
-              {weiString}
-            </Text>
-            <Text>
-              /
-            </Text>
-            <Text>$ {daiString}</Text>
+          <Text>{weiString}</Text>
+          <Text>/</Text>
+          <Text>$ {daiString}</Text>
         </Flex>
       );
     } else if (data) {
@@ -139,7 +136,7 @@ const TotalBorrowedView: React.FC<{
     } else {
       return <Text>$ -</Text>;
     }
-  }, [totalBorrowed.data?.wei, totalBorrowed.data?.dai]);
+  }, [totalBorrowed.data]);
 };
 
 const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
@@ -305,7 +302,41 @@ const AssetTable: React.FC<{
     },
   ];
 
-  return <SortedHtmlTable columns={columns} data={assetRecords} />;
+  const renderer = React.useMemo<TableRenderer<AssetRecord>>(
+    () => table =>
+      (
+        <BasicTableRenderer
+          table={table}
+          tableProps={{
+            style: {
+              borderSpacing: "0 1.5em",
+              borderCollapse: "separate",
+            },
+          }}
+          headProps={{
+            fontSize : "12px",
+            fontFamily: "inherit",
+            color: "white",
+            border: "none",
+            textAlign: "center",
+          }}
+          rowProps={{
+            // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
+            bg: { base: "primary.500", md: "primary.900" },
+          }}
+          cellProps={{
+            borderBottom: "none",
+          }}
+        />
+      ),
+    []
+  );
+
+  return (
+    <SortedHtmlTable columns={columns} data={assetRecords}>
+      {renderer}
+    </SortedHtmlTable>
+  );
 };
 
 export const Markets: React.FC<{}> = () => {
@@ -313,7 +344,7 @@ export const Markets: React.FC<{}> = () => {
     <Box
       rounded={{ md: "lg" }}
       minH={{ base: "6.6rem", md: "9.6rem" }}
-      bg={{ base: "primary.500", md: "primary.900" }}
+      // bg={{ base: "primary.500", md: "primary.900" }}
       fg={{ base: "primary.100", md: "primary.100" }}
       color={{ base: "primary.100", md: "primary.100" }}
       padding="3.5rem"

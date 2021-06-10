@@ -1,6 +1,5 @@
-import { BigNumber, BigNumberish, FixedNumber } from "@ethersproject/bignumber";
+import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
-import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAllReserveTokens } from "./allReserveTokens";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
