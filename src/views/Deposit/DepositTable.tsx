@@ -4,7 +4,6 @@ import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useTokenBalance } from "../../hooks/balance"
-import { usePromise } from "../../hooks/promise"
 import { useDepositAPY } from "../../queries/depositAPY";
 import { BasicTableRenderer, SortedHtmlTable, TableRenderer } from "../../utils/htmlTable";
 import { Box, Text } from "@chakra-ui/layout";
