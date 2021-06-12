@@ -4,13 +4,14 @@ import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useTokenBalance } from "../../hooks/balance"
-import { usePromise } from "../../hooks/promise"
 import { useDepositAPY } from "../../queries/depositAPY";
 import { BasicTableRenderer, SortedHtmlTable, TableRenderer } from "../../utils/htmlTable";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { BigNumber } from "ethers";
+import { useUserAssetBalance } from "../../queries/userAssets";
+import { FixedFromRay } from "../../utils/fixedPoint";
 
 const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
 
@@ -49,30 +50,26 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
   const BalanceView: React.FC<{ tokenAddress: string }> = ({  
     tokenAddress,
   }) => {
-    const [ balance, setBalance ] = useState('')
-    const [ balanceUSD, setBalanceUSD ] = useState('')
-
-    const price = useAssetPriceInDai(tokenAddress);
-    useTokenBalance(tokenAddress)?.then((value: BigNumber) => {
-      const result = Number(ethers.utils.formatEther(value) || 0).toFixed(2)
-      setBalance(result)
-      setBalanceUSD((Number(result) * Number(price.data ?? 0)).toFixed(4))
-    });
     
+    const price = useAssetPriceInDai(tokenAddress);
+    const balance = useUserAssetBalance(tokenAddress)
+    const balanceNumber = balance.data ? Number(ethers.utils.formatEther(balance.data)) : undefined
+    const renderBalanceDai = balanceNumber ? (Number(price.data) * balanceNumber).toFixed(2) : "-"
+    console.log(Number(price.data))
     return React.useMemo(() => {
       return (
         <Flex direction="column" minH={30} ml={2}>
           <Box w="14rem" textAlign="center">
             <Text p={3} fontWeight="bold">
-              {balanceUSD ?? "-"}
+              {balanceNumber?.toFixed(3) ?? "-"}
             </Text>
             <Text p={3}>
-              $ {balance ?? "-"}
+              $ {renderBalanceDai ?? "-"}
             </Text>
           </Box>
         </Flex>
       );
-    }, [balanceUSD, balance]);
+    }, [balance]);
   };
 
   const PercentageView: React.FC<{
