@@ -12,6 +12,7 @@ import Switch from '../../components/Switch'
 import Search from '../../components/Search'
 import DTable from './DepositTable'
 import { DepositAsset } from ".";
+import MyDepositsTable from "./DepositMyDepositsTable"
 
 export interface DepositBannerProps {}
 
@@ -142,37 +143,7 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
         </VStack>  
       </Box>
       { deposits.length > 0 && (
-        <Box
-          minW={{md: 250}}
-          ml={10}
-          h={100}
-          marginTop={0}
-          boxSizing="content-box"
-          rounded="xl"
-          bg="primary.900"
-          py="2rem"
-        >
-          <VStack
-            divider={<StackDivider borderColor="#36CFA2" h="0.188rem" backgroundColor="#36CFA2"/>}
-            spacing={4}
-            w='100%'
-            align="stretch"
-            flexDirection="column"
-          >
-            <Box 
-              ml={27}
-              color="white"
-            >
-              <Text>
-                My Deposits
-              </Text>
-            </Box>
-            <Box>
-
-            </Box>
-          </VStack>
-          
-        </Box> 
+        <MyDepositsTable deposits={deposits} />
       )}
     </Flex>
   );
