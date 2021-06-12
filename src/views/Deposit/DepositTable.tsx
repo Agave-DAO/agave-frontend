@@ -1,17 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { ethers } from "ethers";
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
-import { useTokenBalance } from "../../hooks/balance"
 import { useDepositAPY } from "../../queries/depositAPY";
 import { BasicTableRenderer, SortedHtmlTable, TableRenderer } from "../../utils/htmlTable";
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
-import { BigNumber } from "ethers";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { FixedFromRay } from "../../utils/fixedPoint";
 
 const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
 
@@ -52,10 +49,10 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
   }) => {
     
     const price = useAssetPriceInDai(tokenAddress);
-    const balance = useUserAssetBalance(tokenAddress)
-    const balanceNumber = balance.data ? Number(ethers.utils.formatEther(balance.data)) : undefined
-    const renderBalanceDai = balanceNumber ? (Number(price.data) * balanceNumber).toFixed(2) : "-"
-    console.log(Number(price.data))
+    const balance = useUserAssetBalance(tokenAddress);
+    const balanceNumber = balance.data ? Number(ethers.utils.formatEther(balance.data)) : undefined;
+    const balanceUSD = balanceNumber ? (Number(price.data) * balanceNumber).toFixed(2) : "-";
+
     return React.useMemo(() => {
       return (
         <Flex direction="column" minH={30} ml={2}>
@@ -64,12 +61,12 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
               {balanceNumber?.toFixed(3) ?? "-"}
             </Text>
             <Text p={3}>
-              $ {renderBalanceDai ?? "-"}
+              $ {balanceUSD ?? "-"}
             </Text>
           </Box>
         </Flex>
       );
-    }, [balance]);
+    }, [balanceNumber, balanceUSD]);
   };
 
   const PercentageView: React.FC<{
