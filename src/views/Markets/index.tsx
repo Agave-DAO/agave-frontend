@@ -313,6 +313,13 @@ const AssetTable: React.FC<{
               borderCollapse: "separate",
             },
           }}
+          headProps={{
+            fontSize : "12px",
+            fontFamily: "inherit",
+            color: "white",
+            border: "none",
+            textAlign: "center",
+          }}
           rowProps={{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
             bg: { base: "primary.500", md: "primary.900" },

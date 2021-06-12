@@ -1,104 +1,158 @@
-import React, { useMemo } from "react";
-import { useHistory } from "react-router-dom";
-import { useTable, useSortBy, Column } from "react-table";
-import BasicTable from "../../components/BasicTable";
-import { IMarketData, marketData } from "../../utils/constants";
+import React from "react";
+import { ethers } from "ethers";
+import { CellProps, Column, Renderer } from "react-table";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
+import { useDepositAPY } from "../../queries/depositAPY";
+import { BasicTableRenderer, SortedHtmlTable, TableRenderer } from "../../utils/htmlTable";
+import { Box, Text } from "@chakra-ui/layout";
+import { Flex } from "@chakra-ui/react";
+import { TokenIcon } from "../../utils/icons";
+import { useUserAssetBalance } from "../../queries/userAssets";
 
-const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
-  const history = useHistory();
-  const data = useMemo(() => {
-    if (activeType === "All") {
-      return marketData;
+const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
+
+  interface AssetRecord {
+    symbol: string;
+    tokenAddress: string;
+    aTokenAddress: string;
+  }
+
+  const reserves = useAllReserveTokensWithData();
+  const assetRecords = React.useMemo(() => {
+    return (
+      reserves.data?.map(
+        ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
+          symbol,
+          tokenAddress,
+          aTokenAddress,
+        })
+      ) ?? []
+    );
+  }, [reserves]);
+
+  const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
+    tokenAddress,
+  }) => {
+    const query = useDepositAPY(tokenAddress);
+    return React.useMemo(() => {
+      if (query.data === undefined) {
+        return <>-</>;
+      }
+      
+      return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
+    }, [query.data]);
+  };
+
+  const BalanceView: React.FC<{ tokenAddress: string }> = ({  
+    tokenAddress,
+  }) => {
+    
+    const price = useAssetPriceInDai(tokenAddress);
+    const balance = useUserAssetBalance(tokenAddress);
+    const balanceNumber = balance.data ? Number(ethers.utils.formatEther(balance.data)) : undefined;
+    const balanceUSD = balanceNumber ? (Number(price.data) * balanceNumber).toFixed(2) : "-";
+
+    return React.useMemo(() => {
+      return (
+        <Flex direction="column" minH={30} ml={2}>
+          <Box w="14rem" textAlign="center">
+            <Text p={3} fontWeight="bold">
+              {balanceNumber?.toFixed(3) ?? "-"}
+            </Text>
+            <Text p={3}>
+              $ {balanceUSD ?? "-"}
+            </Text>
+          </Box>
+        </Flex>
+      );
+    }, [balanceNumber, balanceUSD]);
+  };
+
+  const PercentageView: React.FC<{
+    lowerIsBetter?: boolean;
+    positiveOnly?: boolean;
+    value: number;
+  }> = ({ lowerIsBetter, value, positiveOnly }) => {
+    if (lowerIsBetter) {
+      throw new Error('PercentageView Mode "lowerIsBetter" not yet supported');
     }
+    if (positiveOnly) {
+      throw new Error('PercentageView Mode "positiveOnly" not yet supported');
+    }
+    return (
+      <Text color={value >= 0 ? "green.300" : "red.600"}>% {value * 100}</Text>
+    );
+  };
 
-    return marketData.slice(0, 3);
-  }, [activeType]);
-
-  const columns: Column<IMarketData>[] = useMemo(
-    () => [
+  const columns: Column<AssetRecord>[] = [
       {
         Header: 'Asset',
-        accessor: 'name',
-        Cell: row => {
-          return (
-            <div>
-              <img src={row.row.original.img} width="35" height="35" alt="" />
-              <span>{row.value}</span>
-            </div>
-          )
-        }
+        accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+        Cell: (({ value, row }) => (
+          <Flex alignItems={"center"}>
+            <Box>
+              <TokenIcon symbol={value} />
+            </Box>
+            <Box w="1rem"></Box>
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
         Header: 'Your wallet balance',
-        accessor: 'wallet_balance',
-        Cell: row => (
-            <span className="value">{row.value}</span>
-        )
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+          <BalanceView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
         Header: 'APY',
-        accessor: 'deposit_apy',
-        Cell: row => (
-          <div className="value-section">
-            <span className="value yellow">{row.value}</span> %
-          </div>
-        )
-      },
-    ],
-    []
-  );
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+          <DepositAPYView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
+      }
+    ];
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable<IMarketData>(
-    {
-      columns,
-      data: Array.from(data),
-    },
-    useSortBy
-  );
+    const renderer = React.useMemo<TableRenderer<AssetRecord>>(
+      () => table =>
+        (
+          <BasicTableRenderer
+            table={table}
+            tableProps={{
+              style: {
+                borderSpacing: "0 1em",
+                borderCollapse: "separate",
+              },
+            }}
+            headProps={{
+              fontSize : "12px",
+              fontFamily: "inherit",
+              color: "white",
+              border: "none",
+            }}
+            rowProps={{
+              // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
+              bg: { base: "secondary.500", md: "secondary.900" },
+            }}
+            cellProps={{
+              borderBottom: "none",
+            }}
+          />
+        ),
+      []
+    );
 
-  return (
-    <BasicTable>
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                  <div className="header-column">
-                    <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
-                      {column.render('Header')}
-                    </span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, index) => {
-            prepareRow(row)
-            return (
-              <tr {...row.getRowProps()} onClick={() => history.push(`/deposit/${row.values.name}`)} key={index}>
-                {row.cells.map(cell => {
-                  return (
-                    <td {...cell.getCellProps()}>
-                      {cell.render('Cell')}
-                    </td>
-                  )
-                })}
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </BasicTable>
-  )
+    return (
+      <div>
+        <SortedHtmlTable columns={columns} data={assetRecords} >
+          {renderer}
+        </SortedHtmlTable>
+      </div>
+  );
 }
 
-export default DepositTable;
+export default DTable;

@@ -7,6 +7,7 @@ import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
 // import Dashboard from './views/Dashboard';
 import Deposit from "./views/Deposit";
+import DepositDetail from "./views/Deposit/DepositDetail";
 import Withdraw from "./views/Withdraw";
 import { DepositBanner } from "./views/Deposit/layout";
 import { WithdrawBanner } from "./views/Withdraw/layout";
@@ -84,7 +85,8 @@ const App: React.FC<IAppProps> = props => {
               <Route path="/markets" component={Markets} exact />
               {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
               {/* <Route path="/dashboard" component={Dashboard} exact /> */}
-              <Route path="/deposit" component={Deposit} exact /> 
+              <Route path="/deposit" component={Deposit} exact />
+              <Route path="/deposit/:assetName" component={DepositDetail} exact />
               <Route path="/withdraw" component={Withdraw} exact />
               <Route path="/borrow" component={Borrow} exact />
               <Route path="/borrow/:assetName" component={BorrowDetail} exact />

@@ -39,6 +39,9 @@ function Header() {
         <NavTabLink exact to="/markets" fontWeight="bold">
           MARKETS
         </NavTabLink>
+        <NavTabLink exact to="/deposit" fontWeight="bold">
+          DEPOSIT
+        </NavTabLink>
         <NavTabLink exact to="/stake" fontWeight="bold">
           STAKE
         </NavTabLink>

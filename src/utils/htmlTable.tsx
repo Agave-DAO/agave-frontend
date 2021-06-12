@@ -3,11 +3,14 @@ import {
   TableCellProps,
   TableProps,
   TableRowProps,
+  TableColumnHeaderProps,
   Tbody,
   Td,
   Thead,
+  Th,
   Tr,
 } from "@chakra-ui/react";
+import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons"
 import React from "react";
 import { Column, useTable, useSortBy, TableInstance } from "react-table";
 
@@ -72,6 +75,7 @@ export function SortedHtmlTable<TRecord extends object>({
 export interface BasicTableRendererProps<TRecord extends object> {
   table: TableRenderingInstance<TRecord>;
   tableProps?: TableProps;
+  headProps?: TableColumnHeaderProps;
   rowProps?: TableRowProps;
   cellProps?: TableCellProps;
 }
@@ -79,6 +83,7 @@ export interface BasicTableRendererProps<TRecord extends object> {
 export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
   tableProps: tableStyle,
+  headProps: headStyle,
   rowProps: rowStyle,
   cellProps: cellStyle,
 }) => {
@@ -89,13 +94,20 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                <Th {...column.getHeaderProps(column.getSortByToggleProps())} {...headStyle}>
                   {column.render("Header")}
-                  {/* Add a sort direction indicator */}
                   <span>
-                    {column.isSorted ? (column.isSortedDesc ? " v" : " ^") : ""}
+                    {
+                      column.isSorted ? (
+                        column.isSortedDesc ? (
+                          <TriangleDownIcon ml={3}/>
+                        ) : (
+                          <TriangleUpIcon ml={3}/>
+                        )
+                      ) : null
+                    }
                   </span>
-                </th>
+                </Th>
               ))}
             </tr>
           ))}
@@ -125,6 +137,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
       rows,
       prepareRow,
       tableStyle,
+      headStyle,
       rowStyle,
       cellStyle,
     ]

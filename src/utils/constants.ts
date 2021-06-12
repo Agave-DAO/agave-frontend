@@ -54,6 +54,13 @@ export interface IMarketData {
   contractAddress: string;
 }
 
+export interface IMarketDataTable {
+  name: string;
+  img: string;
+  wallet_balance: number;
+  deposit_apy: number;
+}
+
 export const marketData: ReadonlyArray<IMarketData> = [
   {
     name: "DAI",
