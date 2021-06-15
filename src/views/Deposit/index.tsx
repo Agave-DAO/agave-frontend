@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BigNumber } from 'ethers';
-import { useUserDepositAssetBalances } from  '../../queries/userAssets'
+import { useUserDepositAssetBalances, useUserDepositAssetBalancesDaiWei } from  '../../queries/userAssets'
 import {DepositLayout} from './layout';
 
 export interface DepositAsset {
@@ -12,14 +12,14 @@ export interface DepositAsset {
 function Deposit() {
   const [activeValue, setActiveValue] = useState<"All" | "Stable Coins">('All');
   const balances = useUserDepositAssetBalances()
+  const b = useUserDepositAssetBalancesDaiWei()
+  console.log(b)
   const depositedList: DepositAsset[] = []
   balances?.data?.map(value => {
-    if (value.balance.isZero()) {
+    if (!value.balance.isZero()) {
       depositedList.push(value)
     }
   })
-  
-  console.log(">>>>", depositedList)
 
   const handleSetActiveValue = (value: ("All" | "Stable Coins")) => {
     setActiveValue(value)
