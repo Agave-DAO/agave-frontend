@@ -2,52 +2,48 @@ import React from "react";
 import { ethers } from "ethers";
 import { Box, Text } from "@chakra-ui/layout";
 import { Flex, VStack } from "@chakra-ui/react";
-// import { BigNumber } from "ethers";
 import { DepositAsset } from ".";
 import { TokenIcon } from "../../utils/icons";
 
+const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
+  const total = React.useMemo(() => {
+    return assets.reduce(
+      (memo, next) =>
+        memo +
+        (Number(ethers.utils.formatEther(next.daiWeiPriceTotal ?? 0)) ?? 0),
+      0
+    );
+  }, [assets]);
 
-const Deposits: React.FC<{ assets: DepositAsset[] }> = ({  
-  assets
-}) => {
-  return React.useMemo(() => {    
-    let total=0;
+  return React.useMemo(() => {
     return (
-      <Flex w="100%" flexDir="column" >
-        {assets.map((value, i) => {
-          total += Number(ethers.utils.formatEther(value.balance)) ?? 0;
-          (
+      <Flex w="100%" flexDir="column">
+        {assets.map((value, i) => (
           <Box key={i}>
             <BalanceView asset={value} />
             <Box h="0.1rem" backgroundColor="primary.50" />
           </Box>
-          )}
-        )}  
+        ))}
         <Flex
           alignSelf="center"
           justifyContent="space-between"
           w="100%"
-          px={{ base: "2.4rem", md: "2.4rem" }} pt={6}
+          px={{ base: "2.4rem", md: "2.4rem" }}
+          pt={6}
         >
-          <Text>
-            Total
-          </Text>
-          <Text fontWeight="bold">
-            $ {total}
-          </Text>
+          <Text>Total</Text>
+          <Text fontWeight="bold">$ {total}</Text>
         </Flex>
       </Flex>
-    )
-  }, [assets]);
+    );
+  }, [assets, total]);
 };
 
-const BalanceView: React.FC<{ asset: DepositAsset }> = ({  
-  asset,
-}) => {
+const BalanceView: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
   return React.useMemo(() => {
     return (
       <Flex direction="row" minH={30} h="100%" w="100%">
-        <Box 
+        <Box
           w="100%"
           d="flex"
           flexDir="row"
@@ -59,11 +55,15 @@ const BalanceView: React.FC<{ asset: DepositAsset }> = ({
         >
           <Box textAlign="center" alignSelf="center" d="flex">
             <TokenIcon symbol={asset.symbol} />
-            <Text ml={4} alignSelf="center">{asset.symbol}</Text>
+            <Text ml={4} alignSelf="center">
+              {asset.symbol}
+            </Text>
           </Box>
           <Box>
             <Text p={3} fontWeight="bold">
-              $ {Number(ethers.utils.formatEther(asset.balance)) ?? "-"}
+              ${" "}
+              {Number(ethers.utils.formatEther(asset.daiWeiPriceTotal ?? 0)) ??
+                "-"}
             </Text>
           </Box>
         </Box>
@@ -72,40 +72,31 @@ const BalanceView: React.FC<{ asset: DepositAsset }> = ({
   }, [asset]);
 };
 
-const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({ deposits }) => {
-
-return (
+const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
+  deposits,
+}) => {
+  return (
     <div>
       <Box
-          minW={{md: 250}}
-          ml={10}
-          marginTop={0}
-          boxSizing="content-box"
-          rounded="xl"
-          bg="primary.900"
-          py="2rem"
-          color="white"
+        minW={{ md: 250 }}
+        ml={10}
+        marginTop={0}
+        boxSizing="content-box"
+        rounded="xl"
+        bg="primary.900"
+        py="2rem"
+        color="white"
       >
-        <VStack
-          w='100%'
-          align="stretch"
-          flexDirection="column"
-        >
-          <Box 
-            ml="2.4rem"
-            color="white"
-            mb={2}
-          >
-            <Text>
-              My Deposits
-            </Text>
+        <VStack w="100%" align="stretch" flexDirection="column">
+          <Box ml="2.4rem" color="white" mb={2}>
+            <Text>My Deposits</Text>
           </Box>
-          <Box h="0.2rem" backgroundColor="primary.50"/>
+          <Box h="0.2rem" backgroundColor="primary.50" />
           <Deposits assets={deposits} />
         </VStack>
-      </Box> 
+      </Box>
     </div>
   );
-}
+};
 
 export default MyDepositsTable;
