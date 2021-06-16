@@ -21,16 +21,19 @@ export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
     let svg;
     switch (symbol) {
       case "AGVE":
+      case "agAGVE":
         svg = AgaveLogo;
         break;
       case "BAT":
         svg = BatLogo;
         break;
       case "DAI":
+      case "agDAI":
         svg = DaiLogo;
         break;
       case "ETH":
       case "WETH":
+      case "agWETH":
         svg = EthLogo;
         break;
       case "HONEY":
@@ -41,6 +44,7 @@ export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
         svg = UniLogo;
         break;
       case "USDC":
+      case "agUSDC":
         svg = UsdcLogo;
         break;
       case "USDT":
@@ -48,6 +52,7 @@ export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
         break;
       case "BTC":
       case "WBTC":
+      case "agWBTC":
         svg = WbtcLogo;
         break;
       case "ZRX":

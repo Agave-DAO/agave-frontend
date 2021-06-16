@@ -1,9 +1,9 @@
-// import { Center, Text, VStack } from "@chakra-ui/layout";
-import { BigNumber } from "ethers";
 import React from "react";
 import {
   Box,
   Center,
+  Flex,
+  Link,
   StackDivider,
   Text,
   VStack,
@@ -11,12 +11,15 @@ import {
 import Switch from '../../components/Switch'
 import Search from '../../components/Search'
 import DTable from './DepositTable'
+import { DepositAsset } from ".";
+import MyDepositsTable from "./DepositMyDepositsTable"
 
 export interface DepositBannerProps {}
 
 export interface DepositLayoutProps {
   activeValue: string;
   setActiveValue: (active: any) => void;
+  depositedList: DepositAsset[] | undefined
 }
 
 export const DepositBanner: React.FC<{}> = () =>  {
@@ -32,26 +35,30 @@ export const DepositBanner: React.FC<{}> = () =>  {
       >
       	Deposit
       </Text>
+      <Text>
+        Need your Polygon (Matic) or BSC assets on xDai? Please visit <Link fontWeight="bold">xpollinate.io</Link>
+      </Text>
     </Center>
   );
 };
 
 export const DepositLayout: React.FC<DepositLayoutProps> = props => {
+  const deposits: DepositAsset[] = props.depositedList ? props.depositedList : []
 	return (
-    <VStack
-      spacing={{ md: "1.6rem" }}
+    <Flex
       flexDirection={{ base: "column", md: "row" }}
       px={{ base: "2.4rem", md: "0" }}
       mb={10}
       height="100%"
+      alignItems="flex-start"
     >
-      <Center
+      <Box
         boxSizing="content-box"
         rounded="xl"
         minH="12.75rem"
         w="100%"
         bg="primary.900"
-        py="2.4rem"
+        py="2rem"
         mb={{ base: "0.1rem", md: "0" }}
         color="white"
       >
@@ -133,8 +140,11 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               <DTable activeType="All"/>
             </Box>
           </Box>
-        </VStack>   
-      </Center>
-    </VStack>
+        </VStack>  
+      </Box>
+      { deposits.length > 0 && (
+        <MyDepositsTable deposits={deposits} />
+      )}
+    </Flex>
   );
 };
