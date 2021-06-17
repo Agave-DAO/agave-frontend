@@ -19,6 +19,8 @@ import { useCooldownMutation } from "../../mutations/cooldown";
 import { useRedeemMutation } from "../../mutations/redeem";
 import { useStakeMutation } from "../../mutations/stake";
 
+import { useBreakpointValue } from "@chakra-ui/react"
+
 export interface StakingProps {}
 
 export const Staking: React.FC<StakingProps> = _props => {
@@ -36,6 +38,9 @@ export const Staking: React.FC<StakingProps> = _props => {
   const cooldownInfo = useStakingCooldown().data;
   const currentStakerCooldown = useStakingEvents(w3.account ?? undefined).data;
   const agavePriceInNative = useStakingAgavePrice().data;
+  const value = useBreakpointValue({base: 'a', md: 'md'})
+
+  console.log(value)
 
   // Mutations
   const stakeMutation = useStakeMutation({
@@ -113,7 +118,7 @@ export const Staking: React.FC<StakingProps> = _props => {
       </StakingErrorWrapper>
     );
   }
-
+  
   return (
     <StakingLayout
       yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}

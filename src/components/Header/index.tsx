@@ -36,6 +36,9 @@ function Header() {
         </Center>
       </Navbar.Brand>
       <Navbar.Links>
+        <NavTabLink w="14rem" exact to="/dashboard" fontWeight="bold">
+          MY DASHBOARD
+        </NavTabLink>
         <NavTabLink exact to="/markets" fontWeight="bold">
           MARKETS
         </NavTabLink>

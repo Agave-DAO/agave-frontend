@@ -5,10 +5,11 @@ import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
 import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
-// import Dashboard from './views/Dashboard';
+import Dashboard from './views/Dashboard';
 import Deposit from "./views/Deposit";
 import DepositDetail from "./views/Deposit/DepositDetail";
 import Withdraw from "./views/Withdraw";
+import { DashboardBanner } from "./views/Dashboard/layout";
 import { DepositBanner } from "./views/Deposit/layout";
 import { WithdrawBanner } from "./views/Withdraw/layout";
 import Borrow from "./views/Borrow";
@@ -67,6 +68,9 @@ const App: React.FC<IAppProps> = props => {
             header={
               // prettier-ignore
               <Switch>
+                <Route path="/dashboard">
+                  <DashboardBanner/>
+                </Route>
                 <Route path="/stake">
                   <StakingBanner/>
                 </Route>
@@ -84,7 +88,7 @@ const App: React.FC<IAppProps> = props => {
             <Switch>
               <Route path="/markets" component={Markets} exact />
               {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
-              {/* <Route path="/dashboard" component={Dashboard} exact /> */}
+              <Route path="/dashboard" component={Dashboard} exact />
               <Route path="/deposit" component={Deposit} exact />
               <Route path="/deposit/:assetName" component={DepositDetail} exact />
               <Route path="/withdraw" component={Withdraw} exact />
