@@ -6,6 +6,7 @@ export interface UseAssetDto {
   assetQueryKey: readonly [string | undefined];
 };
 
+// DEPRECATED; try useAllReserveTokens and filtering to the symbol you want instead
 export const useAsset = (assetName: string | undefined): UseAssetDto => {
   const assetQueryKey = [assetName] as const;
   const {

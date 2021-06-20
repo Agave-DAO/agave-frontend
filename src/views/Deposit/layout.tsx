@@ -8,7 +8,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import Switch from '../../components/Switch'
+// import Switch from '../../components/Switch'
 // import Search from '../../components/Search'
 import DTable from './DepositTable'
 import { DepositAsset } from ".";
@@ -120,11 +120,11 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               w="100%"
               justifyContent="space-between"
             >
-              <Switch 
+              {/* <Switch 
                 values={['All', 'Stable Coins']}
                 activeValue={props.activeValue}
                 setActiveValue={props.setActiveValue}
-              />
+              /> */}
               {/* Disabled for now, no enough rows to be filtered */}
               {/* <Search
                 placeholder="Search"
