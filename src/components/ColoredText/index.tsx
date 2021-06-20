@@ -1,6 +1,6 @@
 import { Text, TextProps } from "@chakra-ui/layout";
 
-const ColoredText: React.FC<TextProps> = ({ children, ...props }) => {
+export const ColoredText: React.FC<TextProps> = ({ children, ...props }) => {
   return (
     <Text
       color="white"
