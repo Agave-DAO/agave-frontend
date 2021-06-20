@@ -9,7 +9,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import Switch from '../../components/Switch'
-import Search from '../../components/Search'
+// import Search from '../../components/Search'
 import DTable from './DepositTable'
 import { DepositAsset } from ".";
 import MyDepositsTable from "./DepositMyDepositsTable"
@@ -133,9 +133,7 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               /> */}
             </Box>
             <Box
-              mt={5}
-              overflow="scroll"
-              bottom={10}
+              overflowY="auto"
             >
               <DTable activeType="All"/>
             </Box>

@@ -1,9 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { BigNumber } from "ethers";
-import {
-  useUserDepositAssetBalances,
-  useUserDepositAssetBalancesDaiWei,
-} from "../../queries/userAssets";
+import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { DepositLayout } from "./layout";
 
 export interface DepositAsset {
@@ -16,30 +13,23 @@ export interface DepositAsset {
   daiWeiPriceTotal: BigNumber | null;
 }
 
-function Deposit() {
-  const [activeValue, setActiveValue] = useState<"All" | "Stable Coins">("All");
+export function Deposit() {
+  const [activeValue, setActiveValue] =
+    React.useState<"All" | "Stable Coins">("All");
   const balances = useUserDepositAssetBalancesDaiWei();
-  const depositedList: DepositAsset[] = [];
-  balances?.data?.map(value => {
-    if (!value.balance.isZero()) {
-      depositedList.push(value);
-    }
-  });
-
-  const handleSetActiveValue = (value: "All" | "Stable Coins") => {
-    setActiveValue(value);
-  };
-
-  return (
-    <div>
+  const depositedList: DepositAsset[] = React.useMemo(
+    () => balances?.data?.filter(asset => !asset.balance.isZero()) ?? [],
+    [balances]
+  );
+  return React.useMemo(
+    () => (
       <DepositLayout
         activeValue={activeValue}
-        setActiveValue={value => {
-          handleSetActiveValue(value);
-        }}
+        setActiveValue={setActiveValue}
         depositedList={depositedList}
       />
-    </div>
+    ),
+    [activeValue, setActiveValue, depositedList]
   );
 }
 
