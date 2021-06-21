@@ -43,11 +43,11 @@ interface AmountSelectedState extends InitialState {
 interface ApprovalRequiredState extends AmountSelectedState {}
 
 interface DepositTXState extends AmountSelectedState {
-  approvalTXHash: string | undefined;
+  // approvalTXHash: string | undefined;
 }
 
 interface DepositedTXState extends DepositTXState {
-  depositTXHash: string;
+  // depositTXHash: string;
 }
 
 type DepositState = OneTaggedPropertyOf<{
@@ -242,13 +242,16 @@ const AmountSelectedComp: React.FC<{
       amount: state.amountToDeposit,
       spender: chainAddresses?.lendingPool,
     }),
-    [chainId, state]
+    [state, chainAddresses?.lendingPool]
   );
-  const { approvalMutation: { mutateAsync, data, isSuccess, isLoading } } = useApprovalMutation(approvalArgs);
-  const onSubmit = React.useCallback(
-    () => dispatch(createState("approvalRequired", { ...state })),
-    [state, dispatch]
-  );
+  const {
+    approvalMutation: { mutateAsync },
+  } = useApprovalMutation(approvalArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("depositTx", { ...state })))
+      .catch(e => dispatch(createState("amountSelected", state)));
+  }, [state, dispatch, mutateAsync]);
   const currentStep = "amountSelected";
   const stepperBar = React.useMemo(
     () => (
@@ -258,7 +261,7 @@ const AmountSelectedComp: React.FC<{
         stateNames={stateNames}
       />
     ),
-    []
+    [currentStep]
   );
   return (
     <DepositOverviewWrapper amount={state.amountToDeposit} asset={state.token}>
