@@ -1,6 +1,6 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
-import { FixedFromRay } from "../utils/fixedPoint";
+import { divIfNotZeroUnsafe, FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
@@ -28,7 +28,8 @@ export function userAccountDataFromWeb3Result({
   healthFactor, //  Ray e.g. 1500403183017056862 = 1.50
 }: Web3UserAccountData): UserAccountData {
   const maximumLtv = FixedNumber.fromValue(ltv, 4);
-  const currentLtv = FixedNumber.fromValue(totalDebtETH, 18).divUnsafe(
+  const currentLtv = divIfNotZeroUnsafe(
+    FixedNumber.fromValue(totalDebtETH, 18),
     FixedNumber.fromValue(totalCollateralETH, 18)
   );
   return {
@@ -42,7 +43,7 @@ export function userAccountDataFromWeb3Result({
     maximumLtvDiscrete: ltv,
     maximumLtv,
     currentLtv,
-    usedBorrowingPower: currentLtv.divUnsafe(maximumLtv),
+    usedBorrowingPower: divIfNotZeroUnsafe(currentLtv, maximumLtv),
     healthFactor: FixedFromRay(healthFactor),
   };
 }
@@ -96,9 +97,11 @@ export const useAvailableToBorrowAssetWei =
         useDecimalCountForToken.fetchQueryDefined(params, assetAddress),
       ]);
 
-      return assetPrice ? accountData.availableBorrowsEth
-        .mul(weiPerToken(assetDecimals))
-        .div(assetPrice) : null;
+      return assetPrice
+        ? accountData.availableBorrowsEth
+            .mul(weiPerToken(assetDecimals))
+            .div(assetPrice)
+        : null;
     },
     (accountAddress, assetAddress) => [
       "LendingPool",

@@ -2,7 +2,7 @@ import { Box, Center, HStack, Text, VStack } from "@chakra-ui/layout";
 import React, { useEffect, useMemo, useState } from "react";
 import ColoredText from "../../components/ColoredText";
 import InfoWeiBox from "./InfoWeiBox";
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 import { Button } from "@chakra-ui/button";
 import { ModalIcon } from "../../utils/icons";
 
@@ -14,17 +14,21 @@ import { TokenIcon } from "../../utils/icons";
 import { TransactionLog } from "./TransactionLog";
 
 import daiLogo from "../../assets/image/coins/dai.svg";
+import { useHistory } from "react-router-dom";
+import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 
 const getStepData = () =>
   JSON.parse(sessionStorage.getItem("currentStep") || "{}");
 
 /** INTRO SECTION */
-const DashOverviewIntro: React.FC<{
+export const DashOverviewIntro: React.FC<{
   mode: string;
   onSubmit: (value: BigNumber) => void;
+  asset: ReserveTokenDefinition;
   amount: BigNumber | undefined;
   setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
-}> = ({ mode, onSubmit, amount, setAmount }) => {
+  balance: BigNumber | undefined;
+}> = ({ asset, mode, onSubmit, amount, setAmount, balance }) => {
   return (
     <VStack w="50%" spacing="0">
       <ColoredText fontSize="1.8rem" textTransform="capitalize">
@@ -34,12 +38,12 @@ const DashOverviewIntro: React.FC<{
       <Box h="3.3rem" />
       <InfoWeiBox
         w="100%"
-        currency="xDAI"
+        currency={asset.symbol}
         icon={daiLogo}
         amount={amount}
         setAmount={setAmount}
         mode={mode}
-        balance={BigNumber.from(0)}
+        balance={balance}
       />
       <Box h="4.3rem" />
       <Button
@@ -61,12 +65,13 @@ const DashOverviewIntro: React.FC<{
 };
 
 /** STEPPER MASTER SWITCH */
-const DashOverviewStepper: React.FC<{
+export const DashOverviewStepper: React.FC<{
+  asset: ReserveTokenDefinition;
   amount: BigNumber;
   currentHealthFactor: number;
   nextHealthFactor: number;
   mode: string;
-  onModalOpen: () => void;
+  onModalOpen?: () => void;
 }> = ({ mode, onModalOpen }) => {
   const [step, changeStep] = useState(() =>
     parseInt(
@@ -162,7 +167,7 @@ const DashOverviewStepper: React.FC<{
               Current health factor
             </Text>
             <ModalIcon
-              onOpen={onModalOpen}
+              onOpen={onModalOpen ?? (() => {})}
               position="relative"
               top="0"
               right="0"
@@ -210,9 +215,30 @@ const DashOverviewStepper: React.FC<{
 
 /** BINDING COMPONENT */
 const DashOverview: React.FC<{ mode: string }> = ({ mode }) => {
+  const history = useHistory();
   const [toggleExecution, setToggleExecution] = useState(false);
-  const [amount, setAmount] = useState<BigNumber | undefined>(
-    BigNumber.from(0)
+  const [amount, setAmount] = useState<BigNumber | undefined>(constants.Zero);
+
+  const backButton = React.useMemo(
+    () => (
+      <Button
+        background="transparent"
+        border="1px solid white"
+        fontWeight="light"
+        fontSize="1.2rem"
+        px="1.8rem"
+        py=".5rem"
+        position="absolute"
+        top="3rem"
+        left="3rem"
+        onClick={() =>
+          toggleExecution ? setToggleExecution(false) : history.goBack()
+        }
+      >
+        Back
+      </Button>
+    ),
+    [history, toggleExecution]
   );
 
   const handleSubmit = (value: BigNumber) => {
@@ -234,30 +260,20 @@ const DashOverview: React.FC<{ mode: string }> = ({ mode }) => {
       rounded="lg"
       position="relative"
     >
-      <Button
-        background="transparent"
-        border="1px solid white"
-        fontWeight="light"
-        fontSize="1.2rem"
-        px="1.8rem"
-        py=".5rem"
-        position="absolute"
-        top="3rem"
-        left="3rem"
-        onClick={() => setToggleExecution(false)}
-      >
-        Back
-      </Button>
+      {backButton}
       {!toggleExecution ? (
         <DashOverviewIntro
+          asset={{ symbol: "DECOY", tokenAddress: "0xACABACABACABACAB" }}
           mode={mode}
           onSubmit={handleSubmit}
           amount={amount}
           setAmount={setAmount}
+          balance={constants.Zero}
         />
       ) : (
         amount && (
           <DashOverviewStepper
+            asset={{ symbol: "DECOY", tokenAddress: "0xACABACABACABACAB" }}
             amount={amount}
             currentHealthFactor={5.67}
             nextHealthFactor={5.11}

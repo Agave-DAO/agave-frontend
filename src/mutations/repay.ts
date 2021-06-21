@@ -24,7 +24,7 @@ export const useRepayMutation = ({asset, amount, onSuccess}: UseRepayMutationPro
   const queryClient = useQueryClient();
   // FIXME: would be nice not to invoke a list of hooks just to get query keys
   const { approvedQueryKey } = useApproved(asset);
-	const { approvalMutationKey } = useApprovalMutation({ asset, amount, onSuccess: () => {}});
+	const { approvalMutationKey } = useApprovalMutation({ asset: asset?.contractAddress, amount: amount ? BigNumber.from(amount) : undefined, spender: "0x00" });
   const { balanceQueryKey } = useBalance(asset);
   const assetQueryKey = [asset?.name] as const; 
   

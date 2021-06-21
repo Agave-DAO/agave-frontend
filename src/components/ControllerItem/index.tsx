@@ -4,11 +4,12 @@ import { LINEAR_GRADIENT_BG, spacings } from "../../utils/constants";
 
 export const ControllerItem: React.FC<{
   stepName: string;
+  actionName?: string | undefined;
   stepDesc: string | null;
   stepNumber: number;
   onActionClick: () => void;
   totalSteps: number;
-}> = ({ stepDesc, stepName, onActionClick, totalSteps, stepNumber }) => {
+}> = ({ stepDesc, stepName, actionName, onActionClick, totalSteps, stepNumber }) => {
   return (
     <Center w="100%" justifyContent="space-between" p="1.2rem">
       <VStack spacing="0" alignItems="flex-start">
@@ -26,7 +27,7 @@ export const ControllerItem: React.FC<{
         _hover={{ background: LINEAR_GRADIENT_BG }}
         onClick={onActionClick}
       >
-        {stepNumber === totalSteps ? "Dashboard" : stepName}
+        {actionName ?? stepName}
       </Button>
     </Center>
   );

@@ -17,7 +17,7 @@ export const WithdrawBanner: React.FC = () => {
 const WithdrawLayout: React.FC = () => {
   return (
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
-      <DepositDash
+      {/* <DepositDash
         healthFactor={3.91}
         assetPrice={BigNumber.from(1)}
         utilRate={38.42}
@@ -27,7 +27,7 @@ const WithdrawLayout: React.FC = () => {
         maxLTV={50}
         depositAPY={11.07}
         liquidityAvailable={BigNumber.from(223362346)}
-      />
+      /> */}
       <DashOverview mode="withdraw" />
     </VStack>
   );

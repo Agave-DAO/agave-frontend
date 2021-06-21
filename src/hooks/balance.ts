@@ -13,6 +13,7 @@ export interface UseBalanceDto {
   balanceQueryKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined];
 };
 
+// DEPRECATED; try useUserAssetBalance instead
 export const useBalance = (asset: IMarketData | undefined): UseBalanceDto => {
   const { account: address, library } = useWeb3React<Web3Provider>();
   const balanceQueryKey = [address, library, asset] as const;

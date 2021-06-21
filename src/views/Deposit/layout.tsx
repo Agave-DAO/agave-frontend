@@ -8,11 +8,12 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import Switch from '../../components/Switch'
-import Search from '../../components/Search'
+// import Switch from '../../components/Switch'
+// import Search from '../../components/Search'
 import DTable from './DepositTable'
 import { DepositAsset } from ".";
 import MyDepositsTable from "./DepositMyDepositsTable"
+import { useHistory } from "react-router-dom";
 
 export interface DepositBannerProps {}
 
@@ -23,6 +24,7 @@ export interface DepositLayoutProps {
 }
 
 export const DepositBanner: React.FC<{}> = () =>  {
+  const history = useHistory();
   return (
     <Center
       width="100%"
@@ -32,6 +34,7 @@ export const DepositBanner: React.FC<{}> = () =>  {
         fontWeight="bold"
         color="white"
         fontSize={{ base: "1.8rem", md: "2.4rem" }}
+        onClick={() => history.push("/deposit")}
       >
       	Deposit
       </Text>
@@ -120,11 +123,11 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               w="100%"
               justifyContent="space-between"
             >
-              <Switch 
+              {/* <Switch 
                 values={['All', 'Stable Coins']}
                 activeValue={props.activeValue}
                 setActiveValue={props.setActiveValue}
-              />
+              /> */}
               {/* Disabled for now, no enough rows to be filtered */}
               {/* <Search
                 placeholder="Search"
@@ -133,9 +136,7 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               /> */}
             </Box>
             <Box
-              mt={5}
-              overflow="scroll"
-              bottom={10}
+              overflowY="auto"
             >
               <DTable activeType="All"/>
             </Box>
