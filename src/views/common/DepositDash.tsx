@@ -45,7 +45,6 @@ const DepositDash: React.FC<DepositDashProps> = ({
   const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
   const maximumLtv = reserveConfiguration?.ltv;
   const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
-  if (reserveProtocolData) { console.log(reserveProtocolData) }
   
   const healthFactor = userAccountData?.healthFactor;
 

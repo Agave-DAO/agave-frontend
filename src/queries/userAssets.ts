@@ -27,6 +27,39 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   }
 );
 
+export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
+  BigNumber,
+  [
+    _p1: "user",
+    _p2: "asset",
+    assetAddress: string | undefined,
+    _p3: "allowance",
+    spender: string | undefined
+  ],
+  [assetAddress: string, spender: string]
+>(
+  async (params, assetAddress, spender) => {
+    const asset = Erc20abi__factory.connect(
+      assetAddress,
+      params.library.getSigner()
+    );
+
+    return asset.allowance(params.account, spender);
+  },
+  (assetAddress, spender) => [
+    "user",
+    "asset",
+    assetAddress,
+    "allowance",
+    spender,
+  ],
+  () => undefined,
+  {
+    staleTime: 2 * 60 * 1000,
+    cacheTime: 60 * 60 * 1000,
+  }
+);
+
 export const useUserReserveAssetBalances =
   buildQueryHookWhenParamsDefinedChainAddrs<
     { symbol: string; tokenAddress: string; balance: BigNumber }[],

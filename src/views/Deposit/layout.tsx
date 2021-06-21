@@ -13,6 +13,7 @@ import {
 import DTable from './DepositTable'
 import { DepositAsset } from ".";
 import MyDepositsTable from "./DepositMyDepositsTable"
+import { useHistory } from "react-router-dom";
 
 export interface DepositBannerProps {}
 
@@ -23,6 +24,7 @@ export interface DepositLayoutProps {
 }
 
 export const DepositBanner: React.FC<{}> = () =>  {
+  const history = useHistory();
   return (
     <Center
       width="100%"
@@ -32,6 +34,7 @@ export const DepositBanner: React.FC<{}> = () =>  {
         fontWeight="bold"
         color="white"
         fontSize={{ base: "1.8rem", md: "2.4rem" }}
+        onClick={() => history.push("/deposit")}
       >
       	Deposit
       </Text>

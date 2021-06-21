@@ -9,7 +9,7 @@ import { useAsset } from "../../hooks/asset";
 import { useApproved } from "../../hooks/approved";
 import { useApprovalMutation } from "../../mutations/approval";
 import { useRepayMutation } from "../../mutations/repay";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 import RepayOverview from "./RepayOverview";
 /*
@@ -104,7 +104,7 @@ const RepayConfirmWrapper = styled.div`
                 font-size: 16px;
               }
             }
-            
+
             .usd-amount {
               font-size: 10px;
             }
@@ -180,7 +180,6 @@ const RepayConfirmWrapper = styled.div`
                 color: ${props => props.theme.color.textPrimary};
               }
             }
-
           }
         }
       }
@@ -197,10 +196,11 @@ const RepayConfirmWrapper = styled.div`
 
 const RepayConfirm: React.FC = () => {
   const history = useHistory();
-  const match = useRouteMatch<{
-    assetName?: string | undefined;
-    amount?: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName?: string | undefined;
+      amount?: string | undefined;
+    }>();
 
   const assetName = match.params.assetName;
   const [amount, setAmount] = useState<number>(0);
@@ -209,11 +209,17 @@ const RepayConfirm: React.FC = () => {
 
   const { asset } = useAsset(assetName);
   const { approved: approval } = useApproved(asset);
-  const { approvalMutation } = useApprovalMutation({ asset, amount, onSuccess: () => {
-    setStep(2);
-  }});
-  //TODO: ZedKai check repayMutation and that logic works correct... 
-  const { repayMutation } = useRepayMutation({ asset, amount, onSuccess: () => {}});
+  const { approvalMutation } = useApprovalMutation({
+    asset: asset?.contractAddress,
+    amount: amount ? BigNumber.from(amount) : undefined,
+    spender: "0x00",
+  });
+  //TODO: ZedKai check repayMutation and that logic works correct...
+  const { repayMutation } = useRepayMutation({
+    asset,
+    amount,
+    onSuccess: () => {},
+  });
 
   useEffect(() => {
     if (match.params && match.params.amount) {
@@ -286,7 +292,7 @@ function RepayConfirm({ match, history }) {
                   labels={["Approve", "Deposit", "Finished"]}
                 />
                 {step === 1 && (
-                <div className="form-action-body">
+                  <div className="form-action-body">
                     <div className="form-action-body-left">
                       <div className="title">Approve</div>
                       <div className="desc">
@@ -298,7 +304,7 @@ function RepayConfirm({ match, history }) {
                         disabled={approvalMutation.isLoading}
                         variant="secondary"
                         onClick={() => {
-                          approvalMutation.mutate();
+                          approvalMutation.mutateAsync().then(() => setStep(2));
                         }}
                       >
                         Approve
@@ -306,7 +312,7 @@ function RepayConfirm({ match, history }) {
                     </div>
                   </div>
                 )}
-                
+
                 {step === 1 && approvalMutation.isLoading && (
                   <div className="form-action-body">
                     <div className="form-action-body-left">
@@ -323,13 +329,19 @@ function RepayConfirm({ match, history }) {
                     <div className="form-action-body-right">
                       <Button
                         variant="secondary"
-                        disabled={repayMutation.isLoading || approvalMutation.isLoading || approval === undefined}
+                        disabled={
+                          repayMutation.isLoading ||
+                          approvalMutation.isLoading ||
+                          approval === undefined
+                        }
                         onClick={() => {
                           repayMutation
-                            .mutateAsync(ethers.utils.parseEther(amount.toString()))
-                            .then(async (result) => {
+                            .mutateAsync(
+                              ethers.utils.parseEther(amount.toString())
+                            )
+                            .then(async result => {
                               if (result) {
-                                setStep(step + 1)
+                                setStep(step + 1);
                               }
                             });
                         }}
@@ -368,6 +380,6 @@ function RepayConfirm({ match, history }) {
       </RepayConfirmWrapper>
     </Page>
   );
-}
+};
 
 export default RepayConfirm;

@@ -7,6 +7,8 @@ export interface StrongTypedChainAddresses<Id extends ValidNetworkIdTypes, Name 
   readonly agaveOracle: string;
   readonly aaveProtocolDataProvider: string;
   readonly wrappedNativeGateway: string;
+
+  readonly explorer?: string | undefined;
 }
 
 export interface ChainAddresses extends StrongTypedChainAddresses<any, any> {
@@ -39,6 +41,8 @@ export const internalAddressesPerNetwork: Record<
     agaveOracle: "0xb42a48F27150469d8a55dA3ad258B73a37239451",
     aaveProtocolDataProvider: "0x0223f6FE9c7d4AA52C8C1877efEB46DcabC5270B",
     wrappedNativeGateway: "0x90Df46541E7a42e85E57CA92C29F0c8338c88BDd",
+
+    explorer: "https://rinkeby.etherscan.io",
   },
   xdai: {
     chainName: "xdai",
@@ -49,6 +53,8 @@ export const internalAddressesPerNetwork: Record<
     agaveOracle: "0x80E08A2042F4135f6cA72BA2fd0e7cAEb2Ee30ef",
     aaveProtocolDataProvider: "0xa874f66342a04c24b213BF0715dFf18818D24014",
     wrappedNativeGateway: "0x0bb31c42D0692369Ba681A925C254fEB605c327b",
+
+    explorer: "https://blockscout.com/xdai/mainnet",
   },
 } as const;
 
