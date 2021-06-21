@@ -14,11 +14,17 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from 'react-device-detect'
-import { useDisclosure } from "@chakra-ui/hooks";
 import { ModalIcon } from "../../utils/icons";
-import InfoWeiBox from "../common/InfoWeiBox";
-import { fontSizes, spacings } from "../../utils/constants";
+import DashboardTable, { DashboardTableType } from "./DashboardTable";
+
+interface DashboardProps {
+  balance: string | undefined;
+  borrowed: string | undefined;
+  collateral: string | undefined;
+  healthFactor: string | undefined;
+};
 
 export const DashboardBanner: React.FC<{}> = () => {
   return (
@@ -38,79 +44,7 @@ export const DashboardBanner: React.FC<{}> = () => {
   );
 };
 
-const DepositsCard: React.FC<{
-  isModalTrigger?: boolean;
-  onClick: React.MouseEventHandler;
-  balance: string;
-  title: string;
-}> = ({
-  isModalTrigger,
-  title,
-  balance,
-  onClick,
-  children: modalChildren,
-}) => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  return (
-    <Box
-      w="100%"
-      justifyContent="space-between"
-      px={{ base: "1.1rem", md: "2.2rem" }}
-      py={{ base: spacings.md, md: "1.9rem" }}
-      bg="secondary.900"
-      rounded="2xl"
-      position="relative"
-      minH="14.4rem"
-      minW="40%"
-      m="0.5em"
-      align="center"
-    >
-      {isModalTrigger && <ModalIcon onOpen={onOpen} />}
-      <Text
-        color="white"
-        fontSize={{ base: "1.2rem", md: "1.5rem" }}
-        textAlign="center"
-      >
-        {title}
-      </Text>
-      <Text color="white" fontSize="1.2rem">
-        {balance}
-      </Text>
-      {isModalTrigger && (
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
-          <ModalOverlay />
-          <ModalContent
-            color="primary.900"
-            bg="linear-gradient(180deg, #F3FFF7 8.89%, #DCFFF1 146.53%)"
-            px={{ base: "1.5rem", md: "2.9rem" }}
-            py="3.5rem"
-            rounded="lg"
-            minW={{ base: "80%", md: "30vw" }}
-            minH={{ base: "50%", md: "30vh" }}
-          >
-            {modalChildren}
-            <ModalFooter>
-              <Button
-                w={{ base: "100%", md: "60%" }}
-                m="auto"
-                py="1.5rem"
-                fontSize={{ base: "1.6rem", md: fontSizes.md }}
-                bg="secondary.100"
-                color="white"
-                fontWeight="normal"
-                onClick={onClose}
-              >
-                Ok, I got it
-              </Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-      )}
-    </Box>
-  );
-};
-
-const UpperBox: React.FC<{title: string;}> = ({
+const UpperBox: React.FC<{title: string;} & CenterProps> = ({
   title,
   children,
   ...props
@@ -120,11 +54,11 @@ const UpperBox: React.FC<{title: string;}> = ({
       boxSizing="content-box"
       flexDirection="column"
       rounded="xl"
-      minH="15.6rem"
+      minH="10.6rem"
       minW={{ base: "100%", lg: "auto" }}
       flex={1}
       bg="primary.900"
-      py="1.5rem"
+      py="1rem"
       {...props}
     >
       <VStack
@@ -148,28 +82,74 @@ const UpperBox: React.FC<{title: string;}> = ({
   );
 };
 
-export const DashboardLayout: React.FC<{}> = () => {
+export const DashboardLayout: React.FC<DashboardProps> = props => {
   
   return (
     <Flex
-      align="center"
-      flexBasis="auto"
-      spacing="1em"
-      w="100%"
-      flexDirection={{ base: "column", lg: "row" }}
-      m="auto"
-      color="white"
+      flexDirection="column"
     >
-      <UpperBox title="Deposit Information" marginRight={{ base: "2.6rem" }}>
-        <Box h={60}>
-
-        </Box>
-      </UpperBox>
-      <UpperBox title="Borrow Information">
-        <Box h={60}>
-
-        </Box>
-      </UpperBox>
+      <Flex
+        align="center"
+        flexBasis="auto"
+        spacing="1em"
+        w="100%"
+        flexDirection={{ base: "column", lg: "row" }}
+        m="auto"
+        color="white"
+      >
+        <UpperBox title="Deposit Information" mr="2rem">
+          <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
+            <HStack d="flex" mt="0.5rem">
+              <Text>Aproximate Balance</Text>
+              <ModalIcon
+                position="relative"
+                top="0"
+                right="0"
+                ml="0.5rem"
+                transform="scale(0.75)"
+                onOpen={()=>{}}
+                />
+            </HStack>  
+            <Text fontWeight="bold" textAlign="left" mt="0.5em">{props.balance ?? "-"}</Text>
+          </VStack>
+        </UpperBox>
+        <UpperBox title="Borrow Information">
+          <Box 
+            d="flex"
+            flexDirection="row"
+            justifyContent="space-between"
+            pr="6rem"
+            h="7.5rem" 
+            >
+            <Box h="7rem" mt="0.5rem">
+              <Text>Borrowed</Text>
+              <Text fontWeight="bold" textAlign="left" mt="0.5em">{props.borrowed ?? "-"}</Text>
+            </Box>
+            <Box h="7rem" mt="0.5rem" ml="4rem">
+              <Text>Collateral</Text>
+              <Text fontWeight="bold" textAlign="left" mt="0.5em">{props.collateral ?? "-"}</Text>
+            </Box>
+            <VStack flexDirection="column" h="7rem" alignItems="baseline" ml="4rem">
+              <HStack d="flex" mt="0.5rem">
+                <Text>Health Factor</Text>
+                <ModalIcon
+                  position="relative"
+                  top="0"
+                  right="0"
+                  ml="0.5rem"
+                  transform="scale(0.75)"
+                  onOpen={()=>{}}
+                  />
+              </HStack>  
+              <Text fontWeight="bold" textAlign="left" mt="0.5em">{props.healthFactor ?? "-"}</Text>
+              </VStack>
+            </Box>
+        </UpperBox>
+      </Flex>
+      <HStack spacing={8}>
+        <DashboardTable mode={DashboardTableType.Deposit}/>
+        <DashboardTable mode={DashboardTableType.Borrow}/>
+      </HStack>
     </Flex>
   );
 };
