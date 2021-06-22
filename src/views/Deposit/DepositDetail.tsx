@@ -10,16 +10,10 @@ import {
 } from "../../queries/allReserveTokens";
 import { Box, Center, HStack, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
-import { createSlice } from "@reduxjs/toolkit";
-import { createExplicitStateSlicer } from "../../utils/sliceUtils";
-import { BigNumber, constants } from "ethers";
-import {
-  OneTaggedPropertyOf,
-  PossibleStates,
-  PossibleTags,
-} from "../../utils/types";
+import { BigNumber } from "ethers";
+import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { TransactionLog } from "../common/TransactionLog";
+// import { TransactionLog } from "../common/TransactionLog";
 import { ModalIcon, TokenIcon } from "../../utils/icons";
 import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
 import { formatEther } from "ethers/lib/utils";
@@ -29,8 +23,12 @@ import {
   useApprovalMutation,
   UseApprovalMutationProps,
 } from "../../mutations/approval";
-import { getChainAddresses } from "../../utils/chainAddresses";
+import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
+import {
+  useDepositMutation,
+  UseDepositMutationProps,
+} from "../../mutations/deposit";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -39,8 +37,6 @@ interface InitialState {
 interface AmountSelectedState extends InitialState {
   amountToDeposit: BigNumber;
 }
-
-interface ApprovalRequiredState extends AmountSelectedState {}
 
 interface DepositTXState extends AmountSelectedState {
   // approvalTXHash: string | undefined;
@@ -53,7 +49,6 @@ interface DepositedTXState extends DepositTXState {
 type DepositState = OneTaggedPropertyOf<{
   init: InitialState;
   amountSelected: AmountSelectedState;
-  approvalRequired: ApprovalRequiredState;
   depositTx: DepositTXState;
   depositedTx: DepositedTXState;
 }>;
@@ -70,13 +65,12 @@ function createState<SelectedState extends PossibleTags<DepositState>>(
 
 const stateNames: Record<PossibleTags<DepositState>, string> = {
   init: "Token",
-  amountSelected: "Amount",
-  approvalRequired: "Approval",
+  amountSelected: "Approval",
   depositTx: "Deposit",
   depositedTx: "Deposited",
 };
 
-const visibleStateNames = ["approvalRequired", "depositTx", "depositedTx"];
+const visibleStateNames = ["amountSelected", "depositTx", "depositedTx"];
 
 const DepositOverviewWrapper: React.FC<{
   asset: ReserveTokenDefinition;
@@ -234,8 +228,7 @@ const AmountSelectedComp: React.FC<{
   state: AmountSelectedState;
   dispatch: (nextState: DepositState) => void;
 }> = ({ state, dispatch }) => {
-  const { chainId } = useAppWeb3();
-  const chainAddresses = chainId ? getChainAddresses(chainId) : undefined;
+  const chainAddresses = useChainAddresses();
   const approvalArgs = React.useMemo<UseApprovalMutationProps>(
     () => ({
       asset: state.token.tokenAddress,
@@ -250,9 +243,10 @@ const AmountSelectedComp: React.FC<{
   const onSubmit = React.useCallback(() => {
     mutateAsync()
       .then(() => dispatch(createState("depositTx", { ...state })))
-      .catch(e => dispatch(createState("amountSelected", state)));
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
   }, [state, dispatch, mutateAsync]);
-  const currentStep = "amountSelected";
+  const currentStep: PossibleTags<DepositState> = "amountSelected";
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -278,11 +272,64 @@ const AmountSelectedComp: React.FC<{
   );
 };
 
-const UnimplementedComp: React.FC<{
-  state: PossibleStates<DepositState>;
+const DepositTxComp: React.FC<{
+  state: DepositTXState;
   dispatch: (nextState: DepositState) => void;
-}> = ({ state }) => {
-  return <>Unimplemented state: {JSON.stringify(state)}</>;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const depositArgs = React.useMemo<UseDepositMutationProps>(
+    () => ({
+      asset: state.token.tokenAddress,
+      amount: state.amountToDeposit,
+      spender: chainAddresses?.lendingPool,
+    }),
+    [state, chainAddresses?.lendingPool]
+  );
+  const {
+    depositMutation: { mutateAsync },
+  } = useDepositMutation(depositArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("depositedTx", { ...state })))
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<DepositState> = "depositTx";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <DepositOverviewWrapper amount={state.amountToDeposit} asset={state.token}>
+      {stepperBar}
+      <ControllerItem
+        stepNumber={1}
+        stepName="Deposit"
+        stepDesc="Please submit to deposit"
+        actionName="Deposit"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </DepositOverviewWrapper>
+  );
+};
+
+const DepositedTxComp: React.FC<{
+  state: DepositedTXState;
+  dispatch: (nextState: DepositState) => void;
+}> = ({ state, dispatch }) => {
+  return (
+    <>
+      Congrats, you deposited {formatEther(state.amountToDeposit)}{" "}
+      {state.token.symbol}!
+    </>
+  );
 };
 
 const DepositStateMachine: React.FC<{
@@ -296,16 +343,10 @@ const DepositStateMachine: React.FC<{
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
       );
-    case "approvalRequired":
-      return (
-        <UnimplementedComp state={state.approvalRequired} dispatch={setState} />
-      );
     case "depositTx":
-      return <UnimplementedComp state={state.depositTx} dispatch={setState} />;
+      return <DepositTxComp state={state.depositTx} dispatch={setState} />;
     case "depositedTx":
-      return (
-        <UnimplementedComp state={state.depositedTx} dispatch={setState} />
-      );
+      return <DepositedTxComp state={state.depositedTx} dispatch={setState} />;
   }
 };
 
