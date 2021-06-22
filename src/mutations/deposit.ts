@@ -1,9 +1,15 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { AgaveLendingABI__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
-import { useUserAssetAllowance } from "../queries/userAssets";
+import {
+  useUserAssetAllowance,
+  useUserAssetBalance,
+} from "../queries/userAssets";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
+import { useUserAccountData } from "../queries/userAccountData";
+import { useLendingReserveData } from "../queries/lendingReserveData";
+import { getChainAddresses } from "../utils/chainAddresses";
 
 export interface UseDepositMutationProps {
   asset: string | undefined;
@@ -33,6 +39,16 @@ export const useDepositMutation = ({
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
 
+  const userAccountDataQueryKey = useUserAccountData.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    account ?? undefined
+  );
+  const assetBalanceQueryKey = useUserAssetBalance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset
+  );
   const allowanceQueryKey = useUserAssetAllowance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
@@ -72,10 +88,30 @@ export const useDepositMutation = ({
     },
     {
       onSuccess: async (result, vars, context) => {
+        const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
         await Promise.allSettled([
+          queryClient.invalidateQueries(assetBalanceQueryKey),
+          queryClient.invalidateQueries(userAccountDataQueryKey),
           queryClient.invalidateQueries(allowanceQueryKey),
           queryClient.invalidateQueries(depositedQueryKey),
           queryClient.invalidateQueries(depositMutationKey),
+          asset && account && chainAddrs && chainId && library
+            ? useLendingReserveData
+                .fetchQueryDefined(
+                  { account, chainAddrs, chainId, library, queryClient },
+                  asset
+                )
+                .then(reserveData =>
+                  useUserAssetBalance.buildKey(
+                    chainId ?? undefined,
+                    account ?? undefined,
+                    reserveData.aTokenAddress
+                  )
+                )
+                .then(aTokenBalanceQueryKey =>
+                  queryClient.invalidateQueries(aTokenBalanceQueryKey)
+                )
+            : Promise.resolve(),
         ]);
       },
     }
