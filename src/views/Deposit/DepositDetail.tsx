@@ -309,7 +309,7 @@ const DepositTxComp: React.FC<{
     <DepositOverviewWrapper amount={state.amountToDeposit} asset={state.token}>
       {stepperBar}
       <ControllerItem
-        stepNumber={1}
+        stepNumber={2}
         stepName="Deposit"
         stepDesc="Please submit to deposit"
         actionName="Deposit"
@@ -324,11 +324,32 @@ const DepositedTxComp: React.FC<{
   state: DepositedTXState;
   dispatch: (nextState: DepositState) => void;
 }> = ({ state, dispatch }) => {
+  const history = useHistory();
+  const currentStep: PossibleTags<DepositState> = "depositedTx";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
   return (
-    <>
-      Congrats, you deposited {formatEther(state.amountToDeposit)}{" "}
-      {state.token.symbol}!
-    </>
+    <DepositOverviewWrapper amount={state.amountToDeposit} asset={state.token}>
+      {stepperBar}
+      <ControllerItem
+        stepNumber={3}
+        stepName="Deposited"
+        stepDesc={`Deposit of ${formatEther(state.amountToDeposit)} ${
+          state.token.symbol
+        } successful`}
+        actionName="Finish"
+        onActionClick={() => history.push("/deposit")}
+        totalSteps={visibleStateNames.length}
+      />
+    </DepositOverviewWrapper>
   );
 };
 
@@ -364,7 +385,6 @@ const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
   return (
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
       {dash}
-      <>State: {depositState.type}</>
       <Center
         w="100%"
         color="primary.100"
@@ -374,7 +394,6 @@ const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
       >
         <DepositStateMachine state={depositState} setState={setDepositState} />
       </Center>
-      <DashOverview mode="deposit" />
     </VStack>
   );
 };
