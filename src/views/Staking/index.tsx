@@ -19,15 +19,12 @@ import { useCooldownMutation } from "../../mutations/cooldown";
 import { useRedeemMutation } from "../../mutations/redeem";
 import { useStakeMutation } from "../../mutations/stake";
 
-import { useBreakpointValue } from "@chakra-ui/react"
-
 export interface StakingProps {}
 
 export const Staking: React.FC<StakingProps> = _props => {
   const w3 = useAppWeb3(); // We don't unpack because otherwise typescript loses useAppWeb3's magic
-  const {
-    data: stakingPerSecondPerAgaveYield,
-  } = useStakingPerSecondPerAgaveYield();
+  const { data: stakingPerSecondPerAgaveYield } =
+    useStakingPerSecondPerAgaveYield();
   const { data: amountStaked } = useAmountStakedBy(w3.account ?? undefined);
   const { data: availableToStake } = useAmountAvailableToStake(
     w3.account ?? undefined
@@ -38,9 +35,6 @@ export const Staking: React.FC<StakingProps> = _props => {
   const cooldownInfo = useStakingCooldown().data;
   const currentStakerCooldown = useStakingEvents(w3.account ?? undefined).data;
   const agavePriceInNative = useStakingAgavePrice().data;
-  const value = useBreakpointValue({base: 'a', md: 'md'})
-
-  console.log(value)
 
   // Mutations
   const stakeMutation = useStakeMutation({
@@ -118,7 +112,7 @@ export const Staking: React.FC<StakingProps> = _props => {
       </StakingErrorWrapper>
     );
   }
-  
+
   return (
     <StakingLayout
       yieldPerAgavePerSecond={stakingPerSecondPerAgaveYield}
