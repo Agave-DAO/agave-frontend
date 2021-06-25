@@ -93,6 +93,69 @@ const UpperBox: React.FC<{title: string;} & CenterProps> = ({
   );
 };
 
+export const ModalAPBalance: React.FC<{}> = () => {
+  return (
+    <>
+      <ModalHeader fontSize="1.6rem" fontWeight="bold">
+        Aproximate Balance
+      </ModalHeader>
+      <ModalBody>
+        <Text fontSize="1.4rem">
+          Your aggregated balance shows the approximate value in USD of all the assets you have deposited. 
+          It fluctuates based on the evolution of prices.
+        </Text>
+        <Text mt={5} fontSize="1.4rem">
+          Please note that if your deposits consist of stable-coins the approximate balance in USD could 
+          be slightly higher or lower than the stable-coin balance, due to fluctuations in the stable-coin peg.
+        </Text>
+      </ModalBody>
+    </>
+  );
+};
+
+export const ModalHFactor: React.FC<{
+  currentLTV?: string;
+  maximumLTV?: string;
+  threshold?: string;
+}> = ({
+  currentLTV,
+  maximumLTV,
+  threshold,
+}) => {
+  return (
+    <>
+      <ModalHeader fontSize="1.6rem" fontWeight="bold">
+        Liquidation Overview
+      </ModalHeader>
+      <ModalBody>
+        <Text fontSize="1.4rem">
+          Details about your Loan to Value (LTV) ratio and liquidation.
+        </Text>
+        <Box
+          mt="2rem"
+          py="1.5rem"
+          px="1rem"
+          border="solid"
+          borderRadius="xl"
+          borderWidth="0.5px"
+        >
+          <HStack pb="0.5rem" px="1em" justifyContent="space-between">
+            <Text fontSize="1.4rem">Current TVL</Text>
+            <Text fontSize="1.4rem">{currentLTV ?? "-"}</Text>
+          </HStack>
+          <HStack pb="0.5rem" px="1em" justifyContent="space-between">
+            <Text fontSize="1.4rem">Maximum LTV</Text>
+            <Text fontSize="1.4rem">{maximumLTV ?? "-"}</Text>
+          </HStack>
+          <HStack px="1em" justifyContent="space-between">
+            <Text fontSize="1.4rem">Liquidation threshold</Text>
+            <Text fontSize="1.4rem">{threshold ?? "-"}</Text>
+          </HStack>
+        </Box>
+      </ModalBody>
+    </>
+  );
+};
 const ModalComponent: React.FC<{isOpen: boolean; mtype: string; onClose(): void;}> = ({
   children: modalChildren,
   mtype,
@@ -127,21 +190,10 @@ const ModalComponent: React.FC<{isOpen: boolean; mtype: string; onClose(): void;
             minH={{ base: "50%", md: "30vh" }}
           >
             {mtype === MODAL_TYPES.AB && (
-              <>
-                <ModalHeader fontSize="1.6rem" fontWeight="bold">
-                  Aproximate Balance
-                </ModalHeader>
-                <ModalBody>
-                  <Text fontSize="1.4rem">
-                    Your aggregated balance shows the approximate value in USD of all the assets you have deposited. 
-                    It fluctuates based on the evolution of prices.
-                  </Text>
-                  <Text mt={5} fontSize="1.4rem">
-                    Please note that if your deposits consist of stable-coins the approximate balance in USD could 
-                    be slightly higher or lower than the stable-coin balance, due to fluctuations in the stable-coin peg.
-                  </Text>
-                </ModalBody>
-              </>
+              <ModalAPBalance />
+            )}
+            {mtype === MODAL_TYPES.HF && (
+              <ModalHFactor />
             )}
             <ModalFooter>
               <Button
@@ -197,7 +249,10 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
                 right="0"
                 ml="0.5rem"
                 transform="scale(0.75)"
-                onOpen={onOpen}
+                onOpen={() => {
+                  setModal(MODAL_TYPES.AB)
+                  onOpen()
+                }}
                 />
             </HStack>  
             <Text fontWeight="bold" textAlign="left" mt="0.5em">{props.balance ?? "-"}</Text>
@@ -231,7 +286,10 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
                   right="0"
                   ml="0.5rem"
                   transform="scale(0.75)"
-                  onOpen={onOpen}
+                  onOpen={() => {
+                    setModal(MODAL_TYPES.HF)
+                    onOpen()
+                  }}
                   />
               </HStack>  
               <Text fontWeight="bold" textAlign="left" mt="0.5em">{props.healthFactor ?? "-"}</Text>
