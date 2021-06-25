@@ -16,7 +16,6 @@ import {
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
-import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useStakingAgavePrice } from "../../queries/stakingAgavePrice";
 import { StakingCooldownInfo } from "../../queries/stakingCooldown";

@@ -6,8 +6,6 @@ import { BigNumber } from "ethers";
 import { Button } from "@chakra-ui/button";
 
 import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
-
-import daiLogo from "../../assets/image/coins/dai.svg";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 
 /** INTRO SECTION */

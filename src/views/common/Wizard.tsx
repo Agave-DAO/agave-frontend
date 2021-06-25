@@ -78,7 +78,7 @@ export const WizardOverviewWrapper: React.FC<{
         </HStack> */}
       </VStack>
     ),
-    [amount, currentHealthFactor]
+    [asset.symbol, amount, currentHealthFactor]
   );
 
   return (
