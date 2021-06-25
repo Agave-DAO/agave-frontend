@@ -56,6 +56,7 @@ function Header() {
           rounded="lg"
           bg="primary.500"
           cursor="pointer"
+          display="none"
         >
           <img src={isDarkMode ? darkMoon : lightMoon} alt="theme-mode" />
         </Center>
@@ -68,6 +69,7 @@ function Header() {
           color="white"
           bg="primary.500"
           rounded="lg"
+          display="none"
         >
           0 AGVE
         </Center>
