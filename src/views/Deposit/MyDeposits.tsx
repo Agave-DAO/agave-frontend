@@ -5,41 +5,7 @@ import { Flex, VStack } from "@chakra-ui/react";
 import { DepositAsset } from ".";
 import { TokenIcon } from "../../utils/icons";
 
-const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
-  const total = React.useMemo(() => {
-    return assets.reduce(
-      (memo, next) =>
-        memo +
-        (Number(ethers.utils.formatEther(next.daiWeiPriceTotal ?? 0)) ?? 0),
-      0
-    );
-  }, [assets]);
-
-  return React.useMemo(() => {
-    return (
-      <Flex w="100%" flexDir="column">
-        {assets.map((value, i) => (
-          <Box key={i}>
-            <BalanceView asset={value} />
-            <Box h="0.1rem" backgroundColor="primary.50" />
-          </Box>
-        ))}
-        <Flex
-          alignSelf="center"
-          justifyContent="space-between"
-          w="100%"
-          px={{ base: "2.4rem", md: "2.4rem" }}
-          pt={6}
-        >
-          <Text>Total</Text>
-          <Text fontWeight="bold">$ {total}</Text>
-        </Flex>
-      </Flex>
-    );
-  }, [assets, total]);
-};
-
-const BalanceView: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
+const AssetBalanceDisplay: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
   return React.useMemo(() => {
     return (
       <Flex direction="row" minH={30} h="100%" w="100%">
@@ -72,7 +38,40 @@ const BalanceView: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
   }, [asset]);
 };
 
-const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
+const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
+  const total = React.useMemo(() => {
+    return assets.reduce(
+      (memo, next) =>
+        memo +
+        (Number(ethers.utils.formatEther(next.daiWeiPriceTotal ?? 0)) ?? 0),
+      0
+    );
+  }, [assets]);
+  const depositDivider = React.useMemo(() => (<Box h="0.1rem" backgroundColor="primary.50" />), []);
+
+  return React.useMemo(() => {
+    return (
+      <Flex w="100%" flexDir="column">
+        <VStack divider={depositDivider} children={assets.map((value, i) => (
+          <AssetBalanceDisplay key={value.tokenAddress} asset={value} />
+        ))} />
+        {}
+        <Flex
+          alignSelf="center"
+          justifyContent="space-between"
+          w="100%"
+          px={{ base: "2.4rem", md: "2.4rem" }}
+          pt={6}
+        >
+          <Text>Total</Text>
+          <Text fontWeight="bold">$ {total}</Text>
+        </Flex>
+      </Flex>
+    );
+  }, [assets, total]);
+};
+
+export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
   deposits,
 }) => {
   return (
@@ -98,5 +97,3 @@ const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
     </div>
   );
 };
-
-export default MyDepositsTable;

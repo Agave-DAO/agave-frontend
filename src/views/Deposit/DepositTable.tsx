@@ -68,7 +68,7 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   }, [balanceNumber, balanceUSD]);
 };
 
-const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
+export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
   const history = useHistory();
   interface AssetRecord {
     symbol: string;
@@ -169,5 +169,3 @@ const DTable: React.FC<{ activeType: string }> = ({ activeType }) => {
     </div>
   );
 };
-
-export default DTable;

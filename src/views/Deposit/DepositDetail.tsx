@@ -1,24 +1,19 @@
 import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
-import { useHistory, useRouteMatch, withRouter } from "react-router-dom";
+import { useHistory, useRouteMatch } from "react-router-dom";
 import DepositDash from "../common/DepositDash";
-import DashOverview, { DashOverviewIntro } from "../common/DashOverview";
+import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveTokenDefinition,
   useAllReserveTokens,
 } from "../../queries/allReserveTokens";
-import { Box, Center, HStack, Text } from "@chakra-ui/react";
+import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
-// import { TransactionLog } from "../common/TransactionLog";
-import { ModalIcon, TokenIcon } from "../../utils/icons";
-import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
 import { formatEther } from "ethers/lib/utils";
-import { useAppWeb3 } from "../../hooks/appWeb3";
-import { useUserAccountData } from "../../queries/userAccountData";
 import {
   useApprovalMutation,
   UseApprovalMutationProps,
@@ -29,6 +24,7 @@ import {
   useDepositMutation,
   UseDepositMutationProps,
 } from "../../mutations/deposit";
+import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -72,134 +68,7 @@ const stateNames: Record<PossibleTags<DepositState>, string> = {
 
 const visibleStateNames = ["amountSelected", "depositTx", "depositedTx"];
 
-const DepositOverviewWrapper: React.FC<{
-  asset: ReserveTokenDefinition;
-  amount: BigNumber;
-}> = ({ asset, amount, children }) => {
-  const { account: userAccountAddress } = useAppWeb3();
-  const { data: userAccountData } = useUserAccountData(
-    userAccountAddress ?? undefined
-  );
-  const currentHealthFactor = userAccountData?.healthFactor;
-  return (
-    <VStack w="50%" spacing="0">
-      <ColoredText textTransform="capitalize" fontSize="1.8rem">
-        Deposit overview
-      </ColoredText>
-      <Box h="1.3rem" />
-      <Text fontSize={fontSizes.md}>
-        These are your transaction details. Please verify them before
-        submitting.
-      </Text>
-      <Box h={fontSizes.xl} />
-      <VStack
-        spacing=".5rem"
-        p="1.5rem"
-        w="30rem"
-        background="secondary.900"
-        rounded="lg"
-        alignItems="space-between"
-      >
-        <HStack justifyContent="space-between">
-          <Text lineHeight={fontSizes.md} fontSize="1rem">
-            Amount
-          </Text>
-          <HStack>
-            <TokenIcon
-              symbol={asset.symbol}
-              boxSize={{ base: "1.5rem", md: "1.8rem" }}
-            />
-            <Text fontSize="1.2rem">
-              {formatEther(amount)} {asset.symbol}
-            </Text>
-          </HStack>
-        </HStack>
-        <HStack justifyContent="space-between">
-          <HStack spacing=".2rem">
-            <Text lineHeight={fontSizes.md} fontSize="1rem">
-              Current health factor
-            </Text>
-            <ModalIcon
-              onOpen={() => {}}
-              position="relative"
-              top="0"
-              right="0"
-              margin="0"
-              transform="scale(0.75)"
-            />
-          </HStack>
-          <ColoredText
-            fontSize="1.2rem"
-            overflow="hidden"
-            overflowWrap="normal"
-          >
-            {currentHealthFactor
-              ?.toUnsafeFloat()
-              .toLocaleString(undefined, { notation: "scientific" }) ?? "-"}
-          </ColoredText>
-        </HStack>
-        {/* Calculating this is hard - do it later */}
-        {/* <HStack justifyContent="space-between">
-          <Text lineHeight={fontSizes.md} fontSize="1rem">
-            Next health factor
-          </Text>
-          <ColoredText fontSize="1.2rem">(Unimplemented)</ColoredText>
-        </HStack> */}
-      </VStack>
-      <Box h={fontSizes.md} />
-      <VStack
-        w="30rem"
-        minH="8rem"
-        bg="secondary.900"
-        rounded="lg"
-        overflow="hidden"
-      >
-        {/* {mode === "withdraw" ? (
-          <WithdrawController
-            onStepComplete={handleStepComplete}
-            onStepInitiate={handleStepInitiate}
-            currentStep={step}
-          />
-        ) : (
-          <DepositController
-            onStepComplete={handleStepComplete}
-            onStepInitiate={handleStepInitiate}
-            currentStep={step}
-          />
-        )}
-        {stepLogsArr.reverse().map(log => {
-          return <TransactionLog log={log} />;
-        })} */}
-        {children}
-      </VStack>
-    </VStack>
-  );
-};
-
-const StepperBar: React.FC<{
-  states: ReadonlyArray<string>;
-  stateNames: Readonly<Record<string, string>>;
-  currentState: string;
-}> = ({ states, currentState, stateNames }) => {
-  return (
-    <HStack w="100%" spacing="0">
-      {states.map((step, index) => (
-        <Center
-          key={step}
-          flex={1}
-          background={
-            step === currentState ? LINEAR_GRADIENT_BG : "primary.300"
-          }
-          color="secondary.900"
-          fontSize="1rem"
-          padding=".3rem"
-        >
-          {index + 1} {stateNames[step]}
-        </Center>
-      ))}
-    </HStack>
-  );
-};
+const DepositTitle = "Deposit overview";
 
 const InitialComp: React.FC<{
   state: InitialState;
@@ -258,7 +127,11 @@ const AmountSelectedComp: React.FC<{
     [currentStep]
   );
   return (
-    <DepositOverviewWrapper amount={state.amountToDeposit} asset={state.token}>
+    <WizardOverviewWrapper
+      title={DepositTitle}
+      amount={state.amountToDeposit}
+      asset={state.token}
+    >
       {stepperBar}
       <ControllerItem
         stepNumber={1}
@@ -268,7 +141,7 @@ const AmountSelectedComp: React.FC<{
         onActionClick={onSubmit}
         totalSteps={visibleStateNames.length}
       />
-    </DepositOverviewWrapper>
+    </WizardOverviewWrapper>
   );
 };
 
@@ -306,7 +179,11 @@ const DepositTxComp: React.FC<{
     [currentStep]
   );
   return (
-    <DepositOverviewWrapper amount={state.amountToDeposit} asset={state.token}>
+    <WizardOverviewWrapper
+      title={DepositTitle}
+      amount={state.amountToDeposit}
+      asset={state.token}
+    >
       {stepperBar}
       <ControllerItem
         stepNumber={2}
@@ -316,7 +193,7 @@ const DepositTxComp: React.FC<{
         onActionClick={onSubmit}
         totalSteps={visibleStateNames.length}
       />
-    </DepositOverviewWrapper>
+    </WizardOverviewWrapper>
   );
 };
 
@@ -337,7 +214,11 @@ const DepositedTxComp: React.FC<{
     [currentStep]
   );
   return (
-    <DepositOverviewWrapper amount={state.amountToDeposit} asset={state.token}>
+    <WizardOverviewWrapper
+      title={DepositTitle}
+      amount={state.amountToDeposit}
+      asset={state.token}
+    >
       {stepperBar}
       <ControllerItem
         stepNumber={3}
@@ -349,7 +230,7 @@ const DepositedTxComp: React.FC<{
         onActionClick={() => history.push("/deposit")}
         totalSteps={visibleStateNames.length}
       />
-    </DepositOverviewWrapper>
+    </WizardOverviewWrapper>
   );
 };
 
@@ -398,7 +279,7 @@ const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
   );
 };
 
-const DepositDetail: React.FC = () => {
+export const DepositDetail: React.FC = () => {
   const match =
     useRouteMatch<{
       assetName: string | undefined;
@@ -452,5 +333,3 @@ const DepositDetail: React.FC = () => {
   }
   return <DepositDetailForAsset asset={asset} />;
 };
-
-export default withRouter(DepositDetail);

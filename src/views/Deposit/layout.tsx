@@ -10,9 +10,9 @@ import {
 } from "@chakra-ui/react";
 // import Switch from '../../components/Switch'
 // import Search from '../../components/Search'
-import DTable from './DepositTable'
+import { DepositTable } from './DepositTable'
 import { DepositAsset } from ".";
-import MyDepositsTable from "./DepositMyDepositsTable"
+import { MyDepositsTable } from "./MyDeposits"
 import { useHistory } from "react-router-dom";
 
 export interface DepositBannerProps {}
@@ -138,14 +138,12 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
             <Box
               overflowY="auto"
             >
-              <DTable activeType="All"/>
+              <DepositTable activeType="All"/>
             </Box>
           </Box>
         </VStack>  
       </Box>
-      { deposits.length > 0 && (
-        <MyDepositsTable deposits={deposits} />
-      )}
+      <MyDepositsTable deposits={deposits} />
     </Flex>
   );
 };
