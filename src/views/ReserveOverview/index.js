@@ -13,7 +13,7 @@ All dependences pulled through components found in views -> ReserveOverview
 Todos... 
 *Ready For Query Injection 
 **Not Mobile Ready, In progress 
-***Needs to be connected to markets page through router links, currently only works by manualy typing url EG: 
+***Needs to be connected to markets page through router links, currently works by manually typing url EG: 
 /reserve-overview/ETH
 */
 
