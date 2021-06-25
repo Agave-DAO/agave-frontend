@@ -1,15 +1,7 @@
 import React from "react";
-import {
-  Center,
-  Text,
-  Button,
-  VStack,
-  Box,
-  Flex,
-} from "@chakra-ui/react";
+import { Center, Text, Button, VStack, Box, Flex } from "@chakra-ui/react";
 
 export const MobileDashboardLayout: React.FC<{}> = () => {
-  
   return (
     <Flex
       align="center"
@@ -18,8 +10,6 @@ export const MobileDashboardLayout: React.FC<{}> = () => {
       w="100%"
       flexDirection={{ base: "column", lg: "row" }}
       m="auto"
-    >
-      
-    </Flex>
+    ></Flex>
   );
 };
