@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import Chart from "react-apexcharts";
-import DepositAPYCard from './APYCards/DepositAPYCard';
-import StableBorrowAPYCard from './APYCards/StableBorrowAPYCard';
-import VariableBorrowAPYCard from './APYCards/VariableBorrowAPYCard';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+// import Chart from "react-apexcharts";
+import DepositAPYCard from "./APYCards/DepositAPYCard";
+import StableBorrowAPYCard from "./APYCards/StableBorrowAPYCard";
+import VariableBorrowAPYCard from "./APYCards/VariableBorrowAPYCard";
+import { CircularProgress, CircularProgressLabel } from "@chakra-ui/react";
+import { TokenIcon } from "../../utils/icons";
+import { round2Fixed } from "../../utils/helpers";
 
+// Componete Styles  // TODO make mobile ready
 const ReserveInfoWrapper = styled.div`
   flex: 1 1 0%;
   display: flex;
@@ -12,19 +16,19 @@ const ReserveInfoWrapper = styled.div`
   margin-right: 30px;
 
   .title {
-    color: ${props => props.theme.color.textPrimary};
+    color: ${props => props.theme.color.white};
     font-size: 12px;
     font-weight: 400;
     margin-bottom: 10px;
   }
 
   .reserve-content {
-    color: ${props => props.theme.color.textPrimary};
-    background: ${props => props.theme.color.bgWhite};
+    color: ${props => props.theme.color.white};
     padding: 10px;
     flex: 1 1 0%;
     position: relative;
-    border-radius: 2px;
+    border-radius: 15px;
+    background: #007c6e;
     box-shadow: ${props => props.theme.color.boxShadow};
 
     .reserve-graph-inner {
@@ -37,7 +41,7 @@ const ReserveInfoWrapper = styled.div`
       .total-value {
         display: flex;
         min-width: 300px;
-        color: ${props => props.theme.color.textPrimary};
+        color: ${props => props.theme.color.white};
 
         &.liquidity {
           justify-content: flex-end;
@@ -110,6 +114,9 @@ const ReserveInfoWrapper = styled.div`
         .graph-inner {
           width: 220px;
           position: relative;
+          align-items: center;
+          justify-content: center;
+          display: flex;
           .token-icon {
             position: absolute;
             top: 49%;
@@ -138,9 +145,9 @@ const ReserveInfoWrapper = styled.div`
         justify-content: space-between;
         align-items: center;
         padding: 5px 10px;
-        border-radius: 2px;
+        border-radius: 5px;
         margin: 0px 15px;
-        border: 1px solid ${props => props.theme.color.bgSecondary};
+        border: 1px solid ${props => props.theme.color.white};
         min-width: 200px;
 
         .reserve-line-label {
@@ -170,7 +177,7 @@ const ReserveInfoWrapper = styled.div`
       margin: 0px auto;
 
       .reserve-bottom-block {
-        color: ${props => props.theme.color.textPrimary};
+        color: ${props => props.theme.color.white};
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -201,94 +208,91 @@ const ReserveInfoWrapper = styled.div`
   }
 `;
 
-function ReserveInfo({asset}) { 
-  const [options, setOptions] = useState({
-    chart: {
-      height: 150,
-      width: "100%",
-      type: "donut",
-      toolbar: {
-        show: false,
-      },
-    },
-    colors: ['#707070', '#A2A2A2'],
-    legend: {
-      show: false,
-    },
-    tooltip: {
-      enabled: false,
-    },
-    dataLabels: {
-      enabled: false
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '65%',
-          labels: {
-            show: false,
-          }
-        },
-        expandOnClick: false
-      }
-    },
-  });
+function ReserveInfo({ asset }) {
+  // Default Componate States
+  const [name, setName] = useState("AG");
+  const [price, setPrice] = useState("0");
+  const [liquidity, setLiquidity] = useState("0");
+  const [marketsize, setMarketsize] = useState("0");
+  const [totalBorrowed, setTotalBorrowed] = useState("0");
+  const [maxLTV, setMaxLTV] = useState(0);
+  const [liqThrsh, setLiqThrsh] = useState(0);
+  const [liqPen, setLiqPen] = useState(0);
+  const [collateral, setCollateral] = useState("no");
+  const [stable, setStable] = useState("no");
+  const [graph, setGraph] = useState("0");
 
-  const [series, setSeries] = useState([0, 0]);
-
+  // Update Componate States // TODO input real data
   useEffect(() => {
-    setSeries([asset.total_borrowed, asset.liquidity]);
-  }, [asset])
- 
+    setName(asset.name);
+    setPrice(asset.asset_price);
+    setLiquidity(asset.liquidity);
+    setMarketsize(asset.market_size);
+    setTotalBorrowed(asset.total_borrowed);
+    setMaxLTV(75);
+    setLiqThrsh(25);
+    setLiqPen(5);
+    setCollateral("No");
+    setStable("No");
+    setGraph(getGraph());
+  }, [asset]);
+
+  const getGraph = () => {
+    return round2Fixed(
+      Number((asset.total_borrowed / asset.market_size) * 100) // TODO input real data
+    );
+  };
+
+  // Component Return
   return (
     <ReserveInfoWrapper>
-      <div className="title">
-        Reserve Status & Configuration
-      </div>
+      <div className="title">Reserve Status & Configuration</div>
       <div className="reserve-content">
         <div className="reserve-graph-inner">
           <div className="total-value liquidity">
             <div className="total-value-inner">
-              <span>Available Liquidity <i className="liquidity" /></span>
-              <strong>{asset.liquidity}</strong>
-              <p>$ {asset.liquidity * asset.asset_price}</p>
+              <span>
+                Available Liquidity <i className="liquidity" />
+              </span>
+              <strong>{liquidity}</strong>
+              <p>$ {liquidity * price}</p>
             </div>
           </div>
           <div className="graph-section">
             <div className="graph-inner">
-              <Chart
-                options={options}
-                series={series}
-                type="donut"
-              />
-              <div className="token-icon">
-                <img src={asset.img} alt="DAI" height="50" width="50" />
-              </div>
+              <CircularProgress
+                value={graph}
+                size="120px"
+                color="yellow.400"
+                trackColor="green.200"
+              >
+                <CircularProgressLabel>
+                  <div className="token-icon">
+                    <TokenIcon symbol={name} />
+                  </div>
+                </CircularProgressLabel>
+              </CircularProgress>
             </div>
           </div>
           <div className="total-value borrowed">
             <div className="total-value-inner">
-              <span>Total Borrowed <i className="borrowed" /></span>
-              <strong>{asset.total_borrowed}</strong>
-              <p>$ {asset.total_borrowed * asset.asset_price}</p>
+              <span>
+                Total Borrowed <i className="borrowed" />
+              </span>
+              <strong>{totalBorrowed}</strong>
+              <p>$ {totalBorrowed * price}</p>
             </div>
           </div>
         </div>
         <div className="reserve-middle-info">
           <div className="reserve-line">
-            <div className="reserve-line-label">
-              Reserve size
-            </div>
-            <strong className="reserve-line-value">
-              $ {asset.market_size}
-            </strong>
+            <div className="reserve-line-label">Reserve size</div>
+            <strong className="reserve-line-value">$ {marketsize}</strong>
           </div>
           <div className="reserve-line">
-            <div className="reserve-line-label">
-              Utilization Rate
-            </div>
+            <div className="reserve-line-label">Utilization Rate</div>
             <strong className="reserve-line-value">
-              {Number(asset.total_borrowed / asset.market_size * 100).toFixed(2)} %
+              {Number((totalBorrowed / marketsize) * 100).toFixed(2)} %
             </strong>
           </div>
         </div>
@@ -299,44 +303,24 @@ function ReserveInfo({asset}) {
         </div>
         <div className="reserve-bottom-info">
           <div className="reserve-bottom-block">
-            <div className="reserve-bottom-title">
-              Maximum LTV
-            </div>
-            <div className="reserve-bottom-content">
-              75.00 %
-            </div>
+            <div className="reserve-bottom-title">Maximum LTV</div>
+            <div className="reserve-bottom-content">{maxLTV} %</div>
           </div>
           <div className="reserve-bottom-block">
-            <div className="reserve-bottom-title">
-              Liquidation threshold
-            </div>
-            <div className="reserve-bottom-content">
-              80.00 %
-            </div>
+            <div className="reserve-bottom-title">Liquidation threshold</div>
+            <div className="reserve-bottom-content">{liqThrsh} %</div>
           </div>
           <div className="reserve-bottom-block">
-            <div className="reserve-bottom-title">
-              Liquidation penalty
-            </div>
-            <div className="reserve-bottom-content">
-              5.00 %
-            </div>
+            <div className="reserve-bottom-title">Liquidation penalty</div>
+            <div className="reserve-bottom-content">{liqPen} %</div>
           </div>
           <div className="reserve-bottom-block">
-            <div className="reserve-bottom-title">
-              Used as collateral
-            </div>
-            <div className="reserve-bottom-content green">
-              Yes
-            </div>
+            <div className="reserve-bottom-title">Used as collateral</div>
+            <div className="reserve-bottom-content green">{collateral}</div>
           </div>
           <div className="reserve-bottom-block">
-            <div className="reserve-bottom-title">
-              Stable borrowing
-            </div>
-            <div className="reserve-bottom-content green">
-              Yes
-            </div>
+            <div className="reserve-bottom-title">Stable borrowing</div>
+            <div className="reserve-bottom-content green">{stable}</div>
           </div>
         </div>
       </div>

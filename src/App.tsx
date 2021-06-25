@@ -4,7 +4,8 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
 import { MarketsBanner, Markets } from "./views/Markets";
-// import ReserveOverview from './views/ReserveOverview';
+import ReserveOverview from "./views/ReserveOverview";
+import ReserveBanner from "./views/ReserveOverview/ReserveBanner";
 // import Dashboard from './views/Dashboard';
 import Deposit from "./views/Deposit";
 import Withdraw from "./views/Withdraw";
@@ -70,6 +71,7 @@ const App: React.FC<IAppProps> = props => {
                   <StakingBanner/>
                 </Route>
                 <Route path="/markets"><MarketsBanner/></Route>
+                <Route path="/reserve-overview/:assetName" ><ReserveBanner/></Route>
                 <Route path="/deposit">
                   <DepositBanner/>
                 </Route>
@@ -82,7 +84,7 @@ const App: React.FC<IAppProps> = props => {
             {/* prettier-ignore */}
             <Switch>
               <Route path="/markets" component={Markets} exact />
-              {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
+              <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact />
               {/* <Route path="/dashboard" component={Dashboard} exact /> */}
               <Route path="/deposit" component={Deposit} exact /> 
               <Route path="/withdraw" component={Withdraw} exact />

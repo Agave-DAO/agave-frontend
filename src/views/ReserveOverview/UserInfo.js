@@ -1,19 +1,73 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { withRouter } from 'react-router-dom';
-import Button from '../../components/Button';
-import CheckBox from '../../components/CheckBox';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { withRouter } from "react-router-dom";
+import { Switch } from "@chakra-ui/react";
 
+// Componete Styles
+const Btn = styled.div`
+  .agvebtn1 {
+    color: ${props => (!props.disabled ? props.color : `${props.color}55`)};
+    background-color: ${props => props.theme.color.white};
+    border-radius: 7px;
+
+    width: 10rem;
+    height: ${props => props.height}px;
+    padding: 0.5rem;
+    margin: 0.5rem:
+    font-family: ${props => props.theme.color.fonts};
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: ${props => props.fontSize}px;
+    cursor: pointer;
+
+    pointer-events: ${props => (!props.disabled ? undefined : "none")};
+    transition: all 0.2s ease 0s;
+    &:hover {
+      box-shadow: 0px 0px 1px 1px;
+    }
+  }
+
+  .agvebtn2 {
+    color: ${props => (!props.disabled ? props.color : `${props.color}55`)};
+    // background-color: rgba(0, 0, 0, 0);
+    border-radius: 7px;
+
+    width: 10rem;
+    height: ${props => props.height}px;
+    padding: 0.5rem;
+    margin: 0.5rem:
+    font-family: ${props => props.theme.color.fonts};
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: ${props => props.fontSize}px;
+    cursor: pointer;
+
+    pointer-events: ${props => (!props.disabled ? undefined : "none")};
+    transition: all 0.2s ease 0s;
+    &:hover {
+      color: white;
+    }
+  }
+`;
 const UserInfoWrapper = styled.div`
   width: 440px;
   display: flex;
   flex-direction: column;
 
   .userinfo-title {
+    color: ${props => props.theme.color.white};
     margin-bottom: 10px;
     font-size: 12px;
     font-weight: 400;
     width: 100%;
+  }
+
+  .userinfo-widget-title {
+    color: ${props => props.theme.color.white};
   }
 
   .userinfo-content {
@@ -21,11 +75,12 @@ const UserInfoWrapper = styled.div`
     width: 100%;
 
     .userinfo-wrapper {
-      background: ${props => props.theme.color.bgWhite};
       padding: 15px;
       margin-bottom: 15px;
       position: relative;
       box-shadow: ${props => props.theme.color.boxShadow};
+      border-radius: 15px;
+      background: #007c6e;
 
       .userinfo-wrapper-top {
         font-weight: 600;
@@ -58,15 +113,23 @@ const UserInfoWrapper = styled.div`
           .userinfo-wrapper-content-label {
             font-size: 14px;
             font-weight: 400;
+            color: ${props => props.theme.color.white};
           }
 
           .userinfo-wrapper-content-value {
             font-size: 14px;
             font-weight: 400;
+            color: ${props => props.theme.color.white};
 
             &.green {
               color: ${props => props.theme.color.green};
             }
+            &.yellow {
+              color: #ecc94b;
+            }
+          }
+          .switch {
+            padding-left: 10px;
           }
         }
       }
@@ -75,22 +138,52 @@ const UserInfoWrapper = styled.div`
 `;
 
 function UserInfo({ asset, history }) {
+  // Default Componate States
+  const [name, setName] = useState("AG");
+  const [userSupply, setUserSupply] = useState("0");
+  const [userBal, setUserBal] = useState("0");
+  const [userBorrow, setUserBorrow] = useState("0");
+  const [useAsCol, setUseAsCol] = useState(false);
+  const [health, setHealth] = useState("0");
+  const [loanVal, setLoanVal] = useState("0");
+  const [borrowAmt, setBorrowAmt] = useState("0");
+
+  // Update Componate States // TODO input real data
+  useEffect(() => {
+    setName(asset.name);
+    setUserSupply(asset.supply_balance);
+    setUserBorrow(asset.borrow_balance);
+    setUserBal(asset.wallet_balance);
+    setUseAsCol(asset.collateral);
+    setHealth(21.22);
+    setLoanVal(50);
+    setBorrowAmt(1900);
+  }, [asset]);
+
   return (
     <UserInfoWrapper>
-      <div className="userinfo-title">
-        Your information
-      </div>
+      <div className="userinfo-title">Your information</div>
       <div className="userinfo-content">
         <div className="userinfo-wrapper">
           <div className="userinfo-wrapper-top">
-            <span>Deposits</span>
+            <span className="userinfo-widget-title">Deposits</span>
             <div className="userinfo-wrapper-top-buttons">
-              <Button size="sm" variant="primary" onClick={() => history.push(`/deposit/${asset.name}`)}>
-                Deposit
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => history.push(`/withdraw/${asset.name}`)}>
-                Withdraw
-              </Button>
+              <Btn>
+                <button
+                  className="agvebtn1"
+                  onClick={() => history.push(`/deposit/${name}`)}
+                >
+                  Deposit
+                </button>
+              </Btn>
+              <Btn>
+                <button
+                  className="agvebtn2"
+                  onClick={() => history.push(`/withdraw/${name}`)}
+                >
+                  Withdraw
+                </button>
+              </Btn>
             </div>
           </div>
           <div className="userinfo-wrapper-content">
@@ -99,7 +192,7 @@ function UserInfo({ asset, history }) {
                 Your wallet balance
               </div>
               <div className="userinfo-wrapper-content-value">
-                {asset.wallet_balance} {asset.name}
+                {userBal} {name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
@@ -107,59 +200,73 @@ function UserInfo({ asset, history }) {
                 You already deposited
               </div>
               <div className="userinfo-wrapper-content-value">
-              {asset.supply_balance} {asset.name}
+                {userSupply} {name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
               <div className="userinfo-wrapper-content-label">
                 Use as collateral
               </div>
-              <div className="userinfo-wrapper-content-value green">
-                <CheckBox isChecked={asset.collateral} handleChange={() => { history.push(`/collateral/${asset.name}`)}} />
+              <div className="userinfo-wrapper-content-value yellow">
+                <div className="userinfo-wrapper-content-value">
+                  {useAsCol ? "Yes" : "No"}
+
+                  <Switch
+                    className="switch"
+                    isChecked={useAsCol}
+                    aria-label={"yes"}
+                    colorScheme="yellow"
+                    onChange={() => {
+                      history.push(`/collateral/${name}`);
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
+        {/* BORROW SECTION START */}
         <div className="userinfo-wrapper">
           <div className="userinfo-wrapper-top">
-            <span>Borrows</span>
+            <span className="userinfo-widget-title">Borrows</span>
             <div className="userinfo-wrapper-top-buttons">
-              <Button size="sm" variant="primary" onClick={() => history.push(`/borrow/${asset.name}`)}>
-                Borrow
-              </Button>
+              <Btn>
+                <button
+                  className="agvebtn1"
+                  onClick={() => history.push(`/borrow/${name}`)}
+                >
+                  Borrow
+                </button>
+              </Btn>
             </div>
           </div>
           <div className="userinfo-wrapper-content">
             <div className="userinfo-wrapper-content-row">
-              <div className="userinfo-wrapper-content-label">
-                Borrowed
-              </div>
+              <div className="userinfo-wrapper-content-label">Borrowed</div>
               <div className="userinfo-wrapper-content-value">
-                {asset.borrow_balance} {asset.name}
+                {userBorrow} {name}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
               <div className="userinfo-wrapper-content-label">
                 Health factor
               </div>
-              <div className="userinfo-wrapper-content-value green">
-                21.06
+              <div className="userinfo-wrapper-content-value yellow">
+                {health}
               </div>
             </div>
             <div className="userinfo-wrapper-content-row">
               <div className="userinfo-wrapper-content-label">
                 Loan to value
               </div>
-              <div className="userinfo-wrapper-content-value">
-                78.64 %
-              </div>
+              <div className="userinfo-wrapper-content-value">{loanVal} %</div>
             </div>
             <div className="userinfo-wrapper-content-row">
               <div className="userinfo-wrapper-content-label">
                 Available to you
               </div>
               <div className="userinfo-wrapper-content-value">
-                1904.52 {asset.name}
+                {borrowAmt} {name}
               </div>
             </div>
           </div>

@@ -44,7 +44,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
       bg="secondary.900"
       minH={{ base: "100vh", md: "100%" }}
       maxH={{ base: "100%", md: "100vh" }}
-      overflow={{ base: "visible", md: "hidden" }}
+      overflowY="auto"
     >
       <Header />
       <Box
@@ -64,6 +64,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         minW={{ base: "70vw", md: "80vw", lg: "90vw" }}
       >
         <Center
+          className={"headerMemoBox"}
           rounded={{ md: "lg" }}
           minH={{ base: "6.6rem", md: "9.6rem" }}
           mb={{ md: "3.5rem" }}
@@ -76,9 +77,17 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         </Center>
         {childrenMemo}
       </Box>
-      <Center mt="25rem" display={{ base: "none", md: "flex" }}>
-        <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
-      </Center>
+      <Box
+        position="relative"
+        bg="secondary.900"
+        maxHeight="600px"
+        min-height="600px"
+        overflowY="hidden"
+      >
+        <Center mt="25rem" display={{ base: "none", md: "flex" }}>
+          <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
+        </Center>{" "}
+      </Box>
     </Box>
   );
 };
