@@ -10,9 +10,6 @@ import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
 import daiLogo from "../../assets/image/coins/dai.svg";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 
-const getStepData = () =>
-  JSON.parse(sessionStorage.getItem("currentStep") || "{}");
-
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
   mode: string;
@@ -32,7 +29,6 @@ export const DashOverviewIntro: React.FC<{
       <InfoWeiBox
         w="100%"
         currency={asset.symbol}
-        icon={daiLogo}
         amount={amount}
         setAmount={setAmount}
         mode={mode}

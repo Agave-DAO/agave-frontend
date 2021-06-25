@@ -375,9 +375,8 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             balance={availableToStake}
             amount={amount}
             setAmount={setAmount}
-            icon={coloredAgaveLogo}
+            currency="AGVE"
             mode="stake"
-            currency="agave"
           />
         </Box>
         <Button

@@ -47,14 +47,20 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
       0
     );
   }, [assets]);
-  const depositDivider = React.useMemo(() => (<Box h="0.1rem" backgroundColor="primary.50" />), []);
+  const depositDivider = React.useMemo(
+    () => <Box h="0.1rem" backgroundColor="primary.50" />,
+    []
+  );
 
   return React.useMemo(() => {
     return (
       <Flex w="100%" flexDir="column">
-        <VStack divider={depositDivider} children={assets.map((value, i) => (
-          <AssetBalanceDisplay key={value.tokenAddress} asset={value} />
-        ))} />
+        <VStack
+          divider={depositDivider}
+          children={assets.map((value, i) => (
+            <AssetBalanceDisplay key={value.tokenAddress} asset={value} />
+          ))}
+        />
         {}
         <Flex
           alignSelf="center"
@@ -68,7 +74,7 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
         </Flex>
       </Flex>
     );
-  }, [assets, total]);
+  }, [depositDivider, assets, total]);
 };
 
 export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
