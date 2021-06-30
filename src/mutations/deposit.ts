@@ -11,31 +11,31 @@ import { useUserAccountData } from "../queries/userAccountData";
 import { useLendingReserveData } from "../queries/lendingReserveData";
 import { getChainAddresses } from "../utils/chainAddresses";
 
-export interface UseWithdrawMutationProps {
+export interface UseDepositMutationProps {
   asset: string | undefined;
   spender: string | undefined;
   amount: BigNumber | undefined;
 }
 
-export interface UseWithdrawMutationDto {
-  withdrawMutation: UseMutationResult<
+export interface UseDepositMutationDto {
+  depositMutation: UseMutationResult<
     BigNumber | undefined,
     unknown,
     void,
     unknown
   >;
-  withdrawMutationKey: readonly [
+  depositMutationKey: readonly [
     ...ReturnType<typeof useUserAssetAllowance.buildKey>,
-    "withdraw",
+    "deposit",
     BigNumber | undefined
   ];
 }
 
-export const useWithdrawMutation = ({
+export const useDepositMutation = ({
   asset,
   spender,
   amount,
-}: UseWithdrawMutationProps): UseWithdrawMutationDto => {
+}: UseDepositMutationProps): UseDepositMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
 
@@ -55,11 +55,11 @@ export const useWithdrawMutation = ({
     asset,
     spender ?? undefined
   );
-  const withdrawnQueryKey = [...allowanceQueryKey, "withdraw"] as const;
+  const depositedQueryKey = [...allowanceQueryKey, "deposit"] as const;
 
-  const withdrawMutationKey = [...withdrawnQueryKey, amount] as const;
-  const withdrawMutation = useMutation(
-    withdrawMutationKey,
+  const depositMutationKey = [...depositedQueryKey, amount] as const;
+  const depositMutation = useMutation(
+    depositMutationKey,
     async () => {
       if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
@@ -71,18 +71,18 @@ export const useWithdrawMutation = ({
         spender,
         library.getSigner()
       );
-      const withdraw = lendingContract.withdraw(asset, amount, account);
-      const withdrawConfirmation = await usingProgressNotification(
-        "Awaiting withdraw approval",
-        "Please commit the transaction for withdrawal.",
+      const deposit = lendingContract.deposit(asset, amount, account, 0);
+      const depositConfirmation = await usingProgressNotification(
+        "Awaiting deposit approval",
+        "Please commit the transaction for deposit.",
         "info",
-        withdraw
+        deposit
       );
       const receipt = await usingProgressNotification(
-        "Awaiting withdrawal confirmation",
+        "Awaiting deposit confirmation",
         "Please wait while the blockchain processes your transaction",
         "info",
-        withdrawConfirmation.wait()
+        depositConfirmation.wait()
       );
       return receipt.status ? amount : undefined;
     },
@@ -93,8 +93,8 @@ export const useWithdrawMutation = ({
           queryClient.invalidateQueries(assetBalanceQueryKey),
           queryClient.invalidateQueries(userAccountDataQueryKey),
           queryClient.invalidateQueries(allowanceQueryKey),
-          queryClient.invalidateQueries(withdrawnQueryKey),
-          queryClient.invalidateQueries(withdrawMutationKey),
+          queryClient.invalidateQueries(depositedQueryKey),
+          queryClient.invalidateQueries(depositMutationKey),
           asset && account && chainAddrs && chainId && library
             ? useLendingReserveData
                 .fetchQueryDefined(
@@ -117,5 +117,5 @@ export const useWithdrawMutation = ({
     }
   );
 
-  return { withdrawMutation, withdrawMutationKey };
+  return { depositMutation, depositMutationKey };
 };

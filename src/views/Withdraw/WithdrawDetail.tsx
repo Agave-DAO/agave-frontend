@@ -14,71 +14,70 @@ import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { formatEther } from "ethers/lib/utils";
-import {
-  useApprovalMutation,
-  UseApprovalMutationProps,
-} from "../../mutations/approval";
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import {
-  useDepositMutation,
-  UseDepositMutationProps,
-} from "../../mutations/deposit";
+  useWithdrawMutation,
+  UseWithdrawMutationProps,
+} from "../../mutations/withdraw";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useLendingReserveData } from "../../queries/lendingReserveData";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
 }
 
 interface AmountSelectedState extends InitialState {
-  amountToDeposit: BigNumber;
+  amountToWithdraw: BigNumber;
 }
 
-interface DepositTXState extends AmountSelectedState {
+interface WithdrawTXState extends AmountSelectedState {
   // approvalTXHash: string | undefined;
 }
 
-interface DepositedTXState extends DepositTXState {
-  // depositTXHash: string;
+interface WithdrawnTXState extends WithdrawTXState {
+  // withdrawTXHash: string;
 }
 
-type DepositState = OneTaggedPropertyOf<{
+type WithdrawState = OneTaggedPropertyOf<{
   init: InitialState;
-  amountSelected: AmountSelectedState;
-  depositTx: DepositTXState;
-  depositedTx: DepositedTXState;
+  withdrawTx: WithdrawTXState;
+  withdrawnTx: WithdrawnTXState;
 }>;
 
-function createState<SelectedState extends PossibleTags<DepositState>>(
+function createState<SelectedState extends PossibleTags<WithdrawState>>(
   type: SelectedState,
-  value: DepositState[SelectedState]
-): DepositState {
+  value: WithdrawState[SelectedState]
+): WithdrawState {
   return {
     type,
     [type]: value,
   } as any;
 }
 
-const stateNames: Record<PossibleTags<DepositState>, string> = {
+const stateNames: Record<PossibleTags<WithdrawState>, string> = {
   init: "Token",
-  amountSelected: "Approval",
-  depositTx: "Deposit",
-  depositedTx: "Deposited",
+  withdrawTx: "Withdraw",
+  withdrawnTx: "Withdrawn",
 };
 
-const visibleStateNames: ReadonlyArray<PossibleTags<DepositState>> = ["amountSelected", "depositTx", "depositedTx"] as const;
+const visibleStateNames: ReadonlyArray<PossibleTags<WithdrawState>> = [
+  "withdrawTx",
+  "withdrawnTx",
+] as const;
 
-const DepositTitle = "Deposit overview";
+const WithdrawTitle = "Withdraw overview";
 
 const InitialComp: React.FC<{
   state: InitialState;
-  dispatch: (nextState: DepositState) => void;
+  dispatch: (nextState: WithdrawState) => void;
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
-  const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
+  const { data: reserve } = useLendingReserveData(state.token.tokenAddress);
+  const { data: userAgBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const onSubmit = React.useCallback(
-    amountToDeposit =>
-      dispatch(createState("amountSelected", { amountToDeposit, ...state })),
+    amountToWithdraw =>
+      dispatch(createState("withdrawTx", { amountToWithdraw, ...state })),
     [state, dispatch]
   );
   return (
@@ -86,36 +85,36 @@ const InitialComp: React.FC<{
       asset={state.token}
       amount={amount}
       setAmount={setAmount}
-      mode="deposit"
+      mode="withdraw"
       onSubmit={onSubmit}
-      balance={userBalance}
+      balance={userAgBalance}
     />
   );
 };
 
-const AmountSelectedComp: React.FC<{
-  state: AmountSelectedState;
-  dispatch: (nextState: DepositState) => void;
+const WithdrawTxComp: React.FC<{
+  state: WithdrawTXState;
+  dispatch: (nextState: WithdrawState) => void;
 }> = ({ state, dispatch }) => {
   const chainAddresses = useChainAddresses();
-  const approvalArgs = React.useMemo<UseApprovalMutationProps>(
+  const withdrawArgs = React.useMemo<UseWithdrawMutationProps>(
     () => ({
       asset: state.token.tokenAddress,
-      amount: state.amountToDeposit,
+      amount: state.amountToWithdraw,
       spender: chainAddresses?.lendingPool,
     }),
     [state, chainAddresses?.lendingPool]
   );
   const {
-    approvalMutation: { mutateAsync },
-  } = useApprovalMutation(approvalArgs);
+    withdrawMutation: { mutateAsync },
+  } = useWithdrawMutation(withdrawArgs);
   const onSubmit = React.useCallback(() => {
     mutateAsync()
-      .then(() => dispatch(createState("depositTx", { ...state })))
+      .then(() => dispatch(createState("withdrawnTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
       .catch(e => dispatch(createState("init", state)));
   }, [state, dispatch, mutateAsync]);
-  const currentStep: PossibleTags<DepositState> = "amountSelected";
+  const currentStep: PossibleTags<WithdrawState> = "withdrawTx";
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -128,16 +127,16 @@ const AmountSelectedComp: React.FC<{
   );
   return (
     <WizardOverviewWrapper
-      title={DepositTitle}
-      amount={state.amountToDeposit}
+      title={WithdrawTitle}
+      amount={state.amountToWithdraw}
       asset={state.token}
     >
       {stepperBar}
       <ControllerItem
         stepNumber={1}
-        stepName="Approval"
-        stepDesc="Please submit to approve"
-        actionName="Approve"
+        stepName="Withdraw"
+        stepDesc="Please submit to withdraw"
+        actionName="Withdraw"
         onActionClick={onSubmit}
         totalSteps={visibleStateNames.length}
       />
@@ -145,29 +144,12 @@ const AmountSelectedComp: React.FC<{
   );
 };
 
-const DepositTxComp: React.FC<{
-  state: DepositTXState;
-  dispatch: (nextState: DepositState) => void;
+const WithdrawnTxComp: React.FC<{
+  state: WithdrawnTXState;
+  dispatch: (nextState: WithdrawState) => void;
 }> = ({ state, dispatch }) => {
-  const chainAddresses = useChainAddresses();
-  const depositArgs = React.useMemo<UseDepositMutationProps>(
-    () => ({
-      asset: state.token.tokenAddress,
-      amount: state.amountToDeposit,
-      spender: chainAddresses?.lendingPool,
-    }),
-    [state, chainAddresses?.lendingPool]
-  );
-  const {
-    depositMutation: { mutateAsync },
-  } = useDepositMutation(depositArgs);
-  const onSubmit = React.useCallback(() => {
-    mutateAsync()
-      .then(() => dispatch(createState("depositedTx", { ...state })))
-      // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
-  }, [state, dispatch, mutateAsync]);
-  const currentStep: PossibleTags<DepositState> = "depositTx";
+  const history = useHistory();
+  const currentStep: PossibleTags<WithdrawState> = "withdrawnTx";
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -180,86 +162,47 @@ const DepositTxComp: React.FC<{
   );
   return (
     <WizardOverviewWrapper
-      title={DepositTitle}
-      amount={state.amountToDeposit}
+      title={WithdrawTitle}
+      amount={state.amountToWithdraw}
       asset={state.token}
     >
       {stepperBar}
       <ControllerItem
         stepNumber={2}
-        stepName="Deposit"
-        stepDesc="Please submit to deposit"
-        actionName="Deposit"
-        onActionClick={onSubmit}
-        totalSteps={visibleStateNames.length}
-      />
-    </WizardOverviewWrapper>
-  );
-};
-
-const DepositedTxComp: React.FC<{
-  state: DepositedTXState;
-  dispatch: (nextState: DepositState) => void;
-}> = ({ state, dispatch }) => {
-  const history = useHistory();
-  const currentStep: PossibleTags<DepositState> = "depositedTx";
-  const stepperBar = React.useMemo(
-    () => (
-      <StepperBar
-        states={visibleStateNames}
-        currentState={currentStep}
-        stateNames={stateNames}
-      />
-    ),
-    [currentStep]
-  );
-  return (
-    <WizardOverviewWrapper
-      title={DepositTitle}
-      amount={state.amountToDeposit}
-      asset={state.token}
-    >
-      {stepperBar}
-      <ControllerItem
-        stepNumber={3}
-        stepName="Deposited"
-        stepDesc={`Deposit of ${formatEther(state.amountToDeposit)} ${
+        stepName="Withdrawn"
+        stepDesc={`Withdraw of ${formatEther(state.amountToWithdraw)} ${
           state.token.symbol
         } successful`}
         actionName="Finish"
-        onActionClick={() => history.push("/deposit")}
+        onActionClick={() => history.push("/withdraw")}
         totalSteps={visibleStateNames.length}
       />
     </WizardOverviewWrapper>
   );
 };
 
-const DepositStateMachine: React.FC<{
-  state: DepositState;
-  setState: (newState: DepositState) => void;
+const WithdrawStateMachine: React.FC<{
+  state: WithdrawState;
+  setState: (newState: WithdrawState) => void;
 }> = ({ state, setState }) => {
   switch (state.type) {
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
-    case "amountSelected":
-      return (
-        <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
-      );
-    case "depositTx":
-      return <DepositTxComp state={state.depositTx} dispatch={setState} />;
-    case "depositedTx":
-      return <DepositedTxComp state={state.depositedTx} dispatch={setState} />;
+    case "withdrawTx":
+      return <WithdrawTxComp state={state.withdrawTx} dispatch={setState} />;
+    case "withdrawnTx":
+      return <WithdrawnTxComp state={state.withdrawnTx} dispatch={setState} />;
   }
 };
 
-const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
+const WithdrawDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,
 }) => {
   const dash = React.useMemo(
     () => (asset ? <DepositDash token={asset} /> : undefined),
     [asset]
   );
-  const [depositState, setDepositState] = React.useState<DepositState>(
+  const [withdrawState, setWithdrawState] = React.useState<WithdrawState>(
     createState("init", { token: asset })
   );
 
@@ -273,13 +216,16 @@ const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
         rounded="lg"
         padding="1em"
       >
-        <DepositStateMachine state={depositState} setState={setDepositState} />
+        <WithdrawStateMachine
+          state={withdrawState}
+          setState={setWithdrawState}
+        />
       </Center>
     </VStack>
   );
 };
 
-export const DepositDetail: React.FC = () => {
+export const WithdrawDetail: React.FC = () => {
   const match =
     useRouteMatch<{
       assetName: string | undefined;
@@ -320,7 +266,7 @@ export const DepositDetail: React.FC = () => {
             color="primary.100"
             bg="primary.500"
             onClick={() =>
-              history.length > 0 ? history.goBack() : history.push("/deposit")
+              history.length > 0 ? history.goBack() : history.push("/withdraw")
             }
             size="xl"
             padding="1rem"
@@ -331,5 +277,5 @@ export const DepositDetail: React.FC = () => {
       </Box>
     );
   }
-  return <DepositDetailForAsset asset={asset} />;
+  return <WithdrawDetailForAsset asset={asset} />;
 };

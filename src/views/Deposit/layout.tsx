@@ -10,9 +10,9 @@ import {
 } from "@chakra-ui/react";
 // import Switch from '../../components/Switch'
 // import Search from '../../components/Search'
-import DTable from './DepositTable'
+import { DepositTable } from "./DepositTable";
 import { DepositAsset } from ".";
-import MyDepositsTable from "./DepositMyDepositsTable"
+import { MyDepositsTable } from "./MyDeposits";
 import { useHistory } from "react-router-dom";
 
 export interface DepositBannerProps {}
@@ -20,34 +20,43 @@ export interface DepositBannerProps {}
 export interface DepositLayoutProps {
   activeValue: string;
   setActiveValue: (active: any) => void;
-  depositedList: DepositAsset[] | undefined
+  depositedList: DepositAsset[] | undefined;
 }
 
-export const DepositBanner: React.FC<{}> = () =>  {
+export const DepositBanner: React.FC<{}> = () => {
   const history = useHistory();
   return (
-    <Center
-      width="100%"
-      justifyContent="space-between"
-    >
+    <Center width="100%" justifyContent="space-between">
       <Text
         fontWeight="bold"
         color="white"
         fontSize={{ base: "1.8rem", md: "2.4rem" }}
         onClick={() => history.push("/deposit")}
       >
-      	Deposit
+        Deposit
       </Text>
       <Text>
-        Need your Polygon (Matic) or BSC assets on xDai? Please visit <Link fontWeight="bold">xpollinate.io</Link>
+        Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
+        <Link fontWeight="bold">xpollinate.io</Link>
       </Text>
     </Center>
   );
 };
 
 export const DepositLayout: React.FC<DepositLayoutProps> = props => {
-  const deposits: DepositAsset[] = props.depositedList ? props.depositedList : []
-	return (
+  const deposits: DepositAsset[] = React.useMemo(
+    () => props.depositedList ?? [],
+    [props.depositedList]
+  );
+  const depositTable = React.useMemo(
+    () => <DepositTable activeType="All" />,
+    []
+  );
+  const myDeposits = React.useMemo(
+    () => <MyDepositsTable deposits={deposits} />,
+    [deposits]
+  );
+  return (
     <Flex
       flexDirection={{ base: "column", md: "row" }}
       px={{ base: "2.4rem", md: "0" }}
@@ -66,13 +75,19 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
         color="white"
       >
         <VStack
-          divider={<StackDivider borderColor="#36CFA2" h="0.188rem" backgroundColor="#36CFA2"/>}
+          divider={
+            <StackDivider
+              borderColor="#36CFA2"
+              h="0.188rem"
+              backgroundColor="#36CFA2"
+            />
+          }
           spacing={4}
-          w='100%'
+          w="100%"
           align="stretch"
           flexDirection="column"
         >
-          <Box 
+          <Box
             h={{
               base: 100, // 0-48em
               md: 45, // 48em-80em,
@@ -80,12 +95,12 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
             }}
             ml={{
               md: 27,
-              xl: 27
+              xl: 27,
             }}
             mb={{
               base: 5,
               md: 5,
-              xl: 0
+              xl: 0,
             }}
             maxW={{
               base: "100%", // 0-48em
@@ -102,12 +117,10 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               justifyContent="center"
               h="100%"
             >
-              <Text>
-                Available to deposit
-              </Text>
+              <Text>Available to deposit</Text>
             </Box>
           </Box>
-          <Box 
+          <Box
             w="100%"
             pl={27}
             pr={27}
@@ -117,12 +130,7 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
             justifyContent="space-between"
             flexGrow={2}
           >
-            <Box
-              d="flex"
-              flexDir="row"
-              w="100%"
-              justifyContent="space-between"
-            >
+            <Box d="flex" flexDir="row" w="100%" justifyContent="space-between">
               {/* <Switch 
                 values={['All', 'Stable Coins']}
                 activeValue={props.activeValue}
@@ -135,17 +143,11 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
                 h={26}
               /> */}
             </Box>
-            <Box
-              overflowY="auto"
-            >
-              <DTable activeType="All"/>
-            </Box>
+            <Box overflowY="auto">{depositTable}</Box>
           </Box>
-        </VStack>  
+        </VStack>
       </Box>
-      { deposits.length > 0 && (
-        <MyDepositsTable deposits={deposits} />
-      )}
+      {myDeposits}
     </Flex>
   );
 };

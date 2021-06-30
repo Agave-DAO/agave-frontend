@@ -71,26 +71,24 @@ export const useApprovalMutation = ({
             approvalResetConfirmation.wait()
           );
         }
-        {
-          const approval = tokenContract.approve(spender, amount);
-          const approvalConfirmation = await usingProgressNotification(
-            "Awaiting spend approval",
-            "Please commit the transaction for ERC20 approval.",
-            "info",
-            approval
-          );
-          await usingProgressNotification(
-            "Awaiting approval confirmation",
-            "Please wait while the blockchain processes your transaction",
-            "info",
-            approvalConfirmation.wait()
-          );
-        }
-      }
 
-      const tx = await tokenContract.approve(spender, amount);
-      const receipt = await tx.wait();
-      return receipt.status ? amount : undefined;
+        const approval = tokenContract.approve(spender, amount);
+        const approvalConfirmation = await usingProgressNotification(
+          "Awaiting spend approval",
+          "Please commit the transaction for ERC20 approval.",
+          "info",
+          approval
+        );
+        const receipt = await usingProgressNotification(
+          "Awaiting approval confirmation",
+          "Please wait while the blockchain processes your transaction",
+          "info",
+          approvalConfirmation.wait()
+        );
+        return receipt.status ? amount : undefined;
+      } else {
+        return amount;
+      }
     },
     {
       onSuccess: async (result, vars, context) => {

@@ -31,7 +31,7 @@ const PercentageView: React.FC<{
   );
 };
 
-const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
+const WithdrawAPYView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
   const query = useDepositAPY(tokenAddress);
@@ -68,7 +68,7 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   }, [balanceNumber, balanceUSD]);
 };
 
-export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
+export const WithdrawTable: React.FC<{ activeType: string }> = ({ activeType }) => {
   const history = useHistory();
   interface AssetRecord {
     symbol: string;
@@ -100,7 +100,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
             height="100%"
             alignItems={"center"}
             onClick={() => {
-              history.push(`/deposit/${value}`);
+              history.push(`/withdraw/${value}`);
             }}
           >
             <Center width="4rem">
@@ -109,7 +109,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
             <Box w="1rem"></Box>
             <Box>
               <Text>
-                <Link to={`/deposit/${value}`}>{value}</Link>
+                <Link to={`/withdraw/${value}`}>{value}</Link>
               </Text>
             </Box>
           </Flex>
@@ -126,7 +126,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
         Header: "APY",
         accessor: row => row.tokenAddress,
         Cell: (({ value }) => (
-          <DepositAPYView tokenAddress={value} />
+          <WithdrawAPYView tokenAddress={value} />
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
     ],
