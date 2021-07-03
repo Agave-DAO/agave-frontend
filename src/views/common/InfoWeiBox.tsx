@@ -25,7 +25,7 @@ const InfoWeiBox: React.FC<
           Available to {mode}
         </Text>
         <Text color="white" fontSize="inherit" textTransform="capitalize">
-          {balance && FixedNumber.fromValue(balance, 18).toString()} {currency}
+          {balance && FixedNumber.fromValue(balance, 18).toString().slice(0,8)} {currency}
         </Text>
       </Flex>
       <WeiBox
