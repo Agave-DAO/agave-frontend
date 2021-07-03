@@ -42,9 +42,7 @@ export const DashboardEmptyState: React.FC<{
         marginBottom="2.8rem"
         fontSize={{ base: fontSizes.md, md: "inherit" }}
       >
-        {type === EMPTY_TYPE.Deposit
-          ? "There will be a list of all the assets you have deposited. For now, it’s empty since you have not deposited."
-          : "There will be a list of all the assets you have borrowed. For now, it’s empty since you have not borrowed."}
+        "There will be a list of all the assets you have {type}ed. For now, it’s empty since you have not {type}ed."
       </Text>
       <Button
         mt="2.4rem"
@@ -57,7 +55,7 @@ export const DashboardEmptyState: React.FC<{
         fontSize={fontSizes.md}
         onClick={onClick}
       >
-        {type === EMPTY_TYPE.Deposit ? "Deposit now" : "Borrow now"}
+        "{type} now"
       </Button>
     </Center>
   );
