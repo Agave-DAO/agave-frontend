@@ -37,7 +37,7 @@ function Header() {
       </Navbar.Brand>
       <Navbar.Links>
         <NavTabLink w="14rem" exact to="/dashboard" fontWeight="bold">
-          MY DASHBOARD
+          DASHBOARD
         </NavTabLink>
         <NavTabLink exact to="/markets" fontWeight="bold">
           MARKETS

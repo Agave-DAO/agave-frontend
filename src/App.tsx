@@ -7,7 +7,8 @@ import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
 import Dashboard from './views/Dashboard';
 import { DashboardBanner } from "./views/Dashboard/layout";
-import { Deposit, DepositBanner } from "./views/Deposit";
+import { Deposit } from "./views/Deposit";
+import { DepositBanner } from "./views/Deposit/layout"
 import { DepositDetail } from "./views/Deposit/DepositDetail";
 import { Withdraw, WithdrawBanner } from "./views/Withdraw";
 import { WithdrawDetail } from "./views/Withdraw/WithdrawDetail";

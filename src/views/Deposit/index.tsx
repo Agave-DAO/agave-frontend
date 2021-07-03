@@ -3,8 +3,6 @@ import { BigNumber } from "ethers";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { DepositLayout } from "./layout";
 
-export { DepositBanner } from "./layout";
-
 export interface DepositAsset {
   symbol: string;
   aSymbol: string;
@@ -15,7 +13,7 @@ export interface DepositAsset {
   daiWeiPriceTotal: BigNumber | null;
 }
 
-export const Deposit: React.FC = () => {
+export function Deposit() {
   const [activeValue, setActiveValue] =
     React.useState<"All" | "Stable Coins">("All");
   const balances = useUserDepositAssetBalancesDaiWei();
@@ -34,3 +32,5 @@ export const Deposit: React.FC = () => {
     [activeValue, setActiveValue, depositedList]
   );
 }
+
+export default Deposit;

@@ -47,7 +47,7 @@ export const DashboardBanner: React.FC<{}> = () => {
             color="white"
             fontSize={{ base: "1.8rem", md: "2.4rem" }}
           >
-            My Dashboard
+            Dashboard
           </Text>
         </Center>
       )}
