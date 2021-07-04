@@ -1,8 +1,7 @@
 import React from "react";
-import { BigNumber, ethers } from "ethers";
 import { DashboardLayout } from "./layout";
-import { useUserDepositAssetBalancesDaiWei, useUserDepositAssetBalances } from "../../queries/userAssets";
-import { DepositAsset } from "../Deposit";
+import { useUserDepositAssetBalances, useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
+import { BigNumber, ethers } from "ethers";
 
 export interface AssetData {
   tokenAddress: string;
@@ -11,6 +10,7 @@ export interface AssetData {
 }
 
 function Dashboard() {
+  const balancesDaiWei = useUserDepositAssetBalancesDaiWei();
   const balances = useUserDepositAssetBalances();
   const depositedList: AssetData[] = React.useMemo(
     () => balances?.data?.filter(asset => !asset.balance.isZero()) ?? [],
@@ -18,26 +18,22 @@ function Dashboard() {
   );
   
   const balance = React.useMemo(() => {
-    return depositedList.reduce(
+    return balancesDaiWei.data?.reduce(
       (memo, next) =>
         memo +
-        (Number(ethers.utils.formatEther(next.balance ?? 0)) ?? 0),
+        (Number(ethers.utils.formatEther(next.daiWeiPriceTotal ?? 0)) ?? 0),
       0
     );
-  }, [depositedList]);
-
-  console.log('>>>', balance)
-  // const b = useUserDepositAssetBalancesDaiWei()
-  // console.log(b)
-
+  }, [balancesDaiWei]);
   
   return (
     <DashboardLayout
       balance={balance}
       borrowed={undefined}
       collateral={undefined}
-      healthFactor={undefined}
+      borrows={undefined}
       deposits={depositedList}
+      healthFactor={undefined}
     />
   );
 }

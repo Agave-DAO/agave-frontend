@@ -26,15 +26,16 @@ import { AssetData } from ".";
 
 interface DashboardProps {
   balance: number | undefined;
-  borrowed: string | undefined;
-  collateral: string | undefined;
-  healthFactor: string | undefined;
+  borrowed: number | undefined;
+  borrows: AssetData[] | undefined;
+  collateral: number | undefined;
   deposits: AssetData[];
+  healthFactor: number | undefined;
 }
 
 const MODAL_TYPES = {
-  AB: "AB",
-  HF: "HF",
+  APROXIMATE_BALANCE: "APROXIMATE_BALANCE",
+  HEALTH_FACTOR: "HEALTH_FACTOR",
 };
 
 export const DashboardBanner: React.FC<{}> = () => {
@@ -94,7 +95,7 @@ const UpperBox: React.FC<{ title: string } & CenterProps> = ({
   );
 };
 
-export const ModalAPBalance: React.FC<{}> = () => {
+const ModalAPBalance: React.FC<{}> = () => {
   return (
     <>
       <ModalHeader fontSize="1.8rem" fontWeight="bold">
@@ -116,7 +117,7 @@ export const ModalAPBalance: React.FC<{}> = () => {
   );
 };
 
-export const ModalHFactor: React.FC<{
+const ModalHFactor: React.FC<{
   currentLTV?: string;
   maximumLTV?: string;
   threshold?: string;
@@ -155,6 +156,7 @@ export const ModalHFactor: React.FC<{
     </>
   );
 };
+
 const ModalComponent: React.FC<{
   isOpen: boolean;
   mtype: string;
@@ -187,8 +189,8 @@ const ModalComponent: React.FC<{
               minW={{ base: "80%", md: "30vw" }}
               minH={{ base: "50%", md: "30vh" }}
             >
-              {mtype === MODAL_TYPES.AB && <ModalAPBalance />}
-              {mtype === MODAL_TYPES.HF && <ModalHFactor />}
+              {mtype === MODAL_TYPES.APROXIMATE_BALANCE && <ModalAPBalance />}
+              {mtype === MODAL_TYPES.HEALTH_FACTOR && <ModalHFactor />}
               <ModalFooter>
                 <Button
                   w={{ base: "100%", md: "60%" }}
@@ -214,8 +216,19 @@ const ModalComponent: React.FC<{
 
 export const DashboardLayout: React.FC<DashboardProps> = props => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [modal_type, setModal] = useState(MODAL_TYPES.AB);
+  const [modal_type, setModal] = useState(MODAL_TYPES.APROXIMATE_BALANCE);
   const history = useHistory();
+
+  const onSubmitAP = React.useCallback(() => {
+    setModal(MODAL_TYPES.APROXIMATE_BALANCE);
+    onOpen();
+  },[onOpen])
+
+  const onSubmitHF = React.useCallback(() => {
+    setModal(MODAL_TYPES.HEALTH_FACTOR);
+    onOpen();
+  },[onOpen])
+
   return (
     <Flex flexDirection="column">
       <Flex
@@ -240,14 +253,11 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
                 right="0"
                 ml="0.5rem"
                 transform="scale(0.75)"
-                onOpen={() => {
-                  setModal(MODAL_TYPES.AB);
-                  onOpen();
-                }}
+                onOpen={onSubmitAP}
               />
             </HStack>
             <Text fontWeight="bold" textAlign="left" mt="0.5em">
-              {props.balance ?? "-"}
+              {props.balance?.toFixed(6) ?? "-"}
             </Text>
           </VStack>
         </UpperBox>
@@ -288,10 +298,7 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
                   right="0"
                   ml="0.5rem"
                   transform="scale(0.75)"
-                  onOpen={() => {
-                    setModal(MODAL_TYPES.HF);
-                    onOpen();
-                  }}
+                  onOpen={onSubmitHF}
                 />
               </HStack>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
@@ -301,9 +308,9 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
           </Box>
         </UpperBox>
       </Flex>
-      <HStack spacing="0.2rem" mt="2rem">
+      <HStack spacing="2rem" mt="2rem" alignItems="flex-start">
         {props.deposits?.length > 0 ? (
-          <DashboardTable mode={DashboardTableType.Deposit} />
+          <DashboardTable assets={props.deposits} mode={DashboardTableType.Deposit} />
         ) : (
           <DashboardEmptyState
             onClick={() => {

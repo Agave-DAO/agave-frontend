@@ -1,8 +1,6 @@
 import React from "react";
 import { ethers } from "ethers";
 import { CellProps, Column, Renderer } from "react-table";
-import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
-import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useDepositAPY } from "../../queries/depositAPY";
 import {
   BasicTableRenderer,
@@ -12,87 +10,81 @@ import {
 import { Box, Text } from "@chakra-ui/layout";
 import { Button, Flex, Switch } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
-import { useUserAssetBalance } from "../../queries/userAssets";
 import ColoredText from "../../components/ColoredText";
+import { AssetData } from ".";
+import { useProtocolReserveData } from "../../queries/protocolReserveData";
+import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 
 export enum DashboardTableType {
-  Deposit = "DEP",
-  Borrow = "BORR",
+  Deposit = "Deposit",
+  Borrow = "Borrow",
 }
 
-const DashboardTable: React.FC<{ mode: DashboardTableType }> = ({ mode }) => {
-  interface AssetRecord {
-    symbol: string;
-    tokenAddress: string;
-    aTokenAddress: string;
+const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
+  tokenAddress,
+}) => {
+  const { data: reserveProtocolData } = useProtocolReserveData(tokenAddress);
+  const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
+  
+  return React.useMemo(() => {
+    if (variableDepositAPY === undefined) {
+      return <>-</>;
+    }
+    
+    return <PercentageView value={(variableDepositAPY.toUnsafeFloat() * 100)} />;
+  }, [variableDepositAPY]);
+};
+
+const BalanceView: React.FC<{ balanceBN: string }> = ({
+  balanceBN,
+}) => {
+  const balance = ethers.utils.formatEther(balanceBN ?? 0)
+  return React.useMemo(() => {
+    return (
+      <Box minWidth="8rem" textAlign="left">
+        <Text p={3}>{balance ?? "-"}</Text>
+      </Box>
+    );
+  }, [balance]);
+};
+
+const CollateralView: React.FC<{ tokenAddress: string }> = ({
+  tokenAddress
+}) => {
+  const { data: reserveConfiguration } = useProtocolReserveConfiguration(tokenAddress);
+  const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
+
+  return React.useMemo(() => {
+    return (
+      <Switch size="sm" colorScheme="gray" isDisabled={isCollateralized} />
+    );
+  }, [isCollateralized]);
+};
+
+const PercentageView: React.FC<{
+  lowerIsBetter?: boolean;
+  positiveOnly?: boolean;
+  value: number;
+}> = ({ lowerIsBetter, value, positiveOnly }) => {
+  if (lowerIsBetter) {
+    throw new Error('PercentageView Mode "lowerIsBetter" not yet supported');
   }
+  if (positiveOnly) {
+    throw new Error('PercentageView Mode "positiveOnly" not yet supported');
+  }
+  return (
+    <Text fontWeight="bold" color={value >= 0 ? "yellow.100" : "red.600"}>
+      % {value * 100}
+    </Text>
+  );
+};
 
-  const reserves = useAllReserveTokensWithData();
-  const assetRecords = React.useMemo(() => {
-    return (
-      reserves.data?.map(
-        ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
-          symbol,
-          tokenAddress,
-          aTokenAddress,
-        })
-      ) ?? []
-    );
-  }, [reserves]);
+const DashboardTable: React.FC<{ 
+  mode: DashboardTableType;
+  assets: AssetData[];
+}> = ({ mode, assets }) => {
 
-  const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
-    tokenAddress,
-  }) => {
-    const query = useDepositAPY(tokenAddress);
-    return React.useMemo(() => {
-      if (query.data === undefined) {
-        return <>-</>;
-      }
-
-      return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
-    }, [query.data]);
-  };
-
-  const BalanceView: React.FC<{ tokenAddress: string }> = ({
-    tokenAddress,
-  }) => {
-    const price = useAssetPriceInDai(tokenAddress);
-    const balance = useUserAssetBalance(tokenAddress);
-    const balanceNumber = balance.data
-      ? Number(ethers.utils.formatEther(balance.data))
-      : undefined;
-    const balanceUSD = balanceNumber
-      ? (Number(price.data) * balanceNumber).toFixed(2)
-      : "-";
-
-    return React.useMemo(() => {
-      return (
-        <Box minWidth="8rem" textAlign="left">
-          <Text p={3}>{balanceUSD ?? "-"}</Text>
-        </Box>
-      );
-    }, [balanceUSD]);
-  };
-
-  const PercentageView: React.FC<{
-    lowerIsBetter?: boolean;
-    positiveOnly?: boolean;
-    value: number;
-  }> = ({ lowerIsBetter, value, positiveOnly }) => {
-    if (lowerIsBetter) {
-      throw new Error('PercentageView Mode "lowerIsBetter" not yet supported');
-    }
-    if (positiveOnly) {
-      throw new Error('PercentageView Mode "positiveOnly" not yet supported');
-    }
-    return (
-      <Text fontWeight="bold" color={value >= 0 ? "yellow.100" : "red.600"}>
-        % {value * 100}
-      </Text>
-    );
-  };
-
-  const columns: Column<AssetRecord>[] = [
+  const columns: Column<AssetData>[] = [
     {
       Header: mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
       accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
@@ -106,13 +98,13 @@ const DashboardTable: React.FC<{ mode: DashboardTableType }> = ({ mode }) => {
             <Text>{value}</Text>
           </Box>
         </Flex>
-      )) as Renderer<CellProps<AssetRecord, string>>,
+      )) as Renderer<CellProps<AssetData, string>>,
     },
     {
       Header: mode === DashboardTableType.Borrow ? "Borrowed" : "Deposited",
-      accessor: row => row.tokenAddress,
-      Cell: (({ value }) => <BalanceView tokenAddress={value} />) as Renderer<
-        CellProps<AssetRecord, string>
+      accessor: row => row.balance,
+      Cell: (({ value }) => <BalanceView balanceBN={value} />) as Renderer<
+        CellProps<AssetData, string>
       >,
     },
     {
@@ -120,7 +112,7 @@ const DashboardTable: React.FC<{ mode: DashboardTableType }> = ({ mode }) => {
       accessor: row => row.tokenAddress,
       Cell: (({ value }) => (
         <DepositAPYView tokenAddress={value} />
-      )) as Renderer<CellProps<AssetRecord, string>>,
+      )) as Renderer<CellProps<AssetData, string>>,
     },
     {
       Header: mode === DashboardTableType.Borrow ? "APR Type" : "Collateral",
@@ -135,7 +127,7 @@ const DashboardTable: React.FC<{ mode: DashboardTableType }> = ({ mode }) => {
           <Text fontWeight="bold">
             {mode === DashboardTableType.Deposit ? "No" : "Variable"}
           </Text>
-          <Switch size="sm" colorScheme="gray" />
+          <CollateralView tokenAddress={value} />
           <Button bg="secondary.900" _hover={{ bg: "primary.50" }}>
             <ColoredText fontSize="1rem" fontWeight="400">
               {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
@@ -151,11 +143,11 @@ const DashboardTable: React.FC<{ mode: DashboardTableType }> = ({ mode }) => {
             {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
           </Button>
         </Box>
-      )) as Renderer<CellProps<AssetRecord, string>>,
+      )) as Renderer<CellProps<AssetData, string>>,
     },
   ];
 
-  const renderer = React.useMemo<TableRenderer<AssetRecord>>(
+  const renderer = React.useMemo<TableRenderer<AssetData>>(
     () => table =>
       (
         <BasicTableRenderer
@@ -186,7 +178,7 @@ const DashboardTable: React.FC<{ mode: DashboardTableType }> = ({ mode }) => {
   );
 
   return (
-    <SortedHtmlTable columns={columns} data={assetRecords}>
+    <SortedHtmlTable columns={columns} data={assets}>
       {renderer}
     </SortedHtmlTable>
   );
