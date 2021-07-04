@@ -36,14 +36,6 @@ export const DashboardEmptyState: React.FC<{
           ? "No deposits yet"
           : "Nothing borrowed yet"}
       </ColoredText>
-      <Text
-        color="white"
-        textAlign="center"
-        marginBottom="2.8rem"
-        fontSize={{ base: fontSizes.md, md: "inherit" }}
-      >
-        "There will be a list of all the assets you have {type}ed. For now, it’s empty since you have not {type}ed."
-      </Text>
       <Button
         mt="2.4rem"
         textTransform="uppercase"
@@ -55,7 +47,7 @@ export const DashboardEmptyState: React.FC<{
         fontSize={fontSizes.md}
         onClick={onClick}
       >
-        "{type} now"
+        {type} now
       </Button>
     </Center>
   );
