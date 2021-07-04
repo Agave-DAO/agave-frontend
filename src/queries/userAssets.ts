@@ -5,6 +5,7 @@ import { useAllATokens } from "./allATokens";
 import { useAllReserveTokens } from "./allReserveTokens";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
+import { useAllReserveTokensWithData } from "./lendingReserveData";
 
 export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
@@ -186,7 +187,7 @@ export const useUserDepositAssetBalancesDaiWei =
     []
   >(
     async params => {
-      const [aTokens, reserves] = await Promise.all([
+      const [aTokens, reserves, reserveInfo] = await Promise.all([
         useAllATokens.fetchQueryDefined(params).then(result =>
           Promise.all(
             result.map(aToken =>
@@ -200,19 +201,25 @@ export const useUserDepositAssetBalancesDaiWei =
           )
         ),
         useUserReserveAssetBalancesDaiWei.fetchQueryDefined(params),
+        useAllReserveTokensWithData.fetchQueryDefined(params),
       ]);
 
       const reservesByTokenAddr = Object.fromEntries(
         reserves.map(r => [r.tokenAddress, r])
       );
 
+      const reservesByATokenAddr = Object.fromEntries(
+        reserveInfo.map(r => [r.aTokenAddress, r])
+      );
+
       const withDaiPrices: DepositAssetBalancesDaiWei[] = [];
       for (const at of aTokens) {
-        const reserve = reservesByTokenAddr[at.tokenAddress];
-        if (!reserve) {
+        const reserveInfo = reservesByATokenAddr[at.tokenAddress];
+        if (!reserveInfo) {
           console.warn("Equivalent reserve not present for aToken:", at);
           continue;
         }
+        const reserve = reservesByTokenAddr[reserveInfo.tokenAddress]!;
         withDaiPrices.push({
           aSymbol: at.symbol,
           symbol: reserve.symbol,
