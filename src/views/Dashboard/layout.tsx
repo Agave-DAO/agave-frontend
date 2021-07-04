@@ -19,13 +19,14 @@ import { fontSizes, spacings } from "../../utils/constants";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
-import DashboardTable, { DashboardTableType } from "./DashboardTable";
-import { DashboardEmptyState } from "./DasboardEmptyState";
+import DashboardTable, { DashboardTableType } from "./table";
+import { DashboardEmptyState } from "./emptyState";
 import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
+import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
+import { formatEther } from "ethers/lib/utils";
 
 interface DashboardProps {
-  balance: number | undefined;
   borrowed: number | undefined;
   borrows: AssetData[] | undefined;
   collateral: number | undefined;
@@ -214,6 +215,19 @@ const ModalComponent: React.FC<{
   );
 };
 
+const DashboardApproximateBalanceDisplay: React.FC<{}> = () => {
+  const balancesDaiWei = useUserDepositAssetBalancesDaiWei();
+  const balance = React.useMemo(() => {
+    return balancesDaiWei.data?.reduce(
+      (memo, next) =>
+        memo + (Number(formatEther(next.daiWeiPriceTotal ?? 0)) ?? 0),
+      0
+    );
+  }, [balancesDaiWei]);
+
+  return <>{balance?.toFixed(6) ?? "-"}</>;
+};
+
 export const DashboardLayout: React.FC<DashboardProps> = props => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modal_type, setModal] = useState(MODAL_TYPES.APROXIMATE_BALANCE);
@@ -222,12 +236,12 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
   const onSubmitAP = React.useCallback(() => {
     setModal(MODAL_TYPES.APROXIMATE_BALANCE);
     onOpen();
-  },[onOpen])
+  }, [onOpen]);
 
   const onSubmitHF = React.useCallback(() => {
     setModal(MODAL_TYPES.HEALTH_FACTOR);
     onOpen();
-  },[onOpen])
+  }, [onOpen]);
 
   return (
     <Flex flexDirection="column">
@@ -246,7 +260,7 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
         >
           <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
             <HStack d="flex" mt="0.5rem">
-              <Text>Aproximate Balance</Text>
+              <Text>Approximate Balance</Text>
               <ModalIcon
                 position="relative"
                 top="0"
@@ -257,7 +271,7 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
               />
             </HStack>
             <Text fontWeight="bold" textAlign="left" mt="0.5em">
-              {props.balance?.toFixed(6) ?? "-"}
+              <DashboardApproximateBalanceDisplay />
             </Text>
           </VStack>
         </UpperBox>
@@ -310,7 +324,10 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
       </Flex>
       <HStack spacing="2rem" mt="2rem" alignItems="flex-start">
         {props.deposits?.length > 0 ? (
-          <DashboardTable assets={props.deposits} mode={DashboardTableType.Deposit} />
+          <DashboardTable
+            assets={props.deposits}
+            mode={DashboardTableType.Deposit}
+          />
         ) : (
           <DashboardEmptyState
             onClick={() => {
