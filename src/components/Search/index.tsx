@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 
-const Search: React.FC<InputGroupProps> = ({ placeholder, ...props }) => {
+export const Search: React.FC<InputGroupProps> = ({ placeholder, ...props }) => {
   return (
     <InputGroup {...props}>
       <Input
@@ -19,5 +19,3 @@ const Search: React.FC<InputGroupProps> = ({ placeholder, ...props }) => {
     </InputGroup>
   );
 };
-
-export default Search;

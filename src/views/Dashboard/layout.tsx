@@ -21,15 +21,15 @@ import { isMobileOnly } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
 import DashboardTable, { DashboardTableType } from "./DashboardTable";
 import { DashboardEmptyState } from "./DasboardEmptyState";
-import { DepositAsset } from "../Deposit";
 import { useHistory } from "react-router-dom";
+import { AssetData } from ".";
 
 interface DashboardProps {
-  balance: string | undefined;
+  balance: number | undefined;
   borrowed: string | undefined;
   collateral: string | undefined;
   healthFactor: string | undefined;
-  deposits: DepositAsset[];
+  deposits: AssetData[];
 }
 
 const MODAL_TYPES = {
@@ -98,7 +98,7 @@ export const ModalAPBalance: React.FC<{}> = () => {
   return (
     <>
       <ModalHeader fontSize="1.8rem" fontWeight="bold">
-        Aproximate Balance
+        Approximate Balance
       </ModalHeader>
       <ModalBody>
         <Text fontSize="1.4rem">
