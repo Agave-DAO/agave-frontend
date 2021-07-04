@@ -36,6 +36,9 @@ function Header() {
         </Center>
       </Navbar.Brand>
       <Navbar.Links>
+        <NavTabLink w="14rem" exact to="/dashboard" fontWeight="bold">
+          DASHBOARD
+        </NavTabLink>
         <NavTabLink exact to="/markets" fontWeight="bold">
           MARKETS
         </NavTabLink>
@@ -56,6 +59,7 @@ function Header() {
           rounded="lg"
           bg="primary.500"
           cursor="pointer"
+          display="none"
         >
           <img src={isDarkMode ? darkMoon : lightMoon} alt="theme-mode" />
         </Center>
@@ -68,6 +72,7 @@ function Header() {
           color="white"
           bg="primary.500"
           rounded="lg"
+          display="none"
         >
           0 AGVE
         </Center>
