@@ -4,6 +4,10 @@ import { BigNumber } from "@ethersproject/bignumber";
 import {
   useUserAssetAllowance,
   useUserAssetBalance,
+  useUserDepositAssetBalances,
+  useUserDepositAssetBalancesDaiWei,
+  useUserReserveAssetBalances,
+  useUserReserveAssetBalancesDaiWei,
 } from "../queries/userAssets";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
@@ -95,6 +99,16 @@ export const useDepositMutation = ({
           queryClient.invalidateQueries(allowanceQueryKey),
           queryClient.invalidateQueries(depositedQueryKey),
           queryClient.invalidateQueries(depositMutationKey),
+          chainId && account
+            ? Promise.allSettled(
+                [
+                  useUserDepositAssetBalances.buildKey(chainId, account),
+                  useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserReserveAssetBalances.buildKey(chainId, account),
+                  useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                ].map(k => queryClient.invalidateQueries(k))
+              )
+            : Promise.resolve(),
           asset && account && chainAddrs && chainId && library
             ? useLendingReserveData
                 .fetchQueryDefined(
