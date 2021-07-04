@@ -24,7 +24,8 @@ import { DashboardEmptyState } from "./emptyState";
 import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
-import { formatEther } from "ethers/lib/utils";
+import { formatUnits } from "ethers/lib/utils";
+import { BigNumber, constants } from "ethers";
 
 interface DashboardProps {
   borrowed: number | undefined;
@@ -217,18 +218,25 @@ const ModalComponent: React.FC<{
 
 const DashboardApproximateBalanceDisplay: React.FC<{}> = () => {
   const balancesDaiWei = useUserDepositAssetBalancesDaiWei();
+  const daiDecimals = 18; // TODO: get this dynamically
   const balance = React.useMemo(() => {
     return balancesDaiWei.data?.reduce(
-      (memo, next) =>
-        memo + (Number(formatEther(next.daiWeiPriceTotal ?? 0)) ?? 0),
-      0
+      (memo: BigNumber, next) =>
+        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
+      constants.Zero
     );
   }, [balancesDaiWei]);
 
-  return <>{balance?.toFixed(6) ?? "-"}</>;
+  return <>$ {balance ? formatUnits(balance, daiDecimals) : "-"}</>;
 };
 
-export const DashboardLayout: React.FC<DashboardProps> = props => {
+export const DashboardLayout: React.FC<DashboardProps> = ({
+  deposits,
+  borrows,
+  borrowed,
+  collateral,
+  healthFactor,
+}) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modal_type, setModal] = useState(MODAL_TYPES.APROXIMATE_BALANCE);
   const history = useHistory();
@@ -242,6 +250,36 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
     setModal(MODAL_TYPES.HEALTH_FACTOR);
     onOpen();
   }, [onOpen]);
+
+  const depositsTable = React.useMemo(
+    () =>
+      deposits?.length > 0 ? (
+        <DashboardTable assets={deposits} mode={DashboardTableType.Deposit} />
+      ) : (
+        <DashboardEmptyState
+          onClick={() => {
+            history.push("/deposit");
+          }}
+          type="Deposit"
+        />
+      ),
+    [deposits, history]
+  );
+
+  const borrowsTable = React.useMemo(
+    () =>
+      borrows && borrows.length > 0 ? (
+        <DashboardTable assets={borrows} mode={DashboardTableType.Borrow} />
+      ) : (
+        <DashboardEmptyState
+          onClick={() => {
+            history.push("/borrow");
+          }}
+          type="Borrow"
+        />
+      ),
+    [borrows, history]
+  );
 
   return (
     <Flex flexDirection="column">
@@ -289,13 +327,13 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
             <Box h="7rem" mt="0.5rem">
               <Text>Borrowed</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {props.borrowed ?? "-"}
+                {borrowed ?? "-"}
               </Text>
             </Box>
             <Box h="7rem" mt="0.5rem" ml="4rem">
               <Text>Collateral</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {props.collateral ?? "-"}
+                {collateral ?? "-"}
               </Text>
             </Box>
             <VStack
@@ -316,32 +354,15 @@ export const DashboardLayout: React.FC<DashboardProps> = props => {
                 />
               </HStack>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {props.healthFactor ?? "-"}
+                {healthFactor ?? "-"}
               </Text>
             </VStack>
           </Box>
         </UpperBox>
       </Flex>
       <HStack spacing="2rem" mt="2rem" alignItems="flex-start">
-        {props.deposits?.length > 0 ? (
-          <DashboardTable
-            assets={props.deposits}
-            mode={DashboardTableType.Deposit}
-          />
-        ) : (
-          <DashboardEmptyState
-            onClick={() => {
-              history.push("/deposit");
-            }}
-            type="Deposit"
-          />
-        )}
-        <DashboardEmptyState
-          type="Borrow"
-          onClick={() => {
-            history.push("/borrow");
-          }}
-        />
+        {depositsTable}
+        {borrowsTable}
       </HStack>
       <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </Flex>
