@@ -13,7 +13,7 @@ export interface DepositAsset {
   daiWeiPriceTotal: BigNumber | null;
 }
 
-export function Deposit() {
+export const Deposit: React.FC<{}> = () => {
   const [activeValue, setActiveValue] =
     React.useState<"All" | "Stable Coins">("All");
   const balances = useUserDepositAssetBalancesDaiWei();
@@ -31,6 +31,4 @@ export function Deposit() {
     ),
     [activeValue, setActiveValue, depositedList]
   );
-}
-
-export default Deposit;
+};

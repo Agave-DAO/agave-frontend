@@ -5,7 +5,7 @@ import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
 import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
-import Dashboard from './views/Dashboard';
+import { Dashboard } from './views/Dashboard';
 import { DashboardBanner } from "./views/Dashboard/layout";
 import { Deposit } from "./views/Deposit";
 import { DepositBanner } from "./views/Deposit/layout"

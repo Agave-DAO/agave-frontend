@@ -9,7 +9,7 @@ export interface AssetData {
   balance: BigNumber;
 }
 
-function Dashboard() {
+export const Dashboard: React.FC<{}> = () => {
   const balancesDaiWei = useUserDepositAssetBalancesDaiWei();
   const balances = useUserDepositAssetBalances();
   const depositedList: AssetData[] = React.useMemo(
@@ -36,6 +36,4 @@ function Dashboard() {
       healthFactor={undefined}
     />
   );
-}
-
-export default Dashboard;
+};
