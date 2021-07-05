@@ -1,4 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap");
+@font-face {
+  font-family: 'DroidSans', sans-serif;
+  src: url('https://fonts.googleapis.com/css?family=Droid+Sans');
+}
 
 *,
 *::before,
@@ -15,7 +18,7 @@ html {
 
 body,
 body * {
-  font-family: "Arial", "Inter", sans-serif;
+  font-family: "DroidSans", sans-serif;
   font-stretch: normal;
   font-style: normal;
   font-size: 1.6rem;
