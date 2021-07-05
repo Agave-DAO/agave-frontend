@@ -7,6 +7,7 @@ import {
   StackDivider,
   Text,
   VStack,
+  useMediaQuery
 } from "@chakra-ui/react";
 // import Switch from '../../components/Switch'
 // import Search from '../../components/Search'
@@ -25,6 +26,7 @@ export interface DepositLayoutProps {
 
 export const DepositBanner: React.FC<{}> = () => {
   const history = useHistory();
+  const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
   return (
     <Center width="100%" justifyContent="space-between">
       <Text
@@ -35,10 +37,12 @@ export const DepositBanner: React.FC<{}> = () => {
       >
         Deposit
       </Text>
+	  {isSmallerThan900 ? null :
       <Text>
         Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
         <Link fontWeight="bold">xpollinate.io</Link>
       </Text>
+		}
     </Center>
   );
 };
