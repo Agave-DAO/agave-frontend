@@ -107,10 +107,10 @@ const UnlockWallet: React.FC<{}> = props => {
   return (
     <Center
       minW={{ md: "31vw" }}
-      maxW={{ base: "90vw", md: "53.6rem" }}
+      maxW={{ base: "90vw", lg: "53.6rem" }}
       minH={{ base: "33.6rem", md: "40vh" }}
       maxH="max-content"
-      m="auto"
+      m={{ base: "4rem auto", md: "auto" }}
       px={{ base: "4.3rem", md: "7.2rem" }}
       bg="primary.900"
       flexDirection="column"

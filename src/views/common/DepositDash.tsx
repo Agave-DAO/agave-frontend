@@ -1,4 +1,4 @@
-import { Box, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Stack, Text, VStack, useMediaQuery, Flex } from "@chakra-ui/react";
 import { formatEther } from "ethers/lib/utils";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
@@ -47,52 +47,57 @@ const DepositDash: React.FC<DepositDashProps> = ({
   const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
   
   const healthFactor = userAccountData?.healthFactor;
+  const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
 
   return (
     <VStack spacing="0" w="100%" bg="primary.900" rounded="lg">
-      <HStack
+      <Flex
+	    justifyContent="space-between" 
+		alignItems="center" 
+		fontSize={{ base: fontSizes.md, md: "inherit" }} 
         w="100%"
-        justifyContent="flex-start"
-        spacing="0"
         borderBottom="3px solid"
         borderBottomColor="primary.50"
         py="2.4rem"
         px="2.6rem"
       >
-        <HStack spacing={spacings.md} mr="8.5rem">
-          <Text fontSize={fontSizes.md}>Your balance in Agave</Text>
-          <Box>
-            <Text display="inline-block" fontWeight="bold">
-              {aTokenBalance ? formatEther(aTokenBalance) : 0}
-            </Text>{" "}
-            {token.symbol}
+        <Flex w="30%" spacing={spacings.md} mr="1rem" alignItems={{base:"flex-start", md:"center"}}  justifyContent="flex-start" flexDirection={{base:"column", md:"row"}}>
+          <Text fontSize={{ base: fontSizes.sm, md: "inherit" }}  pr="1rem">Your balance in Agave</Text>
+          <Box >	
+            <Text display="inline-block" fontWeight="bold" fontSize={{ base: fontSizes.sm, md: "inherit" }} >
+              {aTokenBalance ? formatEther(aTokenBalance).slice(0,8) : 0}
+			  {" "}
+			  {token.symbol}
+            </Text>
           </Box>
-        </HStack>
-        <HStack spacing={spacings.md} ml="0">
-          <Text fontSize={fontSizes.md}>Your wallet balance</Text>
+        </Flex>
+        <Flex w="30%" spacing={spacings.md} mr="1rem" alignItems={{base:"flex-start", md:"center"}}   justifyContent="flex-start" flexDirection={{base:"column", md:"row"}}>
+          <Text fontSize={{ base: fontSizes.sm, md: "inherit" }}  pr="1rem">Your wallet balance</Text>
           <Box>
-            <Text display="inline-block" fontWeight="bold">
-              {tokenBalance ? formatEther(tokenBalance) : 0}
-            </Text>{" "}
-            {token.symbol}
+            <Text display="inline-block" fontWeight="bold" fontSize={{ base: fontSizes.sm, md: "inherit" }} >
+              {tokenBalance ? formatEther(tokenBalance).slice(0,8) : 0}
+			  {" "}
+              {token.symbol}
+            </Text>
           </Box>
-        </HStack>
-        <Box w="12.1rem" />
-        <HStack spacing={spacings.md}>
-          <Text fontSize={fontSizes.md}>Health factor</Text>
-          <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />
-          <ColoredText fontSize={fontSizes.md}>{healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}</ColoredText>
-        </HStack>
-      </HStack>
+        </Flex>
+        <Flex w="30%" spacing={spacings.md} mr="1rem" alignItems={{base:"flex-start", md:"center"}}   justifyContent="slex-start" flexDirection={{base:"column", md:"row"}}>
+          <HStack pr="1rem">
+			  <Text fontSize={{ base: fontSizes.sm, md: "inherit" }} >Health factor</Text>
+          	  <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />
+		  </HStack>
+          <ColoredText fontSize={{ base: fontSizes.sm, md: "inherit" }} >{healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}</ColoredText>
+        </Flex>
+      </Flex>
       <HStack w="100%" py="2.4rem" px="2.6rem" justifyContent="space-between">
         <Stack justifyContent="flex-start">
-          <Text fontSize={fontSizes.md}>Utilization Rate</Text>
+          <Text fontSize={{ base: fontSizes.sm, md: "inherit" }} >Utilization Rate</Text>
           <Text fontSize={fontSizes.xl} fontWeight="bold">
             {utilizationRate ? (utilizationRate.toUnsafeFloat() * 100).toLocaleString() : "-"} %
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
-          <Text fontSize={fontSizes.md}>Available Liquidity</Text>
+          <Text fontSize={{ base: fontSizes.sm, md: "inherit" }} >Available Liquidity</Text>
           <Text fontSize={fontSizes.xl} fontWeight="bold">
             {liquidityAvailable ? formatEther(liquidityAvailable) : "-"}
             {" "}
@@ -100,20 +105,20 @@ const DepositDash: React.FC<DepositDashProps> = ({
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
-          <Text fontSize={fontSizes.md}>Deposit APY</Text>
+          <Text fontSize={{ base: fontSizes.sm, md: "inherit" }} >Deposit APY</Text>
           <Text fontSize={fontSizes.xl} fontWeight="bold">
             {variableDepositAPY ? (variableDepositAPY.toUnsafeFloat() * 100).toLocaleString() : "-"} %
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
-          <Text fontSize={fontSizes.md}>Usable as collateral</Text>
+          <Text fontSize={{ base: fontSizes.sm, md: "inherit" }} >Usable as collateral</Text>
           <Text fontSize={fontSizes.xl} fontWeight="bold" color="yellow.100">
             {isCollateralized !== undefined ? (isCollateralized ? "Yes" : "No") : "-"}
           </Text>
         </Stack>
         <Stack justifyContent="flex-start">
           <HStack spacing="1rem">
-            <Text fontSize={fontSizes.md}>Maximum LTV</Text>
+            <Text fontSize={{ base: fontSizes.sm, md: "inherit" }} >Maximum LTV</Text>
             <ModalIcon
               position="relative"
               top="0"
@@ -125,12 +130,14 @@ const DepositDash: React.FC<DepositDashProps> = ({
             {maximumLtv ? (maximumLtv.toUnsafeFloat() * 100).toLocaleString() : "-"} %
           </Text>
         </Stack>
+		{ isSmallerThan900 ? null : 
         <Stack justifyContent="flex-start">
-          <Text fontSize={fontSizes.md}>Asset price</Text>
+          <Text fontSize={{ base: fontSizes.sm, md: "inherit" }} >Asset price</Text>
           <Text fontSize={fontSizes.xl} fontWeight="bold">
             $ {assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? "-"}
           </Text>
         </Stack>
+		}
       </HStack>
     </VStack>
   );
