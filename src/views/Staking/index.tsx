@@ -23,9 +23,8 @@ export interface StakingProps {}
 
 export const Staking: React.FC<StakingProps> = _props => {
   const w3 = useAppWeb3(); // We don't unpack because otherwise typescript loses useAppWeb3's magic
-  const {
-    data: stakingPerSecondPerAgaveYield,
-  } = useStakingPerSecondPerAgaveYield();
+  const { data: stakingPerSecondPerAgaveYield } =
+    useStakingPerSecondPerAgaveYield();
   const { data: amountStaked } = useAmountStakedBy(w3.account ?? undefined);
   const { data: availableToStake } = useAmountAvailableToStake(
     w3.account ?? undefined

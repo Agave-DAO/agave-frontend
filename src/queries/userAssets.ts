@@ -5,6 +5,10 @@ import { useAllATokens } from "./allATokens";
 import { useAllReserveTokens } from "./allReserveTokens";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
+import {
+  ExtendedReserveTokenDefinition,
+  useAllReserveTokensWithData,
+} from "./lendingReserveData";
 
 export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
@@ -169,6 +173,46 @@ export const useUserDepositAssetBalances =
     }
   );
 
+export const useUserDepositAssetBalancesWithReserveInfo =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    {
+      symbol: string;
+      tokenAddress: string;
+      balance: BigNumber;
+      reserve: ExtendedReserveTokenDefinition;
+    }[],
+    [_p1: "user", _p2: "allDeposits", _p3: "balances", _p4: "withReserveInfo"],
+    []
+  >(
+    async params => {
+      const [reservesInfo, aTokensWithBalances] = await Promise.all([
+        useAllReserveTokensWithData.fetchQueryDefined(params),
+        useUserDepositAssetBalances.fetchQueryDefined(params),
+      ]);
+
+      const reservesByATokenAddr = Object.fromEntries(
+        reservesInfo.map(reserve => [reserve.aTokenAddress, reserve])
+      );
+
+      return aTokensWithBalances.map(a => {
+        const reserve = reservesByATokenAddr[a.tokenAddress];
+        if (!reserve) {
+          throw new Error(
+            `No matching reserve found for aToken ${a.symbol} : ${a.tokenAddress}`
+          );
+        }
+        return { ...a, reserve };
+      });
+    },
+    () => ["user", "allDeposits", "balances", "withReserveInfo"],
+    () => undefined,
+    {
+      refetchOnMount: true,
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
 interface DepositAssetBalancesDaiWei {
   symbol: string;
   aSymbol: string;
@@ -186,7 +230,7 @@ export const useUserDepositAssetBalancesDaiWei =
     []
   >(
     async params => {
-      const [aTokens, reserves] = await Promise.all([
+      const [aTokens, reserves, reserveInfo] = await Promise.all([
         useAllATokens.fetchQueryDefined(params).then(result =>
           Promise.all(
             result.map(aToken =>
@@ -200,19 +244,25 @@ export const useUserDepositAssetBalancesDaiWei =
           )
         ),
         useUserReserveAssetBalancesDaiWei.fetchQueryDefined(params),
+        useAllReserveTokensWithData.fetchQueryDefined(params),
       ]);
 
       const reservesByTokenAddr = Object.fromEntries(
         reserves.map(r => [r.tokenAddress, r])
       );
 
+      const reservesByATokenAddr = Object.fromEntries(
+        reserveInfo.map(r => [r.aTokenAddress, r])
+      );
+
       const withDaiPrices: DepositAssetBalancesDaiWei[] = [];
       for (const at of aTokens) {
-        const reserve = reservesByTokenAddr[at.tokenAddress];
-        if (!reserve) {
+        const reserveInfo = reservesByATokenAddr[at.tokenAddress];
+        if (!reserveInfo) {
           console.warn("Equivalent reserve not present for aToken:", at);
           continue;
         }
+        const reserve = reservesByTokenAddr[reserveInfo.tokenAddress]!;
         withDaiPrices.push({
           aSymbol: at.symbol,
           symbol: reserve.symbol,

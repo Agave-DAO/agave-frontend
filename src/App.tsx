@@ -5,10 +5,11 @@ import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
 import { MarketsBanner, Markets } from "./views/Markets";
 // import ReserveOverview from './views/ReserveOverview';
-// import Dashboard from './views/Dashboard';
-import { Deposit, DepositBanner } from "./views/Deposit";
+import { Dashboard } from './views/Dashboard';
+import { DashboardBanner } from "./views/Dashboard/layout";
+import { Deposit } from "./views/Deposit";
+import { DepositBanner } from "./views/Deposit/layout"
 import { DepositDetail } from "./views/Deposit/DepositDetail";
-import { Withdraw, WithdrawBanner } from "./views/Withdraw";
 import { WithdrawDetail } from "./views/Withdraw/WithdrawDetail";
 // import Borrow from "./views/Borrow";
 // import BorrowDetail from "./views/Borrow/BorrowDetail";
@@ -66,10 +67,14 @@ const App: React.FC<IAppProps> = props => {
             header={
               // prettier-ignore
               <Switch>
-                <Route path="/stake"><StakingBanner/></Route>
+                <Route path="/dashboard">
+                  <DashboardBanner/>
+                </Route>
+                <Route path="/stake">
+                  <StakingBanner/>
+                </Route>
                 <Route path="/markets"><MarketsBanner/></Route>
                 <Route path="/deposit"><DepositBanner/></Route>
-                <Route path="/withdraw"><WithdrawBanner/></Route>
               </Switch>
             }
           >
@@ -77,10 +82,9 @@ const App: React.FC<IAppProps> = props => {
             <Switch>
               <Route path="/markets" component={Markets} exact />
               {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
-              {/* <Route path="/dashboard" component={Dashboard} exact /> */}
+              <Route path="/dashboard" component={Dashboard} exact />
               <Route path="/deposit" component={Deposit} exact />
               <Route path="/deposit/:assetName" component={DepositDetail} exact />
-              <Route path="/withdraw" component={Withdraw} exact />
               <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
               {/* <Route path="/borrow" component={Borrow} exact /> */}
               {/* <Route path="/borrow/:assetName" component={BorrowDetail} exact /> */}

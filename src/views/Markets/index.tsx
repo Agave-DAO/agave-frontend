@@ -18,6 +18,7 @@ import {
   useStableBorrowAPR,
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
+import { PercentageView} from "../common/PercentageView"
 import { TokenIcon } from "../../utils/icons";
 import {
   BasicTableRenderer,
@@ -63,22 +64,6 @@ interface AssetRecord {
   tokenAddress: string;
   aTokenAddress: string;
 }
-
-const PercentageView: React.FC<{
-  lowerIsBetter?: boolean;
-  positiveOnly?: boolean;
-  value: number;
-}> = ({ lowerIsBetter, value, positiveOnly }) => {
-  if (lowerIsBetter) {
-    throw new Error('PercentageView Mode "lowerIsBetter" not yet supported');
-  }
-  if (positiveOnly) {
-    throw new Error('PercentageView Mode "positiveOnly" not yet supported');
-  }
-  return (
-    <Text color={value >= 0 ? "green.300" : "red.600"}>% {value * 100}</Text>
-  );
-};
 
 const PriceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);

@@ -4,6 +4,11 @@ import { BigNumber } from "@ethersproject/bignumber";
 import {
   useUserAssetAllowance,
   useUserAssetBalance,
+  useUserDepositAssetBalances,
+  useUserDepositAssetBalancesDaiWei,
+  useUserDepositAssetBalancesWithReserveInfo,
+  useUserReserveAssetBalances,
+  useUserReserveAssetBalancesDaiWei,
 } from "../queries/userAssets";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
@@ -95,6 +100,17 @@ export const useWithdrawMutation = ({
           queryClient.invalidateQueries(allowanceQueryKey),
           queryClient.invalidateQueries(withdrawnQueryKey),
           queryClient.invalidateQueries(withdrawMutationKey),
+          chainId && account
+            ? Promise.allSettled(
+                [
+                  useUserDepositAssetBalances.buildKey(chainId, account),
+                  useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
+                  useUserReserveAssetBalances.buildKey(chainId, account),
+                  useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                ].map(k => queryClient.invalidateQueries(k))
+              )
+            : Promise.resolve(),
           asset && account && chainAddrs && chainId && library
             ? useLendingReserveData
                 .fetchQueryDefined(

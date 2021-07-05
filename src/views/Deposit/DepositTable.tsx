@@ -3,46 +3,17 @@ import { ethers } from "ethers";
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
-import { useDepositAPY } from "../../queries/depositAPY";
 import {
   BasicTableRenderer,
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
+import { DepositAPYView } from "../common/DepositAPYView"
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { Link, useHistory } from "react-router-dom";
-
-const PercentageView: React.FC<{
-  lowerIsBetter?: boolean;
-  positiveOnly?: boolean;
-  value: number;
-}> = ({ lowerIsBetter, value, positiveOnly }) => {
-  if (lowerIsBetter) {
-    throw new Error('PercentageView Mode "lowerIsBetter" not yet supported');
-  }
-  if (positiveOnly) {
-    throw new Error('PercentageView Mode "positiveOnly" not yet supported');
-  }
-  return (
-    <Text color={value >= 0 ? "green.300" : "red.600"}>% {value * 100}</Text>
-  );
-};
-
-const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
-}) => {
-  const query = useDepositAPY(tokenAddress);
-  return React.useMemo(() => {
-    if (query.data === undefined) {
-      return <>-</>;
-    }
-
-    return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
-  }, [query.data]);
-};
 
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
