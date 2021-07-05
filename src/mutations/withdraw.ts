@@ -6,6 +6,7 @@ import {
   useUserAssetBalance,
   useUserDepositAssetBalances,
   useUserDepositAssetBalancesDaiWei,
+  useUserDepositAssetBalancesWithReserveInfo,
   useUserReserveAssetBalances,
   useUserReserveAssetBalancesDaiWei,
 } from "../queries/userAssets";
@@ -104,6 +105,7 @@ export const useWithdrawMutation = ({
                 [
                   useUserDepositAssetBalances.buildKey(chainId, account),
                   useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
                   useUserReserveAssetBalances.buildKey(chainId, account),
                   useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
                 ].map(k => queryClient.invalidateQueries(k))

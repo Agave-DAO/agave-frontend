@@ -45,9 +45,6 @@ function Header() {
         <NavTabLink exact to="/deposit" fontWeight="bold">
           DEPOSIT
         </NavTabLink>
-        <NavTabLink exact to="/withdraw" fontWeight="bold">
-          WITHDRAW
-        </NavTabLink>
         <NavTabLink exact to="/stake" fontWeight="bold">
           STAKE
         </NavTabLink>

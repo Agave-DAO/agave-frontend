@@ -5,14 +5,16 @@ import {
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
-import { BalanceView } from "../common/BalanceView"
-import { DepositAPYView } from "../common/DepositAPYView"
+import { BalanceView } from "../common/BalanceView";
+import { DepositAPYView } from "../common/DepositAPYView";
 import { Box, Text } from "@chakra-ui/layout";
 import { Button, Flex, Switch } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import ColoredText from "../../components/ColoredText";
 import { AssetData } from ".";
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
+import { useHistory } from "react-router-dom";
+import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -20,9 +22,10 @@ export enum DashboardTableType {
 }
 
 const CollateralView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress
+  tokenAddress,
 }) => {
-  const { data: reserveConfiguration } = useProtocolReserveConfiguration(tokenAddress);
+  const { data: reserveConfiguration } =
+    useProtocolReserveConfiguration(tokenAddress);
   const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
 
   return React.useMemo(() => {
@@ -32,15 +35,27 @@ const CollateralView: React.FC<{ tokenAddress: string }> = ({
   }, [isCollateralized]);
 };
 
-const DashboardTable: React.FC<{ 
+export const DashboardTable: React.FC<{
   mode: DashboardTableType;
   assets: AssetData[];
 }> = ({ mode, assets }) => {
+  const history = useHistory();
+  const onActionClicked = React.useCallback(
+    (asset: Readonly<ReserveTokenDefinition>) => {
+      if (mode === DashboardTableType.Borrow) {
+        history.push(`/repay/${asset.symbol}`);
+      } else if (mode === DashboardTableType.Deposit) {
+        history.push(`/withdraw/${asset.symbol}`);
+      }
+    },
+    [mode, history]
+  );
 
   const columns: Column<AssetData>[] = React.useMemo(
     () => [
       {
-        Header: mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
+        Header:
+          mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
         accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value, row }) => (
           <Flex alignItems={"center"}>
@@ -71,7 +86,7 @@ const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "APR Type" : "Collateral",
         accessor: row => row.tokenAddress,
-        Cell: (({ value }) => (
+        Cell: (({ value, row }) => (
           <Box
             d="flex"
             flexDir="row"
@@ -93,6 +108,15 @@ const DashboardTable: React.FC<{
               fontWeight="400"
               variant="outline"
               _hover={{ bg: "white" }}
+              onClick={() =>
+                onActionClicked({
+                  symbol:
+                    row.original.backingReserve?.symbol ?? row.original.symbol,
+                  tokenAddress:
+                    row.original.backingReserve?.tokenAddress ??
+                    row.original.tokenAddress,
+                })
+              }
             >
               {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
             </Button>
@@ -100,7 +124,7 @@ const DashboardTable: React.FC<{
         )) as Renderer<CellProps<AssetData, string>>,
       },
     ],
-    [mode]
+    [mode, onActionClicked]
   );
 
   const renderer = React.useMemo<TableRenderer<AssetData>>(
@@ -139,5 +163,3 @@ const DashboardTable: React.FC<{
     </SortedHtmlTable>
   );
 };
-
-export default DashboardTable;

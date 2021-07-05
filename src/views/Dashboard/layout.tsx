@@ -19,7 +19,7 @@ import { fontSizes, spacings } from "../../utils/constants";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
-import DashboardTable, { DashboardTableType } from "./table";
+import { DashboardTable, DashboardTableType } from "./table";
 import { DashboardEmptyState } from "./emptyState";
 import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
