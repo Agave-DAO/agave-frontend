@@ -14,7 +14,7 @@ const InfoWeiBox: React.FC<
     setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   } & StackProps
 > = ({ mode, balance, currency, amount, setAmount, ...props }) => {
-  const [isSmallerThan765] = useMediaQuery("(max-width: 765px)")
+  const [isSmallerThan768] = useMediaQuery("(max-width: 765px)")
   return (
     <VStack fontSize="1.5rem" {...props}>
       <Flex
@@ -33,7 +33,7 @@ const InfoWeiBox: React.FC<
         amount={amount}
         decimals={18}
         setAmount={setAmount}
-        icon={ isSmallerThan765? null : <TokenIcon symbol={currency} />}
+        icon={ isSmallerThan768? null : <TokenIcon symbol={currency} />}
         maxAmount={balance}
       />
     </VStack>
