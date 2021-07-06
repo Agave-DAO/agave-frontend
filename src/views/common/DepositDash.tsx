@@ -98,41 +98,41 @@ const DepositDash: React.FC<DepositDashProps> = ({
 	  px={{ base: "1rem", md: "2.4rem" }}  
 	  justifyContent="space-between">
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Utilization Rate</Text>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} fontWeight="bold">
+          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >{isSmallerThan900 ? "Utilization" : "Utilization Rate"}</Text>
+          <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
             {utilizationRate ? (utilizationRate.toUnsafeFloat() * 100).toLocaleString() : "-"} %
           </Text>
         </Stack>
 		{ isSmallerThan400 ? null : 
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Available Liquidity</Text>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} fontWeight="bold">
-            {liquidityAvailable ? formatEther(liquidityAvailable) : "-"}
-            {" "}
-            {token.symbol}
-          </Text>
+          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >{isSmallerThan900 ? "Liquidity" : "Available Liquidity"}</Text>
+		  <HStack fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
+          	<Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
+            	{liquidityAvailable ? formatEther(liquidityAvailable) : "-"}
+          	</Text>
+		  	{" "}
+          	{token.symbol}
+		  </HStack>
         </Stack>
 		}	
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Deposit APY</Text>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} fontWeight="bold">
+          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >{isSmallerThan900 ? "APY" : "Deposit APY"}</Text>
+          <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
             {variableDepositAPY ? (variableDepositAPY.toUnsafeFloat() * 100).toLocaleString() : "-"} %
           </Text>
         </Stack>
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Collateralizable</Text>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} fontWeight="bold" color="yellow.100">
+          <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold" color="yellow.100">
             {isCollateralized !== undefined ? (isCollateralized ? "Yes" : "No") : "-"}
           </Text>
         </Stack>
         <Stack justifyContent="flex-start" mr={{ base: "0.2rem", md: "1rem" }} whiteSpace="nowrap">
           <HStack pr={{ base: "0rem", md: "1rem" }}>
-            <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{
-			isSmallerThan900 ? "Max LTV" : "Maximum LTV"
-			}</Text>
+            <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Max LTV" : "Maximum LTV"	}</Text>
           </HStack>
 		  <HStack pr={{ base: "0rem", md: "1rem" }} align="center">
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} fontWeight="bold" >
+          <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold" >
             {maximumLtv ? (maximumLtv.toUnsafeFloat() * 100).toLocaleString() : "-"} %
           </Text>
 		  <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />
@@ -141,7 +141,7 @@ const DepositDash: React.FC<DepositDashProps> = ({
 		{ isSmallerThan900 ? null : 
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Asset price</Text>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} fontWeight="bold">
+          <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
             $ {assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? "-"}
           </Text>
         </Stack>
