@@ -83,7 +83,7 @@ const TextInput: React.FC<InputProps> = props => {
   return (
     <Input
       size="lg"
-      pl={{ base: "3.5rem", md: "5rem" }}
+      pl={{ base: "1rem", md: "5rem" }}
       pr={{ base: "13rem", md: "15rem" }}
       py="2rem"
       fontSize={{ base: fontSizes.md, md: "1.6rem" }}
@@ -255,7 +255,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
           boxSizing="content-box"
           w="max-content"
           mx={4}
-          h="100%"
+          h="90%"
           children={
             typeof icon === "string" ? (
               <Image
