@@ -10,6 +10,7 @@ import { DashboardBanner } from "./views/Dashboard/layout";
 import { Deposit } from "./views/Deposit";
 import { DepositBanner } from "./views/Deposit/layout"
 import { DepositDetail } from "./views/Deposit/DepositDetail";
+import { WithdrawBanner } from "./views/Withdraw/WithdrawDetail";
 import { WithdrawDetail } from "./views/Withdraw/WithdrawDetail";
 // import Borrow from "./views/Borrow";
 // import BorrowDetail from "./views/Borrow/BorrowDetail";
@@ -75,6 +76,7 @@ const App: React.FC<IAppProps> = props => {
                 </Route>
                 <Route path="/markets"><MarketsBanner/></Route>
                 <Route path="/deposit"><DepositBanner/></Route>
+				<Route path="/withdraw"><WithdrawBanner/></Route>
               </Switch>
             }
           >

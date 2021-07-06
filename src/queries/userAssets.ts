@@ -161,7 +161,6 @@ export const useUserDepositAssetBalances =
             .then(result => ({ ...reserve, balance: result }))
         )
       );
-
       return aTokensWithBalances;
     },
     () => ["user", "allDeposits", "balances"],

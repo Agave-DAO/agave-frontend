@@ -1,7 +1,7 @@
 import React, { MouseEventHandler } from "react";
-import { Button, Center, CenterProps, Text } from "@chakra-ui/react";
+import { Button, Center, CenterProps } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
-import { fontSizes, spacings } from "../../utils/constants";
+import { fontSizes} from "../../utils/constants";
 
 export const EMPTY_TYPE = {
   Deposit: "Deposit",
