@@ -38,17 +38,6 @@ export const DashboardEmptyState: React.FC<{
           ? "No deposits yet"
           : "Nothing borrowed yet"}
       </ColoredText>
-      <Text
-        color="white"
-        mt="0.5rem"
-        fontWeight="400"
-        fontSize="smaller"
-        textAlign="center"
-        mx={{ base: "1rem", md: "3rem" }}
-      >
-        There will be a list of all the assets you have {renderType}.
-        For now, it’s empty since you have not {renderType}.
-      </Text>
       <Button
         textTransform="uppercase"
         background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
