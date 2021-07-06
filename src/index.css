@@ -1,8 +1,7 @@
 @font-face {
-	font-family: 'DroidSans', sans-serif;
-	src: url('./assets/fonts/DroidSans-webfont.woff') format('woff') font-weight-normal,
-		 url("./assets/fonts/DroidSans-Bold-webfont.woff") format("woff") font-weight-bold;
-  }
+  font-family: 'DroidSans', sans-serif;
+  src: url('https://fonts.googleapis.com/css?family=Droid+Sans');
+}
 
 *,
 *::before,

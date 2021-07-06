@@ -1,5 +1,5 @@
 import React, { MouseEventHandler } from "react";
-import { Button, Center, CenterProps } from "@chakra-ui/react";
+import { Button, Center, CenterProps, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes, spacings } from "../../utils/constants";
 
@@ -13,6 +13,10 @@ export const DashboardEmptyState: React.FC<{
   onClick: MouseEventHandler;
   props?: CenterProps;
 }> = ({ type, onClick, ...props }) => {
+  const renderType = React.useMemo(() => {
+    return type === EMPTY_TYPE.Deposit ? "deposited" : "borrowed";
+  }, [type]);
+
   return (
     <Center
       boxSizing="content-box"
@@ -24,12 +28,10 @@ export const DashboardEmptyState: React.FC<{
       bg="primary.900"
       px={{ base: "2rem", md: "4rem" }}
       py="2.4rem"
-      mr={{ base: "2.6rem" }}
       {...props}
     >
       <ColoredText
         fontSize={{ base: "1.6rem", md: "1.8rem" }}
-        marginBottom={spacings.md}
         textAlign="center"
       >
         {type === EMPTY_TYPE.Deposit
@@ -37,7 +39,6 @@ export const DashboardEmptyState: React.FC<{
           : "Nothing borrowed yet"}
       </ColoredText>
       <Button
-        mt="2.4rem"
         textTransform="uppercase"
         background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
         color="secondary.900"
@@ -46,6 +47,7 @@ export const DashboardEmptyState: React.FC<{
         py="1.5rem"
         fontSize={fontSizes.md}
         onClick={onClick}
+        mt="2rem"
       >
         {type} now
       </Button>
