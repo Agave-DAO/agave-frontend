@@ -8,7 +8,7 @@ import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
-
+import { BigNumber, constants } from "ethers";
 import { useUserDepositAssetBalances } from "../../queries/userAssets";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
@@ -51,9 +51,27 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 	const maximumLtv = reserveConfiguration?.ltv;
 	const currentLtv = userAccountData?.currentLtv;
 	const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
-	// const totalCollateralValue = allReservesData?.reduce(( sum, { daiWeiPriceTotal } ) => sum + parseFloat(formatEther(daiWeiPriceTotal)));
-	// const collateralComposition = allReservesData?.map(t => t["daiWeiPriceTotal"] / totalCollateralValue )
 	const healthFactor = userAccountData?.healthFactor;
+
+	const totalCollateralValue = React.useMemo(() => {
+		return allReservesData?.reduce(
+			(memo: BigNumber, next) =>
+				next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
+			constants.Zero
+		);
+	}, [allReservesData])
+
+	const collateralComposition = React.useMemo(() => {
+		return allReservesData?.map(next => {
+			if (next.daiWeiPriceTotal != undefined && next.decimals != undefined && totalCollateralValue != undefined ) {
+				 let decimals = BigNumber.from(10).pow(next.decimals);
+				 return next.daiWeiPriceTotal.mul(decimals).div(totalCollateralValue) 
+				}
+			else  return 0;
+		})
+	}, [allReservesData, totalCollateralValue]);	
+
+	
 	const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
 	const [isSmallerThan400] = useMediaQuery("(max-width: 400px)");
 
@@ -73,7 +91,7 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 					<TokenIcon symbol={token.symbol} borderRadius="100%" backgroundColor="#eee" border="2px solid" borderColor="#9BEFD7" />
 					<ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg: fontSizes.xl }} mx="1.5rem" >{token.symbol}</ColoredText>
 					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md, lg: fontSizes.lg }} fontWeight="bold">
-						{"$" + assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? ""}
+						{"$" + assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? " "}
 					</Text>
 				</Flex>
 			</Flex>
@@ -87,7 +105,7 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} pr="1rem">Deposited</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-							{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0}
+							{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0} {" $$$ "}
 						</Text>
 						{isSmallerThan400 ? null :
 							" " + token.symbol
@@ -119,7 +137,7 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Collateral" : "Collateral Composition"}</Text>
 					</HStack>
 					<HStack pr={{ base: "0rem", md: "1rem" }} align="center">
-						// add the Collateral Composition stacked chart
+						// add the Collateral Composition stacked chart {collateralComposition?.toLocaleString()}
 					</HStack>
 				</Flex>
 			</Flex>

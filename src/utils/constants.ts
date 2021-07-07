@@ -1,7 +1,7 @@
 import daiImg from "../assets/image/coins/dai.svg";
 import ethImg from "../assets/image/coins/eth.svg";
 import agaveImg from "../assets/image/coins/agave.png";
-import honeyImg from "../assets/image/coins/honey.svg";
+import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
 
 export const LINEAR_GRADIENT_BG =
