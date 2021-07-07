@@ -1,4 +1,24 @@
-import { Box, HStack, Stack, Text, VStack, useMediaQuery, Flex, tokenToCSSVar } from "@chakra-ui/react";
+import {
+	Box,
+	HStack,
+	Stack,
+	Text,
+	VStack,
+	useMediaQuery,
+	Flex,
+	tokenToCSSVar,
+	Grid,
+	GridItem,
+	Popover,
+	Button,
+	PopoverTrigger,
+	PopoverContent,
+	PopoverHeader,
+	PopoverBody,
+	PopoverFooter,
+	PopoverArrow,
+	PopoverCloseButton
+} from "@chakra-ui/react";
 import { formatEther } from "ethers/lib/utils";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
@@ -14,9 +34,11 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { fontSizes, spacings } from "../../utils/constants";
+import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
 import { TokenIcon } from "../../utils/icons";
+import { forEach } from "lodash";
+import { string } from "prop-types";
 
 type WithdrawDashProps = {
 	token: ReserveTokenDefinition;
@@ -62,16 +84,25 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 	}, [allReservesData])
 
 	const collateralComposition = React.useMemo(() => {
-		return allReservesData?.map(next => {
-			if (next.daiWeiPriceTotal != undefined && next.decimals != undefined && totalCollateralValue != undefined ) {
-				 let decimals = BigNumber.from(10).pow(next.decimals);
-				 return next.daiWeiPriceTotal.mul(decimals).div(totalCollateralValue) 
-				}
-			else  return 0;
-		})
-	}, [allReservesData, totalCollateralValue]);	
+		const compositionArray = allReservesData?.map(next => {
+			if (next.daiWeiPriceTotal != undefined && next.decimals != undefined && totalCollateralValue != undefined) {
+				const decimalPower = BigNumber.from(10).pow(next.decimals);
+				return next.daiWeiPriceTotal.mul(decimalPower).div(totalCollateralValue)
+			}
+			else return BigNumber.from(0);
+		});
+		return (compositionArray) ? compositionArray.map(share => {
+			if (share.gt(0)) {
+				return formatEther(share.mul(100))
+			}
+			else return null
+		}) : []
+	}, [allReservesData, totalCollateralValue]);
 
-	
+	const collateralData = collateralComposition.map((x, index) => {
+		if (x != null) return x.substr(0, x.indexOf(".") + 3);
+	})
+
 	const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
 	const [isSmallerThan400] = useMediaQuery("(max-width: 400px)");
 
@@ -105,19 +136,19 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} pr="1rem">Deposited</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-							{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0} {" $$$ "}
+							{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0}
 						</Text>
 						{isSmallerThan400 ? null :
 							" " + token.symbol
 						}
 					</Box>
 				</Flex>
-				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems="center" justifyContent="flex-start" flexDirection="column">
+				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems="center" justifyContent="flex-start" flexDirection="column" >
 					<HStack pr={{ base: "0rem", md: "1rem" }}>
-						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Health factor</Text>
+						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}  >Health factor</Text>
 					</HStack>
-					<HStack pr={{ base: "0rem", md: "1rem" }} align="center">
-						<ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>{healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}</ColoredText>
+					<HStack pr={{ base: "0rem", md: "1rem" }} textAlign="center" w="100%">
+						<ColoredText minW={{base:'30px',md:"100%"}}> {healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}</ColoredText>
 						<ModalIcon position="relative" top="0" right="0" onOpen={() => { }} />
 					</HStack>
 				</Flex>
@@ -125,23 +156,42 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 					<HStack pr={{ base: "0rem", md: "1rem" }}>
 						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Current LTV" : "Current LTV"}</Text>
 					</HStack>
-					<HStack pr={{ base: "0rem", md: "1rem" }} align="center">
-						<Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg: fontSizes.xl }} fontWeight="bold" >
+					<HStack pr={{ base: "0rem", md: "1rem" }} textAlign="center">
+						<Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg: fontSizes.xl }} fontWeight="bold" minW={{base:'30px',md:"100%"}}>
 							{currentLtv ? (currentLtv.toUnsafeFloat() * 100).toLocaleString().slice(0, 6) : "-"} %
 						</Text>
 						<ModalIcon position="relative" top="0" right="0" onOpen={() => { }} />
 					</HStack>
 				</Flex>
 				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems="center" justifyContent="flex-start" flexDirection="column">
-					<HStack pr={{ base: "0rem", md: "1rem" }}>
+					<HStack px={{ base: "0rem", md: "1rem" }}>
 						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Collateral" : "Collateral Composition"}</Text>
 					</HStack>
-					<HStack pr={{ base: "0rem", md: "1rem" }} align="center">
-						// add the Collateral Composition stacked chart {collateralComposition?.toLocaleString()}
-					</HStack>
+					<Popover trigger='hover' >
+						<PopoverTrigger >
+							<Grid role="button" w="100%" templateColumns={collateralData.filter(x => x != null).join('% ')+"%"} h="2rem" borderRadius="8px" borderColor="#444" borderStyle="solid" borderWidth="3px" overflow="hidden">
+								{allReservesData?.map((token, index) =>
+									<Box bg={assetColor[token.symbol]} w="100%" h="100%" borderRadius="0" _hover={{ bg: assetColor[token.symbol], boxShadow: "xl", }} _active={{ bg: assetColor[token.symbol] }} _focus={{ boxShadow: "xl" }} d={(collateralComposition[index] != null) ? 'block' : 'none'} />
+								)}
+							</Grid>
+						</PopoverTrigger>
+						<PopoverContent bg="primary.300" border="2px solid" >
+							<PopoverBody bg="gray.700">
+								<VStack  m='auto' py='2rem' w="90%">{allReservesData?.map((token, index) =>
+									(collateralComposition[index] != null) ?
+										<Flex alignItems="center" justifyContent="space-between" w='100%'>
+											<Box bg={assetColor[token.symbol]} boxSize="1em" minW='1em' minH='1em' borderRadius="1em"/>
+											<Text ml="1em" width="50%">  {token.symbol}</Text>
+											<Text ml="1em">  {collateralData[index]+'%'}</Text>
+										</Flex>
+										: <Text></Text>
+								)}</VStack>
+							</PopoverBody>
+						</PopoverContent>
+					</Popover>
 				</Flex>
 			</Flex>
-		</VStack>
+		</VStack >
 	);
 };
 
