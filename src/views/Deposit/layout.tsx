@@ -129,24 +129,13 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
             pl={27}
             pr={27}
             pt={5}
-            d="flex"
-            flexDirection={{ base: "column", md: "row", xl: "column" }}
-            justifyContent="space-between"
-            flexGrow={2}
           >
-            <Box d="flex" flexDir="row" w="100%" justifyContent="space-between">
-              {/* <Switch 
-                values={['All', 'Stable Coins']}
-                activeValue={props.activeValue}
-                setActiveValue={props.setActiveValue}
-              /> */}
               {/* Disabled for now, no enough rows to be filtered */}
               {/* <Search
                 placeholder="Search"
                 w={185}
                 h={26}
               /> */}
-            </Box>
             <Box overflowY="auto">{depositTable}</Box>
           </Box>
         </VStack>
