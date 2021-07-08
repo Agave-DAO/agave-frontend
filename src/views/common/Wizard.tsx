@@ -26,13 +26,13 @@ export const WizardOverviewWrapper: React.FC<{
       <VStack
         spacing=".5rem"
         p="1.5rem"
-        w="30rem"
+        w={{base:'30rem', md:'45rem'}}
         background="secondary.900"
         rounded="lg"
         alignItems="space-between"
       >
         <HStack justifyContent="space-between">
-          <Text lineHeight={fontSizes.md} fontSize="1rem">
+          <Text lineHeight={fontSizes.md} fontSize={{base:fontSizes.sm, md:fontSizes.md}}>
             Amount
           </Text>
           <HStack>
@@ -40,14 +40,14 @@ export const WizardOverviewWrapper: React.FC<{
               symbol={asset.symbol}
               boxSize={{ base: "1.5rem", md: "1.8rem" }}
             />
-            <Text fontSize="1.2rem">
+            <Text fontSize={{base:fontSizes.sm, md:fontSizes.md}}>
               {formatEther(amount)} {asset.symbol}
             </Text>
           </HStack>
         </HStack>
         <HStack justifyContent="space-between">
           <HStack spacing=".2rem">
-            <Text lineHeight={fontSizes.md} fontSize="1rem">
+            <Text lineHeight={fontSizes.md} fontSize={{base:fontSizes.sm, md:fontSizes.md}}>
               Current health factor
             </Text>
             <ModalIcon
@@ -60,7 +60,7 @@ export const WizardOverviewWrapper: React.FC<{
             />
           </HStack>
           <ColoredText
-            fontSize="1.2rem"
+            fontSize={{base:fontSizes.sm, md:fontSizes.md}}
             overflow="hidden"
             overflowWrap="normal"
           >
@@ -82,20 +82,19 @@ export const WizardOverviewWrapper: React.FC<{
   );
 
   return (
-    <VStack w="50%" spacing="0">
-      <ColoredText textTransform="capitalize" fontSize="1.8rem">
+    <VStack w="95%" spacing="0" p="1rem 2rem">
+      <ColoredText textTransform="capitalize" fontSize={{base:fontSizes.lg, md:fontSizes.xl, lg:fontSizes.xxl}}>
         {title}
       </ColoredText>
       <Box h="1.3rem" />
-      <Text fontSize={fontSizes.md}>
-        These are your transaction details. Please verify them before
-        submitting.
+      <Text fontSize={{base:fontSizes.md, md:fontSizes.lg, lg:fontSizes.lg}} textAlign="center">
+        These are your transaction details. <br/> Please verify them before submitting.
       </Text>
       <Box h={fontSizes.xl} />
       {infoBox}
       <Box h={fontSizes.md} />
       <VStack
-        w="30rem"
+        w={{base:'30rem', md:'45rem'}}
         minH="8rem"
         bg="secondary.900"
         rounded="lg"
@@ -125,7 +124,7 @@ export const StepperBar: React.FC<{
             step === currentState ? LINEAR_GRADIENT_BG : "primary.300"
           }
           color="secondary.900"
-          fontSize="1rem"
+          fontSize={{base:fontSizes.xs, md:fontSizes.sm}}
           padding=".3rem"
         >
           {index + 1} {stateNames[step]}

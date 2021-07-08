@@ -1,4 +1,4 @@
-import { white, black, blue, pink, yellow, green, grey, red, boxShadow } from './colors'
+import { white, black, blue, pink, yellow, green, grey, red, boxShadow} from './colors'
 
 const theme = {
   borderRadius: 2,
@@ -15,6 +15,7 @@ const theme = {
     secondary: {
       100: "#019d8b",
       500: "#007c6e",
+	  700: "#025e5a",
       900: "#044D44",
     },
     textPrimary: grey[100],

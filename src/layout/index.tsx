@@ -1,5 +1,5 @@
 import React from "react";
-import glowingAgave from "../assets/image/glowing-agave.svg";
+import glowingAgave from "../assets/image/glowing-agave.png";
 import Header from "../components/Header";
 import UnlockWallet from "../components/UnlockWallet";
 import { Box, Center, HStack, Image, Text } from "@chakra-ui/react";
@@ -42,8 +42,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
     <Box
       position="relative"
       bg="secondary.900"
-      minH={{ base: "100vh", lg: "100%" }}
-      maxH={{ base: "100%", lg: "100vh" }}
+      minH={{ base: "100vh", lg: "100vh" }}
       overflow={{ base: "visible", md: "hidden" }}
     >
       <Header />
@@ -76,8 +75,8 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         </Center>
         {childrenMemo}
       </Box>
-      <Center mt="25rem" display={{ base: "none", lg: "flex" }}>
-        <Image src={glowingAgave} boxSize="145rem" alt="glowing agave log" />
+      <Center pos="absolute" bottom="0"  width="100%"display={{base:"none", md:"flex"}}>
+        <Image  w={{ base: "0vw", lg: "90vw", xl: "80vw" }} pos="relative" top="10em" src={glowingAgave}  alt="glowing agave log" />
       </Center>
     </Box>
   );

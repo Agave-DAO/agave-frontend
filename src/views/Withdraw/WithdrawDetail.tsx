@@ -2,13 +2,13 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import DepositDash from "../common/DepositDash";
+import { WithdrawDash } from "../common/WithdrawDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveTokenDefinition,
   useAllReserveTokens,
 } from "../../queries/allReserveTokens";
-import { Box, Center } from "@chakra-ui/react";
+import { Box, Center, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
@@ -67,6 +67,24 @@ const visibleStateNames: ReadonlyArray<PossibleTags<WithdrawState>> = [
 ] as const;
 
 const WithdrawTitle = "Withdraw overview";
+
+export interface WithdrawBannerProps {}
+
+export const WithdrawBanner: React.FC<{}> = () => {
+	const history = useHistory();
+	return (
+	  <Center width="100%" justifyContent="space-between">
+		<Text
+		  fontWeight="bold"
+		  color="white"
+		  fontSize={{ base: "1.8rem", md: "2.4rem" }}
+		  onClick={() => history.push("/deposit")}
+		>
+		  Withdraw
+		</Text>		  
+	  </Center>
+	);
+  };
 
 const InitialComp: React.FC<{
   state: InitialState;
@@ -199,7 +217,7 @@ const WithdrawDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,
 }) => {
   const dash = React.useMemo(
-    () => (asset ? <DepositDash token={asset} /> : undefined),
+    () => (asset ? <WithdrawDash token={asset} /> : undefined),
     [asset]
   );
   const [withdrawState, setWithdrawState] = React.useState<WithdrawState>(
@@ -249,7 +267,7 @@ export const WithdrawDetail: React.FC = () => {
         color="primary.100"
         bg="primary.900"
         rounded="lg"
-        padding="1em"
+        padding="3em"
       >
         <Center>
           {allReserves.data ? (
@@ -270,6 +288,7 @@ export const WithdrawDetail: React.FC = () => {
             }
             size="xl"
             padding="1rem"
+			m="3rem"
           >
             Take me back!
           </Button>

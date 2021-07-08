@@ -18,7 +18,7 @@ type DepositDashProps = {
   token: ReserveTokenDefinition;
 };
 
-const DepositDash: React.FC<DepositDashProps> = ({
+export const DepositDash: React.FC<DepositDashProps> = ({
   token,
 }) => {
   const { account: userAccountAddress } = useAppWeb3();
@@ -45,10 +45,9 @@ const DepositDash: React.FC<DepositDashProps> = ({
   const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
   const maximumLtv = reserveConfiguration?.ltv;
   const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
-  
   const healthFactor = userAccountData?.healthFactor;
-  const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
-  const [isSmallerThan400] = useMediaQuery("(max-width: 400px)");
+
+  const [isSmallerThan400, isSmallerThan900] = useMediaQuery(["(max-width: 400px)", "(max-width: 900px)"]);
 
   return (
     <VStack spacing="0" w="100%" bg="primary.900" rounded="lg">
@@ -150,5 +149,3 @@ const DepositDash: React.FC<DepositDashProps> = ({
     </VStack>
   );
 };
-
-export default DepositDash;

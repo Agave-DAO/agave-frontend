@@ -1,14 +1,27 @@
 import daiImg from "../assets/image/coins/dai.svg";
 import ethImg from "../assets/image/coins/eth.svg";
 import agaveImg from "../assets/image/coins/agave.png";
-import honeyImg from "../assets/image/coins/honey.svg";
+import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
-
+import { theme } from "@chakra-ui/theme";
 export const LINEAR_GRADIENT_BG =
   "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%)";
 
 export const spacings = {
   md: "1.3rem",
+};
+
+
+export const assetColor:{ [key: string]: string }  = {
+	USDC: theme.colors.blue[400],
+	DAI: theme.colors.red[400],
+	WETH: theme.colors.gray[100],
+	AGVE: theme.colors.green[400],
+	HNY: theme.colors.yellow[400],
+	WBTC: theme.colors.orange[400],
+	STAKE: theme.colors.teal[400],
+	USDT: theme.colors.green[700],
+	LINK: theme.colors.pink[400]
 };
 
 export const fontSizes = {
@@ -18,6 +31,7 @@ export const fontSizes = {
   lg: "1.6rem",
   xl: "1.8rem",
   "2xl": "2rem",
+  xxl: "2rem",
 };
 
 const addresses: Readonly<Record<string, string>> = {

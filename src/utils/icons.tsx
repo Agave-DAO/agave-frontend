@@ -4,7 +4,7 @@ import AgaveLogo from "../assets/image/colored-agave-logo.svg";
 import BatLogo from "../assets/image/coins/bat.svg";
 import DaiLogo from "../assets/image/coins/dai.svg";
 import EthLogo from "../assets/image/coins/eth.svg";
-import HoneyLogo from "../assets/image/logo.svg";
+import HoneyLogo from "../assets/image/coins/honey.webp";
 import UniLogo from "../assets/image/coins/uni.svg";
 import UsdcLogo from "../assets/image/coins/usdc.svg";
 import UsdtLogo from "../assets/image/coins/usdt.svg";
