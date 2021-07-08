@@ -11,6 +11,7 @@ import {
   Tr,
 } from "@chakra-ui/react";
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons"
+import { Box } from "@chakra-ui/react"
 import React from "react";
 import { Column, useTable, useSortBy, TableInstance } from "react-table";
 
@@ -92,7 +93,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
       <Table {...getTableProps()} margin={0} {...tableStyle}>
         <Thead>
           {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
+            <Tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
                 <Th {...column.getHeaderProps(column.getSortByToggleProps())} {...headStyle}>
                   {column.render("Header")}
@@ -109,7 +110,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
                   </span>
                 </Th>
               ))}
-            </tr>
+            </Tr>
           ))}
         </Thead>
         <Tbody {...getTableBodyProps()}>
@@ -142,4 +143,62 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
       cellStyle,
     ]
   );
+};
+
+export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
+  table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
+  tableProps: tableStyle,
+  headProps: headStyle,
+  rowProps: rowStyle,
+  cellProps: cellStyle,
+}) => {
+
+  const headerGroup = headerGroups[0];
+
+  return React.useMemo(
+    () => (
+      <Box as="table">
+        <Box as="tbody" {...getTableBodyProps()}>
+          {rows.map((row) => {
+            prepareRow(row);
+            return (
+              <Box as="tr" {...row.getRowProps()} {...rowStyle}>
+                {row.cells.map((cell, index) => {
+                  const reactRow = index !== 0 ? (
+                    <Box {...cellStyle}>
+                      <Box as="td" minWidth="50px"{...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers[index].render("Header")}
+                      </Box>
+                      <Box as="td" {...cell.getCellProps()}>
+                        {cell.render("Cell")}
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center"}} {...cellStyle}>
+                      <Box as="td" {...cell.getCellProps()}>
+                        {cell.render("Cell")}
+                      </Box>
+                    </Box>
+                  )
+
+                  return reactRow;
+                })}
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+    ),
+    [
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      rows,
+      prepareRow,
+      tableStyle,
+      headStyle,
+      rowStyle,
+      cellStyle,
+    ]
+  )
 };
