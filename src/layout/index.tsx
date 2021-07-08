@@ -1,5 +1,5 @@
 import React from "react";
-import glowingAgave from "../assets/image/glowing-agave.png";
+import glowingAgave from "../assets/image/glowing-agave.svg";
 import Header from "../components/Header";
 import UnlockWallet from "../components/UnlockWallet";
 import { Box, Center, HStack, Image, Text } from "@chakra-ui/react";
