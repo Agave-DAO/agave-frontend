@@ -37,14 +37,12 @@ import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
 import { TokenIcon } from "../../utils/icons";
-import { forEach } from "lodash";
-import { string } from "prop-types";
 
 type WithdrawDashProps = {
 	token: ReserveTokenDefinition;
 };
 
-const WithdrawDash: React.FC<WithdrawDashProps> = ({
+export const WithdrawDash: React.FC<WithdrawDashProps> = ({
 	token,
 }) => {
 	const { account: userAccountAddress } = useAppWeb3();
@@ -103,8 +101,7 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 		if (x != null) return x.substr(0, x.indexOf(".") + 3);
 	})
 
-	const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
-	const [isSmallerThan400] = useMediaQuery("(max-width: 400px)");
+	const [isSmallerThan400, isSmallerThan900] = useMediaQuery(["(max-width: 400px)", "(max-width: 900px)"]);
 
 	return (
 		<VStack spacing="0" w="100%" bg="primary.900" rounded="lg">
@@ -179,7 +176,7 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 							<PopoverBody bg="gray.700">
 								<VStack  m='auto' py='2rem' w="90%">{allReservesData?.map((token, index) =>
 									(collateralComposition[index] != null) ?
-										<Flex alignItems="center" justifyContent="space-between" w='100%'>
+										<Flex id={index+token.symbol} alignItems="center" justifyContent="space-between" w='100%'>
 											<Box bg={assetColor[token.symbol]} boxSize="1em" minW='1em' minH='1em' borderRadius="1em"/>
 											<Text ml="1em" width="50%">  {token.symbol}</Text>
 											<Text ml="1em">  {collateralData[index]+'%'}</Text>
@@ -194,5 +191,3 @@ const WithdrawDash: React.FC<WithdrawDashProps> = ({
 		</VStack >
 	);
 };
-
-export default WithdrawDash;

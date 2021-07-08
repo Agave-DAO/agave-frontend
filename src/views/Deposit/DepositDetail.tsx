@@ -2,7 +2,7 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import DepositDash from "../common/DepositDash";
+import { DepositDash } from "../common/DepositDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveTokenDefinition,
@@ -303,7 +303,7 @@ export const DepositDetail: React.FC = () => {
         color="primary.100"
         bg="primary.900"
         rounded="lg"
-        padding="1em"
+        padding="3em"
       >
         <Center>
           {allReserves.data ? (
@@ -324,6 +324,7 @@ export const DepositDetail: React.FC = () => {
             }
             size="xl"
             padding="1rem"
+			m="3rem"
           >
             Take me back!
           </Button>

@@ -2,7 +2,7 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import WithdrawDash from "../common/WithdrawDash";
+import { WithdrawDash } from "../common/WithdrawDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveTokenDefinition,
