@@ -157,7 +157,7 @@ export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
 
   return React.useMemo(
     () => (
-      <Box as="table">
+      <Box as="table" {...tableStyle}>
         <Box as="tbody" {...getTableBodyProps()}>
           {rows.map((row) => {
             prepareRow(row);

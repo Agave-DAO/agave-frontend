@@ -71,6 +71,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
             width="100%"
             height="100%"
             alignItems={"center"}
+            // TODO: move this onClick handler up to the row element on the table
             onClick={() => {
               history.push(`/deposit/${value}`);
             }}
@@ -111,6 +112,9 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
         table={table}
         tableProps={{
           textAlign: "center",
+          display: "flex",
+          width: "100%", 
+          flexDirection: "column",
         }}
         headProps={{
           fontSize: "12px",
