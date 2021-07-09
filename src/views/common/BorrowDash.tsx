@@ -28,7 +28,7 @@ import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
-import { BigNumber, constants } from "ethers";
+import { BigNumber, constants, FixedNumber } from "ethers";
 import { useUserDepositAssetBalances } from "../../queries/userAssets";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
@@ -70,8 +70,10 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({
 	const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
 	const maximumLtv = reserveConfiguration?.ltv;
 	const currentLtv = userAccountData?.currentLtv;
-	const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
+	const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
 	const healthFactor = userAccountData?.healthFactor;
+	const totalCollateralEth = userAccountData?.totalCollateralEth;
+	console.log(reserve?.aTokenAddress)
 
 	const totalCollateralValue = React.useMemo(() => {
 		return allReservesData?.reduce(
@@ -118,43 +120,34 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({
 				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", lg: "center" }} justifyContent="flex-start">
 					<TokenIcon symbol={token.symbol} borderRadius="100%" p="2px" background="whiteAlpha.500" border="2px solid" borderColor="whiteAlpha.600" />
 					<Flex flexDirection={{ base: "column", lg: "row" }} justifyContent="flex-start" alignItems="center">
-					<ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg: fontSizes.xl }} mx="1.5rem" >{token.symbol}</ColoredText>
-					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md, lg: fontSizes.lg }} fontWeight="bold">
-						{"$" + assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? " "}
-					</Text>
+						<ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg: fontSizes.xl }} mx="1.5rem" >{token.symbol}</ColoredText>
+						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md, lg: fontSizes.lg }} fontWeight="bold">
+							{"$" + assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 }) ?? " "}
+						</Text>
 					</Flex>
 				</Flex>
 				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", lg: "center" }} justifyContent="flex-start" flexDirection={{ base: "column", lg: "row" }}>
-					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Liquidity" : "Available Liquidity"}</Text>
+					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} mr={{ base: "0rem", md: "1rem" }}>{isSmallerThan900 ? "Liquidity" : "Available Liquidity"}</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-							!{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0}
+							{liquidityAvailable ? formatEther(liquidityAvailable).slice(0, formatEther(liquidityAvailable).indexOf('.') + 3) : '-'}
 						</Text>
-						{isSmallerThan400 ? null :
-							" " + token.symbol
-						}
 					</Box>
 				</Flex>
 				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", lg: "center" }} justifyContent="flex-start" flexDirection={{ base: "column", lg: "row" }}>
-					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Utilization" : "Utilization Rate"}</Text>
+					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} mr={{ base: "0rem", md: "1rem" }}>{isSmallerThan900 ? "Utilization" : "Utilization Rate"}</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-							!{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0}
+							{/*utilizationRate?._value*/} HALP!
 						</Text>
-						{isSmallerThan400 ? null :
-							" " + token.symbol
-						}
 					</Box>
 				</Flex>
 				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", lg: "center" }} justifyContent="flex-start" flexDirection={{ base: "column", lg: "row" }}>
-					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Variable APR" : "Variable APR"}</Text>
+					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} mr={{ base: "0rem", md: "1rem" }}>{isSmallerThan900 ? "Variable APR" : "Variable APR"}</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-							!{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0}
+						HALP!{/*variableBorrowAPR ? variableBorrowAPR.mulUnsafe(FixedNumber.from((10 ** 9), variableBorrowAPR.format)).round(9).toUnsafeFloat() : "-"*/}
 						</Text>
-						{isSmallerThan400 ? null :
-							" " + token.symbol
-						}
 					</Box>
 				</Flex>
 			</Flex>
@@ -164,65 +157,67 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({
 				px={{ base: "1rem", md: "2.4rem" }}
 				justifyContent="space-between">
 
-				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base:"flex-start" , md:"center" }} justifyContent="flex-start" flexDirection="column" >
+				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", md: "center" }} justifyContent="flex-start" flexDirection="column" >
 					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} pr="1rem" mb="0.5em">You Borrowed</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-							!{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0}	
+							!{"pending query"}
 						</Text>
 						{isSmallerThan400 ? null :
 							" " + token.symbol
 						}
 					</Box>
 				</Flex>
-				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base:"flex-start" , md:"center" }} justifyContent="flex-start" flexDirection="column" >
+				<Flex spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", md: "center" }} justifyContent="flex-start" flexDirection="column" >
 					<HStack pr={{ base: "0rem", md: "1rem" }} mb="0.5em">
-						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}  >Health Factor</Text>
+						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Health Factor</Text>
 					</HStack>
 					<HStack pr={{ base: "0rem", md: "1rem" }} textAlign="center" w="100%">
-						<ColoredText minW={{ base: '30px', md: "100%" }}> {healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}</ColoredText>
+						<ColoredText minW={{ base: '30px', md: "100%" }} fontSize={{ base: fontSizes.md, md: fontSizes.lg }} fontWeight="bold">
+							{healthFactor ? healthFactor.mulUnsafe(FixedNumber.from((10 ** 9), healthFactor.format)).round(3).toUnsafeFloat() : "-"}
+						</ColoredText>
 						<ModalIcon position="relative" top="0" right="0" onOpen={() => { }} />
 					</HStack>
 				</Flex>
-				<Flex h="100%" spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base:"flex-start" , md:"center" }} justifyContent="flex-start" flexDirection="column">
+				<Flex h="100%" spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", md: "center" }} justifyContent="flex-start" flexDirection="column">
 					<HStack pr={{ base: "0rem", md: "1rem" }} mb="0.5em">
 						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>Your Collateral</Text>
 					</HStack>
 					<HStack pr={{ base: "0rem", md: "1rem" }} textAlign="center">
-						<Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg: fontSizes.xl }} fontWeight="bold" minW={{ base: '30px', md: "100%" }}>
-							!{currentLtv ? (currentLtv.toUnsafeFloat() * 100).toLocaleString().slice(0, 6) : "-"} %
+						<Text fontSize={{ base: fontSizes.md, md: fontSizes.lg }} fontWeight="bold" minW={{ base: '30px', md: "100%" }}>
+							{totalCollateralEth ? '$ ' + formatEther(totalCollateralEth).slice(0, formatEther(totalCollateralEth).indexOf('.') + 3) : "-"}
 						</Text>
 						<ModalIcon position="relative" top="0" right="0" onOpen={() => { }} />
 					</HStack>
 				</Flex>
 				{isSmallerThan900 ? null :
-				<Flex h="100%" spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base:"flex-start" , md:"center" }} justifyContent="flex-start" flexDirection="column">
-					<HStack px={{ base: "0rem", md: "1rem" }} mb="0.5em">
-						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Collateral" : "Collateral Composition"}</Text>
-					</HStack>
-					<Popover trigger='hover' >
-						<PopoverTrigger >
-							<Grid role="button" w="100%" templateColumns={collateralData.filter(x => x != null).join('% ') + "%"} h="2rem" borderRadius="8px" borderColor="#444" borderStyle="solid" borderWidth="3px" overflow="hidden">
-								{allReservesData?.map((token, index) =>
-									<Box bg={assetColor[token.symbol]} w="100%" h="100%" borderRadius="0" _hover={{ bg: assetColor[token.symbol], boxShadow: "xl", }} _active={{ bg: assetColor[token.symbol] }} _focus={{ boxShadow: "xl" }} d={(collateralComposition[index] != null) ? 'block' : 'none'} />
-								)}
-							</Grid>
-						</PopoverTrigger>
-						<PopoverContent bg="primary.300" border="2px solid" >
-							<PopoverBody bg="gray.700">
-								<VStack m='auto' py='2rem' w="90%">{allReservesData?.map((token, index) =>
-									(collateralComposition[index] != null) ?
-										<Flex id={index + token.symbol} alignItems="center" justifyContent="space-between" w='100%'>
-											<Box bg={assetColor[token.symbol]} boxSize="1em" minW='1em' minH='1em' borderRadius="1em" />
-											<Text ml="1em" width="50%">  {token.symbol}</Text>
-											<Text ml="1em">  {collateralData[index] + '%'}</Text>
-										</Flex>
-										: <Text></Text>
-								)}</VStack>
-							</PopoverBody>
-						</PopoverContent>
-					</Popover>
-				</Flex>
+					<Flex h="100%" spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{ base: "flex-start", md: "center" }} justifyContent="flex-start" flexDirection="column">
+						<HStack px={{ base: "0rem", md: "1rem" }} mb="0.5em">
+							<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>{isSmallerThan900 ? "Collateral" : "Collateral Composition"}</Text>
+						</HStack>
+						<Popover trigger='hover' >
+							<PopoverTrigger >
+								<Grid role="button" w="100%" templateColumns={collateralData.filter(x => x != null).join('% ') + "%"} h="2rem" borderRadius="8px" borderColor="#444" borderStyle="solid" borderWidth="3px" overflow="hidden">
+									{allReservesData?.map((token, index) =>
+										<Box bg={assetColor[token.symbol]} w="100%" h="100%" borderRadius="0" _hover={{ bg: assetColor[token.symbol], boxShadow: "xl", }} _active={{ bg: assetColor[token.symbol] }} _focus={{ boxShadow: "xl" }} d={(collateralComposition[index] != null) ? 'block' : 'none'} />
+									)}
+								</Grid>
+							</PopoverTrigger>
+							<PopoverContent bg="primary.300" border="2px solid" >
+								<PopoverBody bg="gray.700">
+									<VStack m='auto' py='2rem' w="90%">{allReservesData?.map((token, index) =>
+										(collateralComposition[index] != null) ?
+											<Flex id={index + token.symbol} alignItems="center" justifyContent="space-between" w='100%'>
+												<Box bg={assetColor[token.symbol]} boxSize="1em" minW='1em' minH='1em' borderRadius="1em" />
+												<Text ml="1em" width="50%">  {token.symbol}</Text>
+												<Text ml="1em">  {collateralData[index] + '%'}</Text>
+											</Flex>
+											: <Text></Text>
+									)}</VStack>
+								</PopoverBody>
+							</PopoverContent>
+						</Popover>
+					</Flex>
 				}
 			</Flex>
 		</VStack >
