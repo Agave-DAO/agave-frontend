@@ -10,15 +10,19 @@ import { useUserAssetAllowance, useUserAssetBalance } from "../queries/userAsset
 export interface UseRepayMutationProps {
   asset: string | undefined;
   amount: BigNumber;
-  onSuccess: () => void;
 };
 
 export interface UseRepayMutationDto {
-  repayMutation: UseMutationResult<BigNumber | undefined, unknown, BigNumber, unknown>;
+  repayMutation: UseMutationResult<
+    BigNumber | undefined,
+    unknown,
+    void,
+    unknown
+  >;
   repayMutationKey: readonly [string | null | undefined, string | null | undefined, string | null | undefined, BigNumber];
 };
 
-export const useRepayMutation = ({asset, amount, onSuccess}: UseRepayMutationProps): UseRepayMutationDto => {
+export const useRepayMutation = ({asset, amount}: UseRepayMutationProps): UseRepayMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3()
 
@@ -41,9 +45,9 @@ export const useRepayMutation = ({asset, amount, onSuccess}: UseRepayMutationPro
 
   const debtQueryKey = ["user", "allReserves", "debt"] as const;
   const repayMutationKey = [...debtQueryKey, amount] as const;
-  const repayMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
+  const repayMutation = useMutation(
     repayMutationKey,
-    async (unitAmount): Promise<BigNumber | undefined> => {
+    async () => {
       if (!account || !library || !asset) {
         throw new Error("Account or asset details are not available");
       }
@@ -52,20 +56,20 @@ export const useRepayMutation = ({asset, amount, onSuccess}: UseRepayMutationPro
         library.getSigner()
       );
       console.log("repayMutationKey:repay");
-      console.log(Number(ethers.utils.formatEther(unitAmount)));
+      console.log(Number(ethers.utils.formatEther(amount)));
       
       // TODO: Note that `rateMode` is fixed to 2 (variable)
       // since we don't expect to support stable rates in v1
       const rateMode = 2;
       const tx = await contract.repay(
         asset,
-        unitAmount,
+        amount,
         rateMode,
         account,
       );
 
       const receipt = await tx.wait();
-      return receipt.status ? BigNumber.from(unitAmount) : undefined;
+      return receipt.status ? BigNumber.from(amount) : undefined;
     },
     {
       onSuccess: async (unitAmountResult, vars, context) => {
