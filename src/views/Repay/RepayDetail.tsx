@@ -2,7 +2,7 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import { DepositDash } from "../common/DepositDash";
+import { RepayDash } from "../common/RepayDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveTokenDefinition,
@@ -203,7 +203,7 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,
 }) => {
   const dash = React.useMemo(
-    () => (asset ? <DepositDash token={asset} /> : undefined),
+    () => (asset ? <RepayDash token={asset} /> : undefined),
     [asset]
   );
   const [repayState, setRepayState] = React.useState<RepayState>(
