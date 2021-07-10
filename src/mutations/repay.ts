@@ -9,13 +9,13 @@ import { useUserAssetAllowance, useUserAssetBalance } from "../queries/userAsset
 
 export interface UseRepayMutationProps {
   asset: string | undefined;
-  amount: number;
+  amount: BigNumber;
   onSuccess: () => void;
 };
 
 export interface UseRepayMutationDto {
   repayMutation: UseMutationResult<BigNumber | undefined, unknown, BigNumber, unknown>;
-  repayMutationKey: readonly [string | null | undefined, string | null | undefined, string | null | undefined, number];
+  repayMutationKey: readonly [string | null | undefined, string | null | undefined, string | null | undefined, BigNumber];
 };
 
 export const useRepayMutation = ({asset, amount, onSuccess}: UseRepayMutationProps): UseRepayMutationDto => {
