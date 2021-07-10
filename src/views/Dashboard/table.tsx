@@ -84,7 +84,7 @@ export const DashboardTable: React.FC<{
         )) as Renderer<CellProps<AssetData, string>>,
       },
       {
-        Header: mode === DashboardTableType.Borrow ? "APR Type" : "Collateral",
+        Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
         accessor: row => row.tokenAddress,
         Cell: (({ value, row }) => (
           <Box
@@ -93,10 +93,12 @@ export const DashboardTable: React.FC<{
             alignItems="center"
             justifyContent="space-between"
           >
-            <Text fontWeight="bold">
-              {mode === DashboardTableType.Deposit ? "No" : "Variable"}
-            </Text>
-            <CollateralView tokenAddress={value} />
+            {mode === DashboardTableType.Deposit && <>
+              <Text fontWeight="bold">
+                No
+              </Text>
+              <CollateralView tokenAddress={value} />
+            </>}
             <Button bg="secondary.900" _hover={{ bg: "primary.50" }}>
               <ColoredText fontSize="1rem" fontWeight="400">
                 {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
