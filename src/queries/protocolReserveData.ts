@@ -150,7 +150,7 @@ export const useUserReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
       params.library.getSigner()
     );
     return await contract
-      .getUserReserveData(params.account, assetAddress)
+      .getUserReserveData(assetAddress, params.account)
       .then(userReserveData => userReserveDataFromWeb3Result(userReserveData));
   },
   assetAddress => ["user", "reserveData", assetAddress],
