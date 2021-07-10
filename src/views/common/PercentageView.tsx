@@ -4,10 +4,10 @@ import { Text } from "@chakra-ui/layout";
 export const PercentageView: React.FC<{
   lowerIsBetter?: boolean;
   positiveOnly?: boolean;
-  value: number;
+  ratio: number;
 }> = ({
   lowerIsBetter,
-  value,
+  ratio,
   positiveOnly
 }) => {
   if (lowerIsBetter) {
@@ -17,8 +17,8 @@ export const PercentageView: React.FC<{
       throw new Error('PercentageView Mode "positiveOnly" not yet supported');
   }
   return (
-      <Text fontWeight="bold" color={value >= 0 ? "yellow.100" : "red.600"}>
-      % {value * 100}
+      <Text fontWeight="bold" color={ratio >= 0 ? "yellow.100" : "red.600"}>
+      % {ratio * 100}
       </Text>
 );
 };

@@ -18,7 +18,7 @@ import {
   useStableBorrowAPR,
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
-import { PercentageView} from "../common/PercentageView"
+import { PercentageView } from "../common/PercentageView"
 import { TokenIcon } from "../../utils/icons";
 import {
   BasicTableRenderer,
@@ -133,7 +133,7 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
       return <>-</>;
     }
 
-    return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
+    return <PercentageView ratio={query.data.round(4).toUnsafeFloat()} />;
   }, [query.data]);
 };
 
@@ -148,7 +148,7 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
 
     return (
       <PercentageView
-        value={query.data.round(4).toUnsafeFloat()}
+        ratio={query.data.round(4).toUnsafeFloat()}
       />
     );
   }, [query.data]);
@@ -165,7 +165,7 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
 
     return (
       <PercentageView
-        value={query.data.round(4).toUnsafeFloat()}
+        ratio={query.data.round(4).toUnsafeFloat()}
       />
     );
   }, [query.data]);
