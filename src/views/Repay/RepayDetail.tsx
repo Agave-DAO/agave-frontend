@@ -12,7 +12,7 @@ import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
-import { useUserAssetBalance } from "../../queries/userAssets";
+import { useUserAssetBalance, useUserVariableDebtTokenBalances } from "../../queries/userAssets";
 import {
   useRepayMutation,
   UseRepayMutationProps,
@@ -65,6 +65,21 @@ const InitialComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
   const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
+  const { data: userDebts } = useUserVariableDebtTokenBalances();
+  const availableToRepay = React.useMemo(() => {
+    if (!userBalance || !userDebts) {
+      return BigNumber.from(0);
+    }
+    const debtForAsset = userDebts.find(({ tokenAddress }) => {
+      return tokenAddress === state.token.tokenAddress;
+    });
+
+    // availableToRepay = min(debt, balance)
+    return userBalance.gt(debtForAsset?.balance || 0)
+      ? (debtForAsset?.balance || BigNumber.from(0))
+      : userBalance
+  }, [userDebts, userBalance]);
+
   const onSubmit = React.useCallback(
     amountToRepay =>
       dispatch(createState("amountSelected", { amountToRepay, ...state })),
@@ -77,7 +92,7 @@ const InitialComp: React.FC<{
       setAmount={setAmount}
       mode="repay"
       onSubmit={onSubmit}
-      balance={userBalance}
+      balance={availableToRepay}
     />
   );
 };
