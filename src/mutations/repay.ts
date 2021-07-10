@@ -2,7 +2,7 @@ import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { AgaveLendingABI__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
 import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
-import { ethers } from "ethers";
+import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { useUserAssetAllowance, useUserAssetBalance } from "../queries/userAssets";
@@ -55,20 +55,28 @@ export const useRepayMutation = ({asset, amount}: UseRepayMutationProps): UseRep
         internalAddresses.Lending,
         library.getSigner()
       );
-      console.log("repayMutationKey:repay");
-      console.log(Number(ethers.utils.formatEther(amount)));
-      
+
       // TODO: Note that `rateMode` is fixed to 2 (variable)
       // since we don't expect to support stable rates in v1
       const rateMode = 2;
-      const tx = await contract.repay(
+      const tx = contract.repay(
         asset,
         amount,
         rateMode,
         account,
       );
-
-      const receipt = await tx.wait();
+      const repayConfirmation = await usingProgressNotification(
+        "Awaiting repay approval",
+        "Please sign the transaction for repay.",
+        "info",
+        tx
+      );
+      const receipt = await usingProgressNotification(
+        "Awaiting repay confirmation",
+        "Please wait while the blockchain processes your transaction",
+        "info",
+        repayConfirmation.wait()
+      );
       return receipt.status ? BigNumber.from(amount) : undefined;
     },
     {
