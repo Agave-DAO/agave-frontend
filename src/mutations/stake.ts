@@ -82,7 +82,7 @@ export const useStakeMutation = ({
           );
           const approvalResetConfirmation = await usingProgressNotification(
             "Awaiting approval reset",
-            "MiniMe tokens require setting your allowance to 0 before changing it. Please commit the transaction resetting MiniMe approval to 0 to patch inconsistent state",
+            "MiniMe tokens require setting your allowance to 0 before changing it. Please sign the transaction resetting MiniMe approval to 0 to patch inconsistent state",
             "warning",
             approvalReset
           );
