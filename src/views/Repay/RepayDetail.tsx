@@ -12,11 +12,11 @@ import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
-import { useUserAssetBalance, useUserVariableDebtTokenBalances } from "../../queries/userAssets";
 import {
-  useRepayMutation,
-  UseRepayMutationProps,
-} from "../../mutations/repay";
+  useUserAssetBalance,
+  useUserVariableDebtTokenBalances,
+} from "../../queries/userAssets";
+import { useRepayMutation, UseRepayMutationProps } from "../../mutations/repay";
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
@@ -55,7 +55,10 @@ const stateNames: Record<PossibleTags<RepayState>, string> = {
   repaidTx: "Finished",
 };
 
-const visibleStateNames: ReadonlyArray<PossibleTags<RepayState>> = ["amountSelected", "repaidTx"] as const;
+const visibleStateNames: ReadonlyArray<PossibleTags<RepayState>> = [
+  "amountSelected",
+  "repaidTx",
+] as const;
 
 const RepayTitle = "Repay overview";
 
@@ -76,8 +79,8 @@ const InitialComp: React.FC<{
 
     // availableToRepay = min(debt, balance)
     return userBalance.gt(debtForAsset?.balance || 0)
-      ? (debtForAsset?.balance || BigNumber.from(0))
-      : userBalance
+      ? debtForAsset?.balance || BigNumber.from(0)
+      : userBalance;
   }, [userDebts, userBalance]);
 
   const onSubmit = React.useCallback(
@@ -227,10 +230,9 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
 };
 
 export const RepayDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
@@ -272,7 +274,7 @@ export const RepayDetail: React.FC = () => {
             }
             size="xl"
             padding="1rem"
-			m="3rem"
+            m="3rem"
           >
             Take me back!
           </Button>

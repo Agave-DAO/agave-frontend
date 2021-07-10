@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Center,
-  Link,
-  Text,
-  useMediaQuery
-} from "@chakra-ui/react";
+import { Center, Link, Text, useMediaQuery } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 
 export interface RepayBannerProps {}
@@ -22,13 +17,12 @@ export const RepayBanner: React.FC<{}> = () => {
       >
         Repay
       </Text>
-	  {isSmallerThan900 ? null :
-      <Text>
-        Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
-        <Link fontWeight="bold">xpollinate.io</Link>
-      </Text>
-		}
+      {isSmallerThan900 ? null : (
+        <Text>
+          Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
+          <Link fontWeight="bold">xpollinate.io</Link>
+        </Text>
+      )}
     </Center>
   );
 };
-
