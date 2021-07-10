@@ -20,7 +20,7 @@ export const Dashboard: React.FC<{}> = () => {
   // Overall borrow information
   const { account: userAccountAddress } = useAppWeb3();
   const { data: userAccountData } = useUserAccountData(userAccountAddress ?? undefined);
-  const healthFactor = userAccountData?.healthFactor?.toUnsafeFloat();
+  const healthFactor = userAccountData?.healthFactor;
   const collateral = userAccountData?.totalCollateralEth;
   const borrowed = userAccountData?.totalDebtEth;
 

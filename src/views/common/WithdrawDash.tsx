@@ -21,6 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { formatEther } from "ethers/lib/utils";
 import React from "react";
+import { ethers } from "ethers";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -145,7 +146,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({
 						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}  >Health factor</Text>
 					</HStack>
 					<HStack pr={{ base: "0rem", md: "1rem" }} textAlign="center" w="100%">
-						<ColoredText minW={{base:'30px',md:"100%"}}> {healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}</ColoredText>
+						<ColoredText minW={{base:'30px',md:"100%"}}> {healthFactor ? ethers.utils.formatEther(healthFactor).toLocaleString() : "-"}</ColoredText>
 						<ModalIcon position="relative" top="0" right="0" onOpen={() => { }} />
 					</HStack>
 				</Flex>
