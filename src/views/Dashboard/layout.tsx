@@ -15,6 +15,7 @@ import {
   ModalBody,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
+import { ethers } from "ethers";
 import { fontSizes, spacings } from "../../utils/constants";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from "react-device-detect";
@@ -28,9 +29,9 @@ import { formatUnits } from "ethers/lib/utils";
 import { BigNumber, constants } from "ethers";
 
 interface DashboardProps {
-  borrowed: number | undefined;
+  borrowed: BigNumber | undefined;
   borrows: AssetData[] | undefined;
-  collateral: number | undefined;
+  collateral: BigNumber | undefined;
   deposits: AssetData[];
   healthFactor: number | undefined;
 }
@@ -327,13 +328,13 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
             <Box h="7rem" mt="0.5rem">
               <Text>Borrowed</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {borrowed ?? "-"}
+                {borrowed ? `$ ${ethers.utils.formatEther(borrowed ?? 0)}` : "-"}
               </Text>
             </Box>
             <Box h="7rem" mt="0.5rem" ml="4rem">
               <Text>Collateral</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {collateral ?? "-"}
+                {collateral ? `$ ${ethers.utils.formatEther(collateral ?? 0)}` : "-"}
               </Text>
             </Box>
             <VStack
