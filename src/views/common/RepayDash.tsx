@@ -162,7 +162,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
             />
           </HStack>
           <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
-            {healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}
+            {healthFactor ? formatEther(healthFactor).toLocaleString() : "-"}
           </ColoredText>
         </Flex>
       </Flex>
