@@ -22,6 +22,7 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import {
   useUserAssetBalance,
   useUserReserveAssetBalancesDaiWei,
+  useUserVariableDebtForAsset,
   useUserVariableDebtTokenBalances,
 } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
@@ -36,17 +37,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
   const { account: userAccountAddress } = useAppWeb3();
 
   // Debts
-  const { data: debts } = useUserVariableDebtTokenBalances();
-  const reserveWithDebt = React.useMemo(
-    () =>
-      debts?.find(reserve => reserve.tokenAddress === token.tokenAddress) ??
-      debts?.find(
-        reserve =>
-          reserve.tokenAddress.toLowerCase() ===
-          token.tokenAddress.toLowerCase()
-      ),
-    [debts, token.tokenAddress]
-  );
+  const { data: debt } = useUserVariableDebtForAsset(token.tokenAddress);
 
   // User account data and balances
   const { data: userAccountData } = useUserAccountData(
@@ -128,7 +119,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {reserveWithDebt ? formatEther(reserveWithDebt.balance) : 0}
+              {debt ? formatEther(debt) : 0}
             </Text>
             {isSmallerThan400 ? null : " " + token.symbol}
           </Box>
