@@ -177,7 +177,6 @@ const RepaidTxComp: React.FC<{
       <ControllerItem
         stepNumber={2}
         stepName="Success"
-        stepDesc=""
         actionName="Dashboard"
         onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}
