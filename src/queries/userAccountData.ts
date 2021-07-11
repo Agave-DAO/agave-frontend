@@ -16,7 +16,7 @@ export interface UserAccountData {
   maximumLtvDiscrete: BigNumber; //  Fixed4 e.g. 5781 = 57.81 MaximumLTV
   currentLtv: FixedNumber; // 0 <-> Math.min(maximumLtv, 1), totalDebt / totalCollateral
   usedBorrowingPower: FixedNumber;
-  healthFactor: FixedNumber; //  Ray e.g. 1500403183017056862 = 1.50
+  healthFactor: BigNumber; //  e.g. 2500000000000000000 in wei
 }
 
 export function userAccountDataFromWeb3Result({
@@ -44,7 +44,7 @@ export function userAccountDataFromWeb3Result({
     maximumLtv,
     currentLtv,
     usedBorrowingPower: divIfNotZeroUnsafe(currentLtv, maximumLtv),
-    healthFactor: FixedFromRay(healthFactor),
+    healthFactor,
   };
 }
 

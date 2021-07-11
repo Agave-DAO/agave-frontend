@@ -33,7 +33,7 @@ interface DashboardProps {
   borrows: AssetData[] | undefined;
   collateral: BigNumber | undefined;
   deposits: AssetData[];
-  healthFactor: number | undefined;
+  healthFactor: BigNumber | undefined;
 }
 
 const MODAL_TYPES = {
@@ -355,7 +355,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
                 />
               </HStack>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {healthFactor ?? "-"}
+                {healthFactor ? ethers.utils.formatEther(healthFactor).toLocaleString() : "-"}
               </Text>
             </VStack>
           </Box>
