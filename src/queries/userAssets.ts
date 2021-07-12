@@ -65,6 +65,34 @@ export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
   }
 );
 
+export const useUserVariableDebtForAsset =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    BigNumber,
+    [
+      _p1: "user",
+      _p2: "asset",
+      assetAddress: string | undefined,
+      _p3: "debt"
+    ],
+    [assetAddress: string]
+  >(
+    async (params, assetAddress) => {
+      return useUserReserveData.fetchQueryDefined(params, assetAddress)
+        .then(result => result.currentVariableDebt)
+    },
+    (assetAddress) => [
+      "user",
+      "asset",
+      assetAddress,
+      "debt"
+    ],
+    () => undefined,
+    {
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000
+    }
+  );
+
 export const useUserVariableDebtTokenBalances =
   buildQueryHookWhenParamsDefinedChainAddrs<
     { symbol: string; tokenAddress: string; balance: BigNumber }[],
@@ -76,9 +104,8 @@ export const useUserVariableDebtTokenBalances =
 
       const reservesWithVariableDebt = await Promise.all(
         reserves.map(reserve =>
-          useUserReserveData
-            .fetchQueryDefined(params, reserve.tokenAddress)
-            .then(result => ({ ...reserve, balance: result.currentVariableDebt }))
+          useUserVariableDebtForAsset.fetchQueryDefined(params, reserve.tokenAddress)
+            .then(debt => ({ ...reserve, balance: debt }))
         )
       );
 
