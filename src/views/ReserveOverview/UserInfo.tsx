@@ -32,6 +32,7 @@ const UserInfo: React.FC<{
           Your information
         </Text>
         <Box
+          maxW="100%"
           minW="30rem"
           position="relative"
           display="flex"

@@ -80,15 +80,15 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
         flexDirection="column"
         textColor="white"
         mr={{ base: "0px", lg: "20px" }}
+        maxW="1200px"
       >
         <Text fontSize="xl" color="white" padding="1rem">
           Reserve Status & Configuration
         </Text>
         <Box>
           <Box
-            // w={isSmallTab ? "100%" : "800px"}
-            w="100%"
-            minW={{ base: "auto", xl: "80rem" }}
+            maxW="100%"
+            minW={{ base: "auto", xl: "100rem" }}
             bg="primary.900"
             p={isMobile ? "0px" : "20px"}
             flex="1 1 0%"
@@ -96,7 +96,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
             boxShadow="rgba(0, 0, 0, 0.16) 0px 1px 3px 0px"
           >
             {/* 1/3 TODO AssetGraph TODO Pass Real Values */}
-            <Container maxW="450px">
+            <Container>
               <Flex w="100%" justify="center" align="center" padding="1rem">
                 <Box p="4">
                   <Center>

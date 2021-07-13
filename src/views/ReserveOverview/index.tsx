@@ -7,12 +7,13 @@ import ColoredText from "../../components/ColoredText";
 import { Button } from "@chakra-ui/button";
 import { Center, Container, Flex } from "@chakra-ui/react";
 /*
-Agave Asset Page Notes | React Template Edited by Pauly Sun 🌞 July 9th, 2021 TODO update
+Agave Asset Page Notes | React Template Edited by Pauly Sun 🌞 July 13th, 2021 
 ✔ Completed Seperated & Rebuilt Component Tree | July 7th, 2021
 ✔ Completed ChakraUI & JS to TSX Conversion | July 8th, 2021
 ✔ Completed ChakraUI Mobile Ready Components | July 9th, 2021
+✔ Added a new layout solution to allow for scrolling while containing the flower | July 13th, 2021
 Todos... 
-1) *Query Injection IN progress 
+1) *Query Injection Needs to be done, Most likly will need help on this. 
 2) **Needs to be connected to markets page through router links, currently works by manually typing url EG: 
 /reserve-overview/WETH
 3) *** Stable coin borrowing componentes ready when implemented
