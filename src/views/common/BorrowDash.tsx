@@ -174,7 +174,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({
 					</HStack>
 					<HStack pr={{ base: "0rem", md: "1rem" }} textAlign="center" w="100%">
 						<ColoredText minW={{ base: '30px', md: "100%" }} fontSize={{ base: fontSizes.md, md: fontSizes.lg }} fontWeight="bold">
-							{healthFactor ? healthFactor.mulUnsafe(FixedNumber.from((10 ** 9), healthFactor.format)).round(3).toUnsafeFloat() : "-"}
+						{healthFactor ? '$ ' + formatEther(healthFactor).slice(0, formatEther(healthFactor).indexOf('.') + 4) : "-"}
 						</ColoredText>
 						<ModalIcon position="relative" top="0" right="0" onOpen={() => { }} />
 					</HStack>
