@@ -73,7 +73,7 @@ export const useClaimMutation = ({
       );
       const claimConfirmation = await usingProgressNotification(
         "Awaiting claim transaction approval",
-        "Please commit the claim transaction with your wallet.",
+        "Please sign the claim transaction with your wallet.",
         "info",
         claimRequest
       );

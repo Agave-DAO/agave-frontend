@@ -18,7 +18,7 @@ import {
   useStableBorrowAPR,
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
-import { PercentageView} from "../common/PercentageView"
+import { PercentageView } from "../common/PercentageView"
 import { TokenIcon } from "../../utils/icons";
 import {
   BasicTableRenderer,
@@ -134,7 +134,7 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
       return <>-</>;
     }
 
-    return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
+    return <PercentageView ratio={query.data.round(4).toUnsafeFloat()} />;
   }, [query.data]);
 };
 
@@ -147,14 +147,9 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
       return <>-</>;
     }
 
-    // HACK: Awaiting rounding bug fix for https://github.com/ethers-io/ethers.js/issues/1629
     return (
       <PercentageView
-        value={query.data
-          .mulUnsafe(FixedNumber.from(1000, query.data.format))
-          .floor()
-          .divUnsafe(FixedNumber.from(1000, query.data.format))
-          .toUnsafeFloat()}
+        ratio={query.data.round(4).toUnsafeFloat()}
       />
     );
   }, [query.data]);
@@ -169,14 +164,9 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
       return <>-</>;
     }
 
-    // HACK: Awaiting rounding bug fix for https://github.com/ethers-io/ethers.js/issues/1629
     return (
       <PercentageView
-        value={query.data
-          .mulUnsafe(FixedNumber.from(1000, query.data.format))
-          .floor()
-          .divUnsafe(FixedNumber.from(1000, query.data.format))
-          .toUnsafeFloat()}
+        ratio={query.data.round(4).toUnsafeFloat()}
       />
     );
   }, [query.data]);

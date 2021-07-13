@@ -64,9 +64,7 @@ export const WizardOverviewWrapper: React.FC<{
             overflow="hidden"
             overflowWrap="normal"
           >
-            {currentHealthFactor
-              ?.toUnsafeFloat()
-              .toLocaleString(undefined, { notation: "scientific" }) ?? "-"}
+            {currentHealthFactor ? formatEther(currentHealthFactor) : "-"}
           </ColoredText>
         </HStack>
         {/* Calculating this is hard - do it later */}

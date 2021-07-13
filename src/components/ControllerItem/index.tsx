@@ -1,11 +1,11 @@
 import React from "react";
 import { Center, VStack, Text, Button } from "@chakra-ui/react";
-import { LINEAR_GRADIENT_BG, spacings, fontSizes } from "../../utils/constants";
+import { LINEAR_GRADIENT_BG, fontSizes } from "../../utils/constants";
 
 export const ControllerItem: React.FC<{
   stepName: string;
   actionName?: string | undefined;
-  stepDesc: string | null;
+  stepDesc?: string | undefined;
   stepNumber: number;
   onActionClick: () => void;
   totalSteps: number;

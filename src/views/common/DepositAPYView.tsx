@@ -12,7 +12,8 @@ export const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     if (variableDepositAPY === undefined) {
       return <>-</>;
     }
-    
+
     return <PercentageView value={variableDepositAPY.toUnsafeFloat()} />;
+
   }, [variableDepositAPY]);
 };

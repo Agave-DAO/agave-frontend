@@ -4,10 +4,10 @@ import { Text } from "@chakra-ui/layout";
 export const PercentageView: React.FC<{
   lowerIsBetter?: boolean;
   positiveOnly?: boolean;
-  value: number;
+  ratio: number;
 }> = ({
   lowerIsBetter,
-  value,
+  ratio,
   positiveOnly
 }) => {
   if (lowerIsBetter) {

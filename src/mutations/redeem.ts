@@ -71,7 +71,7 @@ export const useRedeemMutation = ({
       const redeemRequest = stakingContract.redeem(args.recipient, args.amount);
       const redeemConfirmation = await usingProgressNotification(
         "Awaiting redeem transaction approval",
-        "Please commit the redeem transaction with your wallet.",
+        "Please sign the redeem transaction with your wallet.",
         "info",
         redeemRequest
       );
