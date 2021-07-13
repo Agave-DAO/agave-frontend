@@ -71,10 +71,6 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
             width="100%"
             height="100%"
             alignItems={"center"}
-            // TODO: move this onClick handler up to the row element on the table
-            onClick={() => {
-              history.push(`/deposit/${value}`);
-            }}
           >
             <Center width="4rem">
               <TokenIcon symbol={value} />
@@ -109,6 +105,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
   const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
     table => (
       <MobileTableRenderer
+        linkpage="deposit"
         table={table}
         tableProps={{
           textAlign: "center",
@@ -144,6 +141,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
   const renderer = React.useCallback<TableRenderer<AssetRecord>>(
     table => (
       <BasicTableRenderer
+        linkpage="deposit"
         table={table}
         tableProps={{
           style: {

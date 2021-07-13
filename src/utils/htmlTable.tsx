@@ -75,6 +75,7 @@ export function SortedHtmlTable<TRecord extends object>({
 }
 
 export interface BasicTableRendererProps<TRecord extends object> {
+  linkpage?: string,
   table: TableRenderingInstance<TRecord>;
   tableProps?: TableProps;
   headProps?: TableColumnHeaderProps;
@@ -83,6 +84,7 @@ export interface BasicTableRendererProps<TRecord extends object> {
 }
 
 export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
+  linkpage,
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
   tableProps: tableStyle,
   headProps: headStyle,
@@ -91,8 +93,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
 }) => {
   const reactHistory = useHistory();
   const handleRowClick = React.useCallback( (row:{ original: {symbol: string}}) => {
-	console.log(row)
-	reactHistory.push(`/deposit/${row.original?.symbol}`);
+	linkpage && reactHistory.push(`/${linkpage}/${row.original?.symbol}`);
   }, []);
   return React.useMemo(
     () => (
@@ -152,12 +153,17 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
 };
 
 export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
+  linkpage,
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
   tableProps: tableStyle,
   headProps: headStyle,
   rowProps: rowStyle,
   cellProps: cellStyle,
 }) => {
+  const reactHistory = useHistory();
+  const handleRowClick = React.useCallback( (row:{ original: {symbol: string}}) => {
+	linkpage && reactHistory.push(`/${linkpage}/${row.original?.symbol}`);
+  }, []);
 
   const headerGroup = headerGroups[0];
 
