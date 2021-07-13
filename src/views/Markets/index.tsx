@@ -1,7 +1,7 @@
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex } from "@chakra-ui/react";
+import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import {
   useMarketSizeInDai,
   useTotalMarketSize,
@@ -24,6 +24,7 @@ import {
   BasicTableRenderer,
   SortedHtmlTable,
   TableRenderer,
+  MobileTableRenderer,
 } from "../../utils/htmlTable";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -307,9 +308,46 @@ const AssetTable: React.FC<{
     []
   );
 
+  const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <MobileTableRenderer
+        table={table}
+        tableProps={{
+          textAlign: "center",
+          display: "flex",
+          width: "100%", 
+          flexDirection: "column"
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+        }}
+        rowProps={{
+          display: "flex", 
+          flexDirection: "column", 
+          margin: "1em 0",
+          padding: "1em",
+          borderRadius: "1em",
+          bg: { base: "secondary.500" },
+        }}
+        cellProps={{
+          display: "flex", 
+          flexDirection: "row", 
+          alignItems: "center", 
+          justifyContent: "space-between",
+        }}
+      />
+    ),
+    []
+  );
+
+  const [ismaxWidth] = useMediaQuery("(max-width: 50em)");
+
   return (
     <SortedHtmlTable columns={columns} data={assetRecords}>
-      {renderer}
+      {ismaxWidth ? mobileRenderer : renderer}
     </SortedHtmlTable>
   );
 };

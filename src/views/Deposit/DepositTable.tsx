@@ -5,12 +5,13 @@ import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import {
   BasicTableRenderer,
+  MobileTableRenderer,
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
 import { DepositAPYView } from "../common/DepositAPYView"
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex } from "@chakra-ui/react";
+import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { Link, useHistory } from "react-router-dom";
@@ -65,14 +66,11 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
       {
         Header: "Asset",
         accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
-        Cell: (({ value, row }) => (
+        Cell: (({ value }) => (
           <Flex
             width="100%"
             height="100%"
             alignItems={"center"}
-            onClick={() => {
-              history.push(`/deposit/${value}`);
-            }}
           >
             <Center width="4rem">
               <TokenIcon symbol={value} />
@@ -104,9 +102,46 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
     [history]
   );
 
+  const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <MobileTableRenderer
+        linkpage="deposit"
+        table={table}
+        tableProps={{
+          textAlign: "center",
+          display: "flex",
+          width: "100%", 
+          flexDirection: "column",
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+        }}
+        rowProps={{
+          display: "flex", 
+          flexDirection: "column", 
+          margin: "1em 0",
+          padding: "1em",
+          borderRadius: "1em",
+          bg: { base: "secondary.900" },
+        }}
+        cellProps={{
+          display: "flex", 
+          flexDirection: "row", 
+          alignItems: "center", 
+          justifyContent: "space-between",
+        }}
+      />
+    ),
+    []
+  );
+
   const renderer = React.useCallback<TableRenderer<AssetRecord>>(
     table => (
       <BasicTableRenderer
+        linkpage="deposit"
         table={table}
         tableProps={{
           style: {
@@ -122,7 +157,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
         }}
         rowProps={{
           // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
-          bg: { base: "secondary.500", md: "secondary.900" },
+          bg: { base: "secondary.900" },
         }}
         cellProps={{
           borderBottom: "none",
@@ -132,10 +167,12 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
     []
   );
 
+  const [ismaxWidth] = useMediaQuery("(max-width: 32em)");
+
   return (
     <div>
       <SortedHtmlTable columns={columns} data={assetRecords}>
-        {renderer}
+      {ismaxWidth ? mobileRenderer : renderer}
       </SortedHtmlTable>
     </div>
   );
