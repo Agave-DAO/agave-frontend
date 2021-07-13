@@ -146,7 +146,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({
 					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} mr={{ base: "0rem", md: "1rem" }}>{isSmallerThan900 ? "Variable APR" : "Variable APR"}</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-						HALP!{/*variableBorrowAPR ? variableBorrowAPR.mulUnsafe(FixedNumber.from((10 ** 9), variableBorrowAPR.format)).round(9).toUnsafeFloat() : "-"*/}
+						{variableBorrowAPR ? variableBorrowAPR.mulUnsafe(FixedNumber.from((10 ** 9), variableBorrowAPR.format)).round(4).toUnsafeFloat() : "-"}
 						</Text>
 					</Box>
 				</Flex>
