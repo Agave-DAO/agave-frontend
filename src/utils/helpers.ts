@@ -2,14 +2,15 @@
 export const sleep = (timeInMs: number) =>
   new Promise(resolve => setTimeout(resolve, timeInMs));
 
-// Rounds any number or number thats a string to a string of 2 decimal places
-export function round2Fixed(value: any) {
-  value = +value;
-  if (isNaN(value)) return NaN;
-  value = value.toString().split("e");
-  value = Math.round(+(value[0] + "e" + (value[1] ? +value[1] + 2 : 2)));
-  value = value.toString().split("e");
-  return (+(value[0] + "e" + (value[1] ? +value[1] - 2 : -2))).toFixed(2);
+// Rounds any number or number as a string to a string of 2 decimal places for front end display.
+// Helpful for condensing large string numbers easily for front-end view.
+export function round2Fixed(value: number | string): string | typeof NaN {
+  let v: any;
+  v = +value;
+  v = value.toString().split("e");
+  v = Math.round(+(v[0] + "e" + (v[1] ? +v[1] + 2 : 2)));
+  v = v.toString().split("e");
+  return (+(v[0] + "e" + (v[1] ? +v[1] - 2 : -2))).toFixed(2);
 }
 
 // Find percent differnce of two numbers

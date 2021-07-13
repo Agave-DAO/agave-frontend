@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { Flex } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/layout";
 import { withRouter } from "react-router-dom";
-import styled from "styled-components";
 
-const BorrowTitle = styled.div`
-  .borrowTitle {
-    text-transform: capitalize;
-  }
-`;
-
-function ReserveBanner(props) {
+const ReserveBanner: React.FC<{}> = (props: any) => {
   const message = props.location.pathname;
-  const title = "Reserve details";
+  const title = "Reserve Details";
 
   return (
     <Flex
@@ -22,16 +15,15 @@ function ReserveBanner(props) {
       height="auto"
       marginRight="auto"
     >
-      <BorrowTitle>
-        <ColoredText className="borrowTitle" fontSize="5xl">
-          {props.match.params.assetName ?? "-"} {title}
-        </ColoredText>
-      </BorrowTitle>
+      <ColoredText fontSize="5xl">
+        {props.match.params.assetName ?? "-"} {title}
+      </ColoredText>
+
       <Text align="left" fontSize="3xl">
         {`/${message}`}
       </Text>
     </Flex>
   );
-}
+};
 
 export default withRouter(ReserveBanner);

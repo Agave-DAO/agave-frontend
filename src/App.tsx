@@ -46,6 +46,12 @@ const theme = extendTheme({
     yellow: {
       100: "#FFC01B",
     },
+    green: {
+      100: "#36CFA2",
+    },
+    orenge: {
+      100: "#EC8F53",
+    },
   },
   fonts: {
     body: "Lato",

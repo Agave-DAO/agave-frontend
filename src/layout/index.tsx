@@ -44,7 +44,10 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
       bg="secondary.900"
       minH={{ base: "100vh", md: "100%" }}
       maxH={{ base: "100%", md: "100vh" }}
-      overflowY="auto"
+      // overflow={{ base: "visible", md: "hidden" }}
+      overflowY="auto" // Allows content to stretch screen vertically
+      overflowX="hidden" // Prevents content from bleeding horizontally on small screens
+      // For this to be mobile-friendly, top-level components views should use a chakra container or box with minW to keep content from bleeding out of small screen views and allowing the content to break at specified global mobile theme definitions. https://chakra-ui.com/docs/layout/container
     >
       <Header />
       <Box
