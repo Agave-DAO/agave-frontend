@@ -17,8 +17,8 @@ export const PercentageView: React.FC<{
       throw new Error('PercentageView Mode "positiveOnly" not yet supported');
   }
   return (
-      <Text fontWeight="bold" color={value >= 0 ? "yellow.100" : "red.600"}>
-      % {(value * 100).toFixed(2)}
+      <Text fontWeight="bold" color={ratio >= 0 ? "yellow.100" : "red.600"}>
+      % {ratio * 100 }
       </Text>
 );
 };
