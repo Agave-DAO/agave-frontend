@@ -79,7 +79,7 @@ export const useWithdrawMutation = ({
       const withdraw = lendingContract.withdraw(asset, amount, account);
       const withdrawConfirmation = await usingProgressNotification(
         "Awaiting withdraw approval",
-        "Please commit the transaction for withdrawal.",
+        "Please sign the transaction for withdrawal.",
         "info",
         withdraw
       );

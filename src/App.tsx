@@ -8,7 +8,7 @@ import { MarketsBanner, Markets } from "./views/Markets";
 import { Dashboard } from './views/Dashboard';
 import { DashboardBanner } from "./views/Dashboard/layout";
 import { Deposit } from "./views/Deposit";
-import { DepositBanner } from "./views/Deposit/layout"
+import { DepositBanner } from "./views/Deposit/layout";
 import { DepositDetail } from "./views/Deposit/DepositDetail";
 import { WithdrawBanner } from "./views/Withdraw/WithdrawDetail";
 import { WithdrawDetail } from "./views/Withdraw/WithdrawDetail";
@@ -16,8 +16,8 @@ import { WithdrawDetail } from "./views/Withdraw/WithdrawDetail";
 import { BorrowBanner } from "./views/Borrow/BorrowDetail";
 import { BorrowDetail } from "./views/Borrow/BorrowDetail";
 // import BorrowConfirm from "./views/Borrow/BorrowConfirm";
-// import RepayDetail from './views/Repay/RepayDetail';
-// import RepayConfirm from './views/Repay/RepayConfirm';
+import { RepayBanner } from "./views/Repay/layout";
+import { RepayDetail } from './views/Repay/RepayDetail';
 // import Collateral from './views/Collateral';
 // import InterestSwap from './views/InterestSwap';
 import { Staking } from "./views/Staking";
@@ -79,6 +79,7 @@ const App: React.FC<IAppProps> = props => {
                 <Route path="/deposit"><DepositBanner/></Route>
 				<Route path="/borrow"><BorrowBanner/></Route>
 				<Route path="/withdraw"><WithdrawBanner/></Route>
+                <Route path="/repay"><RepayBanner/></Route>
               </Switch>
             }
           >
@@ -93,8 +94,7 @@ const App: React.FC<IAppProps> = props => {
               {/* <Route path="/borrow" component={Borrow} exact /> */}
               <Route path="/borrow/:assetName" component={BorrowDetail} exact />
               {/* <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact /> */}
-              {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
-              {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
+              <Route path="/repay/:assetName" component={RepayDetail} exact />
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
               {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
               <Route path="/stake" component={Staking} />

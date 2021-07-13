@@ -1,6 +1,7 @@
 import { Box, HStack, Stack, Text, VStack, useMediaQuery, Flex } from "@chakra-ui/react";
 import { formatEther } from "ethers/lib/utils";
 import React from "react";
+import { ethers } from "ethers";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -88,7 +89,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
 			  <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Health factor</Text>
 			  <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />
 		  </HStack>
-          <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg  }}>{healthFactor?.toUnsafeFloat().toLocaleString() ?? "-"}</ColoredText>
+          <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg  }}>{healthFactor ? ethers.utils.formatEther(healthFactor).toLocaleString() : "-"}</ColoredText>
         </Flex>
       </Flex>
       <Flex 

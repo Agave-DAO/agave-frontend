@@ -66,7 +66,7 @@ export const useCooldownMutation = ({
       const cooldownRequest = stakingContract.cooldown();
       const cooldownConfirmation = await usingProgressNotification(
         "Awaiting cooldown transaction approval",
-        "Please commit the cooldown transaction with your wallet.",
+        "Please sign the cooldown transaction with your wallet.",
         "info",
         cooldownRequest
       );

@@ -79,7 +79,7 @@ export const useDepositMutation = ({
       const deposit = lendingContract.deposit(asset, amount, account, 0);
       const depositConfirmation = await usingProgressNotification(
         "Awaiting deposit approval",
-        "Please commit the transaction for deposit.",
+        "Please sign the transaction for deposit.",
         "info",
         deposit
       );

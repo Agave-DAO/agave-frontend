@@ -60,7 +60,7 @@ export const useApprovalMutation = ({
           const approvalReset = tokenContract.approve(spender, constants.Zero);
           const approvalResetConfirmation = await usingProgressNotification(
             "Awaiting approval reset",
-            "Some ERC20-like tokens require setting your allowance to 0 before changing it. Please commit the transaction resetting approval to 0.",
+            "Some ERC20-like tokens require setting your allowance to 0 before changing it. Please sign the transaction resetting approval to 0.",
             "warning",
             approvalReset
           );
@@ -75,7 +75,7 @@ export const useApprovalMutation = ({
         const approval = tokenContract.approve(spender, amount);
         const approvalConfirmation = await usingProgressNotification(
           "Awaiting spend approval",
-          "Please commit the transaction for ERC20 approval.",
+          "Please sign the transaction for ERC20 approval.",
           "info",
           approval
         );

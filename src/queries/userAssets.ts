@@ -3,6 +3,7 @@ import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAllATokens } from "./allATokens";
 import { useAllReserveTokens } from "./allReserveTokens";
+import { useUserReserveData } from "./protocolReserveData";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
 import {
@@ -63,6 +64,61 @@ export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
     cacheTime: 60 * 60 * 1000,
   }
 );
+
+export const useUserVariableDebtForAsset =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    BigNumber,
+    [
+      _p1: "user",
+      _p2: "asset",
+      assetAddress: string | undefined,
+      _p3: "debt"
+    ],
+    [assetAddress: string]
+  >(
+    async (params, assetAddress) => {
+      return useUserReserveData.fetchQueryDefined(params, assetAddress)
+        .then(result => result.currentVariableDebt)
+    },
+    (assetAddress) => [
+      "user",
+      "asset",
+      assetAddress,
+      "debt"
+    ],
+    () => undefined,
+    {
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000
+    }
+  );
+
+export const useUserVariableDebtTokenBalances =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    { symbol: string; tokenAddress: string; balance: BigNumber }[],
+    [_p1: "user", _p2: "allReserves", _p3: "debts"],
+    []
+  >(
+    async params => {
+      const reserves = await useAllReserveTokens.fetchQueryDefined(params);
+
+      const reservesWithVariableDebt = await Promise.all(
+        reserves.map(reserve =>
+          useUserVariableDebtForAsset.fetchQueryDefined(params, reserve.tokenAddress)
+            .then(debt => ({ ...reserve, balance: debt }))
+        )
+      );
+
+      return reservesWithVariableDebt
+    },
+    () => ["user", "allReserves", "debts"],
+    () => undefined,
+    {
+      refetchOnMount: true,
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
 
 export const useUserReserveAssetBalances =
   buildQueryHookWhenParamsDefinedChainAddrs<
