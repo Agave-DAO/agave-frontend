@@ -14,6 +14,7 @@ import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons"
 import { Box } from "@chakra-ui/react"
 import React from "react";
 import { Column, useTable, useSortBy, TableInstance } from "react-table";
+import { useHistory } from "react-router-dom";
 
 export type TableRenderingProps =
   | "getTableProps"
@@ -88,6 +89,11 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
   rowProps: rowStyle,
   cellProps: cellStyle,
 }) => {
+  const reactHistory = useHistory();
+  const handleRowClick = React.useCallback( (row:{ original: {symbol: string}}) => {
+	console.log(row)
+	reactHistory.push(`/deposit/${row.original?.symbol}`);
+  }, []);
   return React.useMemo(
     () => (
       <Table {...getTableProps()} margin={0} {...tableStyle}>
@@ -114,10 +120,10 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           ))}
         </Thead>
         <Tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
+		{rows.map((row, i) => {
             prepareRow(row);
             return (
-              <Tr {...row.getRowProps()} {...rowStyle}>
+              <Tr {...row.getRowProps()} {...rowStyle} onClick={()=> handleRowClick(row, )}>
                 {row.cells.map(cell => {
                   return (
                     <Td {...cell.getCellProps()} {...cellStyle}>
