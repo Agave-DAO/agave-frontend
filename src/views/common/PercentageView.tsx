@@ -18,7 +18,7 @@ export const PercentageView: React.FC<{
   }
   return (
       <Text fontWeight="bold" color={ratio >= 0 ? "yellow.100" : "red.600"}>
-      % {ratio * 100}
+      % {ratio * 100 }
       </Text>
 );
 };
