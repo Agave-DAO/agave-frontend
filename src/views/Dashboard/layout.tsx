@@ -309,7 +309,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
                 onOpen={onSubmitAP}
               />
             </HStack>
-            <Text fontWeight="bold" textAlign="left" mt="0.5em">
+            <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
               <DashboardApproximateBalanceDisplay />
             </Text>
           </VStack>
@@ -327,14 +327,18 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
           >
             <Box h="7rem" mt="0.5rem">
               <Text>Borrowed</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {borrowed ? `$ ${ethers.utils.formatEther(borrowed ?? 0)}` : "-"}
+              <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
+                {borrowed
+                  ? `$ ${ethers.utils.formatEther(borrowed ?? 0)}`
+                  : "-"}
               </Text>
             </Box>
             <Box h="7rem" mt="0.5rem" ml="4rem">
               <Text>Collateral</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {collateral ? `$ ${ethers.utils.formatEther(collateral ?? 0)}` : "-"}
+              <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
+                {collateral
+                  ? `$ ${ethers.utils.formatEther(collateral ?? 0)}`
+                  : "-"}
               </Text>
             </Box>
             <VStack
@@ -355,7 +359,13 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
                 />
               </HStack>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {healthFactor ? ethers.utils.formatEther(healthFactor).toLocaleString() : "-"}
+                {(healthFactor &&
+                !healthFactor.isZero() &&
+                !healthFactor?.gt("999999999999999999999999999999"))
+                  ? ethers.utils.formatEther(healthFactor).toLocaleString()
+                  : (healthFactor?.gt("999999999999999999999999999999"))
+                  ? "∞"
+                  : "-"}
               </Text>
             </VStack>
           </Box>
