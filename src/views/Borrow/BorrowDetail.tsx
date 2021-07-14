@@ -55,7 +55,6 @@ function createState<SelectedState extends PossibleTags<BorrowState>>(
   } as any;
 }
 
-
 // THIS BorrowState IS ALL WRONG AND NEEDS FIXING WHEN THE QUERIES ARE DONE
 const stateNames: Record<PossibleTags<BorrowState>, string> = {
   init: "Token",
@@ -73,20 +72,20 @@ const BorrowTitle = "Borrow overview";
 export interface BorrowBannerProps {}
 
 export const BorrowBanner: React.FC<{}> = () => {
-	const history = useHistory();
-	return (
-	  <Center width="100%" justifyContent="space-between">
-		<Text
-		  fontWeight="bold"
-		  color="white"
-		  fontSize={{ base: "1.8rem", md: "2.4rem" }}
-		  onClick={() => history.push("/dashboard")}
-		>
-		  Borrow
-		</Text>		  
-	  </Center>
-	);
-  };
+  const history = useHistory();
+  return (
+    <Center width="100%" justifyContent="space-between">
+      <Text
+        fontWeight="bold"
+        color="white"
+        fontSize={{ base: "1.8rem", md: "2.4rem" }}
+        onClick={() => history.push("/dashboard")}
+      >
+        Borrow
+      </Text>
+    </Center>
+  );
+};
 
 const InitialComp: React.FC<{
   state: InitialState;
@@ -111,7 +110,6 @@ const InitialComp: React.FC<{
     />
   );
 };
-
 
 /*
  ##
@@ -222,7 +220,6 @@ const BorrowStateMachine: React.FC<{
 
 */
 
-
 const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,
 }) => {
@@ -244,7 +241,7 @@ const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
         rounded="lg"
         padding="1em"
       >
-		  {/*
+        {/*
         <BorrowStateMachine
           state={borrowState}
           setState={setBorrowState}
@@ -300,7 +297,7 @@ export const BorrowDetail: React.FC = () => {
             }
             size="xl"
             padding="1rem"
-			m="3rem"
+            m="3rem"
           >
             Take me back!
           </Button>
@@ -310,4 +307,3 @@ export const BorrowDetail: React.FC = () => {
   }
   return <BorrowDetailForAsset asset={asset} />;
 };
-
