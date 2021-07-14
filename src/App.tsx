@@ -12,8 +12,9 @@ import { DepositBanner } from "./views/Deposit/layout";
 import { DepositDetail } from "./views/Deposit/DepositDetail";
 import { WithdrawBanner } from "./views/Withdraw/WithdrawDetail";
 import { WithdrawDetail } from "./views/Withdraw/WithdrawDetail";
-// import Borrow from "./views/Borrow";
-// import BorrowDetail from "./views/Borrow/BorrowDetail";
+
+import { BorrowBanner } from "./views/Borrow/BorrowDetail";
+import { BorrowDetail } from "./views/Borrow/BorrowDetail";
 // import BorrowConfirm from "./views/Borrow/BorrowConfirm";
 import { RepayBanner } from "./views/Repay/layout";
 import { RepayDetail } from './views/Repay/RepayDetail';
@@ -76,7 +77,8 @@ const App: React.FC<IAppProps> = props => {
                 </Route>
                 <Route path="/markets"><MarketsBanner/></Route>
                 <Route path="/deposit"><DepositBanner/></Route>
-                <Route path="/withdraw"><WithdrawBanner/></Route>
+				<Route path="/borrow"><BorrowBanner/></Route>
+				<Route path="/withdraw"><WithdrawBanner/></Route>
                 <Route path="/repay"><RepayBanner/></Route>
               </Switch>
             }
@@ -90,7 +92,7 @@ const App: React.FC<IAppProps> = props => {
               <Route path="/deposit/:assetName" component={DepositDetail} exact />
               <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
               {/* <Route path="/borrow" component={Borrow} exact /> */}
-              {/* <Route path="/borrow/:assetName" component={BorrowDetail} exact /> */}
+              <Route path="/borrow/:assetName" component={BorrowDetail} exact />
               {/* <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact /> */}
               <Route path="/repay/:assetName" component={RepayDetail} exact />
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
