@@ -151,7 +151,7 @@ export interface ActionDetailProps {
 export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, actionName, actionBaseRoute }) => {
   const history = useHistory();
   const [amountStr, setAmountStr] = useState<string>("");
-  const walletBalance = Number(bigNumberToString(balance));
+  const walletBalance = bigNumberToString(balance);
 
   const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     setAmountStr(e.target.value);
@@ -248,7 +248,7 @@ export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, acti
               </div>
               <div
                 className="max-section"
-                onClick={() => setAmountStr(String(walletBalance))}
+                onClick={() => setAmountStr(walletBalance)}
               >
                 Max
               </div>
