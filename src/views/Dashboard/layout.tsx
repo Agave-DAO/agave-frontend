@@ -15,7 +15,7 @@ import {
   ModalBody,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { ethers } from "ethers";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import { fontSizes, spacings } from "../../utils/constants";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from "react-device-detect";
@@ -25,7 +25,6 @@ import { DashboardEmptyState } from "./emptyState";
 import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
-import { formatUnits } from "ethers/lib/utils";
 import { BigNumber, constants } from "ethers";
 
 interface DashboardProps {
@@ -228,7 +227,7 @@ const DashboardApproximateBalanceDisplay: React.FC<{}> = () => {
     );
   }, [balancesDaiWei]);
 
-  return <>$ {balance ? formatUnits(balance, daiDecimals) : "-"}</>;
+  return <>$ {bigNumberToString(balance)}</>;
 };
 
 export const DashboardLayout: React.FC<DashboardProps> = ({
@@ -309,7 +308,8 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
                 onOpen={onSubmitAP}
               />
             </HStack>
-            <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
+            {bigNumberToString(healthFactor)}
+            <Text fontWeight="bold" textAlign="left" mt="0.5em" >
               <DashboardApproximateBalanceDisplay />
             </Text>
           </VStack>
@@ -329,7 +329,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
               <Text>Borrowed</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
                 {borrowed
-                  ? `$ ${ethers.utils.formatEther(borrowed ?? 0)}`
+                  ? `$ ${bigNumberToString(borrowed)}`
                   : "-"}
               </Text>
             </Box>
@@ -337,7 +337,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
               <Text>Collateral</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
                 {collateral
-                  ? `$ ${ethers.utils.formatEther(collateral ?? 0)}`
+                  ? `$ ${bigNumberToString(collateral)}`
                   : "-"}
               </Text>
             </Box>
@@ -359,13 +359,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
                 />
               </HStack>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {(healthFactor &&
-                !healthFactor.isZero() &&
-                !healthFactor?.gt("999999999999999999999999999999"))
-                  ? ethers.utils.formatEther(healthFactor).toLocaleString()
-                  : (healthFactor?.gt("999999999999999999999999999999"))
-                  ? "∞"
-                  : "-"}
+                {bigNumberToString(healthFactor)}
               </Text>
             </VStack>
           </Box>

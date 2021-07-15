@@ -1,9 +1,9 @@
 import React from "react";
-import { ethers } from "ethers";
 import { Box, Text } from "@chakra-ui/layout";
-import { Flex, VStack } from "@chakra-ui/react";
+import { Divider, Flex, VStack } from "@chakra-ui/react";
 import { DepositAsset } from ".";
 import { TokenIcon } from "../../utils/icons";
+import { bigNumberToString } from "../../utils/fixedPoint"
 
 const AssetBalanceDisplay: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
   return React.useMemo(() => {
@@ -28,8 +28,7 @@ const AssetBalanceDisplay: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
           <Box>
             <Text p={3} fontWeight="bold">
               ${" "}
-              {Number(ethers.utils.formatEther(asset.daiWeiPriceTotal ?? 0)) ??
-                "-"}
+              {bigNumberToString(asset.daiWeiPriceTotal)}
             </Text>
           </Box>
         </Box>
@@ -43,7 +42,7 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
     return assets.reduce(
       (memo, next) =>
         memo +
-        (Number(ethers.utils.formatEther(next.daiWeiPriceTotal ?? 0)) ?? 0),
+        (Number( bigNumberToString(next.daiWeiPriceTotal)) ),
       0
     );
   }, [assets]);
@@ -54,14 +53,16 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
 
   return React.useMemo(() => {
     return (
-      <Flex w="100%" flexDir="column">
+      <Flex w="100%" flexDir="column" >
         <VStack
+		  py="2rem"
           divider={depositDivider}
           children={assets.map((value, i) => (
             <AssetBalanceDisplay key={value.tokenAddress} asset={value} />
           ))}
         />
         {}
+		<Divider></Divider>
         <Flex
           alignSelf="center"
           justifyContent="space-between"
@@ -70,7 +71,7 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
           pt={6}
         >
           <Text>Total</Text>
-          <Text fontWeight="bold">$ {total}</Text>
+          <Text fontWeight="bold">$ {total.toFixed(2)}</Text>
         </Flex>
       </Flex>
     );

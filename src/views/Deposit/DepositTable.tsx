@@ -1,5 +1,5 @@
 import React from "react";
-import { ethers } from "ethers";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
@@ -9,7 +9,7 @@ import {
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
-import { DepositAPYView } from "../common/DepositAPYView"
+import { DepositAPYView } from "../common/DepositAPYView";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
@@ -19,9 +19,7 @@ import { Link, useHistory } from "react-router-dom";
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
   const balance = useUserAssetBalance(tokenAddress);
-  const balanceNumber = balance.data
-    ? Number(ethers.utils.formatEther(balance.data))
-    : undefined;
+  const balanceNumber = Number(bigNumberToString(balance.data));
   const balanceUSD = balanceNumber
     ? (Number(price.data) * balanceNumber).toFixed(2)
     : "-";
@@ -40,7 +38,9 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   }, [balanceNumber, balanceUSD]);
 };
 
-export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
+export const DepositTable: React.FC<{ activeType: string }> = ({
+  activeType,
+}) => {
   const history = useHistory();
   interface AssetRecord {
     symbol: string;
@@ -67,21 +67,18 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
         Header: "Asset",
         accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value }) => (
-          <Flex
-            width="100%"
-            height="100%"
-            alignItems={"center"}
-          >
-            <Center width="4rem">
-              <TokenIcon symbol={value} />
-            </Center>
-            <Box w="1rem"></Box>
-            <Box>
-              <Text>
-                <Link to={`/deposit/${value}`}>{value}</Link>
-              </Text>
-            </Box>
-          </Flex>
+          <Link to={`/deposit/${value}`}>
+            <Flex width="100%" height="100%" alignItems={"center"}>
+              <Center width="4rem">
+                <TokenIcon symbol={value} />
+              </Center>
+              <Box w="1rem"></Box>
+
+              <Box>
+                <Text>{value}</Text>
+              </Box>
+            </Flex>
+          </Link>
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
@@ -110,7 +107,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
         tableProps={{
           textAlign: "center",
           display: "flex",
-          width: "100%", 
+          width: "100%",
           flexDirection: "column",
         }}
         headProps={{
@@ -120,17 +117,17 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
           border: "none",
         }}
         rowProps={{
-          display: "flex", 
-          flexDirection: "column", 
+          display: "flex",
+          flexDirection: "column",
           margin: "1em 0",
           padding: "1em",
           borderRadius: "1em",
           bg: { base: "secondary.900" },
         }}
         cellProps={{
-          display: "flex", 
-          flexDirection: "row", 
-          alignItems: "center", 
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
           justifyContent: "space-between",
         }}
       />
@@ -161,6 +158,9 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
         }}
         cellProps={{
           borderBottom: "none",
+          border: "0px solid",
+          _first: { borderLeftRadius: "10px" },
+          _last: { borderRightRadius: "10px" },
         }}
       />
     ),
@@ -172,7 +172,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) =
   return (
     <div>
       <SortedHtmlTable columns={columns} data={assetRecords}>
-      {ismaxWidth ? mobileRenderer : renderer}
+        {ismaxWidth ? mobileRenderer : renderer}
       </SortedHtmlTable>
     </div>
   );
