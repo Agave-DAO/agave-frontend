@@ -27,6 +27,7 @@ import {
   TableRenderer,
   MobileTableRenderer,
 } from "../../utils/htmlTable";
+import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -126,53 +127,6 @@ const TotalBorrowedView: React.FC<{
   }, [totalBorrowed.data]);
 };
 
-const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
-}) => {
-  const query = useDepositAPY(tokenAddress);
-  return React.useMemo(() => {
-    if (query.data === undefined) {
-      return <>-</>;
-    }
-  const depositAPY = query.data
-    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3)} />;
-  }, [query.data]);
-};
-
-const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
-}) => {
-  const query = useVariableBorrowAPR(tokenAddress);
-  return React.useMemo(() => {
-    if (query.data === undefined) {
-      return <>-</>;
-    }
-	const variableBorrowAPR = query.data
-    return (
-      <PercentageView
-        ratio={fixedNumberToPercentage(variableBorrowAPR, 3)}
-      />
-    );
-  }, [query.data]);
-};
-
-const StableAPRView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
-}) => {
-  const query = useStableBorrowAPR(tokenAddress);
-  return React.useMemo(() => {
-    if (query.data === undefined) {
-      return <>-</>;
-    }
-  const stableBorrowAPR = query.data
-    return (
-      <PercentageView
-        ratio={fixedNumberToPercentage(stableBorrowAPR, 3)}
-      />
-    );
-  }, [query.data]);
-};
-
 const AssetTable: React.FC<{
   viewMode: "native" | "usd";
 }> = ({ viewMode }) => {
@@ -261,7 +215,7 @@ const AssetTable: React.FC<{
       accessor: row => row.tokenAddress,
       Cell: (({ value }) => (
         <Center>
-          <VariableAPRView tokenAddress={value} />
+          <BorrowAPRView tokenAddress={value} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
@@ -272,7 +226,7 @@ const AssetTable: React.FC<{
       accessor: row => row.tokenAddress,
       Cell: (({ value }) => (
         <Center>
-          <StableAPRView tokenAddress={value} />
+          <BorrowAPRView tokenAddress={value} isStable={true}/>
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,

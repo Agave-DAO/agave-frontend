@@ -1,12 +1,12 @@
 import React from "react";
-import { CellProps, Column, Renderer } from "react-table";
+import { CellProps, Column, Renderer, useRowSelect } from "react-table";
 import {
   BasicTableRenderer,
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
 import { BalanceView } from "../common/BalanceView";
-import { DepositAPYView } from "../common/DepositAPYView";
+import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
 import { Box, Text } from "@chakra-ui/layout";
 import { Button, Flex, Switch } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
@@ -16,6 +16,7 @@ import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConf
 import { useHistory } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { BigNumber } from "ethers";
+import { ProtocolReserveData } from "../../queries/protocolReserveData";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -65,7 +66,7 @@ export const DashboardTable: React.FC<{
       {
         Header:
           mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
-        accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+        accessor: row => row.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value, row }) => (
           <Flex alignItems={"center"}>
             <Box>
@@ -87,12 +88,15 @@ export const DashboardTable: React.FC<{
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
-        accessor: row => row.tokenAddress,  
+        accessor: row => row.backingReserve ? row.backingReserve.tokenAddress : row.tokenAddress,  
         Cell: (({ value }) => ( 
-          <DepositAPYView tokenAddress={value} 
-		  /* There's a difference between the deposit APY and the borrow APR. Lending rates are obviously higher than borrowing rates */
+          (mode === DashboardTableType.Borrow) ?
+		  <BorrowAPRView tokenAddress={value} isStable={false}
 		  />
-        )) as Renderer<CellProps<AssetData, string>>,
+		  :
+		  <DepositAPYView tokenAddress={value}
+		  />
+        )) as Renderer<CellProps<AssetData, string >>,
       }, 
       {
         Header: mode === DashboardTableType.Borrow ? " " : "Collateral",

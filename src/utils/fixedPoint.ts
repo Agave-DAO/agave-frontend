@@ -51,7 +51,8 @@ export function bigNumberToString(
 
 export function fixedNumberToPercentage(
   input: FixedNumber | null | undefined,
-  decimals: number | number = 2
+  decimals: number | number = 2,
+  min: number | number = 0
 ): string {
   if (!input || input === null || input.isZero()) {
     return "0";
@@ -59,7 +60,7 @@ export function fixedNumberToPercentage(
   const inputAsFloat = input.toUnsafeFloat();
   let outputStr = (inputAsFloat * 100).toFixed(decimals);
   // trim trailing 0's and the dot if it's the decimal separator
-  while (decimals >= 0) {
+  while (decimals >= 0 && decimals - min > 0) {
     if (outputStr.endsWith("0") || (decimals = 0 && outputStr.endsWith("."))) {
       outputStr = outputStr.slice(0, -1);
     } else decimals = 0;

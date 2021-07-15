@@ -9,7 +9,7 @@ import {
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
-import { DepositAPYView } from "../common/DepositAPYView";
+import { DepositAPYView } from "../common/RatesView";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
