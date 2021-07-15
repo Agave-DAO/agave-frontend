@@ -19,7 +19,6 @@ import {
   PopoverArrow,
   PopoverCloseButton,
 } from "@chakra-ui/react";
-import { formatEther } from "ethers/lib/utils";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
@@ -37,6 +36,7 @@ import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
 import { TokenIcon } from "../../utils/icons";
+import { bigNumberToString } from "../../utils/fixedPoint"
 
 type BorrowDashProps = {
   token: ReserveTokenDefinition;
@@ -103,7 +103,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
     return compositionArray
       ? compositionArray.map(share => {
           if (share.gt(0)) {
-            return formatEther(share.mul(100));
+            return bigNumberToString(share.mul(100));
           } else return null;
         })
       : [];
@@ -192,12 +192,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {liquidityAvailable
-                ? formatEther(liquidityAvailable).slice(
-                    0,
-                    formatEther(liquidityAvailable).indexOf(".") + 3
-                  )
-                : "-"}
+              {bigNumberToString(liquidityAvailable)}
             </Text>
           </Box>
         </Flex>
@@ -292,13 +287,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
               fontSize={{ base: fontSizes.md, md: fontSizes.lg }}
               fontWeight="bold"
             >
-              {healthFactor
-                ? "$ " +
-                  formatEther(healthFactor).slice(
-                    0,
-                    formatEther(healthFactor).indexOf(".") + 4
-                  )
-                : "-"}
+              {bigNumberToString(healthFactor)}
             </ColoredText>
             <ModalIcon
               position="relative"
@@ -327,13 +316,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
               fontWeight="bold"
               minW={{ base: "30px", md: "100%" }}
             >
-              {totalCollateralEth
-                ? "$ " +
-                  formatEther(totalCollateralEth).slice(
-                    0,
-                    formatEther(totalCollateralEth).indexOf(".") + 3
-                  )
-                : "-"}
+              {bigNumberToString(totalCollateralEth)}
             </Text>
             <ModalIcon
               position="relative"

@@ -7,6 +7,7 @@ import {
   useTotalMarketSize,
 } from "../../queries/marketSize";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../../utils/queryBuilder";
+import { fixedNumberToPercentage } from "../../utils/fixedPoint"
 import { FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
@@ -133,8 +134,8 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-
-    return <PercentageView ratio={query.data.round(4).toUnsafeFloat()} />;
+  const depositAPY = query.data
+    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3)} />;
   }, [query.data]);
 };
 
@@ -146,10 +147,10 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-
+	const variableBorrowAPR = query.data
     return (
       <PercentageView
-        ratio={query.data.round(4).toUnsafeFloat()}
+        ratio={fixedNumberToPercentage(variableBorrowAPR, 3)}
       />
     );
   }, [query.data]);
@@ -163,10 +164,10 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-
+  const stableBorrowAPR = query.data
     return (
       <PercentageView
-        ratio={query.data.round(4).toUnsafeFloat()}
+        ratio={fixedNumberToPercentage(stableBorrowAPR, 3)}
       />
     );
   }, [query.data]);

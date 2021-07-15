@@ -3,7 +3,7 @@ import { IMarketData } from "../utils/constants";
 import { useWeb3React } from "@web3-react/core";
 import { Web3Provider } from '@ethersproject/providers';
 import { Erc20abi__factory } from "../contracts";
-import { ethers } from "ethers";
+import { bigNumberToString } from "../utils/fixedPoint"
 import { BigNumber } from "@ethersproject/bignumber";
 
 export interface UseBalanceDto {
@@ -33,7 +33,7 @@ export const useBalance = (asset: IMarketData | undefined): UseBalanceDto => {
       );
       const tokenBalance = await contract.balanceOf(address);
       console.log("Token balance:");
-      console.log(ethers.utils.formatEther(tokenBalance));
+      console.log(bigNumberToString(tokenBalance));
       return tokenBalance;
     },
     {

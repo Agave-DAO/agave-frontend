@@ -19,7 +19,7 @@ import {
 	PopoverArrow,
 	PopoverCloseButton
 } from "@chakra-ui/react";
-import { formatEther } from "ethers/lib/utils";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import React from "react";
 import { ethers } from "ethers";
 import ColoredText from "../../components/ColoredText";
@@ -92,7 +92,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({
 		});
 		return (compositionArray) ? compositionArray.map(share => {
 			if (share.gt(0)) {
-				return formatEther(share.mul(100))
+				return bigNumberToString(share.mul(100))
 			}
 			else return null
 		}) : []
@@ -134,7 +134,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({
 					<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} pr="1rem">Deposited</Text>
 					<Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
 						<Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-							{aTokenBalance ? formatEther(aTokenBalance).slice(0, 8) : 0}
+							{bigNumberToString(aTokenBalance)}
 						</Text>
 						{isSmallerThan400 ? null :
 							" " + token.symbol
@@ -146,7 +146,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({
 						<Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}  >Health factor</Text>
 					</HStack>
 					<HStack pr={{ base: "0rem", md: "1rem" }} textAlign="center" w="100%">
-						<ColoredText minW={{base:'30px',md:"100%"}}> {healthFactor ? ethers.utils.formatEther(healthFactor).toLocaleString() : "-"}</ColoredText>
+						<ColoredText minW={{base:'30px',md:"100%"}}> {bigNumberToString(healthFactor)}</ColoredText>
 						<ModalIcon position="relative" top="0" right="0" onOpen={() => { }} />
 					</HStack>
 				</Flex>

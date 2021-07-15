@@ -13,7 +13,7 @@ import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { formatEther } from "ethers/lib/utils";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import {
@@ -188,7 +188,7 @@ const WithdrawnTxComp: React.FC<{
       <ControllerItem
         stepNumber={2}
         stepName="Withdrawn"
-        stepDesc={`Withdraw of ${formatEther(state.amountToWithdraw)} ${
+        stepDesc={`Withdraw of ${bigNumberToString(state.amountToWithdraw)} ${
           state.token.symbol
         } successful`}
         actionName="Finish"

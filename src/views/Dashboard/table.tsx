@@ -15,6 +15,7 @@ import { AssetData } from ".";
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 import { useHistory } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import { BigNumber } from "ethers";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -81,16 +82,18 @@ export const DashboardTable: React.FC<{
         Header: mode === DashboardTableType.Borrow ? "Borrowed" : "Deposited",
         accessor: row => row.balance,
         Cell: (({ value }) => <BalanceView balanceBN={value} />) as Renderer<
-          CellProps<AssetData, string>
+          CellProps<AssetData, BigNumber>
         >,
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
-        accessor: row => row.tokenAddress,
-        Cell: (({ value }) => (
-          <DepositAPYView tokenAddress={value} />
+        accessor: row => row.tokenAddress,  
+        Cell: (({ value }) => ( 
+          <DepositAPYView tokenAddress={value} 
+		  /* There's a difference between the deposit APY and the borrow APR. Lending rates are obviously higher than borrowing rates */
+		  />
         )) as Renderer<CellProps<AssetData, string>>,
-      },
+      }, 
       {
         Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
         accessor: row => row.tokenAddress,

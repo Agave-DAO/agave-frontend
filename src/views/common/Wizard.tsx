@@ -7,7 +7,7 @@ import { BigNumber } from "ethers";
 // import { TransactionLog } from "../common/TransactionLog";
 import { ModalIcon, TokenIcon } from "../../utils/icons";
 import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
-import { formatEther } from "ethers/lib/utils";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
 
@@ -41,7 +41,7 @@ export const WizardOverviewWrapper: React.FC<{
               boxSize={{ base: "1.5rem", md: "1.8rem" }}
             />
             <Text fontSize={{base:fontSizes.sm, md:fontSizes.md}}>
-              {formatEther(amount)} {asset.symbol}
+              {bigNumberToString(amount)} {asset.symbol}
             </Text>
           </HStack>
         </HStack>
@@ -64,7 +64,7 @@ export const WizardOverviewWrapper: React.FC<{
             overflow="hidden"
             overflowWrap="normal"
           >
-            {currentHealthFactor ? formatEther(currentHealthFactor) : "-"}
+            {bigNumberToString(currentHealthFactor)}
           </ColoredText>
         </HStack>
         {/* Calculating this is hard - do it later */}

@@ -1,7 +1,6 @@
 import { Box, HStack, Stack, Text, VStack, useMediaQuery, Flex } from "@chakra-ui/react";
-import { formatEther } from "ethers/lib/utils";
 import React from "react";
-import { ethers } from "ethers";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -14,6 +13,7 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
+
 
 type DepositDashProps = {
   token: ReserveTokenDefinition;
@@ -66,7 +66,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}  pr="1rem">My Deposits</Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>	
             <Text display="inline-block" fontWeight="bold" fontSize="inherit" >
-              {aTokenBalance ? formatEther(aTokenBalance).slice(0,8) : 0}
+              {bigNumberToString(aTokenBalance)}
             </Text>
 			{ isSmallerThan400 ? null : 
 			" " + token.symbol
@@ -77,7 +77,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}  pr="1rem">Wallet Balance</Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {tokenBalance ? formatEther(tokenBalance).slice(0,8) : 0}
+              {bigNumberToString(tokenBalance)}
             </Text>
 			{ isSmallerThan400 ? null : 
 			" " + token.symbol
@@ -89,7 +89,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
 			  <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Health factor</Text>
 			  <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />
 		  </HStack>
-          <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg  }}>{healthFactor ? ethers.utils.formatEther(healthFactor).toLocaleString() : "-"}</ColoredText>
+          <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg  }}>{bigNumberToString(healthFactor)}</ColoredText>
         </Flex>
       </Flex>
       <Flex 
@@ -108,7 +108,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >{isSmallerThan900 ? "Liquidity" : "Available Liquidity"}</Text>
 		  <HStack fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
           	<Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
-            	{liquidityAvailable ? formatEther(liquidityAvailable) : "-"}
+            	{bigNumberToString(liquidityAvailable)}
           	</Text>
 		  	{" "}
           	{token.symbol}
@@ -118,6 +118,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >{isSmallerThan900 ? "APY" : "Deposit APY"}</Text>
           <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
+			 {console.log(variableDepositAPY)}
             {variableDepositAPY ? (variableDepositAPY.toUnsafeFloat() * 100).toLocaleString() : "-"} %
           </Text>
         </Stack>

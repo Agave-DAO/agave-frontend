@@ -13,7 +13,7 @@ import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { formatEther } from "ethers/lib/utils";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import {
   useApprovalMutation,
   UseApprovalMutationProps,
@@ -223,7 +223,7 @@ const DepositedTxComp: React.FC<{
       <ControllerItem
         stepNumber={3}
         stepName="Deposited"
-        stepDesc={`Deposit of ${formatEther(state.amountToDeposit)} ${
+        stepDesc={`Deposit of ${bigNumberToString(state.amountToDeposit)} ${
           state.token.symbol
         } successful`}
         actionName="Finish"

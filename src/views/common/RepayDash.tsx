@@ -13,7 +13,7 @@ import {
   Grid,
 } from "@chakra-ui/react";
 import { BigNumber, constants } from "ethers";
-import { formatEther } from "ethers/lib/utils";
+import { bigNumberToString } from "../../utils/fixedPoint"
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
@@ -78,7 +78,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
     return compositionArray
       ? compositionArray.map(share => {
           if (share.gt(0)) {
-            return formatEther(share.mul(100));
+            return bigNumberToString(share.mul(100));
           }
         })
       : [];
@@ -119,7 +119,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {debt ? formatEther(debt) : 0}
+              {bigNumberToString(debt)}
             </Text>
             {isSmallerThan400 ? null : " " + token.symbol}
           </Box>
@@ -137,7 +137,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {tokenBalance ? formatEther(tokenBalance).slice(0, 8) : 0}
+              {bigNumberToString(tokenBalance)}
             </Text>
             {isSmallerThan400 ? null : " " + token.symbol}
           </Box>
@@ -162,7 +162,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
             />
           </HStack>
           <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
-            {healthFactor ? formatEther(healthFactor).toLocaleString() : "-"}
+            {bigNumberToString(healthFactor)}
           </ColoredText>
         </Flex>
       </Flex>
@@ -189,7 +189,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
                 }}
                 fontWeight="bold"
               >
-                {totalCollateral ? formatEther(totalCollateral) : "-"} XDAI
+                {bigNumberToString(totalCollateral)} XDAI
               </Text>{" "}
               {token.symbol}
             </HStack>

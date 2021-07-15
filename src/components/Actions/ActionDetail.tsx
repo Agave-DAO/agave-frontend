@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { store as NotificationManager } from "react-notifications-component";
 import Button from "../../components/Button";
 import { IMarketData } from "../../utils/constants";
-import { ethers } from "ethers";
+import { bigNumberToString } from "../../utils/fixedPoint"
 // import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
 
 const ActionDetailWrapper = styled.div`
@@ -151,7 +151,7 @@ export interface ActionDetailProps {
 export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, actionName, actionBaseRoute }) => {
   const history = useHistory();
   const [amountStr, setAmountStr] = useState<string>("");
-  const walletBalance = Number(ethers.utils.formatEther(balance || 0));
+  const walletBalance = bigNumberToString(balance);
 
   const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
     setAmountStr(e.target.value);
@@ -248,7 +248,7 @@ export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, acti
               </div>
               <div
                 className="max-section"
-                onClick={() => setAmountStr(String(walletBalance))}
+                onClick={() => setAmountStr(walletBalance)}
               >
                 Max
               </div>
