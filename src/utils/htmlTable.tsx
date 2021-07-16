@@ -81,6 +81,7 @@ export interface BasicTableRendererProps<TRecord extends object> {
   headProps?: TableColumnHeaderProps;
   rowProps?: TableRowProps;
   cellProps?: TableCellProps;
+  hidden?: boolean;
 }
 
 export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
@@ -90,6 +91,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
   headProps: headStyle,
   rowProps: rowStyle,
   cellProps: cellStyle,
+  hidden: hidden,
 }) => {
   const reactHistory = useHistory();
   const handleRowClick = React.useCallback( (row:{ original: {symbol: string}}) => {
@@ -102,7 +104,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           {headerGroups.map(headerGroup => (
             <Tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <Th {...column.getHeaderProps(column.getSortByToggleProps())} {...headStyle}>
+                <Th {...column.getHeaderProps(column.getSortByToggleProps())} {...headStyle}  hidden={hidden}>
                   {column.render("Header")}
                   <span>
                     {
@@ -124,7 +126,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
 		{rows.map((row, i) => {
             prepareRow(row);
             return (
-              <Tr {...row.getRowProps()} {...rowStyle} onClick={()=> handleRowClick(row, )}>
+              <Tr {...row.getRowProps()} {...rowStyle} onClick={()=> handleRowClick(row, )} hidden={hidden}>
                 {row.cells.map(cell => {
                   return (
                     <Td {...cell.getCellProps()} {...cellStyle}>

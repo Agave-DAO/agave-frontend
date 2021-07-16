@@ -365,10 +365,10 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
           </Box>
         </UpperBox>
       </Flex>
-      <HStack spacing="2rem" mt="2rem" alignItems="flex-start">
+      <Box mt="2rem" d="grid"  gridTemplateColumns={{base:"1fr", xl:"1fr 1fr"}}  gridGap="2.5rem">
         {depositsTable}
         {borrowsTable}
-      </HStack>
+      </Box>
       <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </Flex>
   );
