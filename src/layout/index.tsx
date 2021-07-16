@@ -46,10 +46,10 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
   );
 
   const [isFullRes] = useMediaQuery("(max-width: 1923px)");
-  const [isLargeTab] = useMediaQuery("(max-width: 1200px)");
-  const [isSmallTab] = useMediaQuery("(max-width: 800px)");
-  const [isLargePhone] = useMediaQuery("(max-width: 600px)");
-  const [isMobile] = useMediaQuery("(max-width: 450px)");
+  // const [isLargeTab] = useMediaQuery("(max-width: 1200px)");
+  // const [isSmallTab] = useMediaQuery("(max-width: 800px)");
+  // const [isLargePhone] = useMediaQuery("(max-width: 600px)");
+  // const [isMobile] = useMediaQuery("(max-width: 450px)");
 
   return (
     <Box

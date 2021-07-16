@@ -3,12 +3,15 @@ import APYCard from "./APYCards";
 import StatCard from "./StatCard";
 import MiddleCard from "./middleCards";
 
-import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
+import { useProtocolReserveData } from "../../queries/protocolReserveData";
+import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
 import { useTotalBorrowedForAsset } from "../../queries/totalBorrowedForAsset";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAvailableLiquidity } from "../../queries/availableLiquidity";
+import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+
 import { UnlockIcon, LockIcon } from "@chakra-ui/icons";
 import {
   useMediaQuery,
@@ -22,48 +25,90 @@ import {
 } from "@chakra-ui/react";
 
 // conversions and helpers
-// import { round2Fixed } from "../../utils/helpers";
-// import { FixedFromRay } from "../../utils/fixedPoint";
-// import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
+import { round2Fixed } from "../../utils/helpers";
+import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
 import { TokenIcon } from "../../utils/icons";
 
 const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,
 }) => {
   // Query data
-  const reserveData = useProtocolReserveConfiguration(asset.tokenAddress).data;
-  const assetPrice = useAssetPriceInDai(asset.tokenAddress).data;
-  const availableLiquidity = useAvailableLiquidity(asset.tokenAddress).data;
-  const totalBorrowedForAsset = useTotalBorrowedForAsset(asset.tokenAddress);
-  const assetUtilization = useAssetUtilizationRate(asset.tokenAddress).data;
-  // console.log("");
+  const reserveConfig = useProtocolReserveConfiguration(
+    asset.tokenAddress
+  )?.data;
+  const reserveData = useProtocolReserveData(asset.tokenAddress)?.data;
+  const assetPrice = useAssetPriceInDai(asset.tokenAddress)?.data;
+  const assetNative = useAssetPriceInDai(useWrappedNativeAddress()?.data)?.data;
 
-  // PRICE TODO
+  // TODO not sure why the following 3 calls calls returning undefined on rinkby still
+  const availableLiquidity = useAvailableLiquidity(asset.tokenAddress)?.data;
+  const totalBorrowedForAsset = useTotalBorrowedForAsset(
+    asset.tokenAddress
+  )?.data;
+  const assetUtilization = useAssetUtilizationRate(asset.tokenAddress)?.data;
+
+  // Check data for undefined and convert to usable front end data
+  const decimals = reserveConfig ? reserveConfig?.decimals.toNumber() : 18;
   const price = assetPrice ? parseFloat(assetPrice?._value) : 0;
-  const liquidity = 0;
-  const totalBorrowed = totalBorrowedForAsset ? 0 : 0;
+  const priceNative = assetNative ? parseFloat(assetNative?._value) : 0;
 
-  // Multiply by price
-  const liquidityPrice = liquidity;
-  const totalBorrowedPrice = totalBorrowed;
-  const graph = 0;
+  const liquidity = availableLiquidity ? availableLiquidity : 0;
+  const totalBorrowed = totalBorrowedForAsset ? totalBorrowedForAsset : 0;
 
-  // Utilization Cards TODO
+  const liquidityPrice = liquidity
+    ? round2Fixed(
+        FixedNumber.fromValue(
+          liquidity.mul(price).div(constants.WeiPerEther),
+          decimals
+        ).toString()
+      )
+    : 0;
+  const liqudityNative = liquidity
+    ? round2Fixed(
+        FixedNumber.fromValue(
+          liquidity.mul(priceNative).div(constants.WeiPerEther),
+          decimals
+        ).toString()
+      )
+    : 0;
+
+  const totalBorrowedPrice = totalBorrowed ? totalBorrowed.dai : 0;
+  const totalBorrowedNative = 0;
+
+  // percetage between availible liquidity and total borrowed : floating point number between 1-100
+  const graph = 0.2;
+
+  // Utilization Cards TODO needs work
+  const utilizationRate = assetUtilization ? assetUtilization : 0;
+  const reserveSize = liquidity ? liquidity.mul(price) : 0;
+
+  console.log(reserveData);
 
   // APY cards (Lendeing reserves) TODO
+  // const depostApy;
+  // const deposit30Day;
+  // const depositOverTotal;
+
+  // const stableApy;
+  // const stable30Day;
+  // const stableOverTotal;
+
+  // const variableApy;
+  // const variable30Day;
+  // const variableOverTotal;
 
   // Bottom Stat Cards
-  const ltv = reserveData?.ltv._value
-    ? parseFloat(reserveData?.ltv._value) * 100
+  const ltv = reserveConfig?.ltv._value
+    ? parseFloat(reserveConfig?.ltv._value) * 100
     : "~";
-  const liqThrsh = reserveData?.liquidationThreshold._value
-    ? reserveData?.liquidationThreshold._value
-    : "0"; // TODO
-  const liqPen = reserveData?.liquidationBonus._value
-    ? reserveData?.liquidationBonus._value
-    : "0"; // TODO
-  const collateral = reserveData?.usageAsCollateralEnabled ? "Yes" : "No";
-  const stable = reserveData?.stableBorrowRateEnabled ? "Yes" : "No";
+  const liqThrsh = reserveConfig?.liquidationThreshold._value
+    ? `${reserveConfig?.liquidationThreshold._value.substring(27, 25)}%`
+    : "0";
+  const liqPen = reserveConfig?.liquidationBonus._value
+    ? `${reserveConfig?.liquidationBonus._value.substring(27, 24)}%`
+    : "0";
+  const collateral = reserveConfig?.usageAsCollateralEnabled ? "Yes" : "No";
+  const stable = reserveConfig?.stableBorrowRateEnabled ? "Yes" : "No";
 
   // Media Quieries
   const [isLargeTab] = useMediaQuery("(max-width: 1200px)");
@@ -95,11 +140,16 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
             borderRadius="15px"
             boxShadow="rgba(0, 0, 0, 0.16) 0px 1px 3px 0px"
           >
-            {/* 1/3 TODO AssetGraph TODO Pass Real Values */}
+            {/* 1/4 AssetGraph  */}
             <Container>
-              <Flex w="100%" justify="center" align="center" padding="1rem">
-                <Box p="4">
-                  <Center>
+              <Flex padding="1rem" justifyContent="center">
+                <Flex
+                  flex="1 0 100%"
+                  p="4"
+                  flexDirection="column"
+                  justifyContent="center"
+                >
+                  <Flex justifyContent="flex-end">
                     <UnlockIcon
                       w={4}
                       h={4}
@@ -109,18 +159,17 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                     <Text fontSize="lg" color="white" align="right">
                       Available Liquidity
                     </Text>
-                  </Center>
+                  </Flex>
                   <Text fontSize="3xl" color="white" align="right">
-                    {liquidity}
+                    {liquidityPrice}
                   </Text>
-                  <strong></strong>
                   <Box>
                     <Text fontSize="md" color="white" align="right">
-                      $ {liquidityPrice}
+                      $ {liqudityNative}
                     </Text>
                   </Box>
-                </Box>
-                <Box>
+                </Flex>
+                <Flex>
                   <CircularProgress
                     value={graph}
                     size="120px"
@@ -133,23 +182,28 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                       </Center>
                     </CircularProgressLabel>
                   </CircularProgress>
-                </Box>
-                <Box p="5">
-                  <Center>
+                </Flex>
+                <Flex
+                  flex="1 0 100%"
+                  p="4"
+                  flexDirection="column"
+                  justifyContent="center"
+                >
+                  <Flex justifyContent="flex-start">
                     <Text fontSize="lg" color="white" align="left">
                       Total Borrowed
                     </Text>
                     <LockIcon w={4} h={4} color="yellow.400" margin="0.25rem" />
-                  </Center>
+                  </Flex>
                   <Text fontSize="3xl" color="white" align="left">
-                    {totalBorrowed}
+                    {totalBorrowedPrice}
                   </Text>
                   <Box>
                     <Text fontSize="md" color="white" align="left">
-                      $ {totalBorrowedPrice}
+                      $ {totalBorrowedNative}
                     </Text>
                   </Box>
-                </Box>
+                </Flex>
               </Flex>
             </Container>
 
@@ -162,9 +216,9 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 justify="center"
                 pl={isMobile ? "5px" : isLargePhone ? "1em" : ""}
               >
-                {/* 2/3 Reserve Tiles TODO Pass Real Values*/}
-                <MiddleCard title="Reserve Size" value="1242421" />
-                <MiddleCard title="Utilisation Rate" value="1242421" />
+                {/* 2/4 utility cards */}
+                <MiddleCard title="Reserve Size" value={reserveSize} />
+                <MiddleCard title="Utilisation Rate" value={utilizationRate} />
               </Flex>
             </Container>
             <Center>
@@ -174,7 +228,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 justifyContent="center"
                 alignItems="center"
               >
-                {/* 3/3 Cards TODO Pass Real Values */}
+                {/* 3/4 Cards TODO Pass Real Values */}
                 <APYCard
                   title="Deposit"
                   color="yellow"
@@ -199,6 +253,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 />
               </Box>
             </Center>
+
             <Box
               m="0px auto"
               display={isMobile ? "block" : isLargeTab ? "flex" : "flex"}
@@ -206,6 +261,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
               justifyContent="space-between"
               maxWidth="750px"
             >
+              {/* 4/4 statCards  */}
               <StatCard title="Maximum LTV" value={ltv} type="%" />
               <StatCard title="Liquidity Threshold" value={liqThrsh} />
               <StatCard title="Liquidity Penalty" value={liqPen} />
