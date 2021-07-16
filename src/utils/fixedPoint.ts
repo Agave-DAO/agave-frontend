@@ -29,7 +29,7 @@ export function divIfNotZeroUnsafe(
 
 export function bigNumberToString(
   input: BigNumber | null | undefined,
-  decimals: number | number = 2
+  decimalsTarget: number | 2
 ): string {
   if (!input || input === null || input.isZero()) {
     return "0";
@@ -37,34 +37,34 @@ export function bigNumberToString(
     return "∞";
   }
   const inputAsString = Number(ethers.utils.formatEther(input)).toFixed(
-    decimals
+    decimalsTarget
   );
   let outputStr = inputAsString;
-  while (decimals >= 0) {
+  while (decimalsTarget >= 0) {
     if (outputStr.endsWith("0") || outputStr.endsWith(".")) {
       outputStr = outputStr.slice(0, -1);
-    } else decimals = 0;
-    decimals--;
+    } else decimalsTarget = 0;
+    decimalsTarget--;
   }
   return outputStr;
 }
 
 export function fixedNumberToPercentage(
   input: FixedNumber | null | undefined,
-  decimals: number | number = 2,
-  min: number | number = 0
+  decimalsTarget: number | 2,
+  minimumNumberOfDecimals: number | 0
 ): string {
   if (!input || input === null || input.isZero()) {
     return "0";
   }
   const inputAsFloat = input.toUnsafeFloat();
-  let outputStr = (inputAsFloat * 100).toFixed(decimals);
+  let outputStr = (inputAsFloat * 100).toFixed(decimalsTarget);
   // trim trailing 0's and the dot if it's the decimal separator
-  while (decimals >= 0 && decimals - min > 0) {
-    if (outputStr.endsWith("0") || (decimals = 0 && outputStr.endsWith("."))) {
+  while (decimalsTarget >= minimumNumberOfDecimals) {
+    if (outputStr.endsWith("0") || (decimalsTarget = 0 && outputStr.endsWith("."))) {
       outputStr = outputStr.slice(0, -1);
-    } else decimals = 0;
-    decimals--;
+    } else decimalsTarget = 0;
+    decimalsTarget--;
   }
   return outputStr;
 }

@@ -88,16 +88,17 @@ export const DashboardTable: React.FC<{
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
-        accessor: row => row.backingReserve ? row.backingReserve.tokenAddress : row.tokenAddress,  
-        Cell: (({ value }) => ( 
-          (mode === DashboardTableType.Borrow) ?
-		  <BorrowAPRView tokenAddress={value} isStable={false}
-		  />
-		  :
-		  <DepositAPYView tokenAddress={value}
-		  />
-        )) as Renderer<CellProps<AssetData, string >>,
-      }, 
+        accessor: row =>
+          row.backingReserve
+            ? row.backingReserve.tokenAddress
+            : row.tokenAddress,
+        Cell: (({ value }) =>
+          mode === DashboardTableType.Borrow ? (
+            <BorrowAPRView tokenAddress={value} isStable={false} />
+          ) : (
+            <DepositAPYView tokenAddress={value} />
+          )) as Renderer<CellProps<AssetData, string>>,
+      },
       {
         Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
         accessor: row => row.tokenAddress,
@@ -111,7 +112,8 @@ export const DashboardTable: React.FC<{
             {mode === DashboardTableType.Deposit && (
               <>
                 <Text fontWeight="bold">{"userAssetCollateral! "}</Text>
-                <CollateralView tokenAddress={value} /> {/* drop the collateralView make this button toggle directly a mutation call */}
+                <CollateralView tokenAddress={value} />{" "}
+                {/* drop the collateralView make this button toggle directly a mutation call */}
               </>
             )}
           </Box>
@@ -120,53 +122,50 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "Actions" : "Actions",
         accessor: row => row.tokenAddress,
-        Cell: (({ row }) =>
-          (
-            <Box
-              d="flex"
-              flexDir="row"
-              alignItems="center"
-              justifyContent="space-between"
+        Cell: (({ row }) => (
+          <Box
+            d="flex"
+            flexDir="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Button
+              bg="secondary.900"
+              _hover={{ bg: "primary.50" }}
+              onClick={() =>
+                onActionClicked("Deposit-Borrow", {
+                  symbol:
+                    row.original.backingReserve?.symbol ?? row.original.symbol,
+                  tokenAddress:
+                    row.original.backingReserve?.tokenAddress ??
+                    row.original.tokenAddress,
+                })
+              }
             >
-              <Button
-                bg="secondary.900"
-                _hover={{ bg: "primary.50" }}
-                onClick={() =>
-                  onActionClicked("Deposit-Borrow", {
-                    symbol:
-                      row.original.backingReserve?.symbol ??
-                      row.original.symbol,
-                    tokenAddress:
-                      row.original.backingReserve?.tokenAddress ??
-                      row.original.tokenAddress,
-                  })
-                }
-              >
-                <ColoredText fontSize="1rem" fontWeight="400">
-                  {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
-                </ColoredText>
-              </Button>
-              <Button
-                borderColor="primary.50"
-                color="primary.50"
-                fontWeight="400"
-                variant="outline"
-                _hover={{ bg: "white" }}
-                onClick={() =>
-                  onActionClicked("Withdraw-Repay", {
-                    symbol:
-                      row.original.backingReserve?.symbol ??
-                      row.original.symbol,
-                    tokenAddress:
-                      row.original.backingReserve?.tokenAddress ??
-                      row.original.tokenAddress,
-                  })
-                }
-              >
-                {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
-              </Button>
-            </Box>
-          )) as Renderer<CellProps<AssetData, string>>,
+              <ColoredText fontSize="1rem" fontWeight="400">
+                {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
+              </ColoredText>
+            </Button>
+            <Button
+              borderColor="primary.50"
+              color="primary.50"
+              fontWeight="400"
+              variant="outline"
+              _hover={{ bg: "white" }}
+              onClick={() =>
+                onActionClicked("Withdraw-Repay", {
+                  symbol:
+                    row.original.backingReserve?.symbol ?? row.original.symbol,
+                  tokenAddress:
+                    row.original.backingReserve?.tokenAddress ??
+                    row.original.tokenAddress,
+                })
+              }
+            >
+              {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
+            </Button>
+          </Box>
+        )) as Renderer<CellProps<AssetData, string>>,
       },
     ],
     [mode, onActionClicked]
