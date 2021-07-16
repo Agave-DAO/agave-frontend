@@ -1,67 +1,90 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { IMarketData } from "../utils/constants";
-import { Web3Provider } from '@ethersproject/providers';
 import { AgaveLendingABI__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
 import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
-import { ethers } from "ethers";
-import { useApproved } from "../hooks/approved";
-import { useBalance } from "../hooks/balance";
-import { useApprovalMutation } from "./approval";
+import { usingProgressNotification } from "../utils/progressNotification";
+import { useUserAccountData } from "../queries/userAccountData";
+import { useAppWeb3 } from "../hooks/appWeb3";
+import { useUserAssetAllowance, useUserAssetBalance } from "../queries/userAssets";
 
 export interface UseRepayMutationProps {
-  asset: IMarketData | undefined;
-  amount: number;
-  onSuccess: () => void;
+  asset: string | undefined;
+  amount: BigNumber;
 };
 
 export interface UseRepayMutationDto {
-  repayMutation: UseMutationResult<BigNumber | undefined, unknown, BigNumber, unknown>;
-  repayMutationKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined, number];
+  repayMutation: UseMutationResult<
+    BigNumber | undefined,
+    unknown,
+    void,
+    unknown
+  >;
+  repayMutationKey: readonly [string | null | undefined, string | null | undefined, string | null | undefined, BigNumber];
 };
 
-export const useRepayMutation = ({asset, amount, onSuccess}: UseRepayMutationProps): UseRepayMutationDto => {
+export const useRepayMutation = ({asset, amount}: UseRepayMutationProps): UseRepayMutationDto => {
   const queryClient = useQueryClient();
-  // FIXME: would be nice not to invoke a list of hooks just to get query keys
-  const { approvedQueryKey } = useApproved(asset);
-	const { approvalMutationKey } = useApprovalMutation({ asset, amount, onSuccess: () => {}});
-  const { balanceQueryKey } = useBalance(asset);
-  const assetQueryKey = [asset?.name] as const; 
-  
-  const repayMutationKey = [...approvedQueryKey, amount] as const;
-  const repayMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
+  const { chainId, account, library } = useAppWeb3()
+
+  const userAccountDataQueryKey = useUserAccountData.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    account ?? undefined
+  );
+  const assetBalanceQueryKey = useUserAssetBalance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset
+  );
+  const allowanceQueryKey = useUserAssetAllowance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset,
+    "0x00"
+  )
+
+  const debtQueryKey = ["user", "allReserves", "debt"] as const;
+  const repayMutationKey = [...debtQueryKey, amount] as const;
+  const repayMutation = useMutation(
     repayMutationKey,
-    async (unitAmount): Promise<BigNumber | undefined> => {
-      const [address, library, asset, ] = repayMutationKey;
-      if (!address || !library || !asset) {
+    async () => {
+      if (!account || !library || !asset) {
         throw new Error("Account or asset details are not available");
       }
       const contract = AgaveLendingABI__factory.connect(
         internalAddresses.Lending,
         library.getSigner()
       );
-      const referralCode = 0;
-      console.log("repayMutationKey:repay");
-      console.log(Number(ethers.utils.formatEther(unitAmount)));
-      
-      //TODO: ZedKai convert the deposit to be repay...
-      const tx = await contract.deposit(
-        asset.contractAddress,
-        unitAmount,
-        address,
-        referralCode
-      );
 
-      const receipt = await tx.wait();
-      return receipt.status ? BigNumber.from(unitAmount) : undefined;
+      // TODO: Note that `rateMode` is fixed to 2 (variable)
+      // since we don't expect to support stable rates in v1
+      const rateMode = 2;
+      const tx = contract.repay(
+        asset,
+        amount,
+        rateMode,
+        account,
+      );
+      const repayConfirmation = await usingProgressNotification(
+        "Awaiting repay approval",
+        "Please sign the transaction for repay.",
+        "info",
+        tx
+      );
+      const receipt = await usingProgressNotification(
+        "Awaiting repay confirmation",
+        "Please wait while the blockchain processes your transaction",
+        "info",
+        repayConfirmation.wait()
+      );
+      return receipt.status ? BigNumber.from(amount) : undefined;
     },
     {
       onSuccess: async (unitAmountResult, vars, context) => {
         await Promise.allSettled([
-          queryClient.invalidateQueries(approvedQueryKey),
-          queryClient.invalidateQueries(approvalMutationKey),
-          queryClient.invalidateQueries(balanceQueryKey),
-          queryClient.invalidateQueries(assetQueryKey),
+          queryClient.invalidateQueries(allowanceQueryKey),
+          queryClient.invalidateQueries(userAccountDataQueryKey),
+          queryClient.invalidateQueries(assetBalanceQueryKey),
         ]);
       },
     }

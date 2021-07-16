@@ -1,8 +1,8 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
-import Button from '../../components/Button';
-import { IMarketData } from '../../utils/constants';
+import React from "react";
+import styled from "styled-components";
+import { useHistory } from "react-router-dom";
+import Button from "../../components/Button";
+import { IMarketData } from "../../utils/constants";
 
 const BorrowOverviewWrapper = styled.div`
   display: flex;
@@ -26,7 +26,7 @@ const BorrowOverviewWrapper = styled.div`
         color: ${props => props.theme.color.textSecondary};
 
         &.green {
-          color: ${props => props.theme.color.green}
+          color: ${props => props.theme.color.green};
         }
       }
     }
@@ -184,50 +184,37 @@ const BorrowOverviewWrapper = styled.div`
   }
 `;
 
-function BorrowOverview({ asset }: {asset: IMarketData }) {
+function BorrowOverview({ asset }: { asset: IMarketData }) {
   const history = useHistory();
   return (
     <BorrowOverviewWrapper>
       <div className="topContent">
         <div className="topContent-section">
-          <span className="topContent-section-title">
-            You borrowed
-          </span>
+          <span className="topContent-section-title">You borrowed</span>
           <span className="topContent-section-value">
             300.0341 {asset.name}
           </span>
         </div>
         <div className="topContent-section">
-          <span className="topContent-section-title">
-            Total collateral
-          </span>
-          <span className="topContent-section-value">
-            2,480.1911 USD
-          </span>
+          <span className="topContent-section-title">Total collateral</span>
+          <span className="topContent-section-value">2,480.1911 USD</span>
         </div>
         <div className="topContent-section">
-          <span className="topContent-section-title">
-            Loan to value
-          </span>
-          <span className="topContent-section-value">
-            78.59 %
-          </span>
+          <span className="topContent-section-title">Loan to value</span>
+          <span className="topContent-section-value">78.59 %</span>
         </div>
         <div className="topContent-section">
-          <span className="topContent-section-title">
-            Health factor
-          </span>
-          <span className="topContent-section-value green">
-            20.31
-          </span>
+          <span className="topContent-section-title">Health factor</span>
+          <span className="topContent-section-value green">20.31</span>
         </div>
       </div>
       <div className="top-overview">
         <div className="top-overview-header">
-          <div className="top-overview-title">
-            Borrow {asset.name}
-          </div>
-          <div className="top-overview-reserve" onClick={() => history.push(`/reserve-overview/${asset.name}`)}>
+          <div className="top-overview-title">Borrow {asset.name}</div>
+          <div
+            className="top-overview-reserve"
+            onClick={() => history.push(`/reserve-overview/${asset.name}`)}
+          >
             <img src={asset.img} alt="" width={20} height={20} />
             <span className="reserve-name">{asset.name} Reserve Overview</span>
           </div>
@@ -252,9 +239,7 @@ function BorrowOverview({ asset }: {asset: IMarketData }) {
                 </div>
               </div>
               <div className="currency-overview-row">
-                <div className="currency-overview-row-title">
-                  Asset Price
-                </div>
+                <div className="currency-overview-row-title">Asset Price</div>
                 <div className="currency-overview-row-content">
                   <span>0.99</span> USD
                 </div>
@@ -281,9 +266,7 @@ function BorrowOverview({ asset }: {asset: IMarketData }) {
           </div>
           <div className="top-overview-content-right">
             <div className="top-graph-header">
-              <div className="top-graph-header-title">
-                Historical rates
-              </div>
+              <div className="top-graph-header-title">Historical rates</div>
               <div className="top-graph-header-button">
                 <div className="filter-section">
                   <Button size="sm">Daily</Button>
@@ -293,9 +276,7 @@ function BorrowOverview({ asset }: {asset: IMarketData }) {
                 </div>
               </div>
             </div>
-            <div className="top-graph-content">
-              No data to show yet
-            </div>
+            <div className="top-graph-content">No data to show yet</div>
           </div>
         </div>
       </div>

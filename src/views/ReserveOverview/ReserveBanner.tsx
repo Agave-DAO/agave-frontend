@@ -15,12 +15,12 @@ const ReserveBanner: React.FC<{}> = (props: any) => {
       height="auto"
       marginRight="auto"
     >
-      <ColoredText fontSize="5xl">
+      <ColoredText fontSize="5xl" textTransform="capitalize">
         {props.match.params.assetName ?? "-"} {title}
       </ColoredText>
 
       <Text align="left" fontSize="3xl">
-        {`/${message}`}
+        {`${message}`}
       </Text>
     </Flex>
   );

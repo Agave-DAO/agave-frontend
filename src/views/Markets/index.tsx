@@ -1,12 +1,13 @@
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex } from "@chakra-ui/react";
+import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import {
   useMarketSizeInDai,
   useTotalMarketSize,
 } from "../../queries/marketSize";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../../utils/queryBuilder";
+import { fixedNumberToPercentage } from "../../utils/fixedPoint";
 import { FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
@@ -18,13 +19,15 @@ import {
   useStableBorrowAPR,
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
+import { PercentageView } from "../common/PercentageView";
 import { TokenIcon } from "../../utils/icons";
 import {
   BasicTableRenderer,
   SortedHtmlTable,
   TableRenderer,
+  MobileTableRenderer,
 } from "../../utils/htmlTable";
-
+import { Link } from "react-router-dom";
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
   ["markets", "totalMarketSize", "wholeDai"],
@@ -63,22 +66,6 @@ interface AssetRecord {
   tokenAddress: string;
   aTokenAddress: string;
 }
-
-const PercentageView: React.FC<{
-  lowerIsBetter?: boolean;
-  positiveOnly?: boolean;
-  value: number;
-}> = ({ lowerIsBetter, value, positiveOnly }) => {
-  if (lowerIsBetter) {
-    throw new Error('PercentageView Mode "lowerIsBetter" not yet supported');
-  }
-  if (positiveOnly) {
-    throw new Error('PercentageView Mode "positiveOnly" not yet supported');
-  }
-  return (
-    <Text color={value >= 0 ? "green.300" : "red.600"}>% {value * 100}</Text>
-  );
-};
 
 const PriceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
@@ -147,8 +134,8 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-
-    return <PercentageView value={query.data.round(4).toUnsafeFloat()} />;
+    const depositAPY = query.data;
+    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3)} />;
   }, [query.data]);
 };
 
@@ -160,16 +147,9 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-
-    // HACK: Awaiting rounding bug fix for https://github.com/ethers-io/ethers.js/issues/1629
+    const variableBorrowAPR = query.data;
     return (
-      <PercentageView
-        value={query.data
-          .mulUnsafe(FixedNumber.from(1000, query.data.format))
-          .floor()
-          .divUnsafe(FixedNumber.from(1000, query.data.format))
-          .toUnsafeFloat()}
-      />
+      <PercentageView ratio={fixedNumberToPercentage(variableBorrowAPR, 3)} />
     );
   }, [query.data]);
 };
@@ -182,16 +162,9 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-
-    // HACK: Awaiting rounding bug fix for https://github.com/ethers-io/ethers.js/issues/1629
+    const stableBorrowAPR = query.data;
     return (
-      <PercentageView
-        value={query.data
-          .mulUnsafe(FixedNumber.from(1000, query.data.format))
-          .floor()
-          .divUnsafe(FixedNumber.from(1000, query.data.format))
-          .toUnsafeFloat()}
-      />
+      <PercentageView ratio={fixedNumberToPercentage(stableBorrowAPR, 3)} />
     );
   }, [query.data]);
 };
@@ -222,15 +195,17 @@ const AssetTable: React.FC<{
       Header: "Asset",
       accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
       Cell: (({ value, row }) => (
-        <Flex alignItems={"center"}>
-          <Box>
-            <TokenIcon symbol={value} />
-          </Box>
-          <Box w="1rem"></Box>
-          <Box>
-            <Text>{value}</Text>
-          </Box>
-        </Flex>
+        <Link to={`/reserve-overview/${value}`}>
+          <Flex alignItems={"center"}>
+            <Box>
+              <TokenIcon symbol={value} />
+            </Box>
+            <Box w="1rem"></Box>
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
+        </Link>
       )) as Renderer<CellProps<AssetRecord, string>>,
     },
     {
@@ -313,6 +288,13 @@ const AssetTable: React.FC<{
               borderCollapse: "separate",
             },
           }}
+          headProps={{
+            fontSize: "12px",
+            fontFamily: "inherit",
+            color: "white",
+            border: "none",
+            textAlign: "center",
+          }}
           rowProps={{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
             bg: { base: "primary.500", md: "primary.900" },
@@ -325,9 +307,46 @@ const AssetTable: React.FC<{
     []
   );
 
+  const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <MobileTableRenderer
+        table={table}
+        tableProps={{
+          textAlign: "center",
+          display: "flex",
+          width: "100%",
+          flexDirection: "column",
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+        }}
+        rowProps={{
+          display: "flex",
+          flexDirection: "column",
+          margin: "1em 0",
+          padding: "1em",
+          borderRadius: "1em",
+          bg: { base: "secondary.500" },
+        }}
+        cellProps={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      />
+    ),
+    []
+  );
+
+  const [ismaxWidth] = useMediaQuery("(max-width: 50em)");
+
   return (
     <SortedHtmlTable columns={columns} data={assetRecords}>
-      {renderer}
+      {ismaxWidth ? mobileRenderer : renderer}
     </SortedHtmlTable>
   );
 };

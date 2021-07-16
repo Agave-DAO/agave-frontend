@@ -1,58 +1,133 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { IMarketData } from "../utils/constants";
-import { Web3Provider } from '@ethersproject/providers';
 import { AgaveLendingABI__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
-import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
-import { ethers } from "ethers";
-import { useApproved } from "../hooks/approved";
-import { useBalance } from "../hooks/balance";
+import {
+  useUserAssetAllowance,
+  useUserAssetBalance,
+  useUserDepositAssetBalances,
+  useUserDepositAssetBalancesDaiWei,
+  useUserDepositAssetBalancesWithReserveInfo,
+  useUserReserveAssetBalances,
+  useUserReserveAssetBalancesDaiWei,
+} from "../queries/userAssets";
+import { useAppWeb3 } from "../hooks/appWeb3";
+import { usingProgressNotification } from "../utils/progressNotification";
+import { useUserAccountData } from "../queries/userAccountData";
+import { useLendingReserveData } from "../queries/lendingReserveData";
+import { getChainAddresses } from "../utils/chainAddresses";
 
 export interface UseWithdrawMutationProps {
-  asset: IMarketData | undefined;
-  amount: number;
-  onSuccess: () => void;
-};
+  asset: string | undefined;
+  spender: string | undefined;
+  amount: BigNumber | undefined;
+}
 
 export interface UseWithdrawMutationDto {
-  withdrawMutation: UseMutationResult<BigNumber | undefined, unknown, BigNumber, unknown>;
-  withdrawMutationKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined, number];
-};
+  withdrawMutation: UseMutationResult<
+    BigNumber | undefined,
+    unknown,
+    void,
+    unknown
+  >;
+  withdrawMutationKey: readonly [
+    ...ReturnType<typeof useUserAssetAllowance.buildKey>,
+    "withdraw",
+    BigNumber | undefined
+  ];
+}
 
-export const useWithdrawMutation = ({asset, amount, onSuccess}: UseWithdrawMutationProps): UseWithdrawMutationDto => {
+export const useWithdrawMutation = ({
+  asset,
+  spender,
+  amount,
+}: UseWithdrawMutationProps): UseWithdrawMutationDto => {
   const queryClient = useQueryClient();
-  // FIXME: would be nice not to invoke a list of hooks just to get query keys
-  const { approvedQueryKey } = useApproved(asset);
-  const { balanceQueryKey } = useBalance(asset);
-  const assetQueryKey = [asset?.name] as const; 
-  
-  const withdrawMutationKey = [...approvedQueryKey, amount] as const;
-  const withdrawMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
+  const { chainId, account, library } = useAppWeb3();
+
+  const userAccountDataQueryKey = useUserAccountData.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    account ?? undefined
+  );
+  const assetBalanceQueryKey = useUserAssetBalance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset
+  );
+  const allowanceQueryKey = useUserAssetAllowance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset,
+    spender ?? undefined
+  );
+  const withdrawnQueryKey = [...allowanceQueryKey, "withdraw"] as const;
+
+  const withdrawMutationKey = [...withdrawnQueryKey, amount] as const;
+  const withdrawMutation = useMutation(
     withdrawMutationKey,
-    async (unitAmount): Promise<BigNumber | undefined> => {
-      const [address, library, asset, ] = withdrawMutationKey;
-      if (!address || !library || !asset) {
+    async () => {
+      if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
       }
-      const contract = AgaveLendingABI__factory.connect(
-        internalAddresses.Lending,
-        library.getSigner(),
+      if (!asset || !spender || !amount) {
+        return undefined;
+      }
+      const lendingContract = AgaveLendingABI__factory.connect(
+        spender,
+        library.getSigner()
       );
-      console.log("withdrawMutationKey:withdraw");
-      console.log(Number(ethers.utils.formatEther(unitAmount)));
-      const tx = await contract.withdraw(
-        asset.contractAddress,
-        unitAmount,
-        address,
+      const withdraw = lendingContract.withdraw(asset, amount, account);
+      const withdrawConfirmation = await usingProgressNotification(
+        "Awaiting withdraw approval",
+        "Please sign the transaction for withdrawal.",
+        "info",
+        withdraw
       );
-      const receipt = await tx.wait();
-      return receipt.status ? BigNumber.from(unitAmount) : undefined;
+      const receipt = await usingProgressNotification(
+        "Awaiting withdrawal confirmation",
+        "Please wait while the blockchain processes your transaction",
+        "info",
+        withdrawConfirmation.wait()
+      );
+      return receipt.status ? amount : undefined;
     },
     {
-      onSuccess: async (unitAmountResult, vars, context) => {
+      onSuccess: async (result, vars, context) => {
+        const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
         await Promise.allSettled([
-          queryClient.invalidateQueries(balanceQueryKey),
-          queryClient.invalidateQueries(assetQueryKey),
+          queryClient.invalidateQueries(assetBalanceQueryKey),
+          queryClient.invalidateQueries(userAccountDataQueryKey),
+          queryClient.invalidateQueries(allowanceQueryKey),
+          queryClient.invalidateQueries(withdrawnQueryKey),
+          queryClient.invalidateQueries(withdrawMutationKey),
+          chainId && account
+            ? Promise.allSettled(
+                [
+                  useUserDepositAssetBalances.buildKey(chainId, account),
+                  useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
+                  useUserReserveAssetBalances.buildKey(chainId, account),
+                  useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                ].map(k => queryClient.invalidateQueries(k))
+              )
+            : Promise.resolve(),
+          asset && account && chainAddrs && chainId && library
+            ? useLendingReserveData
+                .fetchQueryDefined(
+                  { account, chainAddrs, chainId, library, queryClient },
+                  asset
+                )
+                .then(reserveData =>
+                  useUserAssetBalance.buildKey(
+                    chainId ?? undefined,
+                    account ?? undefined,
+                    reserveData.aTokenAddress
+                  )
+                )
+                .then(aTokenBalanceQueryKey =>
+                  queryClient.invalidateQueries(aTokenBalanceQueryKey)
+                )
+            : Promise.resolve(),
         ]);
       },
     }

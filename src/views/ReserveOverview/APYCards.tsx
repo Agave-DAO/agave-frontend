@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { Text, Box, Center, useMediaQuery } from "@chakra-ui/react";
 
-// TODO real types
 interface Props {
   title: string;
   color: string;
@@ -12,11 +11,11 @@ interface Props {
 
 const APYCard: React.FC<Props> = ({ ...props }) => {
   // Default Component States
-  const [title] = useState(props.title ? props.title : "Stats");
-  const [color] = useState(props.color ? props.color : "green");
-  const [apy] = useState(props.apy ? `${props.apy} %` : "—");
-  const [avg] = useState(props.avg ? props.avg : "—");
-  const [total] = useState(props.total ? `${props.total} %` : "—");
+  const title = props.title ? props.title : "Stats";
+  const color = props.color ? props.color : "green";
+  const apy = props.apy ? `${props.apy} %` : "—";
+  const avg = props.avg ? props.avg : "—";
+  const total = props.total ? `${props.total} %` : "—";
 
   // Media Queries to get the right fit
   const [isSmallTab] = useMediaQuery("(max-width: 800px)");

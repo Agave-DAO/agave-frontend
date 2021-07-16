@@ -1,43 +1,309 @@
 import React from "react";
-import styled from "styled-components";
-import { useRouteMatch, withRouter } from "react-router-dom";
-import Page from "../../components/Page";
-import { useAsset } from "../../hooks/asset";
-import { useBalance } from "../../hooks/balance";
-// import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { VStack } from "@chakra-ui/layout";
+import { Button } from "@chakra-ui/button";
+import { useHistory, useRouteMatch } from "react-router-dom";
+import { BorrowDash } from "../common/BorrowDash";
+import { DashOverviewIntro } from "../common/DashOverview";
+import {
+  ReserveTokenDefinition,
+  useAllReserveTokens,
+} from "../../queries/allReserveTokens";
+import { Box, Center, Text } from "@chakra-ui/react";
+import ColoredText from "../../components/ColoredText";
+import { BigNumber } from "ethers";
+import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
+import { useUserAssetBalance } from "../../queries/userAssets";
+import { formatEther } from "ethers/lib/utils";
+import { useChainAddresses } from "../../utils/chainAddresses";
+import { ControllerItem } from "../../components/ControllerItem";
+import {
+  useBorrowMutation,
+  UseBorrowMutationProps,
+} from "../../mutations/borrow";
+import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useLendingReserveData } from "../../queries/lendingReserveData";
 
-import BorrowOverview from "./BorrowOverview";
-import { ActionDetail } from "../../components/Actions/ActionDetail";
+interface InitialState {
+  token: Readonly<ReserveTokenDefinition>;
+}
 
-const BorrowDetailWrapper = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-`;
+interface AmountSelectedState extends InitialState {
+  amountToBorrow: BigNumber;
+}
 
-const BorrowDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined,
-  }>();
-  const assetName = match.params.assetName;
-  const { asset } = useAsset(assetName);
-  const { library, address, balance } = useBalance(asset);
-  if (!asset) {
-    return <>No asset found with details </>;
-  }
+interface BorrowTXState extends AmountSelectedState {
+  // approvalTXHash: string | undefined;
+}
 
-  if (!address || !library) {
-    return <>No account loaded</>;
-  }
+interface BorrownTXState extends BorrowTXState {
+  // borrowTXHash: string;
+}
 
+type BorrowState = OneTaggedPropertyOf<{
+  init: InitialState;
+  borrowTx: BorrowTXState;
+  borrownTx: BorrownTXState;
+}>;
+
+function createState<SelectedState extends PossibleTags<BorrowState>>(
+  type: SelectedState,
+  value: BorrowState[SelectedState]
+): BorrowState {
+  return {
+    type,
+    [type]: value,
+  } as any;
+}
+
+// THIS BorrowState IS ALL WRONG AND NEEDS FIXING WHEN THE QUERIES ARE DONE
+const stateNames: Record<PossibleTags<BorrowState>, string> = {
+  init: "Token",
+  borrowTx: "Borrow",
+  borrownTx: "Borrown",
+};
+
+const visibleStateNames: ReadonlyArray<PossibleTags<BorrowState>> = [
+  "borrowTx",
+  "borrownTx",
+] as const;
+
+const BorrowTitle = "Borrow overview";
+
+export interface BorrowBannerProps {}
+
+export const BorrowBanner: React.FC<{}> = () => {
+  const history = useHistory();
   return (
-    <Page>
-      <BorrowDetailWrapper>
-        <BorrowOverview asset={asset} />
-        <ActionDetail asset={asset} balance={balance} actionName="borrow" actionBaseRoute="borrow" />
-      </BorrowDetailWrapper>
-    </Page>
+    <Center width="100%" justifyContent="space-between">
+      <Text
+        fontWeight="bold"
+        color="white"
+        fontSize={{ base: "1.8rem", md: "2.4rem" }}
+        onClick={() => history.push("/dashboard")}
+      >
+        Borrow
+      </Text>
+    </Center>
   );
 };
 
-export default withRouter(BorrowDetail);
+const InitialComp: React.FC<{
+  state: InitialState;
+  dispatch: (nextState: BorrowState) => void;
+}> = ({ state, dispatch }) => {
+  const [amount, setAmount] = React.useState<BigNumber>();
+  const { data: reserve } = useLendingReserveData(state.token.tokenAddress);
+  const { data: userAgBalance } = useUserAssetBalance(reserve?.aTokenAddress);
+  const onSubmit = React.useCallback(
+    amountToBorrow =>
+      dispatch(createState("borrowTx", { amountToBorrow, ...state })),
+    [state, dispatch]
+  );
+  return (
+    <DashOverviewIntro
+      asset={state.token}
+      amount={amount}
+      setAmount={setAmount}
+      mode="borrow"
+      onSubmit={onSubmit}
+      balance={userAgBalance}
+    />
+  );
+};
+
+/*
+ ##
+ ## Requires fixing the Props with the nex Queries and Mutations for Borrow support
+ ##
+
+const BorrowTxComp: React.FC<{
+  state: BorrowTXState;
+  dispatch: (nextState: BorrowState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const borrowArgs = React.useMemo<UseBorrowMutationProps>(
+    () => ({
+      asset: state.token.tokenAddress,
+      amount: state.amountToBorrow,
+    }),
+    [state, chainAddresses?.lendingPool]
+  );
+  const {
+    borrowMutation: { mutateAsync },
+  } = useBorrowMutation(borrowArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("borrownTx", { ...state })))
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<BorrowState> = "borrowTx";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={BorrowTitle}
+      amount={state.amountToBorrow}
+      asset={state.token}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={1}
+        stepName="Borrow"
+        stepDesc="Please submit to borrow"
+        actionName="Borrow"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
+  );
+};
+
+const BorrownTxComp: React.FC<{
+  state: BorrownTXState;
+  dispatch: (nextState: BorrowState) => void;
+}> = ({ state, dispatch }) => {
+  const history = useHistory();
+  const currentStep: PossibleTags<BorrowState> = "borrownTx";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={BorrowTitle}
+      amount={state.amountToBorrow}
+      asset={state.token}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={2}
+        stepName="Borrown"
+        stepDesc={`Borrow of ${formatEther(state.amountToBorrow)} ${
+          state.token.symbol
+        } successful`}
+        actionName="Finish"
+        onActionClick={() => history.push("/borrow")}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
+  );
+};
+
+const BorrowStateMachine: React.FC<{
+  state: BorrowState;
+  setState: (newState: BorrowState) => void;
+}> = ({ state, setState }) => {
+  switch (state.type) {
+    case "init":
+      return <InitialComp state={state.init} dispatch={setState} />;
+    case "borrowTx":
+      return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;
+    case "borrownTx":
+      return <BorrownTxComp state={state.borrownTx} dispatch={setState} />;
+  }
+};
+
+*/
+
+const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
+  asset,
+}) => {
+  const dash = React.useMemo(
+    () => (asset ? <BorrowDash token={asset} /> : undefined),
+    [asset]
+  );
+  const [borrowState, setBorrowState] = React.useState<BorrowState>(
+    createState("init", { token: asset })
+  );
+
+  return (
+    <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
+      {dash}
+      <Center
+        w="100%"
+        color="primary.100"
+        bg="primary.900"
+        rounded="lg"
+        padding="1em"
+      >
+        {/*
+        <BorrowStateMachine
+          state={borrowState}
+          setState={setBorrowState}
+        />
+		  */}
+      </Center>
+    </VStack>
+  );
+};
+
+export const BorrowDetail: React.FC = () => {
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
+  const history = useHistory();
+  const assetName = match.params.assetName;
+  const allReserves = useAllReserveTokens();
+  const asset = React.useMemo(
+    () =>
+      assetName === undefined
+        ? undefined
+        : allReserves?.data?.find(
+            asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
+          ),
+    [allReserves, assetName]
+  );
+  if (!asset) {
+    return (
+      <Box
+        w="100%"
+        color="primary.100"
+        bg="primary.900"
+        rounded="lg"
+        padding="3em"
+      >
+        <Center>
+          {allReserves.data ? (
+            <>
+              No reserve found with asset symbol&nbsp;
+              <ColoredText>{assetName}</ColoredText>
+            </>
+          ) : (
+            "Loading reserves..."
+          )}
+        </Center>
+        <Center>
+          <Button
+            color="primary.100"
+            bg="primary.500"
+            onClick={() =>
+              history.length > 0 ? history.goBack() : history.push("/borrow")
+            }
+            size="xl"
+            padding="1rem"
+            m="3rem"
+          >
+            Take me back!
+          </Button>
+        </Center>
+      </Box>
+    );
+  }
+  return <BorrowDetailForAsset asset={asset} />;
+};

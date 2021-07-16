@@ -1,13 +1,10 @@
 import React from "react";
-import {
-  Link,
-  LinkProps,
-  Tab,
-  useColorModeValue as mode,
-} from "@chakra-ui/react";
-import { NavLink, NavLinkProps } from "react-router-dom";
+import { Link, Tab, useColorModeValue as mode } from "@chakra-ui/react";
+import { NavLink } from "react-router-dom";
 
-export const NavTabLink: React.FC<LinkProps & NavLinkProps> = props => {
+// Chakra slows typechecking massively; setting this to `any` saves us ~2 seconds on every typecheck
+// export const NavTabLink: React.FC<LinkProps & NavLinkProps<unknown>> = props => {
+export const NavTabLink: React.FC<any> = props => {
   return (
     <Tab
       _selected={{ color: mode("grey.500", "white") }}

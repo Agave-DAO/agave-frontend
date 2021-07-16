@@ -1,5 +1,5 @@
 {
-  "name": "agaave-app",
+  "name": "agave-app",
   "version": "0.1.0",
   "private": true,
   "homepage": ".",
@@ -29,7 +29,7 @@
     "bignumber.js": "^9.0.1",
     "copy-to-clipboard": "^3.3.1",
     "dotenv": "^8.2.0",
-    "ethers": "^5.1.0",
+    "ethers": "^5.4.1",
     "framer-motion": "^4.1.17",
     "graphql": "^15.4.0",
     "moment": "^2.29.1",

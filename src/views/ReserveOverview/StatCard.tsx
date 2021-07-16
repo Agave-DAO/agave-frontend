@@ -1,11 +1,13 @@
 import React from "react";
 import { Text, Box } from "@chakra-ui/react";
+import { ModalIcon } from "../../utils/icons";
 
 interface Props {
   title: string;
   color?: string;
   value: any;
   type?: string;
+  enableModal?: boolean;
 }
 
 const StatCard: React.FC<Props> = ({ ...props }) => {
@@ -26,6 +28,14 @@ const StatCard: React.FC<Props> = ({ ...props }) => {
           position="relative"
         >
           <Text fontSize="lg">{props.title}</Text>
+          {props.enableModal && (
+            <ModalIcon
+              position="relative"
+              top="0"
+              left={{ base: "0.5", md: "2" }}
+              onOpen={() => {}}
+            />
+          )}
         </Box>
         <Box display="flex" flexDirection="row" alignItems="center">
           <Text

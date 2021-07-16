@@ -60,31 +60,40 @@ export function reserveConfigurationFromWeb3Result({
 }
 
 type Web3ProtocolReserveDataResult = PromisedType<
-  ReturnType<typeof AaveProtocolDataProvider.prototype.getReserveConfigurationData>
+  ReturnType<
+    typeof AaveProtocolDataProvider.prototype.getReserveConfigurationData
+  >
 >;
 
-export const useProtocolReserveConfiguration = buildQueryHookWhenParamsDefinedChainAddrs<
-  ReserveAssetConfiguration,
-  [
-    _p1: "AaveProtocolDataProvider",
-    _p2: "reserveData",
-    assetAddress: string | undefined
-  ],
-  [assetAddress: string]
->(
-  async (params, assetAddress) => {
-    const contract = AaveProtocolDataProvider__factory.connect(
-      params.chainAddrs.aaveProtocolDataProvider,
-      params.library.getSigner()
-    );
-    return await contract
-      .getReserveConfigurationData(assetAddress)
-      .then(reserveConfiguration => reserveConfigurationFromWeb3Result(reserveConfiguration));
-  },
-  assetAddress => ["AaveProtocolDataProvider", "reserveData", assetAddress],
-  () => undefined,
-  {
-    cacheTime: 60 * 15 * 1000,
-    staleTime: 60 * 5 * 1000,
-  }
-);
+export const useProtocolReserveConfiguration =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    ReserveAssetConfiguration,
+    [
+      _p1: "AaveProtocolDataProvider",
+      _p2: "assetConfiguration",
+      assetAddress: string | undefined
+    ],
+    [assetAddress: string]
+  >(
+    async (params, assetAddress) => {
+      const contract = AaveProtocolDataProvider__factory.connect(
+        params.chainAddrs.aaveProtocolDataProvider,
+        params.library.getSigner()
+      );
+      return await contract
+        .getReserveConfigurationData(assetAddress)
+        .then(reserveConfiguration =>
+          reserveConfigurationFromWeb3Result(reserveConfiguration)
+        );
+    },
+    assetAddress => [
+      "AaveProtocolDataProvider",
+      "assetConfiguration",
+      assetAddress,
+    ],
+    () => undefined,
+    {
+      cacheTime: 60 * 15 * 1000,
+      staleTime: 60 * 5 * 1000,
+    }
+  );

@@ -1,24 +1,60 @@
-import React, { useState } from "react";
+import React from "react";
 import UserInfoRow from "./UserInfoRow";
 import { Text, Flex, Container, Box, Button } from "@chakra-ui/react";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 
-// Componete Styles
+import { useAppWeb3 } from "../../hooks/appWeb3";
+import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import { useUserAccountData } from "../../queries/userAccountData";
+import { useUserAssetBalance } from "../../queries/userAssets";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+
+import { round2Fixed } from "../../utils/helpers";
+import { bigNumberToString } from "../../utils/fixedPoint";
 
 const UserInfo: React.FC<{
   asset: ReserveTokenDefinition;
   history: any;
 }> = ({ asset, history }) => {
-  // Default Componate States
-  const [name] = useState(asset.symbol ? asset.symbol : "Asset");
-  const [userSupply] = useState("0");
-  const [userBal] = useState("0");
-  const [userBorrow] = useState("0");
-  const [health] = useState("0");
-  const [loanVal] = useState("0");
-  const [borrowAmt] = useState("0");
+  // ** Query data
+  const userAccountAddress = useAppWeb3().account;
+  const reserves = useAllReserveTokensWithData()?.data;
+  const reserve = React.useMemo(
+    () =>
+      reserves?.find(reserve => reserve.tokenAddress === asset.tokenAddress) ??
+      reserves?.find(
+        reserve =>
+          reserve.tokenAddress.toLowerCase() ===
+          asset.tokenAddress.toLowerCase()
+      ),
+    [reserves, asset.tokenAddress]
+  );
+  const aTokenBalance = useUserAssetBalance(reserve?.aTokenAddress)?.data;
+  const tokenBalance = useUserAssetBalance(asset.tokenAddress)?.data;
+  const userAccountData = useUserAccountData(
+    userAccountAddress ?? undefined
+  )?.data;
+  // const healthFactor = userAccountData?.healthFactor;
+  console.log(userAccountData);
+
+  // ** Check data for undefined and convert to usable front end data
+  // TODO text size of asset will likly need to be controlled by helper function
+  const name = asset.symbol ? asset.symbol : "Asset";
+  const userBal = tokenBalance ? bigNumberToString(tokenBalance) : "0";
+  const userAtokens = aTokenBalance ? bigNumberToString(aTokenBalance) : "0";
+
+  const userBorrow = aTokenBalance ? bigNumberToString(aTokenBalance) : "0";
+  const health = userAccountData?.healthFactor
+    ? bigNumberToString(userAccountData.healthFactor)
+    : "0";
+  const loanVal = userAccountData?.maximumLtv
+    ? userAccountData?.maximumLtv._value
+    : "0";
+  const borrowAmt = userAccountData?.availableBorrowsEth
+    ? bigNumberToString(userAccountData.availableBorrowsEth)
+    : "0";
+
   // TODO Used for stable borrowing, ready when implmented
-  // const [useAsCol] = useState(false);
+  // const [useAsCol] = false);
 
   return (
     <React.Fragment>
@@ -84,7 +120,7 @@ const UserInfo: React.FC<{
               />
               <UserInfoRow
                 title="You already deposited"
-                value={userSupply}
+                value={userAtokens}
                 type={name}
               />
               {/* TODO Used for Stable coin borrowing, when ready to be implemented */}
@@ -149,7 +185,11 @@ const UserInfo: React.FC<{
             </Box>
             <Box>
               <UserInfoRow title="Borrowed" value={userBorrow} type={name} />
-              <UserInfoRow title="Health Factor" value={health} />
+              <UserInfoRow
+                title="Health Factor"
+                value={health}
+                enableModal={true}
+              />
               <UserInfoRow title="Loan To Value" value={loanVal} type="%" />
               <UserInfoRow
                 title="Available To You"

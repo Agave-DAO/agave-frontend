@@ -1,16 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { Text, Flex, Box, useMediaQuery } from "@chakra-ui/react";
 
-// TODO real types
 interface Props {
   title: string;
-  value: any;
+  value: string | number | undefined;
 }
 
 const MiddleCard: React.FC<Props> = ({ ...props }) => {
   // Default Component States
-  const [title] = useState(props.title ? props.title : "Stats");
-  const [value] = useState(props.value ? props.value : "~");
+  const title = props.title ? props.title : "Stats";
+  const value = props.value ? props.value : "~";
 
   // const [isLargeTab] = useMediaQuery("(max-width: 1200px)");
   // const [isSmallTab] = useMediaQuery("(max-width: 800px)");
@@ -21,7 +20,7 @@ const MiddleCard: React.FC<Props> = ({ ...props }) => {
     <React.Fragment>
       <Flex
         p="5px"
-        w={isMobile ? "80vw" : isLargePhone ? "75vw" : ""}
+        w="90%"
         m="2"
         minW="150px"
         alignItems="center"

@@ -1,36 +1,146 @@
-import { Center, Text, VStack } from "@chakra-ui/layout";
-import { BigNumber } from "ethers";
 import React from "react";
-import DashOverview from "../common/DashOverview";
-import DepositDash from "../common/DepositDash";
+import {
+  Box,
+  Center,
+  Flex,
+  Link,
+  StackDivider,
+  Text,
+  VStack,
+  useMediaQuery
+} from "@chakra-ui/react";
+// import Switch from '../../components/Switch'
+// import Search from '../../components/Search'
+import { DepositTable } from "./DepositTable";
+import { DepositAsset } from ".";
+import { MyDepositsTable } from "./MyDeposits";
+import { useHistory } from "react-router-dom";
 
-export const DepositBanner: React.FC = () => {
+export interface DepositBannerProps {}
+
+export interface DepositLayoutProps {
+  activeValue: string;
+  setActiveValue: (active: any) => void;
+  depositedList: DepositAsset[] | undefined;
+}
+
+export const DepositBanner: React.FC<{}> = () => {
+  const history = useHistory();
+  const [isSmallerThan900] = useMediaQuery("(max-width: 900px)");
   return (
-    <Center justifyContent="flex-start" w="100%">
-      <Text fontSize="2.4rem" fontWeight="bold">
-        Deposit XDAI
+    <Center width="100%" justifyContent="space-between">
+      <Text
+        fontWeight="bold"
+        color="white"
+        fontSize={{ base: "1.8rem", md: "2.4rem" }}
+        onClick={() => history.push("/deposit")}
+      >
+        Deposit
       </Text>
+	  {isSmallerThan900 ? null :
+      <Text>
+        Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
+        <Link fontWeight="bold">xpollinate.io</Link>
+      </Text>
+		}
     </Center>
   );
 };
 
-const DepositLayout: React.FC = () => {
+export const DepositLayout: React.FC<DepositLayoutProps> = props => {
+  const deposits: DepositAsset[] = React.useMemo(
+    () => props.depositedList ?? [],
+    [props.depositedList]
+  );
+  const depositTable = React.useMemo(
+    () => <DepositTable activeType="All" />,
+    []
+  );
+  const myDeposits = React.useMemo(
+    () => <MyDepositsTable deposits={deposits} />,
+    [deposits]
+  );
   return (
-    <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
-      <DepositDash
-        healthFactor={3.91}
-        assetPrice={BigNumber.from(1)}
-        utilRate={38.42}
-        agaveBalance={BigNumber.from(362)}
-        walletBalance={BigNumber.from(4883)}
-        isCollateralized={true}
-        maxLTV={50}
-        depositAPY={11.07}
-        liquidityAvailable={BigNumber.from(223362346)}
-      />
-      <DashOverview mode="deposit" />
-    </VStack>
+    <Flex
+      flexDirection={{ base: "column", md: "row" }}
+      px={{ base: "2.4rem", md: "0" }}
+      mb={10}
+      height="100%"
+      alignItems="flex-start"
+    >
+      <Box
+        boxSizing="content-box"
+        rounded="xl"
+        minH="12.75rem"
+        w="100%"
+        bg="primary.900"
+        py="2rem"
+        mb={{ base: "0.1rem", md: "0" }}
+        color="white"
+      >
+        <VStack
+          divider={
+            <StackDivider
+              borderColor="#36CFA2"
+              h="0.188rem"
+              backgroundColor="#36CFA2"
+            />
+          }
+          spacing={4}
+          w="100%"
+          align="stretch"
+          flexDirection="column"
+        >
+          <Box
+            h={{
+              base: 100, // 0-48em
+              md: 45, // 48em-80em,
+              xl: 25, // 80em+
+            }}
+            ml={{
+              md: 27,
+              xl: 27,
+            }}
+            mb={{
+              base: 5,
+              md: 5,
+              xl: 0,
+            }}
+            maxW={{
+              base: "100%", // 0-48em
+              md: "90%", // 48em-80em,
+              xl: "70%", // 80em+
+            }}
+            d="flex"
+            flexGrow={1}
+            flexDirection={{ base: "column", md: "row", xl: "row" }}
+          >
+            <Box
+              d="flex"
+              flexDirection={{ base: "row", md: "column", xl: "row" }}
+              justifyContent="center"
+              h="100%"
+            >
+              <Text>Available to deposit</Text>
+            </Box>
+          </Box>
+          <Box
+            w="100%"
+            pl={27}
+            pr={27}
+            pt={5}
+          >
+              {/* Disabled for now, no enough rows to be filtered */}
+              {/* <Search
+                placeholder="Search"
+                w={185}
+                h={26}
+              /> */}
+            <Box overflowY="auto">{depositTable}</Box>
+          </Box>
+        </VStack>
+      </Box>
+      {myDeposits}
+    </Flex>
   );
 };
-
-export default DepositLayout;

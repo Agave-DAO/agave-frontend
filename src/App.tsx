@@ -7,15 +7,20 @@ import { MarketsBanner, Markets } from "./views/Markets";
 import ReserveOverview from "./views/ReserveOverview";
 import ReserveBanner from "./views/ReserveOverview/ReserveBanner";
 // import Dashboard from './views/Dashboard';
-import Deposit from "./views/Deposit";
-import Withdraw from "./views/Withdraw";
+// import ReserveOverview from './views/ReserveOverview';
+import { Dashboard } from "./views/Dashboard";
+import { DashboardBanner } from "./views/Dashboard/layout";
+import { Deposit } from "./views/Deposit";
 import { DepositBanner } from "./views/Deposit/layout";
-import { WithdrawBanner } from "./views/Withdraw/layout";
-import Borrow from "./views/Borrow";
-import BorrowDetail from "./views/Borrow/BorrowDetail";
-import BorrowConfirm from "./views/Borrow/BorrowConfirm";
-// import RepayDetail from './views/Repay/RepayDetail';
-// import RepayConfirm from './views/Repay/RepayConfirm';
+import { DepositDetail } from "./views/Deposit/DepositDetail";
+import { WithdrawBanner } from "./views/Withdraw/WithdrawDetail";
+import { WithdrawDetail } from "./views/Withdraw/WithdrawDetail";
+
+import { BorrowBanner } from "./views/Borrow/BorrowDetail";
+import { BorrowDetail } from "./views/Borrow/BorrowDetail";
+// import BorrowConfirm from "./views/Borrow/BorrowConfirm";
+import { RepayBanner } from "./views/Repay/layout";
+import { RepayDetail } from "./views/Repay/RepayDetail";
 // import Collateral from './views/Collateral';
 // import InterestSwap from './views/InterestSwap';
 import { Staking } from "./views/Staking";
@@ -56,6 +61,17 @@ const theme = extendTheme({
   fonts: {
     body: "Lato",
   },
+  styles: {
+    global: {
+      "html, body": {
+        backgroundColor: "secondary.900",
+        lineHeight: "tall",
+      },
+      a: {
+        color: "teal.500",
+      },
+    },
+  },
 });
 
 interface IAppProps {}
@@ -73,17 +89,18 @@ const App: React.FC<IAppProps> = props => {
             header={
               // prettier-ignore
               <Switch>
+                <Route path="/dashboard">
+                  <DashboardBanner/>
+                </Route>
                 <Route path="/stake">
                   <StakingBanner/>
                 </Route>
                 <Route path="/markets"><MarketsBanner/></Route>
+                <Route path="/deposit"><DepositBanner/></Route>
+				        <Route path="/borrow"><BorrowBanner/></Route>
+				        <Route path="/withdraw"><WithdrawBanner/></Route>
+                <Route path="/repay"><RepayBanner/></Route>
                 <Route path="/reserve-overview/:assetName" ><ReserveBanner/></Route>
-                <Route path="/deposit">
-                  <DepositBanner/>
-                </Route>
-                <Route path="/withdraw">
-                  <WithdrawBanner />
-                </Route>
               </Switch>
             }
           >
@@ -91,19 +108,18 @@ const App: React.FC<IAppProps> = props => {
             <Switch>
               <Route path="/markets" component={Markets} exact />
               <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact />
-              {/* <Route path="/dashboard" component={Dashboard} exact /> */}
-              <Route path="/deposit" component={Deposit} exact /> 
-              <Route path="/withdraw" component={Withdraw} exact />
-              <Route path="/borrow" component={Borrow} exact />
+              <Route path="/dashboard" component={Dashboard} exact />
+              <Route path="/deposit" component={Deposit} exact />
+              <Route path="/deposit/:assetName" component={DepositDetail} exact />
+              <Route path="/withdraw/:assetName" component={WithdrawDetail} exact />
+              {/* <Route path="/borrow" component={Borrow} exact /> */}
               <Route path="/borrow/:assetName" component={BorrowDetail} exact />
-              <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact />
-              <Route exact path="/withdraw" component={Withdraw} />
-              {/* <Route path="/repay/:assetName" component={RepayDetail} exact /> */}
-              {/* <Route path="/repay/confirm/:assetName/:amount" component={RepayConfirm} exact /> */}
+              {/* <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact /> */}
+              <Route path="/repay/:assetName" component={RepayDetail} exact />
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
               {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
               <Route path="/stake" component={Staking} />
-              <Redirect from="/" to="/stake" />
+              <Redirect from="/" to="/markets" />
           </Switch>
           </Layout>
         </HashRouter>

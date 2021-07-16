@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { Text, Flex } from "@chakra-ui/react";
+import { ModalIcon } from "../../utils/icons";
 
-// TODO real types
 interface Props {
   title: string;
   value: any;
   type?: string;
+  enableModal?: boolean;
 }
 
 const UserInfoRow: React.FC<Props> = ({ ...props }) => {
   // Default Component States
-  const [title] = useState(props.title ? props.title : "");
-  const [value] = useState(props.value ? props.value : "~");
-  const [type] = useState(props.type ? props.type : "");
+  const title = props.title ? props.title : "";
+  const value = props.value ? props.value : "~";
+  const type = props.type ? props.type : "";
 
   return (
     <React.Fragment>
@@ -24,6 +25,9 @@ const UserInfoRow: React.FC<Props> = ({ ...props }) => {
       >
         <Flex>
           <Text fontSize="2xl">{title}</Text>
+          {props.enableModal && (
+            <ModalIcon position="relative" top="0" left="2" onOpen={() => {}} />
+          )}
         </Flex>
         <Flex>
           <Text fontSize="2xl">

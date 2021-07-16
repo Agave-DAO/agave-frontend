@@ -5,7 +5,7 @@ const TableWrapper = styled.div`
   table {
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow-y: auto;
     overflow-x: hidden;
 
     thead {
@@ -18,9 +18,9 @@ const TableWrapper = styled.div`
 
         th {
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           align-items: center;
-          justify-content: flex-end;
+          justify-content: center;
           flex: 1 1 0%;
           overflow: hidden;
 
@@ -42,11 +42,10 @@ const TableWrapper = styled.div`
             span {
               display: inline;
               position: relative;
+              height: 100%
 
               &:hover {
                 &::after {
-                  border-top-color: ${props =>
-                    props.theme.color.pink || "pink"};
                   opacity: 1;
                 }
               }
@@ -98,16 +97,13 @@ const TableWrapper = styled.div`
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-radius: 2px;
-        box-shadow: ${props => props.theme.color.boxShadow};
+        border-radius: 6px;
+        background: ${props => props.theme.color.secondary[900]};
         transition: all 0.2s ease 0s;
-        border: 1px solid transparent;
-        background: ${props => props.theme.color.bgWhite};
-        color: ${props => props.theme.color.textPrimary};
         cursor: pointer;
 
         &:hover {
-          box-shadow: ${props => props.theme.color.pink} 0px 0px 10px 0px;
+          box-shadow: ${props => props.theme.color.secondary[100]} 0px 0px 10px 0px;
         }
 
         td {
@@ -116,14 +112,26 @@ const TableWrapper = styled.div`
           align-items: center;
           justify-content: flex-end;
           flex: 1 1 0%;
+          background: ${props => props.theme.color.secondary[900]};
           overflow: hidden;
           font-size: 16px;
-          padding: 10px 20px;
+          padding: 10px 10px;
+          margin-left: 6px;
 
           &:first-child {
             align-items: flex-start;
             justify-content: flex-start;
             max-width: 200px;
+            
+            div {
+              display: flex;
+              flex-direction: row;
+              border-radius: 6px;
+            }
+
+            span {
+              align-self: center;
+            }
 
             img {
               margin-right: 10px;
@@ -132,23 +140,7 @@ const TableWrapper = styled.div`
 
           .value-section {
             font-size: 16px;
-          }
-
-          .value {
-            font-size: 16px;
-            font-weight: 600;
-
-            &.yellow {
-              color: ${props => props.theme.color.yellow};
-            }
-
-            &.blue {
-              color: ${props => props.theme.color.blue};
-            }
-
-            &.pink {
-              color: ${props => props.theme.color.pink};
-            }
+            font-weight: 700;
           }
         }
       }

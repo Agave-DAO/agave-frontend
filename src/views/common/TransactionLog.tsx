@@ -4,6 +4,8 @@ import { LINEAR_GRADIENT_BG } from "../../utils/constants";
 
 import externalLink from "../../assets/image/external-link.svg";
 import pendingSymb from "../../assets/image/loading.svg";
+import { getChainAddresses } from "../../utils/chainAddresses";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 type TransactionLogProps = {
   log: {
@@ -16,6 +18,8 @@ type TransactionLogProps = {
 export const TransactionLog: React.FC<TransactionLogProps> = ({
   log: { txHash, isComplete, stepName },
 }) => {
+  const { chainId } = useAppWeb3();
+  const chainAddresses = chainId ? getChainAddresses(chainId) : undefined;
   return (
     <Center
       w="100%"
@@ -39,16 +43,18 @@ export const TransactionLog: React.FC<TransactionLogProps> = ({
           <Image src={pendingSymb} boxSize="1.1rem" />
         </HStack>
       )}
-      <HStack
-        as={Link}
-        href={`https://blockscout.com/xdai/mainnet/tx/${txHash}`}
-        textDecoration="none !important"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Text fontSize="1rem">Explorer</Text>
-        <Image src={externalLink} boxSize=".8rem" />
-      </HStack>
+      {chainAddresses?.explorer ? (
+        <HStack
+          as={Link}
+          href={`${chainAddresses?.explorer}/tx/${txHash}`}
+          textDecoration="none !important"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Text fontSize="1rem">Explorer</Text>
+          <Image src={externalLink} boxSize=".8rem" />
+        </HStack>
+      ) : null}
     </Center>
   );
 };

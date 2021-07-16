@@ -3,13 +3,18 @@ import {
   TableCellProps,
   TableProps,
   TableRowProps,
+  TableColumnHeaderProps,
   Tbody,
   Td,
   Thead,
+  Th,
   Tr,
 } from "@chakra-ui/react";
+import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons"
+import { Box } from "@chakra-ui/react"
 import React from "react";
 import { Column, useTable, useSortBy, TableInstance } from "react-table";
+import { useHistory } from "react-router-dom";
 
 export type TableRenderingProps =
   | "getTableProps"
@@ -70,41 +75,56 @@ export function SortedHtmlTable<TRecord extends object>({
 }
 
 export interface BasicTableRendererProps<TRecord extends object> {
+  linkpage?: string,
   table: TableRenderingInstance<TRecord>;
   tableProps?: TableProps;
+  headProps?: TableColumnHeaderProps;
   rowProps?: TableRowProps;
   cellProps?: TableCellProps;
 }
 
 export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
+  linkpage,
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
   tableProps: tableStyle,
+  headProps: headStyle,
   rowProps: rowStyle,
   cellProps: cellStyle,
 }) => {
+  const reactHistory = useHistory();
+  const handleRowClick = React.useCallback( (row:{ original: {symbol: string}}) => {
+	linkpage && reactHistory.push(`/${linkpage}/${row.original?.symbol}`);
+  }, []);
   return React.useMemo(
     () => (
       <Table {...getTableProps()} margin={0} {...tableStyle}>
         <Thead>
           {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
+            <Tr {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
+                <Th {...column.getHeaderProps(column.getSortByToggleProps())} {...headStyle}>
                   {column.render("Header")}
-                  {/* Add a sort direction indicator */}
                   <span>
-                    {column.isSorted ? (column.isSortedDesc ? " v" : " ^") : ""}
+                    {
+                      column.isSorted ? (
+                        column.isSortedDesc ? (
+                          <TriangleDownIcon ml={3}/>
+                        ) : (
+                          <TriangleUpIcon ml={3}/>
+                        )
+                      ) : null
+                    }
                   </span>
-                </th>
+                </Th>
               ))}
-            </tr>
+            </Tr>
           ))}
         </Thead>
         <Tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
+		{rows.map((row, i) => {
             prepareRow(row);
             return (
-              <Tr {...row.getRowProps()} {...rowStyle}>
+              <Tr {...row.getRowProps()} {...rowStyle} onClick={()=> handleRowClick(row, )}>
                 {row.cells.map(cell => {
                   return (
                     <Td {...cell.getCellProps()} {...cellStyle}>
@@ -125,8 +145,72 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
       rows,
       prepareRow,
       tableStyle,
+      headStyle,
       rowStyle,
       cellStyle,
     ]
   );
+};
+
+export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
+  linkpage,
+  table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
+  tableProps: tableStyle,
+  headProps: headStyle,
+  rowProps: rowStyle,
+  cellProps: cellStyle,
+}) => {
+  const reactHistory = useHistory();
+  const handleRowClick = React.useCallback( (row:{ original: {symbol: string}}) => {
+	linkpage && reactHistory.push(`/${linkpage}/${row.original?.symbol}`);
+  }, []);
+
+  const headerGroup = headerGroups[0];
+
+  return React.useMemo(
+    () => (
+      <Box as="table" {...tableStyle}>
+        <Box as="tbody" {...getTableBodyProps()}>
+          {rows.map((row) => {
+            prepareRow(row);
+            return (
+              <Box as="tr" {...row.getRowProps()} {...rowStyle}>
+                {row.cells.map((cell, index) => {
+                  const reactRow = index !== 0 ? (
+                    <Box {...cellStyle}>
+                      <Box as="td" minWidth="50px"{...headerGroup.getHeaderGroupProps()}>
+                        {headerGroup.headers[index].render("Header")}
+                      </Box>
+                      <Box as="td" {...cell.getCellProps()}>
+                        {cell.render("Cell")}
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center"}} {...cellStyle}>
+                      <Box as="td" {...cell.getCellProps()}>
+                        {cell.render("Cell")}
+                      </Box>
+                    </Box>
+                  )
+
+                  return reactRow;
+                })}
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
+    ),
+    [
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      rows,
+      prepareRow,
+      tableStyle,
+      headStyle,
+      rowStyle,
+      cellStyle,
+    ]
+  )
 };
