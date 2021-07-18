@@ -16,6 +16,7 @@ import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConf
 import { useHistory } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { BigNumber } from "ethers";
+import { fontSizes } from "../../utils/constants";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -88,10 +89,10 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
         accessor: row => row.tokenAddress,  
-        Cell: (({ value }) => ( 
-          <DepositAPYView tokenAddress={value} 
-		  /* There's a difference between the deposit APY and the borrow APR. Lending rates are obviously higher than borrowing rates */
-		  />
+        Cell: (({ value }) => (
+          /* There's a difference between the deposit APY and the borrow APR.
+             Lending rates are obviously higher than borrowing rates */
+          <DepositAPYView tokenAddress={value} />
         )) as Renderer<CellProps<AssetData, string>>,
       }, 
       {
@@ -122,11 +123,13 @@ export const DashboardTable: React.FC<{
               d="flex"
               flexDir="row"
               alignItems="center"
-              justifyContent="space-between"
+              justifyContent="flex-end"
             >
               <Button
+                fontSize={{base:fontSizes.md, md:fontSizes.lg }}
                 bg="secondary.900"
                 _hover={{ bg: "primary.50" }}
+                mr="1rem"
                 onClick={() =>
                   onActionClicked("Deposit-Borrow", {
                     symbol:
@@ -138,11 +141,12 @@ export const DashboardTable: React.FC<{
                   })
                 }
               >
-                <ColoredText fontSize="1rem" fontWeight="400">
+                <ColoredText fontWeight="400">
                   {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
                 </ColoredText>
               </Button>
               <Button
+                fontSize={{base:fontSizes.sm, md:fontSizes.md }}
                 borderColor="primary.50"
                 color="primary.50"
                 fontWeight="400"
@@ -177,6 +181,7 @@ export const DashboardTable: React.FC<{
             style: {
               borderSpacing: "0 1em",
               borderCollapse: "separate",
+              width: "100%",
             },
           }}
           headProps={{
@@ -193,6 +198,7 @@ export const DashboardTable: React.FC<{
           cellProps={{
             borderBottom: "none",
             border: "0px solid",
+            maxWidth:"10rem",
             _first: { borderLeftRadius: "10px" },
             _last: { borderRightRadius: "10px" },
           }}
