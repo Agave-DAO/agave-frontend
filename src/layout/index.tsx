@@ -55,11 +55,10 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         position={{ base: "relative", md: "absolute" }}
         zIndex="2"
         top={{ md: "9.4rem" }}
-		pb="4rem"
+        pb="4rem"
         left="50%"
         transform="translateX(-50%)"
-        // lg, md, sm
-        minW={{ base: "90vw",xl: "85vw" }}
+        minW={{ base: "90vw", xl: "85vw" }}
       >
         <Center
           rounded={{ md: "lg" }}

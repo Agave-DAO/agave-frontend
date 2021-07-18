@@ -89,26 +89,26 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
         accessor: row => row.tokenAddress,  
-        Cell: (({ value }) => ( 
-          <DepositAPYView tokenAddress={value} 
-		  /* There's a difference between the deposit APY and the borrow APR. Lending rates are obviously higher than borrowing rates */
-		  />
+        Cell: (({ value }) => (
+          /* There's a difference between the deposit APY and the borrow APR.
+             Lending rates are obviously higher than borrowing rates */
+          <DepositAPYView tokenAddress={value} />
         )) as Renderer<CellProps<AssetData, string>>,
       }, 
       {
         Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
         accessor: row => row.tokenAddress,
-        Cell: (({ row }) => (
+        Cell: (({ value }) => (
           <Box
-		  	d={(row.original.backingReserve) ? "flex" : "0" }
+            d="flex"
             flexDir="row"
             alignItems="center"
             justifyContent="space-between"
           >
             {mode === DashboardTableType.Deposit && (
               <>
-                <Text fontWeight="bold">{"user"}</Text>
-                <CollateralView tokenAddress={row.original.tokenAddress} /> {/* drop the collateralView make this button toggle directly a mutation call */}
+                <Text fontWeight="bold">{"userAssetCollateral! "}</Text>
+                <CollateralView tokenAddress={value} /> {/* drop the collateralView make this button toggle directly a mutation call */}
               </>
             )}
           </Box>
@@ -126,10 +126,10 @@ export const DashboardTable: React.FC<{
               justifyContent="flex-end"
             >
               <Button
-			    fontSize={{base:fontSizes.md, md:fontSizes.lg }}
+                fontSize={{base:fontSizes.md, md:fontSizes.lg }}
                 bg="secondary.900"
                 _hover={{ bg: "primary.50" }}
-				mr="1rem"
+                mr="1rem"
                 onClick={() =>
                   onActionClicked("Deposit-Borrow", {
                     symbol:
@@ -146,7 +146,7 @@ export const DashboardTable: React.FC<{
                 </ColoredText>
               </Button>
               <Button
-			  	fontSize={{base:fontSizes.sm, md:fontSizes.md }}
+                fontSize={{base:fontSizes.sm, md:fontSizes.md }}
                 borderColor="primary.50"
                 color="primary.50"
                 fontWeight="400"
@@ -181,7 +181,7 @@ export const DashboardTable: React.FC<{
             style: {
               borderSpacing: "0 1em",
               borderCollapse: "separate",
-			  width: "100%",
+              width: "100%",
             },
           }}
           headProps={{
@@ -198,7 +198,7 @@ export const DashboardTable: React.FC<{
           cellProps={{
             borderBottom: "none",
             border: "0px solid",
-			maxWidth:"10rem",
+            maxWidth:"10rem",
             _first: { borderLeftRadius: "10px" },
             _last: { borderRightRadius: "10px" },
           }}
