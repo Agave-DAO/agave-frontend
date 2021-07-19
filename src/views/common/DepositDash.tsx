@@ -1,6 +1,6 @@
 import { Box, HStack, Stack, Text, VStack, useMediaQuery, Flex } from "@chakra-ui/react";
 import React from "react";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString, fixedNumberToPercentage } from "../../utils/fixedPoint"
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -119,7 +119,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >{isSmallerThan900 ? "APY" : "Deposit APY"}</Text>
           <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
 			 {console.log(variableDepositAPY)}
-            {variableDepositAPY ? (variableDepositAPY.toUnsafeFloat() * 100).toLocaleString() : "-"} %
+            {fixedNumberToPercentage(variableDepositAPY,4, 2)}%
           </Text>
         </Stack>
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>

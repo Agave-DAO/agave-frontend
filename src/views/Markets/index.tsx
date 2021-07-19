@@ -19,7 +19,6 @@ import {
   useStableBorrowAPR,
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
-import { PercentageView } from "../common/PercentageView"
 import { TokenIcon } from "../../utils/icons";
 import {
   BasicTableRenderer,
@@ -85,7 +84,7 @@ const MarketSizeView: React.FC<{ tokenAddress: string }> = ({
 }) => {
   const marketSize = useMarketSizeInDai(tokenAddress);
   const marketSizeInDai = React.useMemo(
-    () => marketSize.data?.round(2).toUnsafeFloat().toLocaleString() ?? null,
+    () => fixedNumberToPercentage(marketSize.data, 4, 2),
     [marketSize.data]
   );
 

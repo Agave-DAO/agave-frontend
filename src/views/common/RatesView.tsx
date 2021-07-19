@@ -1,5 +1,5 @@
 import React from "react";
-import { PercentageView } from "./PercentageView";
+import { Text } from "@chakra-ui/react";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { fixedNumberToPercentage } from "../../utils/fixedPoint";
 
@@ -8,15 +8,13 @@ export const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
 }) => {
   const { data: reserveProtocolData } = useProtocolReserveData(tokenAddress);
   const variableDepositAPY = reserveProtocolData?.liquidityRate;
-  console.log(reserveProtocolData, variableDepositAPY, tokenAddress)
+  console.log(reserveProtocolData, variableDepositAPY, tokenAddress);
   return React.useMemo(() => {
     if (variableDepositAPY === undefined) {
       return <>-</>;
     }
 
-    return (
-      <PercentageView ratio={fixedNumberToPercentage(variableDepositAPY, 7, 2)} />
-    );
+    return <Text>{fixedNumberToPercentage(variableDepositAPY, 7, 2)}</Text>;
   }, [variableDepositAPY]);
 };
 
@@ -35,6 +33,6 @@ export const BorrowAPRView: React.FC<{
       return <>-</>;
     }
 
-    return <PercentageView ratio={fixedNumberToPercentage(borrowRate, 4, 2)} />;
+    return <Text>{fixedNumberToPercentage(borrowRate, 4, 2)}</Text>;
   }, [borrowRate]);
 };

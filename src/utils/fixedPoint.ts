@@ -29,7 +29,7 @@ export function divIfNotZeroUnsafe(
 
 export function bigNumberToString(
   input: BigNumber | null | undefined,
-  decimalsTarget: number | 2
+  decimalsTarget: number = 2
 ): string {
   if (!input || input === null || input.isZero()) {
     return "0";
@@ -51,8 +51,8 @@ export function bigNumberToString(
 
 export function fixedNumberToPercentage(
   input: FixedNumber | null | undefined,
-  decimalsTarget: number | 2,
-  minimumNumberOfDecimals: number | 0
+  decimalsTarget: number = 2,
+  minimumNumberOfDecimals: number = 0
 ): string {
   if (!input || input === null || input.isZero()) {
     return "0";
