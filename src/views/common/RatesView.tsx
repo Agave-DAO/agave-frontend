@@ -8,7 +8,6 @@ export const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
 }) => {
   const { data: reserveProtocolData } = useProtocolReserveData(tokenAddress);
   const variableDepositAPY = reserveProtocolData?.liquidityRate;
-  console.log(reserveProtocolData, variableDepositAPY, tokenAddress);
   return React.useMemo(() => {
     if (variableDepositAPY === undefined) {
       return <>-</>;
