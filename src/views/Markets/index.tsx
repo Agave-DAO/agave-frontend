@@ -19,6 +19,7 @@ import {
   useStableBorrowAPR,
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
+import { PercentageView } from "../common/PercentageView"
 import { TokenIcon } from "../../utils/icons";
 import {
   BasicTableRenderer,
@@ -26,7 +27,6 @@ import {
   TableRenderer,
   MobileTableRenderer,
 } from "../../utils/htmlTable";
-import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -84,7 +84,7 @@ const MarketSizeView: React.FC<{ tokenAddress: string }> = ({
 }) => {
   const marketSize = useMarketSizeInDai(tokenAddress);
   const marketSizeInDai = React.useMemo(
-    () => fixedNumberToPercentage(marketSize.data, 4, 2),
+    () => marketSize.data?.round(2).toUnsafeFloat().toLocaleString() ?? null,
     [marketSize.data]
   );
 
@@ -124,6 +124,53 @@ const TotalBorrowedView: React.FC<{
       return <Text>$ -</Text>;
     }
   }, [totalBorrowed.data]);
+};
+
+const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
+  tokenAddress,
+}) => {
+  const query = useDepositAPY(tokenAddress);
+  return React.useMemo(() => {
+    if (query.data === undefined) {
+      return <>-</>;
+    }
+  const depositAPY = query.data
+    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3)} />;
+  }, [query.data]);
+};
+
+const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
+  tokenAddress,
+}) => {
+  const query = useVariableBorrowAPR(tokenAddress);
+  return React.useMemo(() => {
+    if (query.data === undefined) {
+      return <>-</>;
+    }
+	const variableBorrowAPR = query.data
+    return (
+      <PercentageView
+        ratio={fixedNumberToPercentage(variableBorrowAPR, 3)}
+      />
+    );
+  }, [query.data]);
+};
+
+const StableAPRView: React.FC<{ tokenAddress: string }> = ({
+  tokenAddress,
+}) => {
+  const query = useStableBorrowAPR(tokenAddress);
+  return React.useMemo(() => {
+    if (query.data === undefined) {
+      return <>-</>;
+    }
+  const stableBorrowAPR = query.data
+    return (
+      <PercentageView
+        ratio={fixedNumberToPercentage(stableBorrowAPR, 3)}
+      />
+    );
+  }, [query.data]);
 };
 
 const AssetTable: React.FC<{
@@ -214,7 +261,7 @@ const AssetTable: React.FC<{
       accessor: row => row.tokenAddress,
       Cell: (({ value }) => (
         <Center>
-          <BorrowAPRView tokenAddress={value} />
+          <VariableAPRView tokenAddress={value} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
@@ -225,7 +272,7 @@ const AssetTable: React.FC<{
       accessor: row => row.tokenAddress,
       Cell: (({ value }) => (
         <Center>
-          <BorrowAPRView tokenAddress={value} isStable={true}/>
+          <StableAPRView tokenAddress={value} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,

@@ -89,19 +89,6 @@ export const DashboardTable: React.FC<{
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
-<<<<<<< HEAD
-        accessor: row =>
-          row.backingReserve
-            ? row.backingReserve.tokenAddress
-            : row.tokenAddress,
-        Cell: (({ value }) =>
-          mode === DashboardTableType.Borrow ? (
-            <BorrowAPRView tokenAddress={value} isStable={false} />
-          ) : (
-            <DepositAPYView tokenAddress={value} />
-          )) as Renderer<CellProps<AssetData, string>>,
-      },
-=======
         accessor: row => row.tokenAddress,  
         Cell: (({ value }) => (
           /* There's a difference between the deposit APY and the borrow APR.
@@ -109,7 +96,6 @@ export const DashboardTable: React.FC<{
           <DepositAPYView tokenAddress={value} />
         )) as Renderer<CellProps<AssetData, string>>,
       }, 
->>>>>>> dev
       {
         Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
         accessor: row => row.tokenAddress,
@@ -133,52 +119,6 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "Actions" : "Actions",
         accessor: row => row.tokenAddress,
-<<<<<<< HEAD
-        Cell: (({ row }) => (
-          <Box
-            d="flex"
-            flexDir="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Button
-              bg="secondary.900"
-              _hover={{ bg: "primary.50" }}
-              onClick={() =>
-                onActionClicked("Deposit-Borrow", {
-                  symbol:
-                    row.original.backingReserve?.symbol ?? row.original.symbol,
-                  tokenAddress:
-                    row.original.backingReserve?.tokenAddress ??
-                    row.original.tokenAddress,
-                })
-              }
-            >
-              <ColoredText fontSize="1rem" fontWeight="400">
-                {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
-              </ColoredText>
-            </Button>
-            <Button
-              borderColor="primary.50"
-              color="primary.50"
-              fontWeight="400"
-              variant="outline"
-              _hover={{ bg: "white" }}
-              onClick={() =>
-                onActionClicked("Withdraw-Repay", {
-                  symbol:
-                    row.original.backingReserve?.symbol ?? row.original.symbol,
-                  tokenAddress:
-                    row.original.backingReserve?.tokenAddress ??
-                    row.original.tokenAddress,
-                })
-              }
-            >
-              {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
-            </Button>
-          </Box>
-        )) as Renderer<CellProps<AssetData, string>>,
-=======
         Cell: (({ row }) =>
           (
             <Box
@@ -229,7 +169,6 @@ export const DashboardTable: React.FC<{
               </Button>
             </Box>
           )) as Renderer<CellProps<AssetData, string>>,
->>>>>>> dev
       },
     ],
     [mode, onActionClicked]
