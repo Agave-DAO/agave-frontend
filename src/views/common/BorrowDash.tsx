@@ -36,7 +36,7 @@ import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
 import { TokenIcon } from "../../utils/icons";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString, fixedNumberToPercentage } from "../../utils/fixedPoint"
 
 type BorrowDashProps = {
   token: ReserveTokenDefinition;
@@ -230,14 +230,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {variableBorrowAPR
-                ? variableBorrowAPR
-                    .mulUnsafe(
-                      FixedNumber.from(10 ** 9, variableBorrowAPR.format)
-                    )
-                    .round(4)
-                    .toUnsafeFloat()
-                : "-"}
+              {fixedNumberToPercentage(variableBorrowAPR, 4, 2)}%
             </Text>
           </Box>
         </Flex>
