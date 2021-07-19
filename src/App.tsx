@@ -52,6 +52,17 @@ const theme = extendTheme({
   fonts: {
     body: "Lato",
   },
+  styles: {
+    global: {
+      "html, body": {
+        backgroundColor: "secondary.900",
+        lineHeight: "tall",
+      },
+      a: {
+        color: "teal.500",
+      },
+    },
+  },
 });
 
 interface IAppProps {}

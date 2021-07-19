@@ -17,6 +17,7 @@ import { useHistory } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { BigNumber } from "ethers";
 import { ProtocolReserveData } from "../../queries/protocolReserveData";
+import { fontSizes } from "../../utils/constants";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -88,6 +89,7 @@ export const DashboardTable: React.FC<{
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
+<<<<<<< HEAD
         accessor: row =>
           row.backingReserve
             ? row.backingReserve.tokenAddress
@@ -99,6 +101,15 @@ export const DashboardTable: React.FC<{
             <DepositAPYView tokenAddress={value} />
           )) as Renderer<CellProps<AssetData, string>>,
       },
+=======
+        accessor: row => row.tokenAddress,  
+        Cell: (({ value }) => (
+          /* There's a difference between the deposit APY and the borrow APR.
+             Lending rates are obviously higher than borrowing rates */
+          <DepositAPYView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetData, string>>,
+      }, 
+>>>>>>> dev
       {
         Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
         accessor: row => row.tokenAddress,
@@ -122,6 +133,7 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "Actions" : "Actions",
         accessor: row => row.tokenAddress,
+<<<<<<< HEAD
         Cell: (({ row }) => (
           <Box
             d="flex"
@@ -166,6 +178,58 @@ export const DashboardTable: React.FC<{
             </Button>
           </Box>
         )) as Renderer<CellProps<AssetData, string>>,
+=======
+        Cell: (({ row }) =>
+          (
+            <Box
+              d="flex"
+              flexDir="row"
+              alignItems="center"
+              justifyContent="flex-end"
+            >
+              <Button
+                fontSize={{base:fontSizes.md, md:fontSizes.lg }}
+                bg="secondary.900"
+                _hover={{ bg: "primary.50" }}
+                mr="1rem"
+                onClick={() =>
+                  onActionClicked("Deposit-Borrow", {
+                    symbol:
+                      row.original.backingReserve?.symbol ??
+                      row.original.symbol,
+                    tokenAddress:
+                      row.original.backingReserve?.tokenAddress ??
+                      row.original.tokenAddress,
+                  })
+                }
+              >
+                <ColoredText fontWeight="400">
+                  {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
+                </ColoredText>
+              </Button>
+              <Button
+                fontSize={{base:fontSizes.sm, md:fontSizes.md }}
+                borderColor="primary.50"
+                color="primary.50"
+                fontWeight="400"
+                variant="outline"
+                _hover={{ bg: "white" }}
+                onClick={() =>
+                  onActionClicked("Withdraw-Repay", {
+                    symbol:
+                      row.original.backingReserve?.symbol ??
+                      row.original.symbol,
+                    tokenAddress:
+                      row.original.backingReserve?.tokenAddress ??
+                      row.original.tokenAddress,
+                  })
+                }
+              >
+                {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
+              </Button>
+            </Box>
+          )) as Renderer<CellProps<AssetData, string>>,
+>>>>>>> dev
       },
     ],
     [mode, onActionClicked]
@@ -180,6 +244,7 @@ export const DashboardTable: React.FC<{
             style: {
               borderSpacing: "0 1em",
               borderCollapse: "separate",
+              width: "100%",
             },
           }}
           headProps={{
@@ -196,6 +261,7 @@ export const DashboardTable: React.FC<{
           cellProps={{
             borderBottom: "none",
             border: "0px solid",
+            maxWidth:"10rem",
             _first: { borderLeftRadius: "10px" },
             _last: { borderRightRadius: "10px" },
           }}
