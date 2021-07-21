@@ -2,15 +2,20 @@ import React from "react";
 import glowingAgave from "../assets/image/glowing-agave.svg";
 import Header from "../components/Header";
 import UnlockWallet from "../components/UnlockWallet";
-import { Box, Center, HStack, Image, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  HStack,
+  Image,
+  Text,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import { useAppWeb3 } from "../hooks/appWeb3";
-
 export const Layout: React.FC<{ header: React.ReactNode }> = ({
   header,
   children,
 }) => {
   const { active: activeConnection } = useAppWeb3();
-
   const headerMemo = React.useMemo(
     () =>
       !activeConnection ? (
@@ -22,7 +27,6 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
       ),
     [activeConnection, header]
   );
-
   const childrenMemo = React.useMemo(
     () =>
       !activeConnection ? (
@@ -39,10 +43,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
   );
 
   return (
-    <Box
-      position="relative"
-      bg="secondary.900"
-    >
+    <Box position="relative" bg="secondary.900">
       <Header />
       <Box
         minH="11.1rem"
@@ -58,6 +59,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         pb="4rem"
         left="50%"
         transform="translateX(-50%)"
+        // lg, md, sm
         minW={{ base: "90vw", xl: "85vw" }}
       >
         <Center
@@ -73,8 +75,19 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         </Center>
         {childrenMemo}
       </Box>
-      <Center pos="absolute" bottom="0"  width="100%"display={{base:"none", md:"flex"}}>
-        <Image  w={{ base: "0vw", lg: "90vw", xl: "80vw" }} pos="fixed" bottom="0em" src={glowingAgave}  alt="glowing agave log" />
+      <Center
+        pos="absolute"
+        bottom="0"
+        width="100%"
+        display={{ base: "none", md: "flex" }}
+      >
+        <Image
+          w={{ base: "0vw", lg: "90vw", xl: "80vw" }}
+          pos="fixed"
+          bottom="0em"
+          src={glowingAgave}
+          alt="glowing agave log"
+        />
       </Center>
     </Box>
   );

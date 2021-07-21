@@ -7,7 +7,7 @@ import {
   useTotalMarketSize,
 } from "../../queries/marketSize";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../../utils/queryBuilder";
-import { fixedNumberToPercentage } from "../../utils/fixedPoint"
+import { fixedNumberToPercentage } from "../../utils/fixedPoint";
 import { FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
@@ -19,7 +19,7 @@ import {
   useStableBorrowAPR,
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
-import { PercentageView } from "../common/PercentageView"
+import { PercentageView } from "../common/PercentageView";
 import { TokenIcon } from "../../utils/icons";
 import {
   BasicTableRenderer,
@@ -27,7 +27,7 @@ import {
   TableRenderer,
   MobileTableRenderer,
 } from "../../utils/htmlTable";
-
+import { Link } from "react-router-dom";
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
   ["markets", "totalMarketSize", "wholeDai"],
@@ -112,10 +112,9 @@ const TotalBorrowedView: React.FC<{
         1000
       ).toLocaleString();
       return (
-        <Flex dir={"columns"} justify={"space-between"}>
-          <Text>{weiString}</Text>
-          <Text>/</Text>
-          <Text>$ {daiString}</Text>
+        <Flex alignItems={'center'} flexDirection={'column'} justifyContent="space-evenly">
+          <Text >{weiString}</Text>
+          <Text mt="4px" fontSize={{base: "1.2rem", lg:"1.1rem"}}>$ {daiString}</Text>
         </Flex>
       );
     } else if (data) {
@@ -135,7 +134,7 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
       return <>-</>;
     }
   const depositAPY = query.data
-    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3)} />;
+    return <PercentageView ratio={fixedNumberToPercentage(depositAPY,3, 2)} />;
   }, [query.data]);
 };
 
@@ -147,10 +146,10 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-	const variableBorrowAPR = query.data
+    const variableBorrowAPR = query.data;
     return (
       <PercentageView
-        ratio={fixedNumberToPercentage(variableBorrowAPR, 3)}
+        ratio={fixedNumberToPercentage(variableBorrowAPR, 3, 2)}
       />
     );
   }, [query.data]);
@@ -164,10 +163,10 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-  const stableBorrowAPR = query.data
+    const stableBorrowAPR = query.data;
     return (
       <PercentageView
-        ratio={fixedNumberToPercentage(stableBorrowAPR, 3)}
+        ratio={fixedNumberToPercentage(stableBorrowAPR, 3, 2)}
       />
     );
   }, [query.data]);
@@ -199,15 +198,17 @@ const AssetTable: React.FC<{
       Header: "Asset",
       accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
       Cell: (({ value, row }) => (
-        <Flex alignItems={"center"}>
-          <Box>
-            <TokenIcon symbol={value} />
-          </Box>
-          <Box w="1rem"></Box>
-          <Box>
-            <Text>{value}</Text>
-          </Box>
-        </Flex>
+        <Link to={`/reserve-overview/${value}`}>
+          <Flex alignItems={"center"}>
+            <Box>
+              <TokenIcon symbol={value} />
+            </Box>
+            <Box w="1rem"></Box>
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
+        </Link>
       )) as Renderer<CellProps<AssetRecord, string>>,
     },
     {
@@ -291,7 +292,7 @@ const AssetTable: React.FC<{
             },
           }}
           headProps={{
-            fontSize : "12px",
+            fontSize: "12px",
             fontFamily: "inherit",
             color: "white",
             border: "none",
@@ -303,6 +304,8 @@ const AssetTable: React.FC<{
           }}
           cellProps={{
             borderBottom: "none",
+            _first: { borderLeftRadius: "10px" },
+            _last: { borderRightRadius: "10px" },
           }}
         />
       ),
@@ -316,8 +319,8 @@ const AssetTable: React.FC<{
         tableProps={{
           textAlign: "center",
           display: "flex",
-          width: "100%", 
-          flexDirection: "column"
+          width: "100%",
+          flexDirection: "column",
         }}
         headProps={{
           fontSize: "12px",
@@ -326,17 +329,17 @@ const AssetTable: React.FC<{
           border: "none",
         }}
         rowProps={{
-          display: "flex", 
-          flexDirection: "column", 
+          display: "flex",
+          flexDirection: "column",
           margin: "1em 0",
           padding: "1em",
           borderRadius: "1em",
           bg: { base: "secondary.500" },
         }}
         cellProps={{
-          display: "flex", 
-          flexDirection: "row", 
-          alignItems: "center", 
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
           justifyContent: "space-between",
         }}
       />
@@ -361,7 +364,6 @@ export const Markets: React.FC<{}> = () => {
       // bg={{ base: "primary.500", md: "primary.900" }}
       fg={{ base: "primary.100", md: "primary.100" }}
       color={{ base: "primary.100", md: "primary.100" }}
-      padding="3.5rem"
     >
       <AssetTable viewMode="usd" />
     </Box>
