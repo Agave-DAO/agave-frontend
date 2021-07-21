@@ -92,7 +92,8 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
       if (
         next.daiWeiPriceTotal != undefined &&
         next.decimals != undefined &&
-        totalCollateralValue != undefined
+        totalCollateralValue != undefined &&
+        !totalCollateralValue.eq(BigNumber.from(0))
       ) {
         const decimalPower = BigNumber.from(10).pow(next.decimals);
         return next.daiWeiPriceTotal

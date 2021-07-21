@@ -1,127 +1,201 @@
-import React, { useMemo } from "react";
-import { useHistory } from "react-router-dom";
-import { useTable, useSortBy, Column } from "react-table";
-import BasicTable from "../../components/BasicTable";
-import { IMarketData, marketData } from "../../utils/constants";
+import React from "react";
+import { bigNumberToString } from "../../utils/fixedPoint"
+import { CellProps, Column, Renderer } from "react-table";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
+import { useChainAddresses } from "../../utils/chainAddresses";
+import {
+  BasicTableRenderer,
+  MobileTableRenderer,
+  SortedHtmlTable,
+  TableRenderer,
+} from "../../utils/htmlTable";
+import { Box, Text } from "@chakra-ui/layout";
+import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
+import { TokenIcon } from "../../utils/icons";
+import { useUserAssetBalance, useUserAssetAllowance } from "../../queries/userAssets";
+import { PercentageView } from "../common/PercentageView"
+import { useProtocolReserveData } from "../../queries/protocolReserveData";
+import { fixedNumberToPercentage } from "../../utils/fixedPoint"
+import { Link, useHistory } from "react-router-dom";
 
-const BorrowTable: React.FC<{ activeType: string }> = ({ activeType }) => {
-  const history = useHistory();
-  const data = useMemo(() => {
-    if (activeType === "All") {
-      return marketData;
+export const APYView: React.FC<{ tokenAddress: string }> = ({
+  tokenAddress,
+}) => {
+  const { data: reserveProtocolData } = useProtocolReserveData(tokenAddress);
+  // if it's an aToken this will return null. Handle it differently!
+  const variableBorrowAPY = reserveProtocolData?.variableBorrowRate;
+  
+  return React.useMemo(() => {
+    if (variableBorrowAPY === undefined) {
+      return <>-</>;
     }
 
-    return marketData.slice(0, 3);
-  }, [activeType]);
+    return <PercentageView ratio={fixedNumberToPercentage(variableBorrowAPY, 4, 2)} />;
 
-  const columns: Column<IMarketData>[] = useMemo(
+  }, [variableBorrowAPY]);
+};
+
+
+const BalanceView: React.FC<{ tokenAddress: string, spender: string | undefined }> = ({ tokenAddress, spender }) => {
+  const price = useAssetPriceInDai(tokenAddress);
+  const balance = useUserAssetAllowance(tokenAddress, spender);
+  const balanceNumber = Number(bigNumberToString(balance.data));
+  const balanceUSD = balanceNumber
+    ? (Number(price.data) * balanceNumber).toFixed(2)
+    : "-";
+
+  return React.useMemo(() => {
+    return (
+      <Flex direction="column" minH={30} ml={2}>
+        <Box w="14rem" textAlign="center" whiteSpace="nowrap">
+          <Text p={3} fontWeight="bold">
+            {balanceNumber?.toFixed(3) ?? "-"}
+          </Text>
+          <Text p={3}>$ {balanceUSD ?? "-"}</Text>
+        </Box>
+      </Flex>
+    );
+  }, [balanceNumber, balanceUSD]);
+};
+
+export const BorrowTable: React.FC<{ activeType: string }> = ({
+  activeType,
+}) => {
+  const history = useHistory();
+  interface AssetRecord {
+    symbol: string;
+    tokenAddress: string;
+    aTokenAddress: string;
+  }
+
+  const reserves = useAllReserveTokensWithData();
+  const assetRecords = React.useMemo(() => {
+    return (
+      reserves.data?.map(
+        ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
+          symbol,
+          tokenAddress,
+          aTokenAddress,
+        })
+      ) ?? []
+    );
+  }, [reserves]);
+
+  const chainAddresses = useChainAddresses();
+  const spender = chainAddresses?.lendingPool;
+
+  const columns: Column<AssetRecord>[] = React.useMemo(
     () => [
       {
         Header: "Asset",
-        accessor: "name",
-        Cell: (row) => {
-          return (
-            <div>
-              <img src={row.row.original.img} alt="" width="35" height="35" />
-              <span>{row.value}</span>
-            </div>
-          );
-        },
+        accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+        Cell: (({ value }) => (
+          <Flex width="100%" height="100%" alignItems={"center"}>
+            <Center width="4rem">
+              <TokenIcon symbol={value} />
+            </Center>
+            <Box w="1rem"></Box>
+
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
         Header: "Available to borrow",
-        accessor: "wallet_balance",
-        Cell: (row) => (
-          <div>
-            <span className="value">
-              {row.value} {row.row.original.name}
-            </span>
-          </div>
-        ),
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => <BalanceView tokenAddress={value} spender={spender} />) as Renderer<
+          CellProps<AssetRecord, string>
+        >,
       },
       {
-        Header: "Variable APR",
-        accessor: "variable_borrow_apr",
-        Cell: (row) => (
-          <div className="value-section">
-            <span className="value blue">{row.value}</span> %
-          </div>
-        ),
-      },
-      {
-        Header: "Stable APR",
-        accessor: "stable_borrow_apr",
-        Cell: (row) => (
-          <div className="value-section">
-            <span className="value pink">{row.value}</span> %
-          </div>
-        ),
+        Header: "APY",
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+          <APYView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
     ],
+    [history]
+  );
+
+  const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <MobileTableRenderer
+        linkpage="borrow"
+        table={table}
+        tableProps={{
+          textAlign: "center",
+          display: "flex",
+          width: "100%",
+          flexDirection: "column",
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+        }}
+        rowProps={{
+          display: "flex",
+          flexDirection: "column",
+          margin: "1em 0",
+          padding: "1em",
+          borderRadius: "1em",
+          bg: { base: "secondary.900" },
+        }}
+        cellProps={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      />
+    ),
     []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable<IMarketData>(
-    {
-      columns,
-      data: Array.from(data),
-    },
-    useSortBy
+  const renderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <BasicTableRenderer
+        linkpage="borrow"
+        table={table}
+        tableProps={{
+          style: {
+            borderSpacing: "0 1em",
+            borderCollapse: "separate",
+          },
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+        }}
+        rowProps={{
+          // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
+          bg: { base: "secondary.900" },
+        }}
+        cellProps={{
+          borderBottom: "none",
+          border: "0px solid",
+          _first: { borderLeftRadius: "10px" },
+          _last: { borderRightRadius: "10px" },
+        }}
+      />
+    ),
+    []
   );
+
+  const [ismaxWidth] = useMediaQuery("(max-width: 32em)");
 
   return (
-    <BasicTable>
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                  <div className="header-column">
-                    <span
-                      className={
-                        !column.isSorted
-                          ? ""
-                          : column.isSortedDesc
-                          ? "desc"
-                          : "asc"
-                      }
-                    >
-                      {column.render("Header")}
-                    </span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, index) => {
-            prepareRow(row);
-            return (
-              <tr
-                {...row.getRowProps()}
-                onClick={() => history.push(`/borrow/${row.values.name}`)}
-                key={index}
-              >
-                {row.cells.map((cell) => {
-                  return (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </BasicTable>
+    <div>
+      <SortedHtmlTable columns={columns} data={assetRecords}>
+        {ismaxWidth ? mobileRenderer : renderer}
+      </SortedHtmlTable>
+    </div>
   );
 };
-
-export default BorrowTable;
