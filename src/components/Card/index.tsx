@@ -1,9 +1,9 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 const CardWrapper = styled.div`
   width: 200px;
-  border-radius: 2px;
+  border-radius: 15px;
   border-width: 1px;
   border-style: solid;
   margin: 0px 15px;
@@ -12,6 +12,7 @@ const CardWrapper = styled.div`
     border-color: ${props => props.theme.color.yellow};
     .apycard-title {
       background: ${props => props.theme.color.yellow};
+      border-radius: 13px 13px 0px 0px;
     }
   }
 
@@ -19,6 +20,7 @@ const CardWrapper = styled.div`
     border-color: ${props => props.theme.color.blue};
     .apycard-title {
       background: ${props => props.theme.color.blue};
+      border-radius: 13px 13px 0px 0px;
     }
   }
 
@@ -26,6 +28,23 @@ const CardWrapper = styled.div`
     border-color: ${props => props.theme.color.pink};
     .apycard-title {
       background: ${props => props.theme.color.pink};
+      border-radius: 13px 13px 0px 0px;
+    }
+  }
+
+  &.yellow {
+    border-color: #ecc94b;
+    .apycard-title {
+      background: #ecc94b;
+      border-radius: 13px 13px 0px 0px;
+    }
+  }
+
+  &.green {
+    border-color: ${props => props.theme.color.green};
+    .apycard-title {
+      background: ${props => props.theme.color.green};
+      border-radius: 13px 13px 0px 0px;
     }
   }
 
@@ -38,7 +57,6 @@ const CardWrapper = styled.div`
 
   .apycard-content {
     padding: 10px;
-
     .apycard-content-row {
       margin-bottom: 8px;
       font-size: 14px;
@@ -78,12 +96,10 @@ const CardWrapper = styled.div`
   }
 `;
 
-const Card: React.FC<{ color: React.ComponentProps<typeof CardWrapper>["className"] }> = ({ color, children }) => {
-  return (
-    <CardWrapper className={color}>
-      {children}
-    </CardWrapper>
-  );
-}
+const Card: React.FC<{
+  color: React.ComponentProps<typeof CardWrapper>["className"];
+}> = ({ color, children }) => {
+  return <CardWrapper className={color}>{children}</CardWrapper>;
+};
 
 export default Card;
