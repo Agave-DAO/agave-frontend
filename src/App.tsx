@@ -4,8 +4,11 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { ThemeProvider } from "styled-components";
 import { Layout } from "./layout";
 import { MarketsBanner, Markets } from "./views/Markets";
+import ReserveOverview from "./views/ReserveOverview";
+import ReserveBanner from "./views/ReserveOverview/ReserveBanner";
+// import Dashboard from './views/Dashboard';
 // import ReserveOverview from './views/ReserveOverview';
-import { Dashboard } from './views/Dashboard';
+import { Dashboard } from "./views/Dashboard";
 import { DashboardBanner } from "./views/Dashboard/layout";
 import { Deposit } from "./views/Deposit";
 import { DepositBanner } from "./views/Deposit/layout";
@@ -17,7 +20,7 @@ import { BorrowBanner } from "./views/Borrow/BorrowDetail";
 import { BorrowDetail } from "./views/Borrow/BorrowDetail";
 // import BorrowConfirm from "./views/Borrow/BorrowConfirm";
 import { RepayBanner } from "./views/Repay/layout";
-import { RepayDetail } from './views/Repay/RepayDetail';
+import { RepayDetail } from "./views/Repay/RepayDetail";
 // import Collateral from './views/Collateral';
 // import InterestSwap from './views/InterestSwap';
 import { Staking } from "./views/Staking";
@@ -47,6 +50,12 @@ const theme = extendTheme({
     },
     yellow: {
       100: "#FFC01B",
+    },
+    green: {
+      100: "#36CFA2",
+    },
+    orenge: {
+      100: "#EC8F53",
     },
   },
   fonts: {
@@ -88,16 +97,17 @@ const App: React.FC<IAppProps> = props => {
                 </Route>
                 <Route path="/markets"><MarketsBanner/></Route>
                 <Route path="/deposit"><DepositBanner/></Route>
-				<Route path="/borrow"><BorrowBanner/></Route>
-				<Route path="/withdraw"><WithdrawBanner/></Route>
+				        <Route path="/borrow"><BorrowBanner/></Route>
+				        <Route path="/withdraw"><WithdrawBanner/></Route>
                 <Route path="/repay"><RepayBanner/></Route>
+                <Route path="/reserve-overview/:assetName" ><ReserveBanner/></Route>
               </Switch>
             }
           >
             {/* prettier-ignore */}
             <Switch>
               <Route path="/markets" component={Markets} exact />
-              {/* <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact /> */}
+              <Route path="/reserve-overview/:assetName" component={ReserveOverview} exact />
               <Route path="/dashboard" component={Dashboard} exact />
               <Route path="/deposit" component={Deposit} exact />
               <Route path="/deposit/:assetName" component={DepositDetail} exact />
