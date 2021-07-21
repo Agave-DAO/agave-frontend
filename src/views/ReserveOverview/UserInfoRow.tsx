@@ -21,12 +21,12 @@ const UserInfoRow: React.FC<Props> = ({ ...props }) => {
         justifyContent="space-between"
         alignItems="center"
         flexDirection="row"
-        mb="15px"
+        lineHeight="3.5rem"
       >
         <Flex>
           <Text fontSize="2xl">{title}</Text>
           {props.enableModal && (
-            <ModalIcon position="relative" top="0" left="2" onOpen={() => {}} />
+            <ModalIcon position="relative" top="0" left="2" maxHeight="1.2rem" onOpen={() => {}} />
           )}
         </Flex>
         <Flex>

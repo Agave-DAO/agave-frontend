@@ -133,17 +133,19 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
         flex="1 1 0%"
         flexDirection="column"
         textColor="white"
-        mr={{ base: "0px", lg: "20px" }}
-        maxW="1200px"
-        overflowX={isLargeTab ? "hidden" : "inherit"}
+        minWidth="70%"
+        pr={{base:"auto", lg:"2rem"}}
+        marginInlineEnd="0px"
+        marginInlineStart="0px"
+        overflowX={{base: "hidden" }}
       >
-        <Text fontSize="xl" color="white" padding="1rem">
+        <Text fontSize="2xl" color="white" padding="1rem">
           Reserve Status & Configuration
         </Text>
         <Box>
           <Box
             maxW="100%"
-            minW={{ base: "auto", xl: "100rem" }}
+            minW={{ base: "auto", lg: "auto " }}
             bg="primary.900"
             p={isMobile ? "0px" : "20px"}
             flex="1 1 0%"
@@ -166,7 +168,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                       color="green.200"
                       margin="0.25rem"
                     />
-                    <Text fontSize="lg" color="white" align="right">
+                    <Text fontSize="xl" color="white" align="right">
                       Available Liquidity
                     </Text>
                   </Flex>
@@ -174,7 +176,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                     ${liquidityPrice}
                   </Text>
                   <Box>
-                    <Text fontSize="md" color="white" align="right">
+                    <Text fontSize="lg" color="white" align="right">
                       {liqudityNative} {asset.symbol}
                     </Text>
                   </Box>
@@ -182,13 +184,14 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 <Flex>
                   <CircularProgress
                     value={graph}
-                    size="120px"
-                    color="yellow.400"
+                    size="6em"
+                    color="purple.400"
                     trackColor="green.200"
+                    thickness="10px"
                   >
                     <CircularProgressLabel>
                       <Center>
-                        <TokenIcon symbol={asset.symbol} />
+                        <TokenIcon symbol={asset.symbol} height="100%" />
                       </Center>
                     </CircularProgressLabel>
                   </CircularProgress>
@@ -200,7 +203,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                   justifyContent="center"
                 >
                   <Flex justifyContent="flex-start">
-                    <Text fontSize="lg" color="white" align="left">
+                    <Text fontSize="xl" color="white" align="left">
                       Total Borrowed
                     </Text>
                     <LockIcon w={4} h={4} color="yellow.400" margin="0.25rem" />
@@ -209,7 +212,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                     ${totalBorrowedPrice}
                   </Text>
                   <Box>
-                    <Text fontSize="md" color="white" align="left">
+                    <Text fontSize="lg" color="white" align="left">
                       {totalBorrowedNative} {asset.symbol}
                     </Text>
                   </Box>
@@ -241,25 +244,26 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 display={isMobile ? "block" : isLargePhone ? "block" : "flex"}
                 justifyContent="center"
                 alignItems="center"
+                maxWidth="90%"
               >
                 {/* 3/4 Cards TODO Pass Real Values */}
                 <APYCard
                   title="Deposit"
-                  color="yellow"
+                  color="green"
                   apy={depostApy}
                   avg=""
                   total=""
                 />
                 <APYCard
                   title="Stable Borrowing"
-                  color="orenge"
+                  color="orange"
                   apy={stableApy}
                   avg=""
                   total=""
                 />
                 <APYCard
                   title="Variable Borrowing"
-                  color="green"
+                  color="purple"
                   apy={variableApy}
                   avg=""
                   total=""

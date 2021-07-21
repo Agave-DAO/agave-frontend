@@ -25,10 +25,11 @@ const APYCard: React.FC<Props> = ({ ...props }) => {
   return (
     <React.Fragment>
       <Box
-        minW={{ base: "200px" }}
-        w={isLargePhone ? "80vw" : isSmallTab ? "150px" : "200px"}
-        m={isMobile ? "8" : isSmallTab ? "2" : "10px 15px"}
-        borderRadius="15px"
+        minW="180px"
+        maxW={{ base: "100%", md: "20vw" }}
+        w={{ base: "100%", md: "25rem" }}
+        m={{ base: "10px 5px" }}
+        borderRadius="10px"
         borderWidth="1px"
         borderStyle="solid"
         borderColor="white"
@@ -36,12 +37,14 @@ const APYCard: React.FC<Props> = ({ ...props }) => {
         <Box
           m="-1px"
           p="5px"
-          backgroundColor={`${color}.100`}
+          backgroundColor={`${color}.300`}
           borderWidth="1px"
-          borderRadius="14px 14px 0px 0px"
+          borderRadius="10px 10px 0px 0px"
         >
           <Center>
-            <Text fontSize="lg">{title}</Text>
+            <Text fontSize="xl" fontWeight="semibold">
+              {title}
+            </Text>
           </Center>
         </Box>
         <Box pl="4px" pr="4px">
@@ -68,11 +71,14 @@ const APYCard: React.FC<Props> = ({ ...props }) => {
               justifyContent="flex-end"
               flex="1 1 0%"
             >
-              <Text fontSize="lg" fontWeight="extrabold">
+              <Text fontSize="xl" fontWeight="extrabold">
                 {apy}
               </Text>
             </Box>
           </Box>
+          {/*
+                      UNTIL THERE IS NO SUBGRAPH WITH LOTS OF DATA NOT WORTH DISPLAYING THESE STATS
+
           <Box
             fontSize="lg"
             marginBottom="8px"
@@ -100,6 +106,7 @@ const APYCard: React.FC<Props> = ({ ...props }) => {
                 {avg}
               </Text>
             </Box>
+                     
           </Box>
           <Box
             fontSize="lg"
@@ -129,6 +136,7 @@ const APYCard: React.FC<Props> = ({ ...props }) => {
               </Text>
             </Box>
           </Box>
+           */}
         </Box>
       </Box>
     </React.Fragment>

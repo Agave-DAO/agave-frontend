@@ -27,7 +27,7 @@ const StatCard: React.FC<Props> = ({ ...props }) => {
           alignItems="flex-start"
           position="relative"
         >
-          <Text fontSize="lg">{props.title}</Text>
+          <Text fontSize="xl">{props.title}</Text>
           {props.enableModal && (
             <ModalIcon
               position="relative"
@@ -39,7 +39,7 @@ const StatCard: React.FC<Props> = ({ ...props }) => {
         </Box>
         <Box display="flex" flexDirection="row" alignItems="center">
           <Text
-            fontSize="lg"
+            fontSize="xl"
             fontWeight="extrabold"
             color={`${props.color}.100`}
           >

@@ -10,18 +10,21 @@ const ReserveBanner: React.FC<{}> = (props: any) => {
 
   return (
     <Flex
-      flexDir="column"
+      flexDir="row"
       justifyItems="stretch"
       height="auto"
       marginRight="auto"
+      fontWeight="bold"
     >
-      <ColoredText fontSize="5xl" textTransform="capitalize">
-        {props.match.params.assetName ?? "-"} {title}
+      <Text fontSize="4xl" mx="1rem"> {title}</Text>
+      <ColoredText fontSize="4xl" textTransform="capitalize">
+        {props.match.params.assetName ?? "-"} 
       </ColoredText>
-
+      {/*}
       <Text align="left" fontSize="3xl">
         {`${message}`}
       </Text>
+      */}
     </Flex>
   );
 };

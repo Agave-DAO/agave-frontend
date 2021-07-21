@@ -39,7 +39,7 @@ const ReserveOverview: React.FC = () => {
   );
 
   return (
-    <Container maxWidth="100%">
+    <Container maxWidth="100%" p="0">
       <React.Fragment>
         {!asset && asset === undefined && (
           <Center display="block">
@@ -68,7 +68,7 @@ const ReserveOverview: React.FC = () => {
       </React.Fragment>
       <React.Fragment>
         {asset && (
-          <Flex flexDirection={{ base: "column", xl: "row" }}>
+          <Flex flexDirection={{ base: "column", lg: "row" }}>
             <ReserveInfo asset={asset} />
             <UserInfo asset={asset} history={history} />
           </Flex>

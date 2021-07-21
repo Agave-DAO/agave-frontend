@@ -27,15 +27,15 @@ const MiddleCard: React.FC<Props> = ({ ...props }) => {
         justifyContent="space-between"
         borderWidth="thin"
         borderColor="white"
-        borderRadius="10"
+        borderRadius="5px"
       >
         <Box>
-          <Text fontSize="lg" color="white">
+          <Text fontSize="xl" color="white">
             {title} |
           </Text>
         </Box>
         <Box>
-          <Text fontSize="lg" color="white">
+          <Text fontWeight="bold" fontSize="xl" color="white">
             {value}
           </Text>
         </Box>

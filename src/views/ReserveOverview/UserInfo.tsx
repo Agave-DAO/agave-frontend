@@ -62,21 +62,24 @@ const UserInfo: React.FC<{
         display="flex"
         flexDirection="column"
         textColor="white"
-        maxW="1200px"
+        maxWidth={{base:"100%",lg:"450px"}}
+        minWidth="25vw"
+        p="0"
+        m={{base:"auto", md:"0"}}
+        marginInlineEnd="0px"
+        marginInlineStart="0px"
       >
-        <Text fontSize="xl" padding="1rem">
+        <Text fontSize="2xl" padding="1rem">
           Your information
         </Text>
         <Box
-          maxW="100%"
-          minW="30rem"
           position="relative"
           display="flex"
-          flexDirection={{ base: "column", lg: "row", xl: "column" }}
+          flexDirection={{ base: "column",md:"row", lg: "column" }}
         >
           {/* Deposit Section Start */}
           <Box
-            mr="10px"
+            mr={{base:"10px", lg:"0"}}
             w="100%"
             p="15px"
             mb="15px"
@@ -103,6 +106,7 @@ const UserInfo: React.FC<{
                 >
                   Deposit
                 </Button>
+                {/*
                 <Button
                   size="lg"
                   colorScheme="Green"
@@ -110,6 +114,7 @@ const UserInfo: React.FC<{
                 >
                   Withdraw
                 </Button>
+                */}
               </Flex>
             </Box>
             <Box>
