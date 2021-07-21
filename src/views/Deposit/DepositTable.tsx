@@ -67,7 +67,6 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
         Header: "Asset",
         accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value }) => (
-          <Link to={`/deposit/${value}`}>
             <Flex width="100%" height="100%" alignItems={"center"}>
               <Center width="4rem">
                 <TokenIcon symbol={value} />
@@ -78,7 +77,6 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
                 <Text>{value}</Text>
               </Box>
             </Flex>
-          </Link>
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {

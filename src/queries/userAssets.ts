@@ -120,6 +120,59 @@ export const useUserVariableDebtTokenBalances =
     }
   );
 
+interface VariableDebtTokenBalancesDaiWei {
+  symbol: string;
+  tokenAddress: string;
+  balance: BigNumber;
+  decimals: BigNumberish;
+  daiWeiPricePer: BigNumber | null;
+  daiWeiPriceTotal: BigNumber | null;
+}
+  
+export const useUserVariableDebtTokenBalancesDaiWei =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    VariableDebtTokenBalancesDaiWei[],
+    [_p1: "user", _p2: "allReserves", _p3: "debts", _p4: "dai"],
+    []
+  >(
+    async params => {
+      const reserves = await useUserReserveAssetBalances.fetchQueryDefined(
+        params
+      );
+      const withDaiPrices = await Promise.all(
+        reserves.map(reserve =>
+          Promise.all([
+            useAssetPriceInDaiWei.fetchQueryDefined(
+              params,
+              reserve.tokenAddress
+            ),
+            useDecimalCountForToken.fetchQueryDefined(
+              params,
+              reserve.tokenAddress
+            ),
+          ]).then(([daiPricePerToken, decimals]) => ({
+            ...reserve,
+            daiWeiPricePer: daiPricePerToken,
+            daiWeiPriceTotal:
+              daiPricePerToken
+                ?.mul(reserve.balance)
+                .div(weiPerToken(decimals)) ?? null,
+            decimals,
+          }))
+        )
+      );
+
+      return withDaiPrices;
+    },
+    () => ["user", "allReserves", "debts", "dai"],
+    () => undefined,
+    {
+      refetchOnMount: true,
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
 export const useUserReserveAssetBalances =
   buildQueryHookWhenParamsDefinedChainAddrs<
     { symbol: string; tokenAddress: string; balance: BigNumber }[],
