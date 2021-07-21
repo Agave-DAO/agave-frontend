@@ -31,7 +31,7 @@ export const APYView: React.FC<{ tokenAddress: string }> = ({
       return <>-</>;
     }
 
-    return <PercentageView ratio={fixedNumberToPercentage(variableBorrowAPY, 3)} />;
+    return <PercentageView ratio={fixedNumberToPercentage(variableBorrowAPY, 4, 2)} />;
 
   }, [variableBorrowAPY]);
 };
@@ -48,7 +48,7 @@ const BalanceView: React.FC<{ tokenAddress: string, spender: string | undefined 
   return React.useMemo(() => {
     return (
       <Flex direction="column" minH={30} ml={2}>
-        <Box w="14rem" textAlign="center">
+        <Box w="14rem" textAlign="center" whiteSpace="nowrap">
           <Text p={3} fontWeight="bold">
             {balanceNumber?.toFixed(3) ?? "-"}
           </Text>
