@@ -13,7 +13,7 @@ export const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
       return <>-</>;
     }
 
-    return <Text>{fixedNumberToPercentage(variableDepositAPY, 7, 2)}</Text>;
+    return <Text>{fixedNumberToPercentage(variableDepositAPY, 7, 2)}%</Text>;
   }, [variableDepositAPY]);
 };
 
@@ -32,6 +32,6 @@ export const BorrowAPRView: React.FC<{
       return <>-</>;
     }
 
-    return <Text>{fixedNumberToPercentage(borrowRate, 4, 2)}</Text>;
+    return <Text>{fixedNumberToPercentage(borrowRate, 4, 2)}%</Text>;
   }, [borrowRate]);
 };

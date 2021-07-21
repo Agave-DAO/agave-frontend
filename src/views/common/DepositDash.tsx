@@ -45,7 +45,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
   const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
   const maximumLtv = reserveConfiguration?.ltv;
-  const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
+  const variableDepositAPY = reserveProtocolData?.liquidityRate;
   const healthFactor = userAccountData?.healthFactor;
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery(["(max-width: 400px)", "(max-width: 900px)"]);
@@ -118,7 +118,6 @@ export const DepositDash: React.FC<DepositDashProps> = ({
         <Stack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >{isSmallerThan900 ? "APY" : "Deposit APY"}</Text>
           <Text fontSize={{ base: fontSizes.md, md: fontSizes.lg, lg:fontSizes.xl }} fontWeight="bold">
-			 {console.log(variableDepositAPY)}
             {fixedNumberToPercentage(variableDepositAPY,4, 2)}%
           </Text>
         </Stack>
