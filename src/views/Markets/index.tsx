@@ -112,10 +112,9 @@ const TotalBorrowedView: React.FC<{
         1000
       ).toLocaleString();
       return (
-        <Flex dir={"columns"} justify={"space-between"}>
-          <Text>{weiString}</Text>
-          <Text>/</Text>
-          <Text>$ {daiString}</Text>
+        <Flex alignItems={'center'} flexDirection={'column'} justifyContent="space-evenly">
+          <Text >{weiString}</Text>
+          <Text mt="4px" fontSize={{base: "1.2rem", lg:"1.1rem"}}>$ {daiString}</Text>
         </Flex>
       );
     } else if (data) {
@@ -134,8 +133,8 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-    const depositAPY = query.data;
-    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3)} />;
+  const depositAPY = query.data
+    return <PercentageView ratio={fixedNumberToPercentage(depositAPY,3, 2)} />;
   }, [query.data]);
 };
 
@@ -149,7 +148,9 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
     }
     const variableBorrowAPR = query.data;
     return (
-      <PercentageView ratio={fixedNumberToPercentage(variableBorrowAPR, 3)} />
+      <PercentageView
+        ratio={fixedNumberToPercentage(variableBorrowAPR, 3, 2)}
+      />
     );
   }, [query.data]);
 };
@@ -164,7 +165,9 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
     }
     const stableBorrowAPR = query.data;
     return (
-      <PercentageView ratio={fixedNumberToPercentage(stableBorrowAPR, 3)} />
+      <PercentageView
+        ratio={fixedNumberToPercentage(stableBorrowAPR, 3, 2)}
+      />
     );
   }, [query.data]);
 };
@@ -301,6 +304,8 @@ const AssetTable: React.FC<{
           }}
           cellProps={{
             borderBottom: "none",
+            _first: { borderLeftRadius: "10px" },
+            _last: { borderRightRadius: "10px" },
           }}
         />
       ),
@@ -359,7 +364,6 @@ export const Markets: React.FC<{}> = () => {
       // bg={{ base: "primary.500", md: "primary.900" }}
       fg={{ base: "primary.100", md: "primary.100" }}
       color={{ base: "primary.100", md: "primary.100" }}
-      padding="3.5rem"
     >
       <AssetTable viewMode="usd" />
     </Box>
