@@ -84,7 +84,7 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
         <Image
           w={{ base: "0vw", lg: "90vw", xl: "80vw" }}
           pos="fixed"
-          bottom="0em"
+          bottom="-10em"
           src={glowingAgave}
           alt="glowing agave log"
         />
