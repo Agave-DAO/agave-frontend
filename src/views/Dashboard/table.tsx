@@ -177,10 +177,8 @@ export const DashboardTable: React.FC<{
     [mode, onActionClicked]
   );
 
-  const filterColumns = mode === DashboardTableType.Deposit
-  ? columns
-  : columns?.splice(3, 1)
-  
+  const filterColumns =
+    mode === DashboardTableType.Deposit ? columns : columns?.splice(3, 1);
 
   const renderer = React.useMemo<TableRenderer<AssetData>>(
     () => table =>
