@@ -30,21 +30,36 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   tokenAddress,
 }) => {
   const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
-  const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
+  const reserveUsedAsCollateral = reserveConfiguration?.usageAsCollateralEnabled;
   return React.useMemo(() => {
+
+    // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
+    const toggleUseAssetAsCollateral = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const tokenAddress = e.target.id;
+      console.log(tokenAddress, reserveUsedAsCollateral);
+    };
+
     return (
       <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
         <Text
           fontWeight="bold"
           width="60px"
-          color={isCollateralized ? "green.300" : "orenge.300"}
+          color={reserveUsedAsCollateral ? "green.300" : "orange.300"}
         >
-          {isCollateralized ? "Yes" : "No"}
+          {reserveUsedAsCollateral ? "Yes" : "No"}
         </Text>
-        <Switch size="sm" colorScheme="gray" isDisabled={isCollateralized} />
+        <Switch
+          size="md"
+          colorScheme="yellow"
+          isChecked={reserveUsedAsCollateral}
+          id={tokenAddress}
+          onChange={toggleUseAssetAsCollateral}
+        />
       </Box>
     );
-  }, [isCollateralized]);
+  }, [reserveUsedAsCollateral]);
 };
 
 export const DashboardTable: React.FC<{

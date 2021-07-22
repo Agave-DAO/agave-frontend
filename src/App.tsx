@@ -53,7 +53,7 @@ const theme = extendTheme({
     green: {
       100: "#36CFA2",
     },
-    orenge: {
+    orange: {
       100: "#EC8F53",
     },
   },
