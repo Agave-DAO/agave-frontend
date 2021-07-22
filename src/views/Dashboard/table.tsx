@@ -12,11 +12,13 @@ import { Button, Flex, Switch } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import ColoredText from "../../components/ColoredText";
 import { AssetData } from ".";
-import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
+import {
+  useUserReserveData,
+  ProtocolReserveData,
+} from "../../queries/protocolReserveData";
 import { useHistory } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { BigNumber } from "ethers";
-import { ProtocolReserveData } from "../../queries/protocolReserveData";
 import { fontSizes } from "../../utils/constants";
 
 export enum DashboardTableType {
@@ -24,16 +26,23 @@ export enum DashboardTableType {
   Borrow = "Borrow",
 }
 
-const CollateralView: React.FC<{ tokenAddress: string }> = ({
+const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   tokenAddress,
 }) => {
-  const { data: reserveConfiguration } =
-    useProtocolReserveConfiguration(tokenAddress);
+  const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
   const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
-
   return React.useMemo(() => {
     return (
-      <Switch size="sm" colorScheme="gray" isDisabled={isCollateralized} />
+      <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
+        <Text
+          fontWeight="bold"
+          width="60px"
+          color={isCollateralized ? "green.300" : "orenge.300"}
+        >
+          {isCollateralized ? "Yes" : "No"}
+        </Text>
+        <Switch size="sm" colorScheme="gray" isDisabled={isCollateralized} />
+      </Box>
     );
   }, [isCollateralized]);
 };
@@ -75,7 +84,11 @@ export const DashboardTable: React.FC<{
             </Box>
             <Box w="1rem"></Box>
             <Box>
-              <Text>{value}</Text>
+              {mode === DashboardTableType.Deposit ? (
+                <Text>{row.original.backingReserve?.symbol}</Text>
+              ) : (
+                <Text>{value}</Text>
+              )}
             </Box>
           </Flex>
         )) as Renderer<CellProps<AssetData, string>>,
@@ -89,90 +102,83 @@ export const DashboardTable: React.FC<{
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
-        accessor: row => row.tokenAddress,  
+        accessor: row => row.tokenAddress,
         Cell: (({ value }) => (
           /* There's a difference between the deposit APY and the borrow APR.
              Lending rates are obviously higher than borrowing rates */
           <DepositAPYView tokenAddress={value} />
         )) as Renderer<CellProps<AssetData, string>>,
-      }, 
+      },
       {
         Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
-        accessor: row => row.tokenAddress,
-        Cell: (({ value }) => (
-          <Box
-            d="flex"
-            flexDir="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            {mode === DashboardTableType.Deposit && (
-              <>
-                <Text fontWeight="bold">{"userAssetCollateral! "}</Text>
-                <CollateralView tokenAddress={value} />{" "}
-                {/* drop the collateralView make this button toggle directly a mutation call */}
-              </>
-            )}
-          </Box>
-        )) as Renderer<CellProps<AssetData, string>>,
+        accessor: row => row.backingReserve,
+        Cell: (({ row }) =>
+          mode === DashboardTableType.Deposit && row.original.backingReserve ? (
+            <CollateralView
+              tokenAddress={row.original.backingReserve?.tokenAddress}
+            />
+          ) : (
+            <></>
+          )) as Renderer<CellProps<AssetData, string>>,
+        /* drop the collateralView make this button toggle directly a mutation call */
       },
       {
         Header: mode === DashboardTableType.Borrow ? "Actions" : "Actions",
         accessor: row => row.tokenAddress,
-        Cell: (({ row }) =>
-          (
-            <Box
-              d="flex"
-              flexDir="row"
-              alignItems="center"
-              justifyContent="flex-end"
+        Cell: (({ row }) => (
+          <Box
+            d="flex"
+            flexDir="row"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Button
+              fontSize={{ base: fontSizes.md, md: fontSizes.lg }}
+              bg="secondary.900"
+              _hover={{ bg: "primary.50" }}
+              mr="1rem"
+              onClick={() =>
+                onActionClicked("Deposit-Borrow", {
+                  symbol:
+                    row.original.backingReserve?.symbol ?? row.original.symbol,
+                  tokenAddress:
+                    row.original.backingReserve?.tokenAddress ??
+                    row.original.tokenAddress,
+                })
+              }
             >
-              <Button
-                fontSize={{base:fontSizes.md, md:fontSizes.lg }}
-                bg="secondary.900"
-                _hover={{ bg: "primary.50" }}
-                mr="1rem"
-                onClick={() =>
-                  onActionClicked("Deposit-Borrow", {
-                    symbol:
-                      row.original.backingReserve?.symbol ??
-                      row.original.symbol,
-                    tokenAddress:
-                      row.original.backingReserve?.tokenAddress ??
-                      row.original.tokenAddress,
-                  })
-                }
-              >
-                <ColoredText fontWeight="400">
-                  {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
-                </ColoredText>
-              </Button>
-              <Button
-                fontSize={{base:fontSizes.sm, md:fontSizes.md }}
-                borderColor="primary.50"
-                color="primary.50"
-                fontWeight="400"
-                variant="outline"
-                _hover={{ bg: "white" }}
-                onClick={() =>
-                  onActionClicked("Withdraw-Repay", {
-                    symbol:
-                      row.original.backingReserve?.symbol ??
-                      row.original.symbol,
-                    tokenAddress:
-                      row.original.backingReserve?.tokenAddress ??
-                      row.original.tokenAddress,
-                  })
-                }
-              >
-                {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
-              </Button>
-            </Box>
-          )) as Renderer<CellProps<AssetData, string>>,
+              <ColoredText fontWeight="400">
+                {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
+              </ColoredText>
+            </Button>
+            <Button
+              fontSize={{ base: fontSizes.sm, md: fontSizes.md }}
+              borderColor="primary.50"
+              color="primary.50"
+              fontWeight="400"
+              variant="outline"
+              _hover={{ bg: "white" }}
+              onClick={() =>
+                onActionClicked("Withdraw-Repay", {
+                  symbol:
+                    row.original.backingReserve?.symbol ?? row.original.symbol,
+                  tokenAddress:
+                    row.original.backingReserve?.tokenAddress ??
+                    row.original.tokenAddress,
+                })
+              }
+            >
+              {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
+            </Button>
+          </Box>
+        )) as Renderer<CellProps<AssetData, string>>,
       },
     ],
     [mode, onActionClicked]
   );
+
+  const filterColumns =
+    mode === DashboardTableType.Deposit ? columns : columns?.splice(3, 1);
 
   const renderer = React.useMemo<TableRenderer<AssetData>>(
     () => table =>
@@ -187,10 +193,12 @@ export const DashboardTable: React.FC<{
             },
           }}
           headProps={{
-            fontSize: "12px",
+            fontSize: "lg",
             fontFamily: "inherit",
             color: "white",
-            border: "none",
+            border: "0px solid ",
+            maxWidth: "15rem",
+            whiteSpace: "nowrap",
           }}
           rowProps={{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
@@ -200,9 +208,11 @@ export const DashboardTable: React.FC<{
           cellProps={{
             borderBottom: "none",
             border: "0px solid",
-            maxWidth:"10rem",
-            _first: { borderLeftRadius: "10px" },
-            _last: { borderRightRadius: "10px" },
+            maxWidth: "15rem",
+            paddingInlineStart: "0.1rem",
+            paddingInlineEnd: "0.1rem",
+            _first: { borderLeftRadius: "10px", paddingInlineStart: "1rem" },
+            _last: { borderRightRadius: "10px", paddingInlineEnd: "1rem" },
           }}
         />
       ),

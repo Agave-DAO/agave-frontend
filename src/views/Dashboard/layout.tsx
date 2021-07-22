@@ -365,7 +365,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
           </Box>
         </UpperBox>
       </Flex>
-      <Box mt="2rem" d="grid"  gridTemplateColumns={{base:"1fr", xl:"1fr 1fr"}}  gridGap="2.5rem">
+      <Box mt="2rem" d="grid"  gridTemplateColumns={{base:"1fr", xl:"1fr 1fr"}}  gridGap="2.5rem" overflowX="auto">
         {depositsTable}
         {borrowsTable}
       </Box>
