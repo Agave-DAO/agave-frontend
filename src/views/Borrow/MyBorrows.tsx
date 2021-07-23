@@ -3,7 +3,7 @@ import { Box, Text } from "@chakra-ui/layout";
 import { Divider, Flex, VStack } from "@chakra-ui/react";
 import { BorrowAsset } from ".";
 import { TokenIcon } from "../../utils/icons";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString } from "../../utils/fixedPoint";
 
 const AssetBalanceDisplay: React.FC<{ asset: BorrowAsset }> = ({ asset }) => {
   return React.useMemo(() => {
@@ -27,8 +27,7 @@ const AssetBalanceDisplay: React.FC<{ asset: BorrowAsset }> = ({ asset }) => {
           </Box>
           <Box>
             <Text p={3} fontWeight="bold">
-              ${" "}
-              {bigNumberToString(asset.daiWeiPriceTotal)}
+              $ {bigNumberToString(asset.daiWeiPriceTotal)}
             </Text>
           </Box>
         </Box>
@@ -40,9 +39,7 @@ const AssetBalanceDisplay: React.FC<{ asset: BorrowAsset }> = ({ asset }) => {
 const Borrows: React.FC<{ assets: BorrowAsset[] }> = ({ assets }) => {
   const total = React.useMemo(() => {
     return assets.reduce(
-      (memo, next) =>
-        memo +
-        (Number( bigNumberToString(next.daiWeiPriceTotal)) ),
+      (memo, next) => memo + Number(bigNumberToString(next.daiWeiPriceTotal)),
       0
     );
   }, [assets]);
@@ -53,16 +50,16 @@ const Borrows: React.FC<{ assets: BorrowAsset[] }> = ({ assets }) => {
 
   return React.useMemo(() => {
     return (
-      <Flex w="100%" flexDir="column" >
+      <Flex w="100%" flexDir="column">
         <VStack
-		  py="2rem"
+          py="2rem"
           divider={borrowDivider}
           children={assets.map((value, i) => (
             <AssetBalanceDisplay key={value.tokenAddress} asset={value} />
           ))}
         />
         {}
-		<Divider></Divider>
+        <Divider></Divider>
         <Flex
           alignSelf="center"
           justifyContent="space-between"
@@ -84,8 +81,9 @@ export const MyBorrowsTable: React.FC<{ borrows: BorrowAsset[] }> = ({
   return (
     <div>
       <Box
+        w="auto"
         minW={{ md: 250 }}
-        ml={10}
+        ml={{ base: 0, md: 10 }}
         marginTop={0}
         boxSizing="content-box"
         rounded="xl"
@@ -94,7 +92,7 @@ export const MyBorrowsTable: React.FC<{ borrows: BorrowAsset[] }> = ({
         color="white"
       >
         <VStack w="100%" align="stretch" flexDirection="column">
-          <Box ml="2.4rem" color="white" mb={2}>
+          <Box ml="2.4rem" color="white" mb={5}>
             <Text>My Borrows</Text>
           </Box>
           <Box h="0.2rem" backgroundColor="primary.50" />

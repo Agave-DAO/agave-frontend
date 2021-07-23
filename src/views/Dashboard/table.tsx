@@ -16,7 +16,7 @@ import {
   useUserReserveData,
   ProtocolReserveData,
 } from "../../queries/protocolReserveData";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { BigNumber } from "ethers";
 import { fontSizes } from "../../utils/constants";
@@ -30,9 +30,9 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   tokenAddress,
 }) => {
   const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
-  const reserveUsedAsCollateral = reserveConfiguration?.usageAsCollateralEnabled;
+  const reserveUsedAsCollateral =
+    reserveConfiguration?.usageAsCollateralEnabled;
   return React.useMemo(() => {
-
     // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
     const toggleUseAssetAsCollateral = (
       e: React.ChangeEvent<HTMLInputElement>
@@ -93,19 +93,21 @@ export const DashboardTable: React.FC<{
           mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
         accessor: row => row.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value, row }) => (
-          <Flex alignItems={"center"}>
-            <Box>
-              <TokenIcon symbol={value} />
-            </Box>
-            <Box w="1rem"></Box>
-            <Box>
-              {mode === DashboardTableType.Deposit ? (
-                <Text>{row.original.backingReserve?.symbol}</Text>
-              ) : (
-                <Text>{value}</Text>
-              )}
-            </Box>
-          </Flex>
+         <Link to={`/reserve-overview/${row.original.backingReserve?.symbol ? row.original.backingReserve?.symbol : value }`}>  
+            <Flex alignItems={"center"}>
+              <Box>
+                <TokenIcon symbol={value} />
+              </Box>
+              <Box w="1rem"></Box>
+              <Box>
+                {mode === DashboardTableType.Deposit ? (
+                  <Text>{row.original.backingReserve?.symbol}</Text>
+                ) : (
+                  <Text>{value}</Text>
+                )}
+              </Box>
+            </Flex>
+          </Link>
         )) as Renderer<CellProps<AssetData, string>>,
       },
       {
@@ -219,6 +221,7 @@ export const DashboardTable: React.FC<{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
             bg: "primary.900",
             color: "white",
+            whiteSpace: "nowrap",
           }}
           cellProps={{
             borderBottom: "none",

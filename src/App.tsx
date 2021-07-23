@@ -6,7 +6,6 @@ import { Layout } from "./layout";
 import { MarketsBanner, Markets } from "./views/Markets";
 import ReserveOverview from "./views/ReserveOverview";
 import ReserveBanner from "./views/ReserveOverview/ReserveBanner";
-// import Dashboard from './views/Dashboard';
 // import ReserveOverview from './views/ReserveOverview';
 import { Dashboard } from "./views/Dashboard";
 import { DashboardBanner } from "./views/Dashboard/layout";
@@ -90,7 +89,7 @@ const theme = extendTheme({
         background: "#ace",
       },
       a: {
-        color: "teal.500",
+        color: "white",
       },
     },
   },
@@ -112,7 +111,7 @@ const App: React.FC<IAppProps> = props => {
               // prettier-ignore
               <Switch>
                 <Route path="/dashboard">
-                  <DashboardBanner />
+                  <DashboardBanner/>
                 </Route>
                 <Route path="/stake">
                   <StakingBanner />

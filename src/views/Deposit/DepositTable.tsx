@@ -1,5 +1,5 @@
 import React from "react";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString } from "../../utils/fixedPoint";
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
@@ -24,14 +24,20 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
     ? (Number(price.data) * balanceNumber).toFixed(2)
     : "-";
 
+  const [isMobile] = useMediaQuery("(max-width: 32em)");
+
   return React.useMemo(() => {
     return (
       <Flex direction="column" minH={30} ml={2}>
-        <Box w="14rem" textAlign="center">
+        <Box
+          w="14rem"
+          textAlign={{ base: "end", md: "center" }}
+          whiteSpace="nowrap"
+        >
           <Text p={3} fontWeight="bold">
             {balanceNumber?.toFixed(3) ?? "-"}
           </Text>
-          <Text p={3}>$ {balanceUSD ?? "-"}</Text>
+          {isMobile ? null : <Text p={3}>$ {balanceUSD ?? "-"}</Text>}
         </Box>
       </Flex>
     );
@@ -47,6 +53,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
     tokenAddress: string;
     aTokenAddress: string;
   }
+  const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
   const assetRecords = React.useMemo(() => {
@@ -67,27 +74,32 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
         Header: "Asset",
         accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value }) => (
-            <Flex width="100%" height="100%" alignItems={"center"}>
-              <Center width="4rem">
-                <TokenIcon symbol={value} />
-              </Center>
-              <Box w="1rem"></Box>
+          <Flex
+            width="100%"
+            height="100%"
+            alignItems={"center"}
+            mb={{ base: "2rem", md: "0rem" }}
+          >
+            <Center width="4rem">
+              <TokenIcon symbol={value} />
+            </Center>
+            <Box w="1rem"></Box>
 
-              <Box>
-                <Text>{value}</Text>
-              </Box>
-            </Flex>
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
-        Header: "Your wallet balance",
+        Header: isMobile ? "Your wallet" : "Your wallet balance",
         accessor: row => row.tokenAddress,
         Cell: (({ value }) => <BalanceView tokenAddress={value} />) as Renderer<
           CellProps<AssetRecord, string>
         >,
       },
       {
-        Header: "APY",
+        Header: isMobile ? "APY" : "Deposit APY",
         accessor: row => row.tokenAddress,
         Cell: (({ value }) => (
           <DepositAPYView tokenAddress={value} />
@@ -121,6 +133,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
           padding: "1em",
           borderRadius: "1em",
           bg: { base: "secondary.900" },
+          whiteSpace:"nowrap",
         }}
         cellProps={{
           display: "flex",
@@ -153,6 +166,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
         rowProps={{
           // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
           bg: { base: "secondary.900" },
+          whiteSpace:"nowrap",
         }}
         cellProps={{
           borderBottom: "none",
