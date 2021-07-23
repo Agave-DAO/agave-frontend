@@ -283,12 +283,6 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
             >
               {bigNumberToString(healthFactor)}
             </ColoredText>
-            <ModalIcon
-              position="relative"
-              top="0"
-              right="0"
-              onOpen={() => {}}
-            />
           </HStack>
         </Flex>
         <Flex
@@ -312,12 +306,6 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
             >
               {bigNumberToString(totalCollateralEth)}
             </Text>
-            <ModalIcon
-              position="relative"
-              top="0"
-              right="0"
-              onOpen={() => {}}
-            />
           </HStack>
         </Flex>
         {isSmallerThan900 ? null : (
