@@ -64,7 +64,7 @@ const BorrowAvailability: React.FC<{
 
   const availableBorrowsNativeAdjusted = availableBorrowsNative?.mul(1000);
   const balanceAsset =
-  availableBorrowsNativeAdjusted && price
+    availableBorrowsNativeAdjusted && price
       ? availableBorrowsNativeAdjusted.div(price[0])
       : null;
   const [isMobile] = useMediaQuery("(max-width: 32em)");
@@ -76,12 +76,11 @@ const BorrowAvailability: React.FC<{
           textAlign={{ base: "end", md: "center" }}
           whiteSpace="nowrap"
         >
-          {isMobile ? null : (
-            <Text p={3} fontWeight="bold">
-              {balanceAsset ? balanceAsset.toNumber() / 1000 : "-"}
-            </Text>
-          )}
-          <Text p={3}>$ {balanceNative ?? "-"}</Text>
+          <Text p={3} fontWeight="bold">
+            {balanceAsset ? balanceAsset.toNumber() / 1000 : "-"}
+          </Text>
+
+          {isMobile ? null : <Text p={3}>$ {balanceNative ?? "-"}</Text>}
         </Box>
       </Flex>
     );
@@ -140,7 +139,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = ({
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
-        Header: isMobile ? "Availble" : "You can Borrow",
+        Header: "You can Borrow",
         accessor: row => row.tokenAddress,
         Cell: (({ value }) => (
           <BorrowAvailability tokenAddress={value} lendingPool={lendingPool} />
