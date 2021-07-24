@@ -112,9 +112,15 @@ const TotalBorrowedView: React.FC<{
         1000
       ).toLocaleString();
       return (
-        <Flex alignItems={'center'} flexDirection={'column'} justifyContent="space-evenly">
-          <Text >{weiString}</Text>
-          <Text mt="4px" fontSize={{base: "1.2rem", lg:"1.1rem"}}>$ {daiString}</Text>
+        <Flex
+          alignItems={"center"}
+          flexDirection={"column"}
+          justifyContent="space-evenly"
+        >
+          <Text>{weiString}</Text>
+          <Text mt="4px" fontSize={{ base: "1.2rem", lg: "1.1rem" }}>
+            $ {daiString}
+          </Text>
         </Flex>
       );
     } else if (data) {
@@ -133,8 +139,8 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     if (query.data === undefined) {
       return <>-</>;
     }
-  const depositAPY = query.data
-    return <PercentageView ratio={fixedNumberToPercentage(depositAPY,3, 2)} />;
+    const depositAPY = query.data;
+    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3, 2)} />;
   }, [query.data]);
 };
 
@@ -165,9 +171,7 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
     }
     const stableBorrowAPR = query.data;
     return (
-      <PercentageView
-        ratio={fixedNumberToPercentage(stableBorrowAPR, 3, 2)}
-      />
+      <PercentageView ratio={fixedNumberToPercentage(stableBorrowAPR, 3, 2)} />
     );
   }, [query.data]);
 };
@@ -205,7 +209,7 @@ const AssetTable: React.FC<{
             </Box>
             <Box w="1rem"></Box>
             <Box>
-              <Text>{value}</Text>
+              <Text color="white">{value}</Text>
             </Box>
           </Flex>
         </Link>
