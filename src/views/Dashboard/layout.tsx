@@ -13,9 +13,13 @@ import {
   Text,
   VStack,
   ModalBody,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import {
+  bigNumberToString,
+  fixedNumberToPercentage,
+} from "../../utils/fixedPoint";
 import { fontSizes, spacings } from "../../utils/constants";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from "react-device-detect";
@@ -26,6 +30,8 @@ import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { BigNumber, constants } from "ethers";
+import { useUserAccountData } from "../../queries/userAccountData";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 interface DashboardProps {
   borrowed: BigNumber | undefined;
@@ -38,6 +44,7 @@ interface DashboardProps {
 const MODAL_TYPES = {
   APROXIMATE_BALANCE: "APROXIMATE_BALANCE",
   HEALTH_FACTOR: "HEALTH_FACTOR",
+  CURRENT_LTV: "CURRENT_LTV",
 };
 
 export const DashboardBanner: React.FC<{}> = () => {
@@ -119,11 +126,39 @@ const ModalAPBalance: React.FC<{}> = () => {
   );
 };
 
-const ModalHFactor: React.FC<{
+const ModalHFactor: React.FC<{}> = () => {
+  return (
+    <>
+      <ModalHeader fontSize="1.8rem" fontWeight="bold">
+        Health Factor
+      </ModalHeader>
+      <ModalBody>
+        <Text fontSize="1.4rem">
+          The health factor is the numeric representation of the safety of your
+          deposited assets against the borrowed assets and its underlying value.
+          The higher the value is, the safer the state of your funds are against
+          a liquidation scenario.
+        </Text>
+        <Text mt={5} fontSize="1.4rem">
+          If the health factor reaches 1, the liquidation of your deposits will
+          be triggered, and a Health Factor below 1 can get liquidated.
+        </Text>
+        <Text mt={5} fontSize="1.4rem">
+          For a HF=2, the collateral value vs borrow can reduce up to 50%.
+        </Text>
+      </ModalBody>
+    </>
+  );
+};
+const ModalLTV: React.FC<{
   currentLTV?: string;
   maximumLTV?: string;
   threshold?: string;
 }> = ({ currentLTV, maximumLTV, threshold }) => {
+  const { account: userAccountAddress } = useAppWeb3();
+  const { data: userAccountData } = useUserAccountData(
+    userAccountAddress ?? undefined
+  );
   return (
     <>
       <ModalHeader fontSize="1.8rem" fontWeight="bold">
@@ -132,6 +167,9 @@ const ModalHFactor: React.FC<{
       <ModalBody>
         <Text fontSize="1.4rem">
           Details about your Loan to Value (LTV) ratio and liquidation.
+        </Text>
+        <Text fontSize="1.2rem" mt={5}>
+          * Adjusted to the type of collateral deposited.
         </Text>
         <Box
           mt="2rem"
@@ -143,15 +181,23 @@ const ModalHFactor: React.FC<{
         >
           <HStack pb="0.5rem" px="1em" justifyContent="space-between">
             <Text fontSize="1.4rem">Current TVL</Text>
-            <Text fontSize="1.4rem">{currentLTV ?? "-"}</Text>
+            <Text fontSize="1.4rem">
+              {fixedNumberToPercentage(userAccountData?.currentLtv) ?? "-"}
+            </Text>
           </HStack>
           <HStack pb="0.5rem" px="1em" justifyContent="space-between">
             <Text fontSize="1.4rem">Maximum LTV</Text>
-            <Text fontSize="1.4rem">{maximumLTV ?? "-"}</Text>
+            <Text fontSize="1.4rem">
+              {fixedNumberToPercentage(userAccountData?.maximumLtv) ?? "-"}
+            </Text>
           </HStack>
           <HStack px="1em" justifyContent="space-between">
             <Text fontSize="1.4rem">Liquidation threshold</Text>
-            <Text fontSize="1.4rem">{threshold ?? "-"}</Text>
+            <Text fontSize="1.4rem">
+              {fixedNumberToPercentage(
+                userAccountData?.currentLiquidationThreshold
+              ) ?? "-"}
+            </Text>
           </HStack>
         </Box>
       </ModalBody>
@@ -159,7 +205,7 @@ const ModalHFactor: React.FC<{
   );
 };
 
-const ModalComponent: React.FC<{
+export const ModalComponent: React.FC<{
   isOpen: boolean;
   mtype: string;
   onClose(): void;
@@ -193,6 +239,7 @@ const ModalComponent: React.FC<{
             >
               {mtype === MODAL_TYPES.APROXIMATE_BALANCE && <ModalAPBalance />}
               {mtype === MODAL_TYPES.HEALTH_FACTOR && <ModalHFactor />}
+              {mtype === MODAL_TYPES.CURRENT_LTV && <ModalLTV />}
               <ModalFooter>
                 <Button
                   w={{ base: "100%", md: "60%" }}
@@ -241,6 +288,11 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
   const [modal_type, setModal] = useState(MODAL_TYPES.APROXIMATE_BALANCE);
   const history = useHistory();
 
+  const { account: userAccountAddress } = useAppWeb3();
+  const { data: userAccountData } = useUserAccountData(
+    userAccountAddress ?? undefined
+  );
+
   const onSubmitAP = React.useCallback(() => {
     setModal(MODAL_TYPES.APROXIMATE_BALANCE);
     onOpen();
@@ -250,6 +302,13 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
     setModal(MODAL_TYPES.HEALTH_FACTOR);
     onOpen();
   }, [onOpen]);
+
+  const onSubmitLTV = React.useCallback(() => {
+    setModal(MODAL_TYPES.CURRENT_LTV);
+    onOpen();
+  }, [onOpen]);
+
+  const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const depositsTable = React.useMemo(
     () =>
@@ -308,8 +367,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
                 onOpen={onSubmitAP}
               />
             </HStack>
-            {bigNumberToString(healthFactor)}
-            <Text fontWeight="bold" textAlign="left" mt="0.5em" >
+            <Text fontWeight="bold" textAlign="left" mt="0.5em">
               <DashboardApproximateBalanceDisplay />
             </Text>
           </VStack>
@@ -322,33 +380,29 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
             d="flex"
             flexDirection="row"
             justifyContent="space-between"
-            pr="6rem"
+            whiteSpace="nowrap"
             h="7.5rem"
           >
             <Box h="7rem" mt="0.5rem">
               <Text>Borrowed</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
-                {borrowed
-                  ? `$ ${bigNumberToString(borrowed)}`
-                  : "-"}
+              <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                {borrowed ? `$ ${bigNumberToString(borrowed)}` : "-"}
               </Text>
             </Box>
-            <Box h="7rem" mt="0.5rem" ml="4rem">
+            <Box h="7rem" mt="0.5rem" ml={{ base: "1rem", md: "3rem" }}>
               <Text>Collateral</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em" whiteSpace="nowrap">
-                {collateral
-                  ? `$ ${bigNumberToString(collateral)}`
-                  : "-"}
+              <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                {collateral ? `$ ${bigNumberToString(collateral)}` : "-"}
               </Text>
             </Box>
             <VStack
               flexDirection="column"
               h="7rem"
-              alignItems="baseline"
-              ml="4rem"
+              alignItems="center"
+              ml={{ base: "1rem", md: "3rem" }}
             >
               <HStack d="flex" mt="0.5rem">
-                <Text>Health Factor</Text>
+                <Text>{isMobile ? "HF" : "Health Factor"}</Text>
                 <ModalIcon
                   position="relative"
                   top="0"
@@ -358,14 +412,41 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
                   onOpen={onSubmitHF}
                 />
               </HStack>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em">
+              <Text fontWeight="bold" textAlign="center" mt="0.5em">
                 {bigNumberToString(healthFactor)}
+              </Text>
+            </VStack>
+            <VStack
+              flexDirection="column"
+              h="7rem"
+              alignItems="center"
+              ml={{ base: "1rem", md: "3rem" }}
+            >
+              <HStack d="flex" mt="0.5rem">
+                <Text>{isMobile ? "LTV" : "Current LTV"}</Text>
+                <ModalIcon
+                  position="relative"
+                  top="0"
+                  right="0"
+                  ml="0.5rem"
+                  transform="scale(0.75)"
+                  onOpen={onSubmitLTV}
+                />
+              </HStack>
+              <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                {fixedNumberToPercentage(userAccountData?.currentLtv)}
               </Text>
             </VStack>
           </Box>
         </UpperBox>
       </Flex>
-      <Box mt="2rem" d="grid"  gridTemplateColumns={{base:"1fr", xl:"1fr 1fr"}}  gridGap="2.5rem" overflowX="auto">
+      <Box
+        mt="2rem"
+        d="grid"
+        gridTemplateColumns={{ base: "1fr", xl: "1fr 1fr" }}
+        gridGap="2.5rem"
+        overflowX="auto"
+      >
         {depositsTable}
         {borrowsTable}
       </Box>

@@ -28,15 +28,20 @@ import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 import { BigNumber, constants, FixedNumber } from "ethers";
-import { useUserDepositAssetBalances } from "../../queries/userAssets";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
-import { useProtocolReserveData } from "../../queries/protocolReserveData";
+import {
+  useUserReserveData,
+  useProtocolReserveData,
+} from "../../queries/protocolReserveData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
 import { TokenIcon } from "../../utils/icons";
-import { bigNumberToString, fixedNumberToPercentage } from "../../utils/fixedPoint"
+import {
+  bigNumberToString,
+  fixedNumberToPercentage,
+} from "../../utils/fixedPoint";
 
 type BorrowDashProps = {
   token: ReserveTokenDefinition;
@@ -69,6 +74,9 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const { data: utilizationData } = useAssetUtilizationRate(token.tokenAddress);
   const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
+  const { data: userReserveConfiguration } = useUserReserveData(
+    token.tokenAddress
+  );
   const utilizationRate = utilizationData?.utilizationRate;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
   const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
@@ -77,6 +85,11 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
   const totalCollateralEth = userAccountData?.totalCollateralEth;
+  const userStableDebt = userReserveConfiguration?.currentStableDebt;
+  const userVariableDebt = userReserveConfiguration?.currentVariableDebt;
+
+  const reserveUsedAsCollateral =
+    reserveConfiguration?.usageAsCollateralEnabled;
   console.log(reserve?.aTokenAddress);
 
   const totalCollateralValue = React.useMemo(() => {
@@ -168,13 +181,11 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
               }}
               fontWeight="bold"
             >
-              {"$" +
-                assetPriceInDai
-                  ?.toUnsafeFloat()
-                  .toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 4,
-                  }) ?? " "}
+              {"$ " +
+                assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 4,
+                }) ?? " "}
             </Text>
           </Flex>
         </Flex>
@@ -212,7 +223,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {/*utilizationRate?._value*/} HALP!
+              {fixedNumberToPercentage(utilizationRate, 2)}%
             </Text>
           </Box>
         </Flex>
@@ -258,7 +269,12 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              !{"pending query"}
+              {bigNumberToString(
+                userStableDebt
+                  ? userVariableDebt?.add(userStableDebt)
+                  : userVariableDebt,
+                3
+              )}
             </Text>
             {isSmallerThan400 ? null : " " + token.symbol}
           </Box>
@@ -304,7 +320,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
               fontWeight="bold"
               minW={{ base: "30px", md: "100%" }}
             >
-              {bigNumberToString(totalCollateralEth)}
+              $ {bigNumberToString(totalCollateralEth)}
             </Text>
           </HStack>
         </Flex>

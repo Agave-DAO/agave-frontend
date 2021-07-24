@@ -29,11 +29,7 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   return React.useMemo(() => {
     return (
       <Flex direction="column" minH={30} ml={2}>
-        <Box
-          w="14rem"
-          textAlign={{ base: "end", md: "center" }}
-          whiteSpace="nowrap"
-        >
+        <Box textAlign={{ base: "end", md: "center" }} whiteSpace="nowrap">
           <Text p={3} fontWeight="bold">
             {balanceNumber?.toFixed(3) ?? "-"}
           </Text>
@@ -133,7 +129,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
           padding: "1em",
           borderRadius: "1em",
           bg: { base: "secondary.900" },
-          whiteSpace:"nowrap",
+          whiteSpace: "nowrap",
         }}
         cellProps={{
           display: "flex",
@@ -162,16 +158,19 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
           fontFamily: "inherit",
           color: "white",
           border: "none",
+          textAlign: "center",
+          _first: { textAlign: "start" },
         }}
         rowProps={{
           // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
           bg: { base: "secondary.900" },
-          whiteSpace:"nowrap",
+          whiteSpace: "nowrap",
         }}
         cellProps={{
           borderBottom: "none",
           border: "0px solid",
-          _first: { borderLeftRadius: "10px" },
+          textAlign: "center",
+          _first: { borderLeftRadius: "10px", textAlign: "start" },
           _last: { borderRightRadius: "10px" },
         }}
       />

@@ -9,7 +9,7 @@ import { BalanceView } from "../common/BalanceView";
 import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
 import { Box, Text } from "@chakra-ui/layout";
 import { Button, Flex, Switch } from "@chakra-ui/react";
-import { TokenIcon } from "../../utils/icons";
+import { TokenIcon, ModalIcon } from "../../utils/icons";
 import ColoredText from "../../components/ColoredText";
 import { AssetData } from ".";
 import {
@@ -20,6 +20,7 @@ import { useHistory, Link } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { BigNumber } from "ethers";
 import { fontSizes } from "../../utils/constants";
+import { ModalComponent } from "./layout";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -93,7 +94,13 @@ export const DashboardTable: React.FC<{
           mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
         accessor: row => row.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value, row }) => (
-         <Link to={`/reserve-overview/${row.original.backingReserve?.symbol ? row.original.backingReserve?.symbol : value }`}>  
+          <Link
+            to={`/reserve-overview/${
+              row.original.backingReserve?.symbol
+                ? row.original.backingReserve?.symbol
+                : value
+            }`}
+          >
             <Flex alignItems={"center"}>
               <Box>
                 <TokenIcon symbol={value} />
@@ -127,7 +134,7 @@ export const DashboardTable: React.FC<{
         )) as Renderer<CellProps<AssetData, string>>,
       },
       {
-        Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
+        Header: "Collateral",
         accessor: row => row.backingReserve,
         Cell: (({ row }) =>
           mode === DashboardTableType.Deposit && row.original.backingReserve ? (
