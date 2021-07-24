@@ -1,9 +1,9 @@
 import React from "react";
-import { bigNumberToString } from "../../utils/fixedPoint";
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
-import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
+import { useAssetPricesInDaiWei } from "../../queries/assetPriceInDai";
 import { useChainAddresses } from "../../utils/chainAddresses";
+import { BigNumber } from "@ethersproject/bignumber";
 import {
   BasicTableRenderer,
   MobileTableRenderer,
@@ -17,10 +17,15 @@ import {
   useUserAssetBalance,
   useUserAssetAllowance,
 } from "../../queries/userAssets";
+import { useUserAccountData } from "../../queries/userAccountData";
 import { PercentageView } from "../common/PercentageView";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
-import { fixedNumberToPercentage } from "../../utils/fixedPoint";
+import {
+  fixedNumberToPercentage,
+  bigNumberToString,
+} from "../../utils/fixedPoint";
 import { Link, useHistory } from "react-router-dom";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 export const APYView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
@@ -42,17 +47,26 @@ export const APYView: React.FC<{ tokenAddress: string }> = ({
   }, [variableBorrowAPY]);
 };
 
-const BalanceView: React.FC<{
+const BorrowAvailability: React.FC<{
   tokenAddress: string;
-  spender: string | undefined;
-}> = ({ tokenAddress, spender }) => {
-  const price = useAssetPriceInDai(tokenAddress);
-  const balance = useUserAssetAllowance(tokenAddress, spender);
-  const balanceNumber = Number(bigNumberToString(balance.data));
-  const balanceUSD = balanceNumber
-    ? (Number(price.data) * balanceNumber).toFixed(2)
-    : "-";
+  lendingPool: string | undefined;
+}> = ({ tokenAddress, lendingPool }) => {
+  const { account: userAccountAddress } = useAppWeb3();
 
+  const price = useAssetPricesInDaiWei([tokenAddress]).data;
+  const userAccountData = useUserAccountData(
+    userAccountAddress ?? undefined
+  ).data;
+  const availableBorrowsNative = userAccountData?.availableBorrowsEth;
+  const balanceNative = availableBorrowsNative
+    ? bigNumberToString(availableBorrowsNative)
+    : null;
+
+  const availableBorrowsNativeAdjusted = availableBorrowsNative?.mul(1000);
+  const balanceAsset =
+  availableBorrowsNativeAdjusted && price
+      ? availableBorrowsNativeAdjusted.div(price[0])
+      : null;
   const [isMobile] = useMediaQuery("(max-width: 32em)");
   return React.useMemo(() => {
     return (
@@ -64,14 +78,14 @@ const BalanceView: React.FC<{
         >
           {isMobile ? null : (
             <Text p={3} fontWeight="bold">
-              {balanceNumber?.toFixed(3) ?? "-"}
+              {balanceAsset ? balanceAsset.toNumber() / 1000 : "-"}
             </Text>
           )}
-          <Text p={3}>$ {balanceUSD ?? "-"}</Text>
+          <Text p={3}>$ {balanceNative ?? "-"}</Text>
         </Box>
       </Flex>
     );
-  }, [balanceNumber, balanceUSD]);
+  }, [balanceAsset, balanceNative]);
 };
 
 export const BorrowTable: React.FC<{ activeType: string }> = ({
@@ -100,7 +114,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = ({
   }, [reserves]);
 
   const chainAddresses = useChainAddresses();
-  const spender = chainAddresses?.lendingPool;
+  const lendingPool = chainAddresses?.lendingPool;
 
   const columns: Column<AssetRecord>[] = React.useMemo(
     () => [
@@ -126,10 +140,10 @@ export const BorrowTable: React.FC<{ activeType: string }> = ({
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
-        Header: isMobile ? "Collateral" : "Disposable collateral",
+        Header: isMobile ? "Availble" : "You can Borrow",
         accessor: row => row.tokenAddress,
         Cell: (({ value }) => (
-          <BalanceView tokenAddress={value} spender={spender} />
+          <BorrowAvailability tokenAddress={value} lendingPool={lendingPool} />
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
