@@ -13,11 +13,11 @@ import {
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
-import { useUserAssetBalance, useUserAssetAllowance } from "../../queries/userAssets";
+import { useUserAssetAllowance } from "../../queries/userAssets";
 import { PercentageView } from "../common/PercentageView"
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { fixedNumberToPercentage } from "../../utils/fixedPoint"
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 export const APYView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,

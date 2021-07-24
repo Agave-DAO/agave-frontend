@@ -111,32 +111,37 @@ const InitialComp: React.FC<{
   );
 };
 
-/*
- ##
- ## Requires fixing the Props with the nex Queries and Mutations for Borrow support
- ##
+//  ##
+//  ## Requires fixing the Props with the nex Queries and Mutations for Borrow support
+//  ##
 
 const BorrowTxComp: React.FC<{
   state: BorrowTXState;
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
   const chainAddresses = useChainAddresses();
-  const borrowArgs = React.useMemo<UseBorrowMutationProps>(
-    () => ({
-      asset: state.token.tokenAddress,
-      amount: state.amountToBorrow,
-    }),
-    [state, chainAddresses?.lendingPool]
-  );
-  const {
-    borrowMutation: { mutateAsync },
-  } = useBorrowMutation(borrowArgs);
+  // const borrowArgs = React.useMemo<UseBorrowMutationProps>(
+  //   () => ({
+  //     asset: state.token.tokenAddress,
+  //     amount: state.amountToBorrow,
+  //   }),
+  //   [state, chainAddresses?.lendingPool]
+  // );
+  // const {
+  //   borrowMutation: { mutateAsync },
+  // } = useBorrowMutation(borrowArgs);
+  // const onSubmit = React.useCallback(() => {
+  //   mutateAsync()
+  //     .then(() => dispatch(createState("borrownTx", { ...state })))
+  //     // TODO: Switch to an error-display state that returns to init
+  //     .catch(e => dispatch(createState("init", state)));
+  // }, [state, dispatch, mutateAsync]);
+
+  // TODO: get rid of this for above commented code with fixed mutations
   const onSubmit = React.useCallback(() => {
-    mutateAsync()
-      .then(() => dispatch(createState("borrownTx", { ...state })))
+    dispatch(createState("borrownTx", { ...state }))
       // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
-  }, [state, dispatch, mutateAsync]);
+  }, [state, dispatch]);
   const currentStep: PossibleTags<BorrowState> = "borrowTx";
   const stepperBar = React.useMemo(
     () => (
@@ -218,8 +223,6 @@ const BorrowStateMachine: React.FC<{
   }
 };
 
-*/
-
 const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,
 }) => {
@@ -241,12 +244,12 @@ const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
         rounded="lg"
         padding="1em"
       >
-        {/*
+        
         <BorrowStateMachine
           state={borrowState}
           setState={setBorrowState}
         />
-		  */}
+		 
       </Center>
     </VStack>
   );
