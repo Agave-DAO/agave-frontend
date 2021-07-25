@@ -78,9 +78,9 @@ export const DashboardTable: React.FC<{
         }
       } else if (route === "Withdraw-Repay") {
         if (mode === DashboardTableType.Deposit) {
-          history.push(`/repay/${asset.symbol}`);
-        } else if (mode === DashboardTableType.Borrow) {
           history.push(`/withdraw/${asset.symbol}`);
+        } else if (mode === DashboardTableType.Borrow) {
+          history.push(`/repay/${asset.symbol}`);
         }
       }
     },
