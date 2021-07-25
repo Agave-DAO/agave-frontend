@@ -41,7 +41,6 @@ export const Layout: React.FC<{ header: React.ReactNode }> = ({
       ),
     [activeConnection, children]
   );
-
   return (
     <Box position="relative" bg="secondary.900">
       <Header />

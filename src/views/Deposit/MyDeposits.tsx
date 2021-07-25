@@ -84,8 +84,9 @@ export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
   return (
     <div>
       <Box
+        w="auto"
         minW={{ md: 250 }}
-        ml={10}
+        ml={{base:0, md:10}}
         marginTop={0}
         boxSizing="content-box"
         rounded="xl"
@@ -94,7 +95,7 @@ export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
         color="white"
       >
         <VStack w="100%" align="stretch" flexDirection="column">
-          <Box ml="2.4rem" color="white" mb={2}>
+          <Box ml="2.4rem" color="white" mb={5} >
             <Text>My Deposits</Text>
           </Box>
           <Box h="0.2rem" backgroundColor="primary.50" />

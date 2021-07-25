@@ -8,7 +8,6 @@ export const BalanceView: React.FC<{ balanceBN: BigNumber}> = ({
   balanceBN,
 }) => {
   const balance = bigNumberToString(balanceBN, 3)
-  console.log(balance)
   return React.useMemo(() => {
     return (
       <Box minWidth="8rem" textAlign="left">

@@ -7,7 +7,7 @@ import {
   StackDivider,
   Text,
   VStack,
-  useMediaQuery
+  useMediaQuery,
 } from "@chakra-ui/react";
 // import Switch from '../../components/Switch'
 // import Search from '../../components/Search'
@@ -37,12 +37,12 @@ export const DepositBanner: React.FC<{}> = () => {
       >
         Deposit
       </Text>
-	  {isSmallerThan900 ? null :
-      <Text>
-        Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
-        <Link fontWeight="bold">xpollinate.io</Link>
-      </Text>
-		}
+      {isSmallerThan900 ? null : (
+        <Text>
+          Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
+          <Link fontWeight="bold">xpollinate.io</Link>
+        </Text>
+      )}
     </Center>
   );
 };
@@ -63,8 +63,8 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
   return (
     <Flex
       flexDirection={{ base: "column", md: "row" }}
-      px={{ base: "2.4rem", md: "0" }}
-      mb={10}
+      px={{ base: "0.5rem", md: "0" }}
+      my={10}
       height="100%"
       alignItems="flex-start"
     >
@@ -75,7 +75,7 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
         w="100%"
         bg="primary.900"
         py="2rem"
-        mb={{ base: "0.1rem", md: "0" }}
+        mb={{ base: "1rem", md: "0" }}
         color="white"
       >
         <VStack
@@ -87,13 +87,12 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
             />
           }
           spacing={4}
-          w="100%"
           align="stretch"
           flexDirection="column"
         >
           <Box
             h={{
-              base: 100, // 0-48em
+              base: 20, // 0-48em
               md: 45, // 48em-80em,
               xl: 25, // 80em+
             }}
@@ -124,14 +123,9 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
               <Text>Available to deposit</Text>
             </Box>
           </Box>
-          <Box
-            w="100%"
-            pl={27}
-            pr={27}
-            pt={5}
-          >
-              {/* Disabled for now, no enough rows to be filtered */}
-              {/* <Search
+          <Box w="100%" pl={27} pr={27} pt={5}>
+            {/* Disabled for now, no enough rows to be filtered */}
+            {/* <Search
                 placeholder="Search"
                 w={185}
                 h={26}
@@ -140,7 +134,7 @@ export const DepositLayout: React.FC<DepositLayoutProps> = props => {
           </Box>
         </VStack>
       </Box>
-      {myDeposits}
+      <Box w={{ base: "100%", md: "auto" }}>{myDeposits}</Box>
     </Flex>
   );
 };

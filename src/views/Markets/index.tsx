@@ -202,17 +202,15 @@ const AssetTable: React.FC<{
       Header: "Asset",
       accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
       Cell: (({ value, row }) => (
-        <Link to={`/reserve-overview/${value}`}>
-          <Flex alignItems={"center"}>
-            <Box>
-              <TokenIcon symbol={value} />
-            </Box>
-            <Box w="1rem"></Box>
-            <Box>
-              <Text color="white">{value}</Text>
-            </Box>
-          </Flex>
-        </Link>
+        <Flex alignItems={"center"}>
+          <Box>
+            <TokenIcon symbol={value} />
+          </Box>
+          <Box w="1rem"></Box>
+          <Box>
+            <Text color="white">{value}</Text>
+          </Box>
+        </Flex>
       )) as Renderer<CellProps<AssetRecord, string>>,
     },
     {
@@ -288,6 +286,7 @@ const AssetTable: React.FC<{
     () => table =>
       (
         <BasicTableRenderer
+          linkpage="reserve-overview"
           table={table}
           tableProps={{
             style: {
@@ -305,6 +304,7 @@ const AssetTable: React.FC<{
           rowProps={{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
             bg: { base: "primary.500", md: "primary.900" },
+            whiteSpace: "nowrap",
           }}
           cellProps={{
             borderBottom: "none",
@@ -339,6 +339,7 @@ const AssetTable: React.FC<{
           padding: "1em",
           borderRadius: "1em",
           bg: { base: "secondary.500" },
+          whiteSpace: "nowrap",
         }}
         cellProps={{
           display: "flex",

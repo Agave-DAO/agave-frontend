@@ -298,12 +298,12 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
               />
               <StatCard
                 title="Used As Collateral"
-                color={collateral === "Yes" ? "green" : "orenge"}
+                color={collateral === "Yes" ? "green" : "orange"}
                 value={collateral}
               />
               <StatCard
                 title="Stable Borrowing"
-                color={stable === "Yes" ? "green" : "orenge"}
+                color={stable === "Yes" ? "green" : "orange"}
                 value={stable}
               />
             </Box>

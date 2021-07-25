@@ -9,17 +9,18 @@ import { BalanceView } from "../common/BalanceView";
 import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
 import { Box, Text } from "@chakra-ui/layout";
 import { Button, Flex, Switch } from "@chakra-ui/react";
-import { TokenIcon } from "../../utils/icons";
+import { TokenIcon, ModalIcon } from "../../utils/icons";
 import ColoredText from "../../components/ColoredText";
 import { AssetData } from ".";
 import {
   useUserReserveData,
   ProtocolReserveData,
 } from "../../queries/protocolReserveData";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { BigNumber } from "ethers";
 import { fontSizes } from "../../utils/constants";
+import { ModalComponent } from "./layout";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -30,21 +31,36 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   tokenAddress,
 }) => {
   const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
-  const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
+  const reserveUsedAsCollateral =
+    reserveConfiguration?.usageAsCollateralEnabled;
   return React.useMemo(() => {
+    // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
+    const toggleUseAssetAsCollateral = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const tokenAddress = e.target.id;
+      console.log(tokenAddress, reserveUsedAsCollateral);
+    };
+
     return (
       <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
         <Text
           fontWeight="bold"
           width="60px"
-          color={isCollateralized ? "green.300" : "orenge.300"}
+          color={reserveUsedAsCollateral ? "green.300" : "orange.300"}
         >
-          {isCollateralized ? "Yes" : "No"}
+          {reserveUsedAsCollateral ? "Yes" : "No"}
         </Text>
-        <Switch size="sm" colorScheme="gray" isDisabled={isCollateralized} />
+        <Switch
+          size="md"
+          colorScheme="yellow"
+          isChecked={reserveUsedAsCollateral}
+          id={tokenAddress}
+          onChange={toggleUseAssetAsCollateral}
+        />
       </Box>
     );
-  }, [isCollateralized]);
+  }, [reserveUsedAsCollateral]);
 };
 
 export const DashboardTable: React.FC<{
@@ -78,19 +94,27 @@ export const DashboardTable: React.FC<{
           mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
         accessor: row => row.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value, row }) => (
-          <Flex alignItems={"center"}>
-            <Box>
-              <TokenIcon symbol={value} />
-            </Box>
-            <Box w="1rem"></Box>
-            <Box>
-              {mode === DashboardTableType.Deposit ? (
-                <Text>{row.original.backingReserve?.symbol}</Text>
-              ) : (
-                <Text>{value}</Text>
-              )}
-            </Box>
-          </Flex>
+          <Link
+            to={`/reserve-overview/${
+              row.original.backingReserve?.symbol
+                ? row.original.backingReserve?.symbol
+                : value
+            }`}
+          >
+            <Flex alignItems={"center"}>
+              <Box>
+                <TokenIcon symbol={value} />
+              </Box>
+              <Box w="1rem"></Box>
+              <Box>
+                {mode === DashboardTableType.Deposit ? (
+                  <Text>{row.original.backingReserve?.symbol}</Text>
+                ) : (
+                  <Text>{value}</Text>
+                )}
+              </Box>
+            </Flex>
+          </Link>
         )) as Renderer<CellProps<AssetData, string>>,
       },
       {
@@ -110,7 +134,7 @@ export const DashboardTable: React.FC<{
         )) as Renderer<CellProps<AssetData, string>>,
       },
       {
-        Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
+        Header: "Collateral",
         accessor: row => row.backingReserve,
         Cell: (({ row }) =>
           mode === DashboardTableType.Deposit && row.original.backingReserve ? (
@@ -204,6 +228,7 @@ export const DashboardTable: React.FC<{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
             bg: "primary.900",
             color: "white",
+            whiteSpace: "nowrap",
           }}
           cellProps={{
             borderBottom: "none",

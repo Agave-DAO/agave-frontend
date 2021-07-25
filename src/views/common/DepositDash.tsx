@@ -87,7 +87,6 @@ export const DepositDash: React.FC<DepositDashProps> = ({
         <Flex w="30%" spacing={spacings.md} mr={{ base: "0rem", md: "1rem" }} alignItems={{base:"flex-start", md:"center"}}  justifyContent="slex-start" flexDirection={{base:"column", lg:"row"}}>
           <HStack pr={{ base: "0rem", md: "1rem" }}>
 			  <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} >Health factor</Text>
-			  <ModalIcon position="relative" top="0" right="0" onOpen={() => {}} />
 		  </HStack>
           <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg  }}>{bigNumberToString(healthFactor)}</ColoredText>
         </Flex>
