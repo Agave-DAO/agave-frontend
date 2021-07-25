@@ -11,6 +11,20 @@ import {
   useAllReserveTokensWithData,
 } from "./lendingReserveData";
 
+export const useUserNativeBalance = buildQueryHookWhenParamsDefinedChainAddrs<
+  BigNumber,
+  [_p1: "user", _p2: "native", _p3: "balance"],
+  []
+>(
+  async params => params.library.getBalance(params.account),
+  () => ["user", "native", "balance"],
+  () => undefined,
+  {
+    staleTime: 2 * 60 * 1000,
+    cacheTime: 60 * 60 * 1000,
+  }
+);
+
 export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
   [_p1: "user", _p2: "asset", assetAddress: string | undefined, _p3: "balance"],
@@ -68,28 +82,19 @@ export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
 export const useUserVariableDebtForAsset =
   buildQueryHookWhenParamsDefinedChainAddrs<
     BigNumber,
-    [
-      _p1: "user",
-      _p2: "asset",
-      assetAddress: string | undefined,
-      _p3: "debt"
-    ],
+    [_p1: "user", _p2: "asset", assetAddress: string | undefined, _p3: "debt"],
     [assetAddress: string]
   >(
     async (params, assetAddress) => {
-      return useUserReserveData.fetchQueryDefined(params, assetAddress)
-        .then(result => result.currentVariableDebt)
+      return useUserReserveData
+        .fetchQueryDefined(params, assetAddress)
+        .then(result => result.currentVariableDebt);
     },
-    (assetAddress) => [
-      "user",
-      "asset",
-      assetAddress,
-      "debt"
-    ],
+    assetAddress => ["user", "asset", assetAddress, "debt"],
     () => undefined,
     {
       staleTime: 2 * 60 * 1000,
-      cacheTime: 60 * 60 * 1000
+      cacheTime: 60 * 60 * 1000,
     }
   );
 
@@ -104,12 +109,13 @@ export const useUserVariableDebtTokenBalances =
 
       const reservesWithVariableDebt = await Promise.all(
         reserves.map(reserve =>
-          useUserVariableDebtForAsset.fetchQueryDefined(params, reserve.tokenAddress)
+          useUserVariableDebtForAsset
+            .fetchQueryDefined(params, reserve.tokenAddress)
             .then(debt => ({ ...reserve, balance: debt }))
         )
       );
 
-      return reservesWithVariableDebt
+      return reservesWithVariableDebt;
     },
     () => ["user", "allReserves", "debts"],
     () => undefined,
@@ -128,7 +134,7 @@ interface VariableDebtTokenBalancesDaiWei {
   daiWeiPricePer: BigNumber | null;
   daiWeiPriceTotal: BigNumber | null;
 }
-  
+
 export const useUserVariableDebtTokenBalancesDaiWei =
   buildQueryHookWhenParamsDefinedChainAddrs<
     VariableDebtTokenBalancesDaiWei[],
