@@ -23,6 +23,7 @@ import {
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
+import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -93,8 +94,8 @@ const InitialComp: React.FC<{
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
-  const { data: reserve } = useLendingReserveData(state.token.tokenAddress);
-  const { data: userAgBalance } = useUserAssetBalance(reserve?.aTokenAddress);
+  const { account } = useAppWeb3();
+  const maxToBorrow = useAvailableToBorrowAssetWei(account ?? undefined, state.token.tokenAddress).data ?? undefined;
   const onSubmit = React.useCallback(
     amountToBorrow =>
       dispatch(createState("borrowTx", { amountToBorrow, ...state })),
@@ -107,7 +108,7 @@ const InitialComp: React.FC<{
       setAmount={setAmount}
       mode="borrow"
       onSubmit={onSubmit}
-      balance={userAgBalance}
+      balance={maxToBorrow}
     />
   );
 };
@@ -246,12 +247,7 @@ const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
         rounded="lg"
         padding="1em"
       >
-        {/*
-        <BorrowStateMachine
-          state={borrowState}
-          setState={setBorrowState}
-        />
-		  */}
+        <BorrowStateMachine state={borrowState} setState={setBorrowState} />
       </Center>
     </VStack>
   );
