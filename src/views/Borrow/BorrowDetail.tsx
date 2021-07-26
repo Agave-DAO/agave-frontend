@@ -22,6 +22,7 @@ import {
 } from "../../mutations/borrow";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -115,16 +116,19 @@ const InitialComp: React.FC<{
  ##
  ## Requires fixing the Props with the nex Queries and Mutations for Borrow support
  ##
+*/
 
 const BorrowTxComp: React.FC<{
   state: BorrowTXState;
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
   const chainAddresses = useChainAddresses();
+  const { account } = useAppWeb3();
   const borrowArgs = React.useMemo<UseBorrowMutationProps>(
     () => ({
       asset: state.token.tokenAddress,
       amount: state.amountToBorrow,
+      onBehalfOf: account ?? undefined,
     }),
     [state, chainAddresses?.lendingPool]
   );
@@ -167,7 +171,7 @@ const BorrowTxComp: React.FC<{
   );
 };
 
-const BorrownTxComp: React.FC<{
+const BorrowedTxComp: React.FC<{
   state: BorrownTXState;
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
@@ -214,10 +218,11 @@ const BorrowStateMachine: React.FC<{
     case "borrowTx":
       return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;
     case "borrownTx":
-      return <BorrownTxComp state={state.borrownTx} dispatch={setState} />;
+      return <BorrowedTxComp state={state.borrownTx} dispatch={setState} />;
   }
 };
-
+/*
+END IMPL SECTION
 */
 
 const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({

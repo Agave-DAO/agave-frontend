@@ -18,7 +18,7 @@ import { getChainAddresses } from "../utils/chainAddresses";
 
 export interface UseWithdrawMutationProps {
   asset: string | undefined;
-  spender: string | undefined;
+  recipientAccount: string | undefined;
   amount: BigNumber | undefined;
 }
 
@@ -38,7 +38,7 @@ export interface UseWithdrawMutationDto {
 
 export const useWithdrawMutation = ({
   asset,
-  spender,
+  recipientAccount,
   amount,
 }: UseWithdrawMutationProps): UseWithdrawMutationDto => {
   const queryClient = useQueryClient();
@@ -58,7 +58,7 @@ export const useWithdrawMutation = ({
     chainId ?? undefined,
     account ?? undefined,
     asset,
-    spender ?? undefined
+    recipientAccount ?? undefined
   );
   const withdrawnQueryKey = [...allowanceQueryKey, "withdraw"] as const;
 
@@ -69,14 +69,18 @@ export const useWithdrawMutation = ({
       if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
       }
-      if (!asset || !spender || !amount) {
+      const chainAddresses = getChainAddresses(chainId);
+      if (!chainAddresses) {
+        return undefined;
+      }
+      if (!asset || !recipientAccount || !amount) {
         return undefined;
       }
       const lendingContract = AgaveLendingABI__factory.connect(
-        spender,
+        chainAddresses.lendingPool,
         library.getSigner()
       );
-      const withdraw = lendingContract.withdraw(asset, amount, account);
+      const withdraw = lendingContract.withdraw(asset, amount, recipientAccount);
       const withdrawConfirmation = await usingProgressNotification(
         "Awaiting withdraw approval",
         "Please sign the transaction for withdrawal.",

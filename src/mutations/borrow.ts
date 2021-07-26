@@ -18,7 +18,7 @@ import { getChainAddresses } from "../utils/chainAddresses";
 
 export interface UseBorrowMutationProps {
   asset: string | undefined;
-  spender: string | undefined;
+  onBehalfOf: string | undefined;
   amount: BigNumber | undefined;
 }
 
@@ -38,7 +38,7 @@ export interface UseBorrowMutationDto {
 
 export const useBorrowMutation = ({
   asset,
-  spender,
+  onBehalfOf,
   amount,
 }: UseBorrowMutationProps): UseBorrowMutationDto => {
   const queryClient = useQueryClient();
@@ -58,7 +58,7 @@ export const useBorrowMutation = ({
     chainId ?? undefined,
     account ?? undefined,
     asset,
-    spender ?? undefined
+    onBehalfOf ?? undefined
   );
   const borrowQueryKey = [...allowanceQueryKey, "borrow"] as const;
 
@@ -69,16 +69,20 @@ export const useBorrowMutation = ({
       if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
       }
-      if (!asset || !spender || !amount) {
+      const chainAddresses = getChainAddresses(chainId);
+      if (!chainAddresses) {
+        return undefined;
+      }
+      if (!asset || !onBehalfOf || !amount) {
         return undefined;
       }
       const lendingContract = AgaveLendingABI__factory.connect(
-        spender,
+        chainAddresses.lendingPool,
         library.getSigner()
       );
       const interestRateMode = 2;
       const referralCode = 0;
-      const borrow = lendingContract.borrow(asset, amount, interestRateMode, referralCode, account);
+      const borrow = lendingContract.borrow(asset, amount, interestRateMode, referralCode, onBehalfOf);
       const borrowConfirmation = await usingProgressNotification(
         "Awaiting borrow approval",
         "Please sign the borrowing transaction.",

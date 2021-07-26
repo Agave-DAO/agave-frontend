@@ -22,6 +22,7 @@ import {
 } from "../../mutations/withdraw";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -115,11 +116,12 @@ const WithdrawTxComp: React.FC<{
   dispatch: (nextState: WithdrawState) => void;
 }> = ({ state, dispatch }) => {
   const chainAddresses = useChainAddresses();
+  const { account } = useAppWeb3();
   const withdrawArgs = React.useMemo<UseWithdrawMutationProps>(
     () => ({
       asset: state.token.tokenAddress,
       amount: state.amountToWithdraw,
-      spender: chainAddresses?.lendingPool,
+      recipientAccount: account ?? undefined,
     }),
     [state, chainAddresses?.lendingPool]
   );
