@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { CellProps, Column, Renderer, useRowSelect } from "react-table";
 import {
   BasicTableRenderer,
@@ -33,15 +33,20 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
   const reserveUsedAsCollateral =
     reserveConfiguration?.usageAsCollateralEnabled;
-  return React.useMemo(() => {
-    // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
-    const toggleUseAssetAsCollateral = (
-      e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-      const tokenAddress = e.target.id;
-    };
 
-    return (
+  // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
+  const [isChecked, changeIsChecked] = useState(!!reserveUsedAsCollateral);
+  useEffect(() => changeIsChecked(!!reserveUsedAsCollateral), [reserveUsedAsCollateral]);
+
+  const toggleUseAssetAsCollateral = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    changeIsChecked(!isChecked);
+    const tokenAddress = e.target.id;
+    console.log({ tokenAddress, reserveUsedAsCollateral, isChecked });
+  };
+
+  return React.useMemo(() => (
       <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
         <Text
           fontWeight="bold"
@@ -53,13 +58,13 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
         <Switch
           size="md"
           colorScheme="yellow"
-          isChecked={reserveUsedAsCollateral}
+          isChecked={isChecked}
+          isDisabled={reserveUsedAsCollateral === null || reserveUsedAsCollateral === undefined}
           id={tokenAddress}
           onChange={toggleUseAssetAsCollateral}
         />
       </Box>
-    );
-  }, [reserveUsedAsCollateral]);
+    ), [reserveUsedAsCollateral, isChecked]);
 };
 
 export const DashboardTable: React.FC<{
