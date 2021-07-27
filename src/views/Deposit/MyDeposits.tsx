@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Text } from "@chakra-ui/layout";
-import { Divider, Flex, VStack } from "@chakra-ui/react";
+import { Divider, Flex, VStack, Tooltip } from "@chakra-ui/react";
 import { DepositAsset } from ".";
 import { TokenIcon } from "../../utils/icons";
 import { bigNumberToString } from "../../utils/fixedPoint"
@@ -25,10 +25,21 @@ const AssetBalanceDisplay: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
               {asset.symbol}
             </Text>
           </Box>
-          <Box>
-            <Text p={3} fontWeight="bold">
-              ${" "}
-              {bigNumberToString(asset.daiWeiPriceTotal)}
+          <Box p={1} textAlign="end">
+            <Tooltip
+              fontSize="big"
+              label={bigNumberToString(asset.balance, 18) + " " + asset.symbol}
+              aria-label="balance in Wei"
+              bg="secondary.900"
+              placement="top-start"
+            >
+              <Text fontSize="smaller" onHover>
+                {bigNumberToString(asset.balance, 2)} x $
+                {bigNumberToString(asset.daiWeiPricePer, 2)}
+              </Text>
+            </Tooltip>
+            <Text fontWeight="bold">
+              $ {bigNumberToString(asset.daiWeiPriceTotal)}
             </Text>
           </Box>
         </Box>
