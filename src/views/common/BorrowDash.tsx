@@ -19,7 +19,7 @@ import {
   PopoverArrow,
   PopoverCloseButton,
 } from "@chakra-ui/react";
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -43,7 +43,7 @@ import {
   bigNumberToString,
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
-import {CollateralComposition} from "../../components/Chart/CollateralComposition"
+import { CollateralComposition } from "../../components/Chart/CollateralComposition";
 
 type BorrowDashProps = {
   token: ReserveTokenDefinition;
@@ -82,9 +82,8 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const { data: utilizationData } = useAssetUtilizationRate(token.tokenAddress);
   const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
-  const { data: userReserveConfiguration } = useUserReserveData(
-    token.tokenAddress
-  );
+  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
+
   const utilizationRate = utilizationData?.utilizationRate;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
   const maximumLtv = reserveConfiguration?.ltv;
@@ -92,10 +91,10 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
   const totalCollateralEth = userAccountData?.totalCollateralEth;
-  const userStableDebt = userReserveConfiguration?.currentStableDebt;
-  const userVariableDebt = userReserveConfiguration?.currentVariableDebt;
-
-  const allUserReservesData = useUserReservesData(tokenAddresses);
+  const userStableDebt =
+    allUserReservesData?.[token.tokenAddress]?.currentStableDebt;
+  const userVariableDebt =
+    allUserReservesData?.[token.tokenAddress]?.currentVariableDebt;
 
   const totalCollateralValue = React.useMemo(() => {
     return allUserReservesBalances?.reduce(
@@ -106,12 +105,13 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   }, [allUserReservesBalances]);
 
   const collateralComposition = React.useMemo(() => {
-    const compositionArray = allUserReservesBalances?.map((next)=> {
-      const withCollateralEnabled = allUserReservesData[allUserReservesData?.indexOf(next.tokenAddress)]?.usageAsCollateralEnabled ;
+    const compositionArray = allUserReservesBalances?.map((next, index) => {
+      const withCollateralEnabled =
+        allUserReservesData?.[next.tokenAddress]?.usageAsCollateralEnabled;
       if (
-        next.daiWeiPriceTotal != undefined &&
-        next.decimals != undefined &&
-        totalCollateralValue != undefined &&
+        next.daiWeiPriceTotal !== null &&
+        next.decimals &&
+        totalCollateralValue &&
         !totalCollateralValue.eq(BigNumber.from(0)) &&
         withCollateralEnabled
       ) {
@@ -131,7 +131,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   }, [allUserReservesBalances, totalCollateralValue]);
 
   const collateralData = collateralComposition.map((x, index) => {
-    if (x != null) return x.substr(0, x.indexOf(".") + 3);
+    if (x !== null) return x.substr(0, x.indexOf(".") + 3);
   });
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
@@ -331,84 +331,13 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
             </Text>
           </HStack>
         </Flex>
+
         {isSmallerThan900 ? null : (
-          <Flex
-            h="100%"
-            spacing={spacings.md}
-            mr={{ base: "0rem", md: "1rem" }}
-            alignItems={{ base: "flex-start", md: "center" }}
-            justifyContent="flex-start"
-            flexDirection="column"
-          >
-            <HStack px={{ base: "0rem", md: "1rem" }} mb="0.5em">
-              <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
-                {isSmallerThan900 ? "Collateral" : "Collateral Composition"}
-              </Text>
-            </HStack>
-            <Popover trigger="hover">
-              <PopoverTrigger>
-                <Grid
-                  role="button"
-                  w="100%"
-                  templateColumns={
-                    collateralData.filter(x => x != null).join("% ") + "%"
-                  }
-                  h="2rem"
-                  borderRadius="8px"
-                  borderColor="#444"
-                  borderStyle="solid"
-                  borderWidth="3px"
-                  overflow="hidden"
-                >
-                  {allUserReservesData?.map((token, index) => (
-                    <Box
-                      bg={assetColor[token.symbol]}
-                      w="100%"
-                      h="100%"
-                      borderRadius="0"
-                      _hover={{ bg: assetColor[token.symbol], boxShadow: "xl" }}
-                      _active={{ bg: assetColor[token.symbol] }}
-                      _focus={{ boxShadow: "xl" }}
-                      d={
-                        collateralComposition[index] != null ? "block" : "none"
-                      }
-                    />
-                  ))}
-                </Grid>
-              </PopoverTrigger>
-              <PopoverContent bg="primary.300" border="2px solid">
-                <PopoverBody bg="gray.700">
-                  <VStack m="auto" py="2rem" w="90%">
-                    {allUserReservesData?.map((token, index) =>
-                      collateralComposition[index] != null ? (
-                        <Flex
-                          id={index + token.symbol}
-                          alignItems="center"
-                          justifyContent="space-between"
-                          w="100%"
-                        >
-                          <Box
-                            bg={assetColor[token.symbol]}
-                            boxSize="1em"
-                            minW="1em"
-                            minH="1em"
-                            borderRadius="1em"
-                          />
-                          <Text ml="1em" width="50%">
-                            {" "}
-                            {token.symbol}
-                          </Text>
-                          <Text ml="1em"> {collateralData[index] + "%"}</Text>
-                        </Flex>
-                      ) : (
-                        <Text></Text>
-                      )
-                    )}
-                  </VStack>
-                </PopoverBody>
-              </PopoverContent>
-            </Popover>
-          </Flex>
+          <CollateralComposition
+            allUserReservesData={allUserReservesData}
+            totalCollateralValue={totalCollateralValue}
+            allUserReservesBalances={allUserReservesBalances}
+          ></CollateralComposition>
         )}
       </Flex>
     </VStack>

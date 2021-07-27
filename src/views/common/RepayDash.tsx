@@ -13,12 +13,18 @@ import {
   Grid,
 } from "@chakra-ui/react";
 import { BigNumber, constants } from "ethers";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useUserAccountData } from "../../queries/userAccountData";
+import {
+  useUserReserveData,
+  useProtocolReserveData,
+  useUserReservesData,
+} from "../../queries/protocolReserveData";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import {
   useUserAssetBalance,
   useUserReserveAssetBalancesDaiWei,
@@ -27,6 +33,7 @@ import {
 } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
+import { CollateralComposition } from "../../components/Chart/CollateralComposition";
 
 type RepayDashProps = {
   token: ReserveTokenDefinition;
@@ -35,6 +42,13 @@ type RepayDashProps = {
 export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
   // General
   const { account: userAccountAddress } = useAppWeb3();
+  const { data: reserves } = useAllReserveTokensWithData();
+  const tokenAddresses = reserves?.map(
+    token => {
+      return token.tokenAddress;
+    },
+    [String]
+  );
 
   // Debts
   const { data: debt } = useUserVariableDebtForAsset(token.tokenAddress);
@@ -51,43 +65,15 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
   const healthFactor = userAccountData?.healthFactor;
 
   // Collateral composition
-  const { data: allReservesData } = useUserReserveAssetBalancesDaiWei();
+  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
+  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
   const totalCollateralValue = React.useMemo(() => {
-    return allReservesData?.reduce(
+    return allUserReservesBalances?.reduce(
       (memo: BigNumber, next) =>
         next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
       constants.Zero
     );
-  }, [allReservesData]);
-  const collateralComposition = React.useMemo(() => {
-    const compositionArray = allReservesData?.map(next => {
-      if (
-        next.daiWeiPriceTotal != undefined &&
-        next.decimals != undefined &&
-        totalCollateralValue != undefined
-      ) {
-        const decimalPower = BigNumber.from(10).pow(next.decimals);
-        return next.daiWeiPriceTotal
-          .mul(decimalPower)
-          .div(totalCollateralValue);
-      } else {
-        return BigNumber.from(0);
-      }
-    });
-
-    return compositionArray
-      ? compositionArray.map(share => {
-          if (share.gt(0)) {
-            return bigNumberToString(share.mul(100));
-          }
-        })
-      : [];
-  }, [allReservesData, totalCollateralValue]);
-  const collateralData = collateralComposition.map(x => {
-    if (x != null) {
-      return x.substr(0, x.indexOf(".") + 3);
-    }
-  });
+  }, [allUserReservesBalances]);
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
     "(max-width: 400px)",
@@ -154,12 +140,6 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
             <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
               Health factor
             </Text>
-            <ModalIcon
-              position="relative"
-              top="0"
-              right="0"
-              onOpen={() => {}}
-            />
           </HStack>
           <ColoredText fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             {bigNumberToString(healthFactor)}
@@ -189,78 +169,13 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
                 }}
                 fontWeight="bold"
               >
-                {bigNumberToString(totalCollateral)} XDAI
+                $ {bigNumberToString(totalCollateral)}
               </Text>{" "}
               {token.symbol}
             </HStack>
           </Stack>
         )}
-        <VStack justifyContent="flex-start" mr={{ base: "0.7rem", md: "1rem" }}>
-          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
-            {isSmallerThan900 ? "Composition" : "Collateral composition"}
-          </Text>
-          <Popover trigger="hover">
-            <PopoverTrigger>
-              <Grid
-                role="button"
-                w="100%"
-                templateColumns={
-                  collateralData.filter(x => x != null).join("% ") + "%"
-                }
-                h="2rem"
-                borderRadius="8px"
-                borderColor="#444"
-                borderStyle="solid"
-                borderWidth="3px"
-                overflow="hidden"
-              >
-                {allReservesData?.map((token, index) => (
-                  <Box
-                    bg={assetColor[token.symbol]}
-                    w="100%"
-                    h="100%"
-                    borderRadius="0"
-                    _hover={{ bg: assetColor[token.symbol], boxShadow: "xl" }}
-                    _active={{ bg: assetColor[token.symbol] }}
-                    _focus={{ boxShadow: "xl" }}
-                    d={collateralComposition[index] != null ? "block" : "none"}
-                  />
-                ))}
-              </Grid>
-            </PopoverTrigger>
-            <PopoverContent bg="primary.300" border="2px solid">
-              <PopoverBody bg="gray.700">
-                <VStack m="auto" py="2rem" w="90%">
-                  {allReservesData?.map((token, index) =>
-                    collateralComposition[index] != null ? (
-                      <Flex
-                        id={index + token.symbol}
-                        alignItems="center"
-                        justifyContent="space-between"
-                        w="100%"
-                      >
-                        <Box
-                          bg={assetColor[token.symbol]}
-                          boxSize="1em"
-                          minW="1em"
-                          minH="1em"
-                          borderRadius="1em"
-                        />
-                        <Text ml="1em" width="50%">
-                          {" "}
-                          {token.symbol}
-                        </Text>
-                        <Text ml="1em"> {collateralData[index] + "%"}</Text>
-                      </Flex>
-                    ) : (
-                      <Text></Text>
-                    )
-                  )}
-                </VStack>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        </VStack>
+
         <Stack
           justifyContent="flex-start"
           mr={{ base: "0.2rem", md: "1rem" }}
@@ -268,7 +183,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
         >
           <HStack pr={{ base: "0rem", md: "1rem" }}>
             <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
-              {isSmallerThan900 ? "LTV" : "Loan to value"}
+              {isSmallerThan900 ? "LTV" : "Current LTV"}
             </Text>
           </HStack>
           <HStack pr={{ base: "0rem", md: "1rem" }} align="center">
@@ -285,14 +200,13 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
                 : "-"}{" "}
               %
             </Text>
-            <ModalIcon
-              position="relative"
-              top="0"
-              right="0"
-              onOpen={() => {}}
-            />
           </HStack>
         </Stack>
+        <CollateralComposition
+          allUserReservesData={allUserReservesData}
+          totalCollateralValue={totalCollateralValue}
+          allUserReservesBalances={allUserReservesBalances}
+        ></CollateralComposition>
       </Flex>
     </VStack>
   );
