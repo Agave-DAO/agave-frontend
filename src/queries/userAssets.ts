@@ -142,7 +142,7 @@ export const useUserVariableDebtTokenBalancesDaiWei =
     []
   >(
     async params => {
-      const reserves = await useUserReserveAssetBalances.fetchQueryDefined(
+      const reserves = await useUserVariableDebtTokenBalances.fetchQueryDefined(
         params
       );
       const withDaiPrices = await Promise.all(
