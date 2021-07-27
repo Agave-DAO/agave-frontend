@@ -137,11 +137,7 @@ type Web3ProtocolUserReserveDataResult = PromisedType<
 
 export const useUserReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
   UserReserveData,
-  [
-    _p1: "user",
-    _p2: "reserveData",
-    assetAddress: string | undefined
-  ],
+  [_p1: "user", _p2: "reserveData", assetAddress: string | undefined],
   [assetAddress: string]
 >(
   async (params, assetAddress) => {
@@ -154,6 +150,29 @@ export const useUserReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
       .then(userReserveData => userReserveDataFromWeb3Result(userReserveData));
   },
   assetAddress => ["user", "reserveData", assetAddress],
+  () => undefined,
+  {
+    cacheTime: 60 * 15 * 1000,
+    staleTime: 60 * 5 * 1000,
+  }
+);
+
+export const useUserReservesData = buildQueryHookWhenParamsDefinedChainAddrs<
+  { [assetAddress: string]: UserReserveData },
+  [_p1: "user", _p2: "reserveData", assetAddresses: string[] | undefined],
+  [assetAddresses: string[]]
+>(
+  async (params, assetAddresses) => {
+    const reserveData = await Promise.all(
+      assetAddresses.map(assetAddress =>
+        useUserReserveData
+          .fetchQueryDefined(params, assetAddress)
+          .then(result => [assetAddress, result])
+      )
+    );
+    return Object.fromEntries(reserveData);
+  },
+  assetAddresses => ["user", "reserveData", assetAddresses],
   () => undefined,
   {
     cacheTime: 60 * 15 * 1000,
