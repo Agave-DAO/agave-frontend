@@ -33,7 +33,6 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
   const reserveUsedAsCollateral =
     reserveConfiguration?.usageAsCollateralEnabled;
-    console.log(tokenAddress, reserveUsedAsCollateral);
   return React.useMemo(() => {
     // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
     const toggleUseAssetAsCollateral = (

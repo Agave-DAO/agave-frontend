@@ -43,12 +43,9 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
   // General
   const { account: userAccountAddress } = useAppWeb3();
   const { data: reserves } = useAllReserveTokensWithData();
-  const tokenAddresses = reserves?.map(
-    token => {
-      return token.tokenAddress;
-    },
-    [String]
-  );
+  const tokenAddresses = reserves?.map(token => {
+    return token.tokenAddress;
+  });
 
   // Debts
   const { data: debt } = useUserVariableDebtForAsset(token.tokenAddress);
@@ -63,17 +60,6 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
   const totalCollateral = userAccountData?.totalCollateralEth;
   const currentLtv = userAccountData?.currentLtv;
   const healthFactor = userAccountData?.healthFactor;
-
-  // Collateral composition
-  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
-  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
-  const totalCollateralValue = React.useMemo(() => {
-    return allUserReservesBalances?.reduce(
-      (memo: BigNumber, next) =>
-        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
-      constants.Zero
-    );
-  }, [allUserReservesBalances]);
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
     "(max-width: 400px)",
@@ -202,11 +188,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
             </Text>
           </HStack>
         </Stack>
-        <CollateralComposition
-          allUserReservesData={allUserReservesData}
-          totalCollateralValue={totalCollateralValue}
-          allUserReservesBalances={allUserReservesBalances}
-        ></CollateralComposition>
+        <CollateralComposition></CollateralComposition>
       </Flex>
     </VStack>
   );

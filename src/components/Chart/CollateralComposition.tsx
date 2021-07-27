@@ -1,8 +1,6 @@
 import React from "react";
 import { BigNumber, constants, FixedNumber, BigNumberish } from "ethers";
 import {
-  Button,
-  ButtonGroup,
   HStack,
   Popover,
   Grid,
@@ -15,8 +13,6 @@ import {
   PopoverHeader,
   PopoverBody,
   PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
   useMediaQuery,
 } from "@chakra-ui/react";
 import {
@@ -26,37 +22,29 @@ import {
 } from "../../queries/protocolReserveData";
 import { borrowListener } from "../../utils/contracts/events/events";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
+import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import {
   bigNumberToString,
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
 
-export const CollateralComposition: React.FC<{
-  allUserReservesData?: { [assetAddress: string]: UserReserveData } | undefined;
-  totalCollateralValue: BigNumber | undefined;
-  allUserReservesBalances:
-    | ReadonlyArray<{
-        symbol: string;
-        tokenAddress: string;
-        balance: BigNumber;
-        decimals: BigNumberish;
-        daiWeiPricePer: BigNumber | null;
-        daiWeiPriceTotal: BigNumber | null;
-      }>
-    | undefined;
-}> = ({
-  allUserReservesData,
-  totalCollateralValue,
-  allUserReservesBalances,
-}) => {
-  const tokenAddresses = allUserReservesBalances?.map(
-    token => {
-      return token.tokenAddress;
-    },
-    [String]
-  );
+export const CollateralComposition: React.FC = () => {
+  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
 
-  console.log(allUserReservesBalances);
+  const tokenAddresses = allUserReservesBalances?.map(token => {
+    return token.tokenAddress;
+  });
+
+  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
+
+  const totalCollateralValue = React.useMemo(() => {
+    return allUserReservesBalances?.reduce(
+      (memo: BigNumber, next) =>
+        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
+      constants.Zero
+    );
+  }, [allUserReservesBalances]);
+
   const collateralComposition = React.useMemo(() => {
     const compositionArray = allUserReservesBalances?.map((next, index) => {
       const withCollateralEnabled =
@@ -64,7 +52,7 @@ export const CollateralComposition: React.FC<{
       if (
         next.daiWeiPriceTotal !== null &&
         next.decimals &&
-        totalCollateralValue  &&
+        totalCollateralValue &&
         !totalCollateralValue.eq(BigNumber.from(0)) &&
         withCollateralEnabled
       ) {
@@ -84,7 +72,7 @@ export const CollateralComposition: React.FC<{
   }, [allUserReservesBalances, totalCollateralValue]);
 
   const collateralData = collateralComposition.map((x, index) => {
-    if (x !== null) return x.substr(0, x.indexOf(".") + 3);
+    if (x != null) return x.substr(0, x.indexOf(".") + 3);
   });
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
@@ -112,7 +100,7 @@ export const CollateralComposition: React.FC<{
             role="button"
             w="100%"
             templateColumns={
-              collateralData.filter(x => x !== null).join("% ") + "%"
+              collateralData.filter(x => x !== undefined).join("% ") + "%"
             }
             h="2rem"
             borderRadius="8px"

@@ -52,12 +52,9 @@ type BorrowDashProps = {
 export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const { account: userAccountAddress } = useAppWeb3();
   const { data: reserves } = useAllReserveTokensWithData();
-  const tokenAddresses = reserves?.map(
-    token => {
-      return token.tokenAddress;
-    },
-    [String]
-  );
+  const tokenAddresses = reserves?.map(token => {
+    return token.tokenAddress;
+  });
   const reserve = React.useMemo(
     () =>
       reserves?.find(reserve => reserve.tokenAddress === token.tokenAddress) ??
@@ -95,44 +92,6 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
     allUserReservesData?.[token.tokenAddress]?.currentStableDebt;
   const userVariableDebt =
     allUserReservesData?.[token.tokenAddress]?.currentVariableDebt;
-
-  const totalCollateralValue = React.useMemo(() => {
-    return allUserReservesBalances?.reduce(
-      (memo: BigNumber, next) =>
-        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
-      constants.Zero
-    );
-  }, [allUserReservesBalances]);
-
-  const collateralComposition = React.useMemo(() => {
-    const compositionArray = allUserReservesBalances?.map((next, index) => {
-      const withCollateralEnabled =
-        allUserReservesData?.[next.tokenAddress]?.usageAsCollateralEnabled;
-      if (
-        next.daiWeiPriceTotal !== null &&
-        next.decimals &&
-        totalCollateralValue &&
-        !totalCollateralValue.eq(BigNumber.from(0)) &&
-        withCollateralEnabled
-      ) {
-        const decimalPower = BigNumber.from(10).pow(next.decimals);
-        return next.daiWeiPriceTotal
-          .mul(decimalPower)
-          .div(totalCollateralValue);
-      } else return BigNumber.from(0);
-    });
-    return compositionArray
-      ? compositionArray.map(share => {
-          if (share.gt(0)) {
-            return bigNumberToString(share.mul(100));
-          } else return null;
-        })
-      : [];
-  }, [allUserReservesBalances, totalCollateralValue]);
-
-  const collateralData = collateralComposition.map((x, index) => {
-    if (x !== null) return x.substr(0, x.indexOf(".") + 3);
-  });
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
     "(max-width: 400px)",
@@ -333,11 +292,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
         </Flex>
 
         {isSmallerThan900 ? null : (
-          <CollateralComposition
-            allUserReservesData={allUserReservesData}
-            totalCollateralValue={totalCollateralValue}
-            allUserReservesBalances={allUserReservesBalances}
-          ></CollateralComposition>
+          <CollateralComposition></CollateralComposition>
         )}
       </Flex>
     </VStack>
