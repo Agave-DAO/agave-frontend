@@ -19,7 +19,7 @@ import {
   PopoverArrow,
   PopoverCloseButton,
 } from "@chakra-ui/react";
-import React from "react";
+import React, {useEffect} from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -33,6 +33,7 @@ import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import {
   useUserReserveData,
   useProtocolReserveData,
+  useUserReservesData,
 } from "../../queries/protocolReserveData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
@@ -42,6 +43,7 @@ import {
   bigNumberToString,
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
+import {CollateralComposition} from "../../components/Chart/CollateralComposition"
 
 type BorrowDashProps = {
   token: ReserveTokenDefinition;
@@ -50,6 +52,12 @@ type BorrowDashProps = {
 export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const { account: userAccountAddress } = useAppWeb3();
   const { data: reserves } = useAllReserveTokensWithData();
+  const tokenAddresses = reserves?.map(
+    token => {
+      return token.tokenAddress;
+    },
+    [String]
+  );
   const reserve = React.useMemo(
     () =>
       reserves?.find(reserve => reserve.tokenAddress === token.tokenAddress) ??
@@ -69,7 +77,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
-  const { data: allReservesData } = useUserReserveAssetBalancesDaiWei();
+  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
   const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
   const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const { data: utilizationData } = useAssetUtilizationRate(token.tokenAddress);
@@ -79,7 +87,6 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   );
   const utilizationRate = utilizationData?.utilizationRate;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
-  const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
   const maximumLtv = reserveConfiguration?.ltv;
   const currentLtv = userAccountData?.currentLtv;
   const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
@@ -88,25 +95,25 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const userStableDebt = userReserveConfiguration?.currentStableDebt;
   const userVariableDebt = userReserveConfiguration?.currentVariableDebt;
 
-  const reserveUsedAsCollateral =
-    reserveConfiguration?.usageAsCollateralEnabled;
-  console.log(reserve?.aTokenAddress);
+  const allUserReservesData = useUserReservesData(tokenAddresses);
 
   const totalCollateralValue = React.useMemo(() => {
-    return allReservesData?.reduce(
+    return allUserReservesBalances?.reduce(
       (memo: BigNumber, next) =>
         next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
       constants.Zero
     );
-  }, [allReservesData]);
+  }, [allUserReservesBalances]);
 
   const collateralComposition = React.useMemo(() => {
-    const compositionArray = allReservesData?.map(next => {
+    const compositionArray = allUserReservesBalances?.map((next)=> {
+      const withCollateralEnabled = allUserReservesData[allUserReservesData?.indexOf(next.tokenAddress)]?.usageAsCollateralEnabled ;
       if (
         next.daiWeiPriceTotal != undefined &&
         next.decimals != undefined &&
         totalCollateralValue != undefined &&
-        !totalCollateralValue.eq(BigNumber.from(0))
+        !totalCollateralValue.eq(BigNumber.from(0)) &&
+        withCollateralEnabled
       ) {
         const decimalPower = BigNumber.from(10).pow(next.decimals);
         return next.daiWeiPriceTotal
@@ -121,7 +128,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           } else return null;
         })
       : [];
-  }, [allReservesData, totalCollateralValue]);
+  }, [allUserReservesBalances, totalCollateralValue]);
 
   const collateralData = collateralComposition.map((x, index) => {
     if (x != null) return x.substr(0, x.indexOf(".") + 3);
@@ -353,7 +360,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
                   borderWidth="3px"
                   overflow="hidden"
                 >
-                  {allReservesData?.map((token, index) => (
+                  {allUserReservesData?.map((token, index) => (
                     <Box
                       bg={assetColor[token.symbol]}
                       w="100%"
@@ -372,7 +379,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
               <PopoverContent bg="primary.300" border="2px solid">
                 <PopoverBody bg="gray.700">
                   <VStack m="auto" py="2rem" w="90%">
-                    {allReservesData?.map((token, index) =>
+                    {allUserReservesData?.map((token, index) =>
                       collateralComposition[index] != null ? (
                         <Flex
                           id={index + token.symbol}
