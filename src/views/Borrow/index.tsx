@@ -15,7 +15,6 @@ export const Borrow: React.FC<{}> = () => {
   const [activeValue, setActiveValue] =
     React.useState<"All" | "Stable Coins">("All");
   const balances = useUserVariableDebtTokenBalancesDaiWei();
-  console.log(balances);
   const borrowedList: BorrowAsset[] = React.useMemo(
     () => balances?.data?.filter(asset => !asset.balance.isZero()) ?? [],
     [balances]
