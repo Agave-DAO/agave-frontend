@@ -1,59 +1,15 @@
 import React from "react";
 import { Box, Text } from "@chakra-ui/layout";
-import { Divider, Flex, VStack, Tooltip } from "@chakra-ui/react";
+import { Divider, Flex, VStack } from "@chakra-ui/react";
 import { DepositAsset } from ".";
-import { TokenIcon } from "../../utils/icons";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString } from "../../utils/fixedPoint";
+import { AssetBalanceDisplay } from "../../components/Card/AssetBalanceDisplay";
 
-const AssetBalanceDisplay: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
-  return React.useMemo(() => {
-    return (
-      <Flex direction="row" minH={30} h="100%" w="100%">
-        <Box
-          w="100%"
-          d="flex"
-          flexDir="row"
-          p={3}
-          px="2rem"
-          color="white"
-          alignSelf="center"
-          justifyContent="space-between"
-        >
-          <Box textAlign="center" alignSelf="center" d="flex">
-            <TokenIcon symbol={asset.symbol} />
-            <Text ml={4} alignSelf="center">
-              {asset.symbol}
-            </Text>
-          </Box>
-          <Box p={1} textAlign="end">
-            <Tooltip
-              fontSize="big"
-              label={bigNumberToString(asset.balance, 18) + " " + asset.symbol}
-              aria-label="balance in Wei"
-              bg="secondary.900"
-              placement="top-start"
-            >
-              <Text fontSize="smaller" onHover>
-                {bigNumberToString(asset.balance, 2)} x $
-                {bigNumberToString(asset.daiWeiPricePer, 2)}
-              </Text>
-            </Tooltip>
-            <Text fontWeight="bold">
-              $ {bigNumberToString(asset.daiWeiPriceTotal)}
-            </Text>
-          </Box>
-        </Box>
-      </Flex>
-    );
-  }, [asset]);
-};
 
 const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
   const total = React.useMemo(() => {
     return assets.reduce(
-      (memo, next) =>
-        memo +
-        (Number( bigNumberToString(next.daiWeiPriceTotal)) ),
+      (memo, next) => memo + Number(bigNumberToString(next.daiWeiPriceTotal)),
       0
     );
   }, [assets]);
@@ -64,16 +20,16 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
 
   return React.useMemo(() => {
     return (
-      <Flex w="100%" flexDir="column" >
+      <Flex w="100%" flexDir="column">
         <VStack
-		  py="2rem"
+          py="2rem"
           divider={depositDivider}
           children={assets.map((value, i) => (
             <AssetBalanceDisplay key={value.tokenAddress} asset={value} />
           ))}
         />
         {}
-		<Divider></Divider>
+        <Divider></Divider>
         <Flex
           alignSelf="center"
           justifyContent="space-between"
@@ -97,7 +53,7 @@ export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
       <Box
         w="auto"
         minW={{ md: 250 }}
-        ml={{base:0, md:10}}
+        ml={{ base: 0, md: 10 }}
         marginTop={0}
         boxSizing="content-box"
         rounded="xl"
@@ -106,7 +62,7 @@ export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
         color="white"
       >
         <VStack w="100%" align="stretch" flexDirection="column">
-          <Box ml="2.4rem" color="white" mb={5} >
+          <Box ml="2.4rem" color="white" mb={5}>
             <Text>My Deposits</Text>
           </Box>
           <Box h="0.2rem" backgroundColor="primary.50" />
