@@ -15,64 +15,20 @@ import {
   PopoverFooter,
   useMediaQuery,
 } from "@chakra-ui/react";
-import {
-  UserReserveData,
-  useUserReserveData,
-  useUserReservesData,
-} from "../../queries/protocolReserveData";
 import { borrowListener } from "../../utils/contracts/events/events";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
-import {
-  bigNumberToString,
-  fixedNumberToPercentage,
-} from "../../utils/fixedPoint";
+import { useCollateralComposition } from "../../hooks/collateralComposition";
+import { bigNumberToString } from "../../utils/fixedPoint";
 
 export const CollateralComposition: React.FC = () => {
+
   const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
 
-  const tokenAddresses = allUserReservesBalances?.map(token => {
-    return token.tokenAddress;
-  });
-
-  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
-
-  const totalCollateralValue = React.useMemo(() => {
-    return allUserReservesBalances?.reduce(
-      (memo: BigNumber, next) =>
-        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
-      constants.Zero
-    );
-  }, [allUserReservesBalances]);
-
-  const collateralComposition = React.useMemo(() => {
-    const compositionArray = allUserReservesBalances?.map((next, index) => {
-      const withCollateralEnabled =
-        allUserReservesData?.[next.tokenAddress]?.usageAsCollateralEnabled;
-      if (
-        next.daiWeiPriceTotal !== null &&
-        next.decimals &&
-        totalCollateralValue &&
-        !totalCollateralValue.eq(BigNumber.from(0)) &&
-        withCollateralEnabled
-      ) {
-        const decimalPower = BigNumber.from(10).pow(next.decimals);
-        return next.daiWeiPriceTotal
-          .mul(decimalPower)
-          .div(totalCollateralValue);
-      } else return BigNumber.from(0);
-    });
-    return compositionArray
-      ? compositionArray.map(share => {
-          if (share.gt(0)) {
-            return bigNumberToString(share.mul(100));
-          } else return null;
-        })
-      : [];
-  }, [allUserReservesBalances, totalCollateralValue]);
+  const collateralComposition = useCollateralComposition();
 
   const collateralData = collateralComposition.map((x, index) => {
-    if (x != null) return x.substr(0, x.indexOf(".") + 3);
+    if (x !== null) return bigNumberToString(x, 2);
   });
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([

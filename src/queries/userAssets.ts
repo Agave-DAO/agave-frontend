@@ -207,7 +207,7 @@ export const useUserReserveAssetBalances =
     }
   );
 
-interface ReserveAssetBalancesDaiWei {
+export interface ReserveAssetBalancesDaiWei {
   symbol: string;
   tokenAddress: string;
   balance: BigNumber;
