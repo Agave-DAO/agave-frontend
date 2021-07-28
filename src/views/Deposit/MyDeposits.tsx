@@ -4,13 +4,14 @@ import { Divider, Flex, VStack } from "@chakra-ui/react";
 import { DepositAsset } from ".";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { AssetBalanceDisplay } from "../../components/Card/AssetBalanceDisplay";
-
+import { constants } from "ethers";
 
 const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
   const total = React.useMemo(() => {
     return assets.reduce(
-      (memo, next) => memo + Number(bigNumberToString(next.daiWeiPriceTotal)),
-      0
+      (memo, next) =>
+        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
+      constants.Zero
     );
   }, [assets]);
   const depositDivider = React.useMemo(
@@ -38,7 +39,7 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
           pt={6}
         >
           <Text>Total</Text>
-          <Text fontWeight="bold">$ {total.toFixed(2)}</Text>
+          <Text fontWeight="bold">$ {bigNumberToString(total, 2)}</Text>
         </Flex>
       </Flex>
     );
