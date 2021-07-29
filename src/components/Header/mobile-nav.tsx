@@ -1,5 +1,5 @@
 import React from "react";
-import { CloseButton, Flex, useColorModeValue } from "@chakra-ui/react";
+import { Flex, useColorModeValue } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface Props {
@@ -8,32 +8,52 @@ interface Props {
 }
 
 export const MobileNavContent: React.FC<Props> = props => {
-  const { isOpen, onClose, children } = props;
-  const bg = useColorModeValue("primary.900", "secondary.900");
+  const { isOpen, children } = props;
+
+  const lightGrad =
+    "radial-gradient(circle, rgba(79,203,141,1) 5%, rgba(0,124,110,1) 100%)";
+  const darkGrad =
+    "radial-gradient(circle, rgba(24,79,60,1) 0%, rgba(17,120,101,1) 61%, rgba(0,124,110,1) 100%)";
+  const bg = useColorModeValue(lightGrad, darkGrad);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          transition={{ duration: 0.1 }}
+          transition={{ duration: 0.15 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          style={{
+            position: "fixed",
+            height: "0",
+            width: "0",
+            top: 0,
+            left: 0,
+            zIndex: 20,
+          }}
         >
           <Flex
+            className="mobileover"
             direction="column"
-            w="100%"
             bg={bg}
-            h="100vh"
-            overflow="auto"
+            w="100vw"
+            h="100%"
+            minH="100vh"
             pos="absolute"
-            top={0}
+            // TODO top={{ base: "80px", md: "50px" }}
             left={0}
             zIndex={20}
-            px={4}
-            py={4}
+            overflowY="auto"
           >
             {children}
-            <CloseButton pos="absolute" top={4} right={4} onClick={onClose} />
+            {/* <CloseButton
+              pos="absolute"
+              top={12}
+              right={12}
+              onClick={onClose}
+              colorScheme="whiteAlpha"
+            /> */}
           </Flex>
         </motion.div>
       )}
