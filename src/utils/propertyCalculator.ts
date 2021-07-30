@@ -2,82 +2,81 @@ import React from "react";
 import { BigNumber, FixedFormat, FixedNumber } from "@ethersproject/bignumber";
 import { constants, ethers } from "ethers";
 import { useProtocolReserveConfiguration } from "../queries/protocolAssetConfiguration";
-import { useUserDepositAssetBalancesDaiWei } from "../queries/userAssets";
-import { useTotalBorrowedForAsset } from "../queries/totalBorrowedForAsset";
 import {
-  useAllReserveTokens,
-  ReserveTokenDefinition,
+  useUserDepositAssetBalancesDaiWei,
+  useUserVariableDebtTokenBalancesDaiWei,
+} from "../queries/userAssets";
+import {
+  useAllReserveTokensWithConfiguration,
+  ReserveTokensConfiguration,
 } from "../queries/allReserveTokens";
+import { useTotalBorrowedForAsset } from "../queries/totalBorrowedForAsset";
+import { ExtendedReserveTokenDefinition } from "../queries/lendingReserveData";
+import { reserveConfigurationFromWeb3Result } from "../queries/protocolAssetConfiguration";
 import Collateral from "../views/Collateral";
 import { zeroLayout } from "framer-motion/types/render/utils/state";
+import { formatEther } from "ethers/lib/utils";
 
-export function getAssetsData() {
-  const { data: reserveTokens } = useAllReserveTokens();
+export function useAllAssetsData() {
+  const { data: reserveTokens } = useAllReserveTokensWithConfiguration();
   const { data: userDepositAssetBalancesDaiWei } =
     useUserDepositAssetBalancesDaiWei();
+  const { data: userVariableDebtTokenBalancesDaiWei } =
+    useUserVariableDebtTokenBalancesDaiWei();
 
-  const assetsData = reserveTokens?.map((t: ReserveTokenDefinition) => {
-    const { data: reserveAssetConfiguration } = useProtocolReserveConfiguration(
-      t.tokenAddress
+  const assetsData = reserveTokens?.map((t: ReserveTokensConfiguration) => {
+    const totalBorrowedForAsset = userVariableDebtTokenBalancesDaiWei?.find(
+      ele => ele.tokenAddress === t.tokenAddress
     );
-    const totalBorrowedForAsset = reserveAssetConfiguration?.borrowingEnabled
-      ? useTotalBorrowedForAsset(t.tokenAddress)
-      : null;
 
     const userDepositAsset = userDepositAssetBalancesDaiWei?.find(
       ele => ele.tokenAddress === t.tokenAddress
     );
-
-    const ltv = reserveAssetConfiguration?.ltv.toUnsafeFloat();
-    const liquidationThreshold =
-      reserveAssetConfiguration?.liquidationThreshold.toUnsafeFloat();
+    // HACK: Assumes values of roughly 0.1000 - 0.9999 in wei
+    const ltv = t.rawltv;
+    // HACK: Assumes values of roughly 1000 - 9999
+    const liquidationThreshold = t.rawliquidationThreshold;
     const collateralBalance = userDepositAsset?.balance;
+
     const collateralValue = userDepositAsset?.daiWeiPriceTotal;
     const collateralBorrowCapacity =
-      ltv && collateralValue
-        ? collateralValue.mul(BigNumber.from(ltv * 1000).div(1000))
-        : null;
+      ltv && collateralValue ? ltv.mul(collateralValue).div(10000) : null;
     const collateralMaxCapacity =
       collateralValue && liquidationThreshold
-        ? collateralValue.mul(
-            BigNumber.from(liquidationThreshold * 1000).div(1000)
-          )
-        : null;
-
+        ? liquidationThreshold.mul(collateralValue).div(10000)
+        : undefined;
     return {
-      tokenAddress: t.tokenAddress,
+      tokenConfig: t,
       aTokenAddress: userDepositAsset?.aTokenAddress,
-      assetConfig: reserveAssetConfiguration,
       collateralBalance: userDepositAsset?.balance,
       collateralValue: userDepositAsset?.daiWeiPriceTotal,
       collateralBorrowCapacity: collateralBorrowCapacity,
       collateralMaxCapacity: collateralMaxCapacity,
-      borrowsValue: totalBorrowedForAsset?.data?.wei,
+      borrowsValue: totalBorrowedForAsset?.daiWeiPriceTotal,
     };
   });
 
   return assetsData;
 }
 
-export function newHealthFactorGivenDeposit({
-  amount,
-  tokenAddress,
-}: {
-  amount: BigNumber;
-  tokenAddress: string;
-}) {
+export function useNewHealthFactorGivenDeposit(
+  amount: BigNumber | undefined,
+  tokenAddress: string | undefined
+) {
   const memoAmount = React.useMemo(() => amount, [amount]);
   const memoTokenAddress = React.useMemo(() => tokenAddress, [tokenAddress]);
 
-  const assetsData = getAssetsData();
+  const assetsData = useAllAssetsData();
 
   const tokenData = assetsData
-    ? assetsData.find(t => t.tokenAddress === memoTokenAddress)
+    ? assetsData.find(t => t.tokenConfig.tokenAddress === memoTokenAddress)
     : undefined;
 
-  const currentTotalBorrowsvalue = assetsData?.reduce((acc, next) => {
-    return next.borrowsValue ? acc.add(next.borrowsValue) : acc;
-  }, constants.Zero);
+  const currentTotalBorrowsvalue = assetsData
+    ? assetsData?.reduce((acc, next) => {
+        return next.borrowsValue ? acc.add(next.borrowsValue) : acc;
+      }, constants.Zero)
+    : null;
 
   const currentTotalCollateralMaxCapacity = assetsData?.reduce((acc, next) => {
     return next.collateralMaxCapacity
@@ -86,23 +85,31 @@ export function newHealthFactorGivenDeposit({
   }, constants.Zero);
 
   const changeCollateralMaxCapacity =
-    tokenData?.assetConfig?.liquidationThreshold !== undefined
-      ? memoAmount.mul(
-          BigNumber.from(
-            tokenData.assetConfig.liquidationThreshold.toUnsafeFloat() * 1000
-          ).div(1000)
-        )
+    tokenData?.tokenConfig?.liquidationThreshold &&
+    memoAmount &&
+    memoAmount > constants.Zero
+      ? tokenData.tokenConfig.rawliquidationThreshold.mul(memoAmount).div(10000)
       : null;
 
   const newTotalCollateralMaxCapacity =
-    changeCollateralMaxCapacity !== null
+    changeCollateralMaxCapacity && changeCollateralMaxCapacity !== null
       ? currentTotalCollateralMaxCapacity?.add(changeCollateralMaxCapacity)
       : null;
 
   const newHealthFactor =
     currentTotalBorrowsvalue && newTotalCollateralMaxCapacity
-      ? newTotalCollateralMaxCapacity?.div(currentTotalBorrowsvalue)
+      ? newTotalCollateralMaxCapacity
+          .mul(1000000000)
+          .div(currentTotalBorrowsvalue)
       : null;
+
+  console.log({
+    pBorrow: currentTotalBorrowsvalue?.toString(),
+    pMax: currentTotalCollateralMaxCapacity?.toString(),
+    cMax: changeCollateralMaxCapacity?.toString(),
+    nMax: newTotalCollateralMaxCapacity?.toString(),
+    hf: newHealthFactor?.toString(),
+  });
 
   return newHealthFactor;
 }
