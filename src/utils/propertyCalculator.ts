@@ -5,6 +5,7 @@ import { useProtocolReserveConfiguration } from "../queries/protocolAssetConfigu
 import {
   useUserDepositAssetBalancesDaiWei,
   useUserVariableDebtTokenBalancesDaiWei,
+  VariableDebtTokenBalancesDaiWei,
 } from "../queries/userAssets";
 import {
   useAllReserveTokensWithConfiguration,
@@ -12,6 +13,17 @@ import {
 } from "../queries/allReserveTokens";
 import { FixedFromRay } from "../utils/fixedPoint";
 import { weiPerToken } from "../queries/decimalsForToken";
+
+interface AssetsData {
+  tokenConfig: ReserveTokensConfiguration;
+  aTokenAddress: string | undefined;
+  assetPrice: BigNumber | null;
+  collateralBalance: BigNumber | null;
+  collateralValue: BigNumber | null;
+  collateralBorrowCapacity: BigNumber | null;
+  collateralMaxCapacity: BigNumber | null;
+  borrowsValue: BigNumber | null;
+}
 
 export function useAllAssetsData() {
   const { data: reserveTokens } = useAllReserveTokensWithConfiguration();
@@ -28,53 +40,56 @@ export function useAllAssetsData() {
     const userDepositAsset = userDepositAssetBalancesDaiWei?.find(
       ele => ele.tokenAddress === t.tokenAddress
     );
-    // HACK: Assumes values of roughly 0.1000 - 0.9999 in wei
+    // HACK: Assumes values of roughly 1000 - 9999
     const ltv = t.rawltv;
     // HACK: Assumes values of roughly 1000 - 9999
     const liquidationThreshold = t.rawliquidationThreshold;
 
-    const collateralBalance = userDepositAsset?.balance;
-    const collateralValue = userDepositAsset?.daiWeiPriceTotal;
+    const pricePer = totalBorrowedForAsset
+      ? totalBorrowedForAsset.daiWeiPricePer
+      : null;
+
+    const collateralBalance = userDepositAsset
+      ? userDepositAsset.balance
+      : null;
+    const collateralValue = userDepositAsset
+      ? userDepositAsset.daiWeiPriceTotal
+      : null;
     const collateralBorrowCapacity =
       ltv && collateralValue ? ltv.mul(collateralValue).div(10000) : null;
+
     const collateralMaxCapacity =
       collateralValue && liquidationThreshold
         ? liquidationThreshold.mul(collateralValue).div(10000)
-        : undefined;
+        : null;
+    const totalBorrowsValue = totalBorrowedForAsset
+      ? totalBorrowedForAsset.daiWeiPriceTotal
+      : null;
     return {
       tokenConfig: t,
       aTokenAddress: userDepositAsset?.aTokenAddress,
-      assetPrice: totalBorrowedForAsset?.daiWeiPricePer,
+      assetPrice: pricePer,
       collateralBalance: collateralBalance,
       collateralValue: collateralValue,
       collateralBorrowCapacity: collateralBorrowCapacity,
       collateralMaxCapacity: collateralMaxCapacity,
-      borrowsValue: totalBorrowedForAsset?.daiWeiPriceTotal,
+      borrowsValue: totalBorrowsValue,
     };
   });
 
   return assetsData;
 }
 
-export function useNewHealthFactorByCollateralChange(
+function newHealthFactorGivenAssetsData(
   amount: BigNumber | undefined,
-  tokenAddress: string | undefined,
-  deposit?: Boolean | false
+  tokenAddress: string,
+  assetsData: AssetsData[] | undefined,
+  collateral: Boolean,
+  increase?: Boolean | false
 ) {
-  const memoAmount = React.useMemo(() => amount, [amount]);
-  const memoTokenAddress = React.useMemo(() => tokenAddress, [tokenAddress]);
-
-  const assetsData = useAllAssetsData();
-
   const tokenData = assetsData
-    ? assetsData.find(t => t.tokenConfig.tokenAddress === memoTokenAddress)
+    ? assetsData.find(t => t.tokenConfig.tokenAddress === tokenAddress)
     : undefined;
-
-  const newTotalBorrowsvalue = assetsData
-    ? assetsData?.reduce((acc, next) => {
-        return next.borrowsValue ? acc.add(next.borrowsValue) : acc;
-      }, constants.Zero)
-    : null;
 
   const oldTotalCollateralMaxCapacity = assetsData?.reduce((acc, next) => {
     return next.collateralMaxCapacity
@@ -82,19 +97,47 @@ export function useNewHealthFactorByCollateralChange(
       : acc;
   }, constants.Zero);
 
+  // Collateral Calculations
+
   const changeCollateralMaxCapacity =
-    tokenData?.tokenConfig?.liquidationThreshold &&
-    memoAmount &&
-    memoAmount > constants.Zero
-      ? tokenData.tokenConfig.rawliquidationThreshold.mul(memoAmount).div(10000)
+    tokenData &&
+    tokenData.tokenConfig.rawliquidationThreshold &&
+    amount &&
+    collateral &&
+    amount > constants.Zero
+      ? tokenData.tokenConfig.rawliquidationThreshold.mul(amount).div(10000)
       : constants.Zero;
 
   const newTotalCollateralMaxCapacity =
     changeCollateralMaxCapacity && oldTotalCollateralMaxCapacity
-      ? deposit
-        ? oldTotalCollateralMaxCapacity?.add(changeCollateralMaxCapacity)
-        : oldTotalCollateralMaxCapacity?.sub(changeCollateralMaxCapacity)
+      ? increase
+        ? oldTotalCollateralMaxCapacity.add(changeCollateralMaxCapacity)
+        : oldTotalCollateralMaxCapacity.sub(changeCollateralMaxCapacity)
       : undefined;
+
+  // Borrow Calculations
+  const oldTotalBorrowsvalue = assetsData
+    ? assetsData?.reduce((acc, next) => {
+        return next.borrowsValue ? acc.add(next.borrowsValue) : acc;
+      }, constants.Zero)
+    : null;
+
+  const changeTotalBorrowsvalue =
+    amount &&
+    !collateral &&
+    tokenData &&
+    tokenData.assetPrice &&
+    amount > constants.Zero
+      ? amount.mul(tokenData.assetPrice).div(weiPerToken(18))
+      : constants.Zero;
+
+  const newTotalBorrowsvalue =
+    changeTotalBorrowsvalue && oldTotalBorrowsvalue
+      ? increase
+        ? oldTotalBorrowsvalue.add(changeTotalBorrowsvalue)
+        : oldTotalBorrowsvalue.sub(changeTotalBorrowsvalue)
+      : undefined;
+
   // Multiply by 10^27 to be compatible with the Ray format and then converted into FixedNumber
   const newHealthFactor =
     newTotalBorrowsvalue &&
@@ -110,57 +153,26 @@ export function useNewHealthFactorByCollateralChange(
   return newHealthFactor;
 }
 
-export function useNewHealthFactorByBorrowChange(
+export function useNewHealthFactorCalculator(
   amount: BigNumber | undefined,
-  tokenAddress: string | undefined,
-  borrow?: Boolean | false
+  tokenAddress: string,
+  collateral: Boolean,
+  increase?: Boolean | false
 ) {
-  const memoAmount = React.useMemo(() => amount, [amount]);
-  const memoTokenAddress = React.useMemo(() => tokenAddress, [tokenAddress]);
-
+  //const amount = React.useMemo(() => amount, [amount]);
   const assetsData = useAllAssetsData();
 
-  const tokenData = assetsData
-    ? assetsData.find(t => t.tokenConfig.tokenAddress === memoTokenAddress)
-    : undefined;
-
-  const oldTotalBorrowsvalue = assetsData
-    ? assetsData?.reduce((acc, next) => {
-        return next.borrowsValue ? acc.add(next.borrowsValue) : acc;
-      }, constants.Zero)
-    : null;
-
-  const changeTotalBorrowsvalue =
-    memoAmount &&
-    tokenData &&
-    tokenData.assetPrice &&
-    memoAmount > constants.Zero
-      ? memoAmount.mul(tokenData.assetPrice).div(weiPerToken(18))
-      : constants.Zero;
-
-  const newTotalBorrowsvalue =
-    changeTotalBorrowsvalue && oldTotalBorrowsvalue
-      ? borrow
-        ? oldTotalBorrowsvalue?.add(changeTotalBorrowsvalue)
-        : oldTotalBorrowsvalue?.sub(changeTotalBorrowsvalue)
-      : undefined;
-
-  const newTotalCollateralMaxCapacity = assetsData?.reduce((acc, next) => {
-    return next.collateralMaxCapacity
-      ? acc.add(next.collateralMaxCapacity)
-      : acc;
-  }, constants.Zero);
-  // Multiply by 10^27 to be compatible with the Ray format and then converted into FixedNumber
-  const newHealthFactor =
-    newTotalBorrowsvalue &&
-    !newTotalBorrowsvalue.isZero() &&
-    newTotalCollateralMaxCapacity
-      ? FixedFromRay(
-          newTotalCollateralMaxCapacity
-            .mul(BigNumber.from(10).pow(27))
-            .div(newTotalBorrowsvalue)
-        )
-      : undefined;
+  const newHealthFactor = React.useMemo(
+    () =>
+      newHealthFactorGivenAssetsData(
+        amount,
+        tokenAddress,
+        assetsData,
+        collateral,
+        increase
+      ),
+    [amount, tokenAddress, assetsData, collateral, increase]
+  );
 
   return newHealthFactor;
 }

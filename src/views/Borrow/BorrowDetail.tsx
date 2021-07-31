@@ -24,7 +24,7 @@ import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
-import { useNewHealthFactorByBorrowChange } from "../../utils/propertyCalculator";
+import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -104,9 +104,10 @@ const InitialComp: React.FC<{
       dispatch(createState("borrowTx", { amountToBorrow, ...state })),
     [state, dispatch]
   );
-  const newHealthFactor = useNewHealthFactorByBorrowChange(
+  const newHealthFactor = useNewHealthFactorCalculator(
     amount,
     state.token.tokenAddress,
+    false,
     true
   );
   //console.log(state.token.symbol ,"borrow: " +amount ," - new HF: " +  newHealthFactor?.toString())
