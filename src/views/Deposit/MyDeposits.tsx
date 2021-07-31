@@ -2,48 +2,16 @@ import React from "react";
 import { Box, Text } from "@chakra-ui/layout";
 import { Divider, Flex, VStack } from "@chakra-ui/react";
 import { DepositAsset } from ".";
-import { TokenIcon } from "../../utils/icons";
-import { bigNumberToString } from "../../utils/fixedPoint"
-
-const AssetBalanceDisplay: React.FC<{ asset: DepositAsset }> = ({ asset }) => {
-  return React.useMemo(() => {
-    return (
-      <Flex direction="row" minH={30} h="100%" w="100%">
-        <Box
-          w="100%"
-          d="flex"
-          flexDir="row"
-          p={3}
-          px="2rem"
-          color="white"
-          alignSelf="center"
-          justifyContent="space-between"
-        >
-          <Box textAlign="center" alignSelf="center" d="flex">
-            <TokenIcon symbol={asset.symbol} />
-            <Text ml={4} alignSelf="center">
-              {asset.symbol}
-            </Text>
-          </Box>
-          <Box>
-            <Text p={3} fontWeight="bold">
-              ${" "}
-              {bigNumberToString(asset.daiWeiPriceTotal)}
-            </Text>
-          </Box>
-        </Box>
-      </Flex>
-    );
-  }, [asset]);
-};
+import { bigNumberToString } from "../../utils/fixedPoint";
+import { AssetBalanceDisplay } from "../../components/Card/AssetBalanceDisplay";
+import { constants } from "ethers";
 
 const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
   const total = React.useMemo(() => {
     return assets.reduce(
       (memo, next) =>
-        memo +
-        (Number( bigNumberToString(next.daiWeiPriceTotal)) ),
-      0
+        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
+      constants.Zero
     );
   }, [assets]);
   const depositDivider = React.useMemo(
@@ -53,16 +21,16 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
 
   return React.useMemo(() => {
     return (
-      <Flex w="100%" flexDir="column" >
+      <Flex w="100%" flexDir="column">
         <VStack
-		  py="2rem"
+          py="2rem"
           divider={depositDivider}
           children={assets.map((value, i) => (
             <AssetBalanceDisplay key={value.tokenAddress} asset={value} />
           ))}
         />
         {}
-		<Divider></Divider>
+        <Divider></Divider>
         <Flex
           alignSelf="center"
           justifyContent="space-between"
@@ -71,7 +39,7 @@ const Deposits: React.FC<{ assets: DepositAsset[] }> = ({ assets }) => {
           pt={6}
         >
           <Text>Total</Text>
-          <Text fontWeight="bold">$ {total.toFixed(2)}</Text>
+          <Text fontWeight="bold">$ {bigNumberToString(total, 2)}</Text>
         </Flex>
       </Flex>
     );
@@ -86,7 +54,7 @@ export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
       <Box
         w="auto"
         minW={{ md: 250 }}
-        ml={{base:0, md:10}}
+        ml={{ base: 0, md: 10 }}
         marginTop={0}
         boxSizing="content-box"
         rounded="xl"
@@ -95,7 +63,7 @@ export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
         color="white"
       >
         <VStack w="100%" align="stretch" flexDirection="column">
-          <Box ml="2.4rem" color="white" mb={5} >
+          <Box ml="2.4rem" color="white" mb={5}>
             <Text>My Deposits</Text>
           </Box>
           <Box h="0.2rem" backgroundColor="primary.50" />
