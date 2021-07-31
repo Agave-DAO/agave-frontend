@@ -25,6 +25,7 @@ import {
   UseDepositMutationProps,
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useNewHealthFactorByCollateralChange } from "../../utils/propertyCalculator";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -81,6 +82,13 @@ const InitialComp: React.FC<{
       dispatch(createState("amountSelected", { amountToDeposit, ...state })),
     [state, dispatch]
   );
+
+  const newHealthFactor = useNewHealthFactorByCollateralChange(
+    amount,
+    state.token.tokenAddress,
+    true
+  );
+  //console.log(state.token.symbol ,"deposit: " +amount ," - new HF: " +  newHealthFactor?.toString())
   return (
     <DashOverviewIntro
       asset={state.token}

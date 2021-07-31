@@ -9,6 +9,10 @@ import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder
 
 export interface ReserveAssetConfiguration {
   decimals: BigNumber;
+  rawltv: BigNumber;
+  rawliquidationThreshold: BigNumber;
+  rawliquidationBonus: BigNumber;
+  rawreserveFactor: BigNumber;
   ltv: FixedNumber; // 4-fractional-decimal precision ratio e.g. 0.5000 => 50%, 1.2500 => 1.25
   liquidationThreshold: FixedNumber;
   liquidationBonus: FixedNumber;
@@ -47,6 +51,10 @@ export function reserveConfigurationFromWeb3Result({
 }: Web3ProtocolReserveDataResult): ReserveAssetConfiguration {
   return {
     decimals,
+    rawltv: ltv,
+    rawliquidationThreshold: liquidationThreshold,
+    rawliquidationBonus: liquidationBonus,
+    rawreserveFactor: reserveFactor,
     ltv: FixedNumber.fromValue(ltv, 4),
     liquidationThreshold: FixedFromRay(liquidationThreshold),
     liquidationBonus: FixedFromRay(liquidationBonus),
