@@ -1,29 +1,43 @@
 import React from "react";
 
 import { BigNumber } from "@ethersproject/bignumber";
-import { useUserReserveAssetBalancesDaiWei } from "../queries/userAssets";
-import { useUserReservesData } from "../queries/protocolReserveData";
+import {
+  useUserReserveAssetBalancesDaiWei,
+  ReserveAssetBalancesDaiWei,
+} from "../queries/userAssets";
+import {
+  useUserReservesData,
+  UserReserveData,
+} from "../queries/protocolReserveData";
 import { constants } from "ethers";
 import { ConsoleView } from "react-device-detect";
 
-export const useCollateralComposition = () => {
-  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
-
-  const tokenAddresses = allUserReservesBalances?.map(token => {
-    return token.tokenAddress;
-  });
-
-  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
-
+// TODO: move to propertyCalculator in utils once that has been merged
+function collateralCompositionCalculator(
+  tokenAddresses: string[] | undefined,
+  allUserReservesBalances: ReserveAssetBalancesDaiWei[] | undefined,
+  allUserReservesData:
+    | {
+        [assetAddress: string]: UserReserveData;
+      }
+    | undefined
+) {
   const totalCollateralValue = allUserReservesBalances?.reduce(
     (memo: BigNumber, next) =>
-      next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
+      next.daiWeiPriceTotal !== null &&
+      allUserReservesData?.[next.tokenAddress].usageAsCollateralEnabled
+        ? memo.add(next.daiWeiPriceTotal)
+        : memo,
     constants.Zero
   );
 
   const compositionArray = allUserReservesBalances?.map(next => {
+    const nextAddress = next.tokenAddress;
     const withCollateralEnabled =
-      allUserReservesData?.[next.tokenAddress]?.usageAsCollateralEnabled;
+      allUserReservesData && allUserReservesData?.[nextAddress]
+        ? allUserReservesData?.[nextAddress].usageAsCollateralEnabled
+        : undefined;
+    console.log(next.symbol, allUserReservesData?.[nextAddress]);
     if (
       next.daiWeiPriceTotal !== null &&
       next.decimals &&
@@ -43,6 +57,27 @@ export const useCollateralComposition = () => {
         } else return null;
       })
     : [];
+  return collateralComposition;
+}
+
+export const useCollateralComposition = () => {
+  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
+
+  const tokenAddresses = allUserReservesBalances?.map(token => {
+    return token.tokenAddress;
+  });
+
+  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
+
+  const collateralComposition = React.useMemo(
+    () =>
+      collateralCompositionCalculator(
+        tokenAddresses,
+        allUserReservesBalances,
+        allUserReservesData
+      ),
+    [tokenAddresses, allUserReservesBalances, allUserReservesData]
+  );
 
   return collateralComposition;
 };
