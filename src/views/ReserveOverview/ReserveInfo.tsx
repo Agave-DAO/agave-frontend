@@ -81,7 +81,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
     : undefined;
 
   const reserveSize = totalBorrowedForAsset?.dai?._value
-    ? `$${round2Fixed(
+    ? `$ ${round2Fixed(
         parseFloat(bigNumberToString(liquidity)) * price +
           parseFloat(totalBorrowedForAsset.dai._value)
       )}`
@@ -107,15 +107,15 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   // const variableOverTotal;
 
   // ** Bottom Stat Cards
-  const ltv = reserveData?.ltv._value
-    ? parseFloat(reserveData?.ltv._value) * 100
-    : "~";
-  const liqThrsh = reserveData?.liquidationThreshold._value
-    ? `${reserveData?.liquidationThreshold._value.substring(27, 25)}%`
-    : "0";
-  const liqPen = reserveData?.liquidationBonus._value
-    ? `${reserveData?.liquidationBonus._value.substring(27, 24)}%`
-    : "0";
+  const ltv = reserveData?.rawltv
+    ? reserveData?.rawltv.toNumber()/100
+    : "-";
+  const liqThrsh = reserveData?.rawliquidationThreshold
+    ? reserveData?.rawliquidationThreshold.toNumber()/100
+    : "-";
+  const liqPen = reserveData?.rawliquidationBonus
+    ? (reserveData?.rawliquidationBonus.toNumber()/100)-100
+    : "-";
   const collateral = reserveData?.usageAsCollateralEnabled ? "Yes" : "No";
   const stable = reserveData?.stableBorrowRateEnabled ? "Yes" : "No";
 
@@ -173,7 +173,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                     </Text>
                   </Flex>
                   <Text fontSize="3xl" color="white" align="right">
-                    ${liquidityPrice}
+                    $ {liquidityPrice}
                   </Text>
                   <Box>
                     <Text fontSize="lg" color="white" align="right">
@@ -209,7 +209,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                     <LockIcon w={4} h={4} color="yellow.400" margin="0.25rem" />
                   </Flex>
                   <Text fontSize="3xl" color="white" align="left">
-                    ${totalBorrowedPrice}
+                    $ {totalBorrowedPrice}
                   </Text>
                   <Box>
                     <Text fontSize="lg" color="white" align="left">
@@ -289,11 +289,13 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
               <StatCard
                 title="Liquidity Threshold"
                 value={liqThrsh}
+				type="%"
                 enableModal={true}
               />
               <StatCard
                 title="Liquidity Penalty"
                 value={liqPen}
+				type="%"
                 enableModal={true}
               />
               <StatCard
