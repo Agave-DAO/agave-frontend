@@ -1,26 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { CellProps, Column, Renderer, useRowSelect } from "react-table";
+import { Box, Text } from "@chakra-ui/layout";
+import { Button, Flex, Switch, useMediaQuery } from "@chakra-ui/react";
+import { BigNumber } from "ethers";
+import React from "react";
+import { Link, useHistory } from "react-router-dom";
+import { CellProps, Column, Renderer } from "react-table";
+import { AssetData } from ".";
+import ColoredText from "../../components/ColoredText";
+import { useCollateralModeMutation } from "../../mutations/collateralMode";
+import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import { useLendingReserveData } from "../../queries/lendingReserveData";
+import { useUserReserveData } from "../../queries/protocolReserveData";
+import { fontSizes } from "../../utils/constants";
 import {
   BasicTableRenderer,
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
+import { TokenIcon } from "../../utils/icons";
 import { BalanceView } from "../common/BalanceView";
-import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
-import { Box, Text } from "@chakra-ui/layout";
-import { Button, Flex, Switch, useMediaQuery } from "@chakra-ui/react";
-import { TokenIcon, ModalIcon } from "../../utils/icons";
-import ColoredText from "../../components/ColoredText";
-import { AssetData } from ".";
-import {
-  useUserReserveData,
-  ProtocolReserveData,
-} from "../../queries/protocolReserveData";
-import { useHistory, Link } from "react-router-dom";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
-import { BigNumber } from "ethers";
-import { fontSizes } from "../../utils/constants";
-import { ModalComponent } from "./layout";
+import { BorrowAPRView, DepositAPYView } from "../common/RatesView";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
@@ -68,18 +66,25 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   const reserveUsedAsCollateral =
     reserveConfiguration?.usageAsCollateralEnabled;
 
-  // const { mutateAsync, isLoading } = useCollateralToggleMutation(tokenAddress);
+  const {
+    collateralModeMutation: { mutate, isLoading: mutationIsLoading },
+  } = useCollateralModeMutation(tokenAddress);
 
   const toggleUseAssetAsCollateral = React.useCallback(() => {
-    if (reserveUsedAsCollateral === undefined) {
+    if (reserveUsedAsCollateral === undefined || mutationIsLoading) {
       return;
     }
     const shouldUseAsCollateral = !reserveUsedAsCollateral;
-    // TODO: 
+    mutate(shouldUseAsCollateral);
   }, [reserveUsedAsCollateral]);
 
   return React.useMemo(
-    () => (<ThreeStateSwitch state={reserveUsedAsCollateral ?? null} onClick={toggleUseAssetAsCollateral} />),
+    () => (
+      <ThreeStateSwitch
+        state={mutationIsLoading ? null : (reserveUsedAsCollateral ?? null)}
+        onClick={toggleUseAssetAsCollateral}
+      />
+    ),
     [reserveUsedAsCollateral, toggleUseAssetAsCollateral]
   );
 };
@@ -150,11 +155,11 @@ export const DashboardTable: React.FC<{
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
-        accessor: row => row.tokenAddress,
+        accessor: row => row.backingReserve?.tokenAddress ?? row.tokenAddress,
         Cell: (({ value }) => (
           /* There's a difference between the deposit APY and the borrow APR.
              Lending rates are obviously higher than borrowing rates */
-          <DepositAPYView tokenAddress={value} />
+          mode === DashboardTableType.Borrow ? <BorrowAPRView tokenAddress={value} /> : <DepositAPYView tokenAddress={value} />
         )) as Renderer<CellProps<AssetData, string>>,
       },
       {

@@ -72,18 +72,16 @@ const theme = extendTheme({
         opacity:"0.2",
       },
       "::-webkit-scrollbar-track": {
-        "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.3)",
-        "-webkit-border-radius": "10px",
-        "border-radius": "10px",
+        // "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.3)",
+        borderRadius: "10px",
       },
 
       /* Handle */
       "::-webkit-scrollbar-thumb": {
-        "-webkit-border-radius": "10px",
-        "border-radius": "10px",
+        borderRadius: "10px",
         background: "primary.100",
         opacity:"0.8",
-        "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.5)",
+        // "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.5)",
       },
       "::-webkit-scrollbar-thumb:window-inactive": {
         background: "#ace",
