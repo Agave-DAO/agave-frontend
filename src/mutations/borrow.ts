@@ -9,12 +9,19 @@ import {
   useUserDepositAssetBalancesWithReserveInfo,
   useUserReserveAssetBalances,
   useUserReserveAssetBalancesDaiWei,
+  useUserVariableDebtForAsset,
+  useUserVariableDebtTokenBalances,
+  useUserVariableDebtTokenBalancesDaiWei,
 } from "../queries/userAssets";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
 import { useLendingReserveData } from "../queries/lendingReserveData";
 import { getChainAddresses } from "../utils/chainAddresses";
+import {
+  useUserReserveData,
+  useUserReservesData,
+} from "../queries/protocolReserveData";
 
 export interface UseBorrowMutationProps {
   asset: string | undefined;
@@ -60,6 +67,16 @@ export const useBorrowMutation = ({
     asset,
     onBehalfOf ?? undefined
   );
+  const variableDebtQueryKey = useUserVariableDebtForAsset.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset
+  );
+  const userProtocolReserveDataQueryKey = useUserReserveData.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset
+  );
   const borrowQueryKey = [...allowanceQueryKey, "borrow"] as const;
 
   const borrowMutationKey = [...borrowQueryKey, amount] as const;
@@ -82,7 +99,13 @@ export const useBorrowMutation = ({
       );
       const interestRateMode = 2;
       const referralCode = 0;
-      const borrow = lendingContract.borrow(asset, amount, interestRateMode, referralCode, onBehalfOf);
+      const borrow = lendingContract.borrow(
+        asset,
+        amount,
+        interestRateMode,
+        referralCode,
+        onBehalfOf
+      );
       const borrowConfirmation = await usingProgressNotification(
         "Awaiting borrow approval",
         "Please sign the borrowing transaction.",
@@ -104,6 +127,8 @@ export const useBorrowMutation = ({
           queryClient.invalidateQueries(assetBalanceQueryKey),
           queryClient.invalidateQueries(userAccountDataQueryKey),
           queryClient.invalidateQueries(allowanceQueryKey),
+          queryClient.invalidateQueries(variableDebtQueryKey),
+          queryClient.invalidateQueries(userProtocolReserveDataQueryKey),
           queryClient.invalidateQueries(borrowQueryKey),
           queryClient.invalidateQueries(borrowMutationKey),
           chainId && account
@@ -111,9 +136,17 @@ export const useBorrowMutation = ({
                 [
                   useUserDepositAssetBalances.buildKey(chainId, account),
                   useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
-                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(
+                    chainId,
+                    account
+                  ),
                   useUserReserveAssetBalances.buildKey(chainId, account),
                   useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserVariableDebtTokenBalances.buildKey(chainId, account),
+                  useUserVariableDebtTokenBalancesDaiWei.buildKey(
+                    chainId,
+                    account
+                  ),
                 ].map(k => queryClient.invalidateQueries(k))
               )
             : Promise.resolve(),
