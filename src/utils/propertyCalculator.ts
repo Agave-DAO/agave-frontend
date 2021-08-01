@@ -157,7 +157,7 @@ export function useNewHealthFactorCalculator(
   amount: BigNumber | undefined,
   tokenAddress: string,
   collateral: Boolean,
-  increase?: Boolean | false
+  increase?: Boolean,
 ) {
   //const amount = React.useMemo(() => amount, [amount]);
   const assetsData = useAllAssetsData();
