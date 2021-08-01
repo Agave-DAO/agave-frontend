@@ -126,7 +126,7 @@ export const useUserVariableDebtTokenBalances =
     }
   );
 
-interface VariableDebtTokenBalancesDaiWei {
+export interface VariableDebtTokenBalancesDaiWei {
   symbol: string;
   tokenAddress: string;
   balance: BigNumber;
@@ -142,7 +142,7 @@ export const useUserVariableDebtTokenBalancesDaiWei =
     []
   >(
     async params => {
-      const reserves = await useUserReserveAssetBalances.fetchQueryDefined(
+      const reserves = await useUserVariableDebtTokenBalances.fetchQueryDefined(
         params
       );
       const withDaiPrices = await Promise.all(
@@ -327,7 +327,7 @@ export const useUserDepositAssetBalancesWithReserveInfo =
     }
   );
 
-interface DepositAssetBalancesDaiWei {
+export interface DepositAssetBalancesDaiWei {
   symbol: string;
   aSymbol: string;
   tokenAddress: string;

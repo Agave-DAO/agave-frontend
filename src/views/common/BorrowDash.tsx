@@ -88,6 +88,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
   const totalCollateralEth = userAccountData?.totalCollateralEth;
+
   const userStableDebt =
     allUserReservesData?.[token.tokenAddress]?.currentStableDebt;
   const userVariableDebt =
