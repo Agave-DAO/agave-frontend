@@ -39,7 +39,6 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
       e: React.ChangeEvent<HTMLInputElement>
     ) => {
       const tokenAddress = e.target.id;
-      console.log(tokenAddress, reserveUsedAsCollateral);
     };
 
     return (

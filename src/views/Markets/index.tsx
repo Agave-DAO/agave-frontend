@@ -105,7 +105,7 @@ const TotalBorrowedView: React.FC<{
 
   return React.useMemo(() => {
     const data = totalBorrowed.data;
-    if (data && data.dai != null) {
+    if (data && data.dai !== null) {
       const daiString = data.dai.round(2).toUnsafeFloat().toLocaleString();
       const weiString = (
         data.wei.mul(1000).div(weiPerToken(data.assetDecimals)).toNumber() /
