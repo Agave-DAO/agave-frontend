@@ -27,6 +27,40 @@ export enum DashboardTableType {
   Borrow = "Borrow",
 }
 
+const ThreeStateSwitch: React.FC<{
+  state: boolean | null;
+  onClick: (previousState: boolean | null) => void;
+}> = ({ state, onClick }) => {
+  const onClickWrapped = React.useCallback(() => {
+    onClick(state);
+  }, [state, onClick]);
+
+  return React.useMemo(
+    () => (
+      <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
+        <Text
+          fontWeight="bold"
+          width="60px"
+          color={
+            state === null ? "grey.300" : state ? "green.300" : "orange.300"
+          }
+        >
+          {state === null ? "-" : state ? "Yes" : "No"}
+        </Text>
+        <Switch
+          size="md"
+          colorScheme="yellow"
+          aria-checked={state === null ? "mixed" : undefined}
+          isChecked={state === null ? undefined : state}
+          isDisabled={state === null}
+          onChange={onClickWrapped}
+        />
+      </Box>
+    ),
+    [onClickWrapped, state]
+  );
+};
+
 const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   tokenAddress,
 }) => {
@@ -34,48 +68,29 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   const reserveUsedAsCollateral =
     reserveConfiguration?.usageAsCollateralEnabled;
 
-  // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
-  const [isChecked, changeIsChecked] = useState(!!reserveUsedAsCollateral);
-  useEffect(() => changeIsChecked(!!reserveUsedAsCollateral), [reserveUsedAsCollateral]);
+  // const { mutateAsync, isLoading } = useCollateralToggleMutation(tokenAddress);
 
-  const toggleUseAssetAsCollateral = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    changeIsChecked(!isChecked);
-    const tokenAddress = e.target.id;
-    console.log({ tokenAddress, reserveUsedAsCollateral, isChecked });
-  };
+  const toggleUseAssetAsCollateral = React.useCallback(() => {
+    if (reserveUsedAsCollateral === undefined) {
+      return;
+    }
+    const shouldUseAsCollateral = !reserveUsedAsCollateral;
+    // TODO: 
+  }, [reserveUsedAsCollateral]);
 
-  return React.useMemo(() => (
-      <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
-        <Text
-          fontWeight="bold"
-          width="60px"
-          color={reserveUsedAsCollateral ? "green.300" : "orange.300"}
-        >
-          {reserveUsedAsCollateral ? "Yes" : "No"}
-        </Text>
-        <Switch
-          size="md"
-          colorScheme="yellow"
-          isChecked={isChecked}
-          isDisabled={reserveUsedAsCollateral === null || reserveUsedAsCollateral === undefined}
-          id={tokenAddress}
-          onChange={toggleUseAssetAsCollateral}
-        />
-      </Box>
-    ), [reserveUsedAsCollateral, isChecked]);
+  return React.useMemo(
+    () => (<ThreeStateSwitch state={reserveUsedAsCollateral ?? null} onClick={toggleUseAssetAsCollateral} />),
+    [reserveUsedAsCollateral, toggleUseAssetAsCollateral]
+  );
 };
 
 export const DashboardTable: React.FC<{
   mode: DashboardTableType;
   assets: AssetData[];
 }> = ({ mode, assets }) => {
-	const [isSmallerThan400, isSmallerThan900, isSmallerThan1200] = useMediaQuery([
-		"(max-width: 400px)",
-		"(max-width: 900px)",
-		"(max-width: 1200px)",
-	  ]);
+  const [isSmallerThan400, isSmallerThan900, isSmallerThan1200] = useMediaQuery(
+    ["(max-width: 400px)", "(max-width: 900px)", "(max-width: 1200px)"]
+  );
   const history = useHistory();
   const onActionClicked = React.useCallback(
     (route: String, asset: Readonly<ReserveTokenDefinition>) => {
@@ -222,9 +237,12 @@ export const DashboardTable: React.FC<{
             style: {
               borderSpacing: "0 1em",
               borderCollapse: "separate",
-			  float: "left",
-			  marginRight: (mode === DashboardTableType.Deposit && !isSmallerThan1200)?"2%":"0%",
-			  width:isSmallerThan1200 ? "100%":"49%",
+              float: "left",
+              marginRight:
+                mode === DashboardTableType.Deposit && !isSmallerThan1200
+                  ? "2%"
+                  : "0%",
+              width: isSmallerThan1200 ? "100%" : "49%",
             },
           }}
           headProps={{
@@ -240,17 +258,17 @@ export const DashboardTable: React.FC<{
             bg: "primary.900",
             color: "white",
             whiteSpace: "nowrap",
-			height:"55px",
+            height: "55px",
           }}
           cellProps={{
             borderBottom: "none",
             border: "0px solid",
             minWidth: "10rem",
-			maxWidth:"15rem",
+            maxWidth: "15rem",
             paddingInlineStart: "0.1rem",
             paddingInlineEnd: "0.1rem",
             _first: { borderLeftRadius: "10px", paddingInlineStart: "1rem" },
-            _last: { borderRightRadius: "10px", paddingInlineEnd: "1rem"},
+            _last: { borderRightRadius: "10px", paddingInlineEnd: "1rem" },
           }}
         />
       ),
