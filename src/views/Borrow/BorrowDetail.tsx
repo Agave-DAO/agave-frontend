@@ -38,14 +38,14 @@ interface BorrowTXState extends AmountSelectedState {
   // approvalTXHash: string | undefined;
 }
 
-interface BorrownTXState extends BorrowTXState {
+interface BorrowedTXState extends BorrowTXState {
   // borrowTXHash: string;
 }
 
 type BorrowState = OneTaggedPropertyOf<{
   init: InitialState;
   borrowTx: BorrowTXState;
-  borrownTx: BorrownTXState;
+  borrowedTx: BorrowedTXState;
 }>;
 
 function createState<SelectedState extends PossibleTags<BorrowState>>(
@@ -62,12 +62,12 @@ function createState<SelectedState extends PossibleTags<BorrowState>>(
 const stateNames: Record<PossibleTags<BorrowState>, string> = {
   init: "Token",
   borrowTx: "Borrow",
-  borrownTx: "Borrown",
+  borrowedTx: "Borrowed",
 };
 
 const visibleStateNames: ReadonlyArray<PossibleTags<BorrowState>> = [
   "borrowTx",
-  "borrownTx",
+  "borrowedTx",
 ] as const;
 
 const BorrowTitle = "Borrow overview";
@@ -148,7 +148,7 @@ const BorrowTxComp: React.FC<{
   } = useBorrowMutation(borrowArgs);
   const onSubmit = React.useCallback(() => {
     mutateAsync()
-      .then(() => dispatch(createState("borrownTx", { ...state })))
+      .then(() => dispatch(createState("borrowedTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
       .catch(e => dispatch(createState("init", state)));
   }, [state, dispatch, mutateAsync]);
@@ -183,11 +183,11 @@ const BorrowTxComp: React.FC<{
 };
 
 const BorrowedTxComp: React.FC<{
-  state: BorrownTXState;
+  state: BorrowedTXState;
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
   const history = useHistory();
-  const currentStep: PossibleTags<BorrowState> = "borrownTx";
+  const currentStep: PossibleTags<BorrowState> = "borrowedTx";
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -207,7 +207,7 @@ const BorrowedTxComp: React.FC<{
       {stepperBar}
       <ControllerItem
         stepNumber={2}
-        stepName="Borrown"
+        stepName="Borrowed"
         stepDesc={`Borrow of ${formatEther(state.amountToBorrow)} ${
           state.token.symbol
         } successful`}
@@ -228,8 +228,8 @@ const BorrowStateMachine: React.FC<{
       return <InitialComp state={state.init} dispatch={setState} />;
     case "borrowTx":
       return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;
-    case "borrownTx":
-      return <BorrowedTxComp state={state.borrownTx} dispatch={setState} />;
+    case "borrowedTx":
+      return <BorrowedTxComp state={state.borrowedTx} dispatch={setState} />;
   }
 };
 /*
