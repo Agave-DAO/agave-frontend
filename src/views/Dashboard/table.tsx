@@ -8,7 +8,7 @@ import {
 import { BalanceView } from "../common/BalanceView";
 import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
 import { Box, Text } from "@chakra-ui/layout";
-import { Button, Flex, Switch } from "@chakra-ui/react";
+import { Button, Flex, Switch, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon, ModalIcon } from "../../utils/icons";
 import ColoredText from "../../components/ColoredText";
 import { AssetData } from ".";
@@ -67,6 +67,11 @@ export const DashboardTable: React.FC<{
   mode: DashboardTableType;
   assets: AssetData[];
 }> = ({ mode, assets }) => {
+	const [isSmallerThan400, isSmallerThan900, isSmallerThan1200] = useMediaQuery([
+		"(max-width: 400px)",
+		"(max-width: 900px)",
+		"(max-width: 1200px)",
+	  ]);
   const history = useHistory();
   const onActionClicked = React.useCallback(
     (route: String, asset: Readonly<ReserveTokenDefinition>) => {
@@ -213,7 +218,9 @@ export const DashboardTable: React.FC<{
             style: {
               borderSpacing: "0 1em",
               borderCollapse: "separate",
-              width: "100%",
+			  float: "left",
+			  marginRight: (mode === DashboardTableType.Deposit && !isSmallerThan1200)?"2%":"0%",
+			  width:isSmallerThan1200 ? "100%":"49%",
             },
           }}
           headProps={{
@@ -229,15 +236,17 @@ export const DashboardTable: React.FC<{
             bg: "primary.900",
             color: "white",
             whiteSpace: "nowrap",
+			height:"55px",
           }}
           cellProps={{
             borderBottom: "none",
             border: "0px solid",
-            maxWidth: "15rem",
+            minWidth: "10rem",
+			maxWidth:"15rem",
             paddingInlineStart: "0.1rem",
             paddingInlineEnd: "0.1rem",
             _first: { borderLeftRadius: "10px", paddingInlineStart: "1rem" },
-            _last: { borderRightRadius: "10px", paddingInlineEnd: "1rem" },
+            _last: { borderRightRadius: "10px", paddingInlineEnd: "1rem"},
           }}
         />
       ),
