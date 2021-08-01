@@ -24,6 +24,7 @@ import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
+import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -95,12 +96,21 @@ const InitialComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
   const { account } = useAppWeb3();
-  const maxToBorrow = useAvailableToBorrowAssetWei(account ?? undefined, state.token.tokenAddress).data ?? undefined;
+  const maxToBorrow =
+    useAvailableToBorrowAssetWei(account ?? undefined, state.token.tokenAddress)
+      .data ?? undefined;
   const onSubmit = React.useCallback(
     amountToBorrow =>
       dispatch(createState("borrowTx", { amountToBorrow, ...state })),
     [state, dispatch]
   );
+  const newHealthFactor = useNewHealthFactorCalculator(
+    amount,
+    state.token.tokenAddress,
+    false,
+    true
+  );
+  //console.log(state.token.symbol ,"borrow: " +amount ," - new HF: " +  newHealthFactor?.toString())
   return (
     <DashOverviewIntro
       asset={state.token}

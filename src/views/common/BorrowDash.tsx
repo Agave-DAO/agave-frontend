@@ -90,7 +90,6 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
 
   const reserveUsedAsCollateral =
     reserveConfiguration?.usageAsCollateralEnabled;
-  console.log(reserve?.aTokenAddress);
 
   const totalCollateralValue = React.useMemo(() => {
     return allReservesData?.reduce(

@@ -13,7 +13,7 @@ import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString } from "../../utils/fixedPoint";
 import {
   useApprovalMutation,
   UseApprovalMutationProps,
@@ -25,6 +25,7 @@ import {
   UseDepositMutationProps,
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -66,7 +67,11 @@ const stateNames: Record<PossibleTags<DepositState>, string> = {
   depositedTx: "Deposited",
 };
 
-const visibleStateNames: ReadonlyArray<PossibleTags<DepositState>> = ["amountSelected", "depositTx", "depositedTx"] as const;
+const visibleStateNames: ReadonlyArray<PossibleTags<DepositState>> = [
+  "amountSelected",
+  "depositTx",
+  "depositedTx",
+] as const;
 
 const DepositTitle = "Deposit overview";
 
@@ -81,6 +86,14 @@ const InitialComp: React.FC<{
       dispatch(createState("amountSelected", { amountToDeposit, ...state })),
     [state, dispatch]
   );
+
+  const newHealthFactor = useNewHealthFactorCalculator(
+    amount,
+    state.token.tokenAddress,
+    true,
+    true
+  );
+  //console.log(state.token.symbol ,"deposit: " +amount ," - new HF: " +  newHealthFactor?.toString())
   return (
     <DashOverviewIntro
       asset={state.token}
@@ -324,7 +337,7 @@ export const DepositDetail: React.FC = () => {
             }
             size="xl"
             padding="1rem"
-			m="3rem"
+            m="3rem"
           >
             Take me back!
           </Button>
