@@ -36,7 +36,7 @@ const ModalLiqThreshold: React.FC<{}> = () => {
         Liquidation Threshold
       </ModalHeader>
       <ModalBody>
-        <Text fontSize="fontsizes.lg">
+        <Text>
           This represents the threshold at which a borrow position will be
           considered undercollateralized and subject to liquidation for each
           collateral. <br></br>For example, if a collateral has a liquidation
@@ -55,9 +55,9 @@ const ModalLiqPenalty: React.FC<{}> = () => {
         Liquidation Penalty
       </ModalHeader>
       <ModalBody>
-        <Text fontSize="fontsizes.lg">
+        <Text>
           When a liquidation occurs, liquidators repay part or all of the
-          outstanding borrowed amount on behalf of the borrower. In return, they
+          outstanding borrowed amount on behalf of the borrower.<br></br> In return, they
           can buy the collateral at a discount and keep the difference as a
           bonus!
         </Text>
@@ -73,17 +73,17 @@ const ModalHFactor: React.FC<{}> = () => {
         Health Factor
       </ModalHeader>
       <ModalBody>
-        <Text fontSize="1.4rem">
+        <Text>
           The health factor is the numeric representation of the safety of your
           deposited assets against the borrowed assets and its underlying value.
           The higher the value is, the safer the state of your funds are against
           a liquidation scenario.
         </Text>
-        <Text mt={5} fontSize="1.4rem">
+        <Text mt={5}>
           If the health factor reaches 1, the liquidation of your deposits will
           be triggered, and a Health Factor below 1 can get liquidated.
         </Text>
-        <Text mt={5} fontSize="1.4rem">
+        <Text mt={5}>
           For a HF=2, the collateral value vs borrow can reduce up to 50%.
         </Text>
       </ModalBody>
@@ -97,7 +97,7 @@ const ModalMaxLTV: React.FC<{}> = () => {
         Loan to Value (LTV) Ratio
       </ModalHeader>
       <ModalBody>
-        <Text fontSize="fontsize.lg">
+        <Text>
           The Maximum Loan-to-Value ratio represents the maximum borrowing power
           of a specific collateral. <br></br> For example, if a collateral has a
           LTV of 75%, the user can borrow up to 0.75 worth of ETH in the
@@ -113,7 +113,6 @@ const ModalComponent: React.FC<{
   mtype: string;
   onClose(): void;
 }> = ({ children: modalChildren, mtype, isOpen, onClose }) => {
-	
   return (
     <>
       {isOpen ? (
@@ -152,7 +151,7 @@ const ModalComponent: React.FC<{
                   m="auto"
                   mt={5}
                   py="1.5rem"
-                  fontSize={{ base: "1.6rem", md: fontSizes.md }}
+                  fontSize={{ base: "1.6rem", md: fontSizes.lg }}
                   bg="secondary.100"
                   color="white"
                   fontWeight="normal"
