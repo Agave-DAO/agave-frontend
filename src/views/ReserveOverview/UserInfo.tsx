@@ -1,6 +1,7 @@
-import React from "react";
+import React, {useState} from "react";
 import UserInfoRow from "./UserInfoRow";
 import { Text, Flex, Container, Box, Button } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/hooks";
 
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -8,6 +9,10 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 
+//Modals
+import  ModalComponent, {MODAL_TYPES} from "../../components/Modals";
+
+// Helpers
 import { round2Fixed } from "../../utils/helpers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 
@@ -34,7 +39,6 @@ const UserInfo: React.FC<{
     userAccountAddress ?? undefined
   )?.data;
   // const healthFactor = userAccountData?.healthFactor;
-  console.log(userAccountData);
 
   // ** Check data for undefined and convert to usable front end data
   // TODO text size of asset will likly need to be controlled by helper function
@@ -53,6 +57,36 @@ const UserInfo: React.FC<{
     ? bigNumberToString(userAccountData.availableBorrowsEth)
     : "0";
 
+
+	const [modal_type, setModal] = useState(MODAL_TYPES.HEALTH_FACTOR);
+	const { isOpen, onOpen, onClose } = useDisclosure();
+  
+	const setModalOpen = React.useCallback(
+	  (selector: string) => {
+		switch (selector) {
+		  case "Maximum LTV": {
+			setModal(MODAL_TYPES.MAXIMUM_LTV);
+			break;
+		  }
+		  case "Liquidity Threshold": {
+			setModal(MODAL_TYPES.LIQUIDITY_THRESHOLD);
+			//statements;
+			break;
+		  }
+		  case "Liquidity Penalty": {
+			setModal(MODAL_TYPES.LIQUIDITY_PENALTY);
+  
+			break;
+		  }
+		  default: {
+			setModal(MODAL_TYPES.HEALTH_FACTOR);
+			break;
+		  }
+		}
+		onOpen();
+	  },
+	  [onOpen]
+	);
   // TODO Used for stable borrowing, ready when implmented
   // const [useAsCol] = false);
 
@@ -194,6 +228,7 @@ const UserInfo: React.FC<{
                 title="Health Factor"
                 value={health}
                 enableModal={true}
+                modalOpen={setModalOpen}
               />
               <UserInfoRow title="Loan To Value" value={loanVal} type="%" />
               <UserInfoRow
@@ -205,6 +240,7 @@ const UserInfo: React.FC<{
           </Box>
         </Box>
       </Container>
+	  <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </React.Fragment>
   );
 };
