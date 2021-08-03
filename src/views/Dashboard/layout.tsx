@@ -353,7 +353,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
       >
         <UpperBox
           title="Deposit Information"
-          mr={{ base: "inherit", lg: "2rem" }}
+          mr={{ base: "inherit", lg: "2%" }}
         >
           <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
             <HStack d="flex" mt="0.5rem">
@@ -442,9 +442,6 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
       </Flex>
       <Box
         mt="2rem"
-        d="grid"
-        gridTemplateColumns={{ base: "1fr", xl: "1fr 1fr" }}
-        gridGap="2.5rem"
         overflowX="auto"
       >
         {depositsTable}

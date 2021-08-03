@@ -1,31 +1,63 @@
+import { Box, Text } from "@chakra-ui/layout";
+import { Button, Flex, Switch, useMediaQuery } from "@chakra-ui/react";
+import { BigNumber } from "ethers";
 import React from "react";
-import { CellProps, Column, Renderer, useRowSelect } from "react-table";
+import { Link, useHistory } from "react-router-dom";
+import { CellProps, Column, Renderer } from "react-table";
+import { AssetData } from ".";
+import ColoredText from "../../components/ColoredText";
+import { useCollateralModeMutation } from "../../mutations/collateralMode";
+import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import { useLendingReserveData } from "../../queries/lendingReserveData";
+import { useUserReserveData } from "../../queries/protocolReserveData";
+import { fontSizes } from "../../utils/constants";
 import {
   BasicTableRenderer,
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
+import { TokenIcon } from "../../utils/icons";
 import { BalanceView } from "../common/BalanceView";
-import { DepositAPYView, BorrowAPRView } from "../common/RatesView";
-import { Box, Text } from "@chakra-ui/layout";
-import { Button, Flex, Switch } from "@chakra-ui/react";
-import { TokenIcon, ModalIcon } from "../../utils/icons";
-import ColoredText from "../../components/ColoredText";
-import { AssetData } from ".";
-import {
-  useUserReserveData,
-  ProtocolReserveData,
-} from "../../queries/protocolReserveData";
-import { useHistory, Link } from "react-router-dom";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
-import { BigNumber } from "ethers";
-import { fontSizes } from "../../utils/constants";
-import { ModalComponent } from "./layout";
+import { BorrowAPRView, DepositAPYView } from "../common/RatesView";
 
 export enum DashboardTableType {
   Deposit = "Deposit",
   Borrow = "Borrow",
 }
+
+const ThreeStateSwitch: React.FC<{
+  state: boolean | null;
+  onClick: (previousState: boolean | null) => void;
+}> = ({ state, onClick }) => {
+  const onClickWrapped = React.useCallback(() => {
+    onClick(state);
+  }, [state, onClick]);
+
+  return React.useMemo(
+    () => (
+      <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
+        <Text
+          fontWeight="bold"
+          width="60px"
+          color={
+            state === null ? "grey.300" : state ? "green.300" : "orange.300"
+          }
+        >
+          {state === null ? "-" : state ? "Yes" : "No"}
+        </Text>
+        <Switch
+          size="md"
+          colorScheme="yellow"
+          aria-checked={state === null ? "mixed" : undefined}
+          isChecked={state === null ? undefined : state}
+          isDisabled={state === null}
+          onChange={onClickWrapped}
+        />
+      </Box>
+    ),
+    [onClickWrapped, state]
+  );
+};
 
 const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   tokenAddress,
@@ -33,40 +65,37 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
   const reserveUsedAsCollateral =
     reserveConfiguration?.usageAsCollateralEnabled;
-  return React.useMemo(() => {
-    // Using onChange={toggleUseAssetAsCollateral} from the Switch in the CollateralView Component
-    const toggleUseAssetAsCollateral = (
-      e: React.ChangeEvent<HTMLInputElement>
-    ) => {
-      const tokenAddress = e.target.id;
-      console.log(tokenAddress, reserveUsedAsCollateral);
-    };
 
-    return (
-      <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
-        <Text
-          fontWeight="bold"
-          width="60px"
-          color={reserveUsedAsCollateral ? "green.300" : "orange.300"}
-        >
-          {reserveUsedAsCollateral ? "Yes" : "No"}
-        </Text>
-        <Switch
-          size="md"
-          colorScheme="yellow"
-          isChecked={reserveUsedAsCollateral}
-          id={tokenAddress}
-          onChange={toggleUseAssetAsCollateral}
-        />
-      </Box>
-    );
+  const {
+    collateralModeMutation: { mutate, isLoading: mutationIsLoading },
+  } = useCollateralModeMutation(tokenAddress);
+
+  const toggleUseAssetAsCollateral = React.useCallback(() => {
+    if (reserveUsedAsCollateral === undefined || mutationIsLoading) {
+      return;
+    }
+    const shouldUseAsCollateral = !reserveUsedAsCollateral;
+    mutate(shouldUseAsCollateral);
   }, [reserveUsedAsCollateral]);
+
+  return React.useMemo(
+    () => (
+      <ThreeStateSwitch
+        state={mutationIsLoading ? null : (reserveUsedAsCollateral ?? null)}
+        onClick={toggleUseAssetAsCollateral}
+      />
+    ),
+    [reserveUsedAsCollateral, toggleUseAssetAsCollateral]
+  );
 };
 
 export const DashboardTable: React.FC<{
   mode: DashboardTableType;
   assets: AssetData[];
 }> = ({ mode, assets }) => {
+  const [isSmallerThan400, isSmallerThan900, isSmallerThan1200] = useMediaQuery(
+    ["(max-width: 400px)", "(max-width: 900px)", "(max-width: 1200px)"]
+  );
   const history = useHistory();
   const onActionClicked = React.useCallback(
     (route: String, asset: Readonly<ReserveTokenDefinition>) => {
@@ -126,11 +155,11 @@ export const DashboardTable: React.FC<{
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
-        accessor: row => row.tokenAddress,
+        accessor: row => row.backingReserve?.tokenAddress ?? row.tokenAddress,
         Cell: (({ value }) => (
           /* There's a difference between the deposit APY and the borrow APR.
              Lending rates are obviously higher than borrowing rates */
-          <DepositAPYView tokenAddress={value} />
+          mode === DashboardTableType.Borrow ? <BorrowAPRView tokenAddress={value} /> : <DepositAPYView tokenAddress={value} />
         )) as Renderer<CellProps<AssetData, string>>,
       },
       {
@@ -213,7 +242,12 @@ export const DashboardTable: React.FC<{
             style: {
               borderSpacing: "0 1em",
               borderCollapse: "separate",
-              width: "100%",
+              float: "left",
+              marginRight:
+                mode === DashboardTableType.Deposit && !isSmallerThan1200
+                  ? "2%"
+                  : "0%",
+              width: isSmallerThan1200 ? "100%" : "49%",
             },
           }}
           headProps={{
@@ -229,10 +263,12 @@ export const DashboardTable: React.FC<{
             bg: "primary.900",
             color: "white",
             whiteSpace: "nowrap",
+            height: "55px",
           }}
           cellProps={{
             borderBottom: "none",
             border: "0px solid",
+            minWidth: "10rem",
             maxWidth: "15rem",
             paddingInlineStart: "0.1rem",
             paddingInlineEnd: "0.1rem",

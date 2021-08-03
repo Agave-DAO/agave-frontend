@@ -15,9 +15,12 @@ import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import {
   useUserAssetBalance,
   useUserVariableDebtForAsset,
-  useUserVariableDebtTokenBalances,
 } from "../../queries/userAssets";
 import { useRepayMutation, UseRepayMutationProps } from "../../mutations/repay";
+import {
+  useApprovalMutation,
+  UseApprovalMutationProps,
+} from "../../mutations/approval";
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
@@ -30,13 +33,18 @@ interface AmountSelectedState extends InitialState {
   amountToRepay: BigNumber;
 }
 
-interface RepaidTXState extends AmountSelectedState {
+interface RepayTXState extends AmountSelectedState {
+  // approvalTXHash: string;
+}
+
+interface RepaidTXState extends RepayTXState {
   // repayTXHash: string;
 }
 
 type RepayState = OneTaggedPropertyOf<{
   init: InitialState;
   amountSelected: AmountSelectedState;
+  repayTx: RepayTXState;
   repaidTx: RepaidTXState;
 }>;
 
@@ -52,12 +60,14 @@ function createState<SelectedState extends PossibleTags<RepayState>>(
 
 const stateNames: Record<PossibleTags<RepayState>, string> = {
   init: "Token",
-  amountSelected: "Repay",
+  amountSelected: "Approval",
+  repayTx: "Repayment",
   repaidTx: "Finished",
 };
 
 const visibleStateNames: ReadonlyArray<PossibleTags<RepayState>> = [
   "amountSelected",
+  "repayTx",
   "repaidTx",
 ] as const;
 
@@ -69,16 +79,16 @@ const InitialComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
   const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
-  const { data: debtForAsset } = useUserVariableDebtForAsset(state.token.tokenAddress);
+  const { data: debtForAsset } = useUserVariableDebtForAsset(
+    state.token.tokenAddress
+  );
   const availableToRepay = React.useMemo(() => {
     if (!userBalance || !debtForAsset) {
       return BigNumber.from(0);
     }
 
     // availableToRepay = min(debt, balance)
-    return userBalance.gt(debtForAsset)
-      ? debtForAsset
-      : userBalance;
+    return userBalance.gt(debtForAsset) ? debtForAsset : userBalance;
   }, [debtForAsset, userBalance]);
 
   const onSubmit = React.useCallback(
@@ -103,19 +113,20 @@ const AmountSelectedComp: React.FC<{
   dispatch: (nextState: RepayState) => void;
 }> = ({ state, dispatch }) => {
   const chainAddresses = useChainAddresses();
-  const repayArgs = React.useMemo<UseRepayMutationProps>(
+  const approvalArgs = React.useMemo<UseApprovalMutationProps>(
     () => ({
       asset: state.token.tokenAddress,
       amount: state.amountToRepay,
+      spender: chainAddresses?.lendingPool,
     }),
     [state, chainAddresses?.lendingPool]
   );
   const {
-    repayMutation: { mutateAsync },
-  } = useRepayMutation(repayArgs);
+    approvalMutation: { mutateAsync },
+  } = useApprovalMutation(approvalArgs);
   const onSubmit = React.useCallback(() => {
     mutateAsync()
-      .then(() => dispatch(createState("repaidTx", { ...state })))
+      .then(() => dispatch(createState("repayTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
       .catch(e => dispatch(createState("init", state)));
   }, [state, dispatch, mutateAsync]);
@@ -139,6 +150,57 @@ const AmountSelectedComp: React.FC<{
       {stepperBar}
       <ControllerItem
         stepNumber={1}
+        stepName="Approval"
+        stepDesc="Please submit to approve"
+        actionName="Approve"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
+  );
+};
+
+const RepayTxComp: React.FC<{
+  state: AmountSelectedState;
+  dispatch: (nextState: RepayState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const repayArgs = React.useMemo<UseRepayMutationProps>(
+    () => ({
+      asset: state.token.tokenAddress,
+      amount: state.amountToRepay,
+    }),
+    [state, chainAddresses?.lendingPool]
+  );
+  const {
+    repayMutation: { mutateAsync },
+  } = useRepayMutation(repayArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("repaidTx", { ...state })))
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<RepayState> = "repayTx";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={RepayTitle}
+      amount={state.amountToRepay}
+      asset={state.token}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={2}
         stepName="Repay"
         stepDesc="Please submit to repay"
         actionName="Repay"
@@ -173,7 +235,7 @@ const RepaidTxComp: React.FC<{
     >
       {stepperBar}
       <ControllerItem
-        stepNumber={2}
+        stepNumber={3}
         stepName="Success"
         actionName="Dashboard"
         onActionClick={() => history.push("/dashboard")}
@@ -194,6 +256,8 @@ const RepayStateMachine: React.FC<{
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
       );
+    case "repayTx":
+      return <RepayTxComp state={state.repayTx} dispatch={setState} />;
     case "repaidTx":
       return <RepaidTxComp state={state.repaidTx} dispatch={setState} />;
   }
@@ -227,9 +291,10 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
 };
 
 export const RepayDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
