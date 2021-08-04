@@ -1,180 +1,72 @@
-import React, { useMemo, useState } from "react";
 import {
-  Text,
-  Center,
-  Button,
-  Badge,
-  Image,
-  useColorMode,
+  Flex,
+  HStack,
+  TabList,
+  Tabs,
   useColorModeValue as mode,
 } from "@chakra-ui/react";
-import { Navbar } from "./navbar";
-import agaveLogo from "../../assets/image/agave-logo.svg";
-import darkMoon from "../../assets/image/dark-moon.svg";
-import lightMoon from "../../assets/image/light-moon.svg";
-import { selectAddress } from "../../features/auth/authSlice";
-import { useAppSelector } from "../../redux/hooks";
-import { NavLink } from "react-router-dom";
-import { NavTabLink } from "./tab-link";
-import { bigNumberToString } from "../../utils/fixedPoint";
-import { useUserAssetBalance } from "../../queries/userAssets";
-import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
-import { store as NotificationManager } from "react-notifications-component";
-import { useWeb3React } from "@web3-react/core";
-import { injectedConnector } from "../../hooks/injectedConnectors";
+import React from "react";
+import { UserProfile } from "./NavComponents/userprofile";
+import { Links } from "./NavComponents/links";
+import { Brand } from "./NavComponents/brand";
+import { MobileNav } from "./mobile-nav";
+import { AgveBG } from "./NavComponents/BGimage";
 
-function Header() {
-  // Light/Dark button functions
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const { colorMode, toggleColorMode } = useColorMode();
-
-  // Address button functions
-  const address: string | undefined = useAppSelector(selectAddress);
-  const addressPretty = useMemo(
-    () =>
-      address
-        ? `${address.substring(0, 4)}...${address.substring(
-            address.length - 4,
-            address.length
-          )}`
-        : undefined,
-    [address]
-  );
-
-  // Agve button functions
-  const reserves = useAllReserveTokensWithData()?.data;
-  const reserve = React.useMemo(
-    () =>
-      reserves?.find(reserve => reserve?.symbol === "AGVE") ??
-      reserves?.find(reserve => reserve.tokenAddress),
-    [reserves]
-  );
-  const tokenBalance = useUserAssetBalance(reserve?.tokenAddress)?.data;
-  const userBal = tokenBalance ? bigNumberToString(tokenBalance) : "0";
-
-  // Connect button functions
-  function warnUser(title: string, message?: string | undefined): void {
-    NotificationManager.addNotification({
-      container: "top-right",
-      type: "warning",
-      title,
-      message,
-    });
-  }
-  const { activate, error } = useWeb3React();
-  const onMetamaskConnect = async () => {
-    if (typeof (window as any).ethereum === "undefined") {
-      warnUser(
-        "Please install MetaMask!",
-        "Agave requires Metamask to be installed in your browser to work properly."
-      );
-      return;
-    }
-    await activate(injectedConnector);
-  };
-
+const Header: React.FC<any> = props => {
   return (
-    <Navbar>
-      <Navbar.Brand>
-        <Center as={NavLink} to="/" marginEnd={6}>
-          <Image
-            src={agaveLogo}
-            alt="AGAVE ALT"
-            width={{ base: "35px", md: "inherit" }}
-          />
-          <Text
-            color="white"
-            ml={4}
-            mt={{ base: "2.5", md: "1" }}
-            fontWeight="bold"
-            fontSize={{ base: "4xl", md: "2xl" }}
-          >
-            AGAVE
-          </Text>
-        </Center>
-      </Navbar.Brand>
-      <Navbar.Links>
-        <NavTabLink exact to="/dashboard">
-          DASHBOARD
-        </NavTabLink>
-        <NavTabLink exact to="/markets">
-          MARKETS
-        </NavTabLink>
-        <NavTabLink exact to="/borrow">
-          BORROW
-        </NavTabLink>
-        <NavTabLink exact to="/deposit">
-          DEPOSIT
-        </NavTabLink>
-        <NavTabLink exact to="/stake">
-          STAKE
-        </NavTabLink>
-      </Navbar.Links>
-      <Navbar.UserProfile>
-        <Center
-          width={{ base: "4rem", md: "3rem" }}
-          height={{ base: "4rem", md: "3rem" }}
-          rounded="lg"
-          bg={mode({ base: "primary.800", md: "primary.500" }, "primary.500")}
-          cursor="pointer"
-          // display="none"
-          onClick={toggleColorMode}
+    <React.Fragment>
+      <Flex display={{ base: "none", md: "block" }}>
+        <Flex
+          zIndex="1"
+          className="NavBar"
+          bg={mode("primary.900", "secondary.900")}
+          boxShadow="none"
+          justifyContent="space-between"
+          alignItems="center"
+          p="0px 30px"
+          h="50px"
+          top="0"
+          wrap="wrap"
+          position="static"
+          borderBottomColor={"primary.50"}
+          borderBottomWidth="1px"
+          overflowY="hidden"
         >
-          <Image
-            src={colorMode === "dark" ? darkMoon : lightMoon}
-            alt="theme-mode"
-          />
-        </Center>
-        <Center
-          minWidth="10rem"
-          height={{ base: "4rem", md: "3rem" }}
-          fontSize={{ base: "3xl", md: "2xl" }}
-          mx="1.5rem"
-          textTransform="uppercase"
-          color="white"
-          bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
-          rounded="lg"
-        >
-          {userBal.substring(0, 4)} AGVE
-        </Center>
-        {addressPretty ? (
-          <Center
-            background={mode(
-              { base: "secondary.800", md: "primary.500" },
-              "primary.500"
-            )}
-            rounded="lg"
-            minWidth="10rem"
-            height={{ base: "4rem", md: "3rem" }}
-            color="white"
-            p="10px"
+          <Flex className="Brand" flex={{ base: "0", md: "1" }} zIndex={3}>
+            <Brand />
+          </Flex>
+          <Tabs
+            flex="3"
+            variant="unstyled"
+            className="Tabs"
+            display={{ base: "none", md: "flex" }}
+            h="100%"
+            justifyContent="center"
+            alignItems="center"
+            zIndex={3}
           >
-            <Badge
-              bg="yellow"
-              rounded="full"
-              width={{ base: "1.3rem", md: "1rem" }}
-              height={{ base: "1.3rem", md: "1rem" }}
-              mr="5px"
-            />
-            <Text fontSize={{ base: "3xl", md: "2xl" }}>{addressPretty}</Text>
-          </Center>
-        ) : (
-          <Button
-            background="primary.500"
-            rounded="lg"
-            minWidth="10rem"
-            height={{ base: "4rem", md: "3rem" }}
-            fontSize={{ base: "3xl", md: "2xl" }}
-            fontWeight="normal"
-            color="white"
-            onClick={onMetamaskConnect}
+            <TabList className="TabList" display="flex" h="100%">
+              <Links />
+            </TabList>
+          </Tabs>
+          <HStack
+            className="profile"
+            flex="1"
+            justify="flex-end"
+            display={{ base: "none", md: "flex" }}
+            spacing={3}
+            zIndex={3}
           >
-            Connect
-          </Button>
-        )}
-      </Navbar.UserProfile>
-    </Navbar>
+            <UserProfile />
+          </HStack>
+        </Flex>
+        <AgveBG top="" />
+      </Flex>
+      <Flex display={{ base: "block", md: "none" }}>
+        <MobileNav />
+      </Flex>
+    </React.Fragment>
   );
-}
+};
 
 export default Header;
