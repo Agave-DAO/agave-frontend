@@ -12,7 +12,7 @@ import { Links } from "./NavComponents/links";
 import { UserProfile } from "./NavComponents/userprofile";
 import { MobileNavContent } from "./NavComponents/mobile-nav-content";
 
-export const MobileNav: React.FC<any> = props => {
+export const MobileNav: React.FC<{}> = () => {
   const mobileNav = useDisclosure();
   const lightGrad =
     "radial-gradient(circle, rgba(79,203,141,1) 5%, rgba(0,124,110,1) 100%)";

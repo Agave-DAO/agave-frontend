@@ -16,7 +16,7 @@ import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useUserAssetBalance } from "../../../queries/userAssets";
 import { useAllReserveTokensWithData } from "../../../queries/lendingReserveData";
 
-export const UserProfile: React.FC<any> = props => {
+export const UserProfile: React.FC<{}> = () => {
   // Light/Dark button functions
   const { colorMode, toggleColorMode } = useColorMode();
 
@@ -71,40 +71,27 @@ export const UserProfile: React.FC<any> = props => {
       >
         {userBal.substring(0, 4)} AGVE
       </Center>
-      {addressPretty ? (
-        <Center
-          background={mode(
-            { base: "secondary.800", md: "primary.500" },
-            "primary.500"
-          )}
-          rounded="lg"
-          minWidth="10rem"
-          height={{ base: "4rem", md: "3rem" }}
-          color="white"
-          p="10px"
-        >
-          <Badge
-            bg="yellow"
-            rounded="full"
-            width={{ base: "1.3rem", md: "1rem" }}
-            height={{ base: "1.3rem", md: "1rem" }}
-            mr="5px"
-          />
-          <Text fontSize={{ base: "4xl", md: "2xl" }}>{addressPretty}</Text>
-        </Center>
-      ) : (
-        <Button
-          background="primary.500"
-          rounded="lg"
-          minWidth="10rem"
-          height={{ base: "4rem", md: "3rem" }}
-          fontSize={{ base: "4xl", md: "2xl" }}
-          fontWeight="normal"
-          color="white"
-        >
-          Not Connected
-        </Button>
-      )}
+
+      <Center
+        background={mode(
+          { base: "secondary.800", md: "primary.500" },
+          "primary.500"
+        )}
+        rounded="lg"
+        minWidth="10rem"
+        height={{ base: "4rem", md: "3rem" }}
+        color="white"
+        p="10px"
+      >
+        <Badge
+          bg="yellow"
+          rounded="full"
+          width={{ base: "1.3rem", md: "1rem" }}
+          height={{ base: "1.3rem", md: "1rem" }}
+          mr="5px"
+        />
+        <Text fontSize={{ base: "4xl", md: "2xl" }}>{addressPretty}</Text>
+      </Center>
     </React.Fragment>
   );
 };

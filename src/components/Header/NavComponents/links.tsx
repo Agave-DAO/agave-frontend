@@ -1,7 +1,7 @@
 import React from "react";
 import { NavTabLink } from "./tab-link-style";
 
-export const Links: React.FC<any> = props => {
+export const Links: React.FC<{}> = () => {
   return (
     <React.Fragment>
       <NavTabLink exact to="/dashboard">

@@ -10,9 +10,9 @@ import { UserProfile } from "./NavComponents/userprofile";
 import { Links } from "./NavComponents/links";
 import { Brand } from "./NavComponents/brand";
 import { MobileNav } from "./mobile-nav";
-import { AgveBG } from "./NavComponents/BGimage";
+import { AgaveBackground } from "./NavComponents/BackgroundImage";
 
-const Header: React.FC<any> = props => {
+const Header: React.FC<{}> = () => {
   return (
     <React.Fragment>
       <Flex display={{ base: "none", md: "block" }}>
@@ -60,7 +60,7 @@ const Header: React.FC<any> = props => {
             <UserProfile />
           </HStack>
         </Flex>
-        <AgveBG top="" />
+        <AgaveBackground top="" />
       </Flex>
       <Flex display={{ base: "block", md: "none" }}>
         <MobileNav />

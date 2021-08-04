@@ -3,22 +3,22 @@ import { HamburgerIcon, ChevronLeftIcon } from "@chakra-ui/icons";
 import { Flex, IconButton, useColorModeValue as mode } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 import { Brand } from "../NavComponents/brand";
-import { AgveBG } from "../NavComponents/BGimage";
+import { AgaveBackground } from "./BackgroundImage";
 
-interface Props {
+interface MobileNavContentProps {
   isOpen?: boolean;
   onClose?: () => void;
   onOpen?: () => void;
 }
 
-export const MobileNavContent: React.FC<Props> = props => {
+export const MobileNavContent: React.FC<MobileNavContentProps> = props => {
   const { isOpen, onClose, onOpen } = props;
   const history = useHistory();
 
   return (
     <React.Fragment>
       <Flex flexDirection="column" justifyContent="center" alignItems="center">
-        <AgveBG top="80px" />
+        <AgaveBackground top="80px" />
         <Flex
           className="mobileNavBar"
           bg={mode("primary.900", "secondary.900")}
