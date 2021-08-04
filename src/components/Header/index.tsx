@@ -9,7 +9,7 @@ import React from "react";
 import { UserProfile } from "./NavComponents/userprofile";
 import { Links } from "./NavComponents/links";
 import { Brand } from "./NavComponents/brand";
-import { MobileNav } from "./mobile-nav";
+import { MobileNavOverlay } from "./mobile-nav";
 import { AgaveBackground } from "./NavComponents/BackgroundImage";
 
 const Header: React.FC<{}> = () => {
@@ -63,7 +63,7 @@ const Header: React.FC<{}> = () => {
         <AgaveBackground top="" />
       </Flex>
       <Flex display={{ base: "block", md: "none" }}>
-        <MobileNav />
+        <MobileNavOverlay />
       </Flex>
     </React.Fragment>
   );

@@ -10,9 +10,9 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { Links } from "./NavComponents/links";
 import { UserProfile } from "./NavComponents/userprofile";
-import { MobileNavContent } from "./NavComponents/mobile-nav-content";
+import { MobileNavBar } from "./NavComponents/mobile-nav-bar";
 
-export const MobileNav: React.FC<{}> = () => {
+export const MobileNavOverlay: React.FC<{}> = () => {
   const mobileNav = useDisclosure();
   const lightGrad =
     "radial-gradient(circle, rgba(79,203,141,1) 5%, rgba(0,124,110,1) 100%)";
@@ -22,11 +22,12 @@ export const MobileNav: React.FC<{}> = () => {
 
   return (
     <React.Fragment>
-      <MobileNavContent
+      <MobileNavBar
         isOpen={mobileNav.isOpen}
         onClose={mobileNav.onClose}
         onOpen={mobileNav.onOpen}
       />
+      {/* MOBILE OVERLAY STARTS BELOW  */}
       <AnimatePresence>
         {mobileNav.isOpen && (
           <motion.div
@@ -56,7 +57,7 @@ export const MobileNav: React.FC<{}> = () => {
               overflowY="auto"
               // top="80px"
             >
-              <MobileNavContent
+              <MobileNavBar
                 isOpen={mobileNav.isOpen}
                 onClose={mobileNav.onClose}
                 onOpen={mobileNav.onOpen}
