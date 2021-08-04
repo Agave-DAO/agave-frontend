@@ -1,62 +1,86 @@
 import React from "react";
-import { Flex, useColorModeValue } from "@chakra-ui/react";
+import {
+  Flex,
+  TabList,
+  Tabs,
+  Divider,
+  useDisclosure,
+  useColorModeValue as mode,
+} from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Links } from "./NavComponents/links";
+import { UserProfile } from "./NavComponents/userprofile";
+import { MobileNavContent } from "./NavComponents/mobile-nav-content";
 
-interface Props {
-  isOpen?: boolean;
-  onClose?: () => void;
-}
-
-export const MobileNavContent: React.FC<Props> = props => {
-  const { isOpen, children } = props;
-
+export const MobileNav: React.FC<any> = props => {
+  const mobileNav = useDisclosure();
   const lightGrad =
     "radial-gradient(circle, rgba(79,203,141,1) 5%, rgba(0,124,110,1) 100%)";
   const darkGrad =
     "radial-gradient(circle, rgba(24,79,60,1) 0%, rgba(17,120,101,1) 61%, rgba(0,124,110,1) 100%)";
-  const bg = useColorModeValue(lightGrad, darkGrad);
+  const bg = mode(lightGrad, darkGrad);
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          transition={{ duration: 0.15 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          style={{
-            position: "fixed",
-            height: "0",
-            width: "0",
-            top: 0,
-            left: 0,
-            zIndex: 20,
-          }}
-        >
-          <Flex
-            className="mobileover"
-            direction="column"
-            bg={bg}
-            w="100vw"
-            h="100%"
-            minH="100vh"
-            pos="absolute"
-            // TODO top={{ base: "80px", md: "50px" }}
-            left={0}
-            zIndex={20}
-            overflowY="auto"
+    <React.Fragment>
+      <MobileNavContent
+        isOpen={mobileNav.isOpen}
+        onClose={mobileNav.onClose}
+        onOpen={mobileNav.onOpen}
+      />
+      <AnimatePresence>
+        {mobileNav.isOpen && (
+          <motion.div
+            transition={{ duration: 0.15 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              height: "0",
+              width: "0",
+              top: 0,
+              left: 0,
+              zIndex: 20,
+            }}
           >
-            {children}
-            {/* <CloseButton
+            <Flex
+              className="mobileover"
+              direction="column"
+              bg={bg}
+              w="100vw"
+              h="100%"
+              minH="100vh"
               pos="absolute"
-              top={12}
-              right={12}
-              onClick={onClose}
-              colorScheme="whiteAlpha"
-            /> */}
-          </Flex>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              left={0}
+              zIndex={20}
+              overflowY="auto"
+              // top="80px"
+            >
+              <MobileNavContent
+                isOpen={mobileNav.isOpen}
+                onClose={mobileNav.onClose}
+                onOpen={mobileNav.onOpen}
+              />
+              <Flex
+                h="10rem"
+                w="100%"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <UserProfile />
+              </Flex>
+              <Divider />
+              <Flex>
+                <Tabs orientation="vertical" variant="unstyled">
+                  <TabList onClick={mobileNav.onClose} h="100%" w="100%">
+                    <Links />
+                  </TabList>
+                </Tabs>
+              </Flex>
+            </Flex>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </React.Fragment>
   );
 };
