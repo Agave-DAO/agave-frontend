@@ -8,13 +8,13 @@ import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
-
+import { useAssetPricesInDaiWei } from "../../queries/assetPriceInDai";
 //Modals
 import  ModalComponent, {MODAL_TYPES} from "../../components/Modals";
 
 // Helpers
 import { round2Fixed } from "../../utils/helpers";
-import { bigNumberToString } from "../../utils/fixedPoint";
+import { bigNumberToString, fixedNumberToPercentage } from "../../utils/fixedPoint";
 
 const UserInfo: React.FC<{
   asset: ReserveTokenDefinition;
@@ -42,7 +42,7 @@ const UserInfo: React.FC<{
 
   // ** Check data for undefined and convert to usable front end data
   // TODO text size of asset will likly need to be controlled by helper function
-  const name = asset.symbol ? asset.symbol : "Asset";
+  const symbol = asset.symbol ? asset.symbol : "Asset";
   const userBal = tokenBalance ? bigNumberToString(tokenBalance) : "0";
   const userAtokens = aTokenBalance ? bigNumberToString(aTokenBalance) : "0";
 
@@ -51,12 +51,20 @@ const UserInfo: React.FC<{
     ? bigNumberToString(userAccountData.healthFactor)
     : "0";
   const loanVal = userAccountData?.maximumLtv
-    ? userAccountData?.maximumLtv._value
-    : "0";
-  const borrowAmt = userAccountData?.availableBorrowsEth
-    ? bigNumberToString(userAccountData.availableBorrowsEth)
-    : "0";
+    ? fixedNumberToPercentage(userAccountData?.maximumLtv)
+    : null;
 
+	const availableBorrowsNative = userAccountData?.availableBorrowsEth;
+	const price = useAssetPricesInDaiWei([asset.tokenAddress]).data;  
+	const availableBorrowsNativeAdjusted = availableBorrowsNative?.mul(1000);
+	
+	const balanceAsset =
+	  availableBorrowsNativeAdjusted && price
+		? availableBorrowsNativeAdjusted.div(price[0])
+		: null;
+  const borrowAmt = balanceAsset
+    ? balanceAsset.toNumber() / 1000
+    : "0";
 
 	const [modal_type, setModal] = useState(MODAL_TYPES.HEALTH_FACTOR);
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -136,7 +144,7 @@ const UserInfo: React.FC<{
                 <Button
                   size="lg"
                   colorScheme="whiteAlpha"
-                  onClick={() => history.push(`/deposit/${name}`)}
+                  onClick={() => history.push(`/deposit/${symbol}`)}
                 >
                   Deposit
                 </Button>
@@ -144,7 +152,7 @@ const UserInfo: React.FC<{
                 <Button
                   size="lg"
                   colorScheme="Green"
-                  onClick={() => history.push(`/withdraw/${name}`)}
+                  onClick={() => history.push(`/withdraw/${symbol}`)}
                 >
                   Withdraw
                 </Button>
@@ -155,12 +163,12 @@ const UserInfo: React.FC<{
               <UserInfoRow
                 title="Your wallet balance"
                 value={userBal}
-                type={name}
+                type={symbol}
               />
               <UserInfoRow
                 title="You already deposited"
                 value={userAtokens}
-                type={name}
+                type={symbol}
               />
               {/* TODO Used for Stable coin borrowing, when ready to be implemented */}
               {/* <Flex
@@ -179,12 +187,12 @@ const UserInfo: React.FC<{
                     {useAsCol ? "Yes" : "No"}
                     <Switch
                       pl="5px"
-                      className="switch"
+                      classsymbol="switch"
                       isChecked={useAsCol}
                       aria-label={"yes"}
                       colorScheme="yellow"
                       onChange={() => {
-                        history.push(`/collateral/${name}`);
+                        history.push(`/collateral/${symbol}`);
                       }}
                     />
                   </Text>
@@ -216,14 +224,14 @@ const UserInfo: React.FC<{
                 <Button
                   size="lg"
                   colorScheme="whiteAlpha"
-                  onClick={() => history.push(`/borrow/${name}`)}
+                  onClick={() => history.push(`/borrow/${symbol}`)}
                 >
                   Borrow
                 </Button>
               </Flex>
             </Box>
             <Box>
-              <UserInfoRow title="Borrowed" value={userBorrow} type={name} />
+              <UserInfoRow title="Borrowed" value={userBorrow} type={symbol} />
               <UserInfoRow
                 title="Health Factor"
                 value={health}
@@ -232,9 +240,9 @@ const UserInfo: React.FC<{
               />
               <UserInfoRow title="Loan To Value" value={loanVal} type="%" />
               <UserInfoRow
-                title="Available To You"
+                title="You can Borrow"
                 value={borrowAmt}
-                type={name}
+                type={symbol}
               />
             </Box>
           </Box>

@@ -24,12 +24,14 @@ const UserInfoRow: React.FC<Props> = ({ ...props }) => {
         flexDirection="row"
         lineHeight="3.5rem"
       >
-        <Flex>
+        <Flex justifyContent="center" alignItems="center">
           <Text fontSize="2xl">{title}</Text>
-          {props.enableModal && (
+		  {props.enableModal && (
             <ModalIcon position="relative" top="0" left="2" maxHeight="1.2rem" onOpen={() => props.modalOpen(props.title)} />
           )}
+          
         </Flex>
+		
         <Flex>
           <Text fontSize="2xl">
             {value} {type}
