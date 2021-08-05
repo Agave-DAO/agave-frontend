@@ -14,7 +14,7 @@ import { AgaveBackground } from "./NavComponents/BackgroundImage";
 
 const Header: React.FC<{}> = () => {
   return (
-    <React.Fragment>
+    <>
       <Flex display={{ base: "none", md: "block" }}>
         <Flex
           zIndex="1"
@@ -65,7 +65,7 @@ const Header: React.FC<{}> = () => {
       <Flex display={{ base: "block", md: "none" }}>
         <MobileNavOverlay />
       </Flex>
-    </React.Fragment>
+    </>
   );
 };
 

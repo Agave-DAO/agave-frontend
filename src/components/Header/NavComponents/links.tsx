@@ -3,7 +3,7 @@ import { NavTabLink } from "./tab-link-style";
 
 export const Links: React.FC<{}> = () => {
   return (
-    <React.Fragment>
+    <>
       <NavTabLink exact to="/dashboard">
         DASHBOARD
       </NavTabLink>
@@ -19,6 +19,6 @@ export const Links: React.FC<{}> = () => {
       <NavTabLink exact to="/stake">
         STAKE
       </NavTabLink>
-    </React.Fragment>
+    </>
   );
 };

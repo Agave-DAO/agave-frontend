@@ -45,7 +45,7 @@ export const UserProfile: React.FC<{}> = () => {
   const userBal = tokenBalance ? bigNumberToString(tokenBalance) : "0";
 
   return (
-    <React.Fragment>
+    <>
       <Center
         width={{ base: "4rem", md: "3rem" }}
         height={{ base: "4rem", md: "3rem" }}
@@ -92,6 +92,6 @@ export const UserProfile: React.FC<{}> = () => {
         />
         <Text fontSize={{ base: "4xl", md: "2xl" }}>{addressPretty}</Text>
       </Center>
-    </React.Fragment>
+    </>
   );
 };
