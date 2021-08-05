@@ -21,7 +21,7 @@ export const MobileNavOverlay: React.FC<{}> = () => {
   const bg = mode(lightGrad, darkGrad);
 
   return (
-    <React.Fragment>
+    <>
       <MobileNavBar
         isOpen={mobileNav.isOpen}
         onClose={mobileNav.onClose}
@@ -82,6 +82,6 @@ export const MobileNavOverlay: React.FC<{}> = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </React.Fragment>
+    </>
   );
 };
