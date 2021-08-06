@@ -9,18 +9,32 @@ export const ControllerItem: React.FC<{
   stepNumber: number;
   onActionClick: () => void;
   totalSteps: number;
-}> = ({ stepDesc, stepName, actionName, onActionClick, totalSteps, stepNumber }) => {
+}> = ({
+  stepDesc,
+  stepName,
+  actionName,
+  onActionClick,
+  totalSteps,
+  stepNumber,
+}) => {
   return (
     <Center w="100%" justifyContent="space-between" p="1.2rem">
       <VStack spacing="0" alignItems="flex-start">
-        <Text fontSize={{base:fontSizes.sm, md:fontSizes.md}} color="yellow.100" >
+        <Text
+          fontSize={{ base: fontSizes.sm, md: fontSizes.md }}
+          color="yellow.100"
+        >
           {stepNumber}/{totalSteps} {stepName}
         </Text>
-        {stepDesc && <Text fontSize={{base:fontSizes.sm, md:fontSizes.md}}>{stepDesc}</Text>}
+        {stepDesc && (
+          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
+            {stepDesc}
+          </Text>
+        )}
       </VStack>
       <Button
         bg={LINEAR_GRADIENT_BG}
-        fontSize={{base:fontSizes.sm, md:fontSizes.md}}
+        fontSize={{ base: fontSizes.sm, md: fontSizes.md }}
         textTransform="capitalize"
         color="secondary.900"
         fontWeight="light"

@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import UserInfoRow from "./UserInfoRow";
 import { Text, Flex, Container, Box, Button } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
@@ -10,11 +10,14 @@ import { useUserAssetBalance } from "../../queries/userAssets";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPricesInDaiWei } from "../../queries/assetPriceInDai";
 //Modals
-import  ModalComponent, {MODAL_TYPES} from "../../components/Modals";
+import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
 // Helpers
 import { round2Fixed } from "../../utils/helpers";
-import { bigNumberToString, fixedNumberToPercentage } from "../../utils/fixedPoint";
+import {
+  bigNumberToString,
+  fixedNumberToPercentage,
+} from "../../utils/fixedPoint";
 
 const UserInfo: React.FC<{
   asset: ReserveTokenDefinition;
@@ -54,47 +57,45 @@ const UserInfo: React.FC<{
     ? fixedNumberToPercentage(userAccountData?.maximumLtv)
     : null;
 
-	const availableBorrowsNative = userAccountData?.availableBorrowsEth;
-	const price = useAssetPricesInDaiWei([asset.tokenAddress]).data;  
-	const availableBorrowsNativeAdjusted = availableBorrowsNative?.mul(1000);
-	
-	const balanceAsset =
-	  availableBorrowsNativeAdjusted && price
-		? availableBorrowsNativeAdjusted.div(price[0])
-		: null;
-  const borrowAmt = balanceAsset
-    ? balanceAsset.toNumber() / 1000
-    : "0";
+  const availableBorrowsNative = userAccountData?.availableBorrowsEth;
+  const price = useAssetPricesInDaiWei([asset.tokenAddress]).data;
+  const availableBorrowsNativeAdjusted = availableBorrowsNative?.mul(1000);
 
-	const [modal_type, setModal] = useState(MODAL_TYPES.HEALTH_FACTOR);
-	const { isOpen, onOpen, onClose } = useDisclosure();
-  
-	const setModalOpen = React.useCallback(
-	  (selector: string) => {
-		switch (selector) {
-		  case "Maximum LTV": {
-			setModal(MODAL_TYPES.MAXIMUM_LTV);
-			break;
-		  }
-		  case "Liquidity Threshold": {
-			setModal(MODAL_TYPES.LIQUIDITY_THRESHOLD);
-			//statements;
-			break;
-		  }
-		  case "Liquidity Penalty": {
-			setModal(MODAL_TYPES.LIQUIDITY_PENALTY);
-  
-			break;
-		  }
-		  default: {
-			setModal(MODAL_TYPES.HEALTH_FACTOR);
-			break;
-		  }
-		}
-		onOpen();
-	  },
-	  [onOpen]
-	);
+  const balanceAsset =
+    availableBorrowsNativeAdjusted && price
+      ? availableBorrowsNativeAdjusted.div(price[0])
+      : null;
+  const borrowAmt = balanceAsset ? balanceAsset.toNumber() / 1000 : "0";
+
+  const [modal_type, setModal] = useState(MODAL_TYPES.HEALTH_FACTOR);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const setModalOpen = React.useCallback(
+    (selector: string) => {
+      switch (selector) {
+        case "Maximum LTV": {
+          setModal(MODAL_TYPES.MAXIMUM_LTV);
+          break;
+        }
+        case "Liquidity Threshold": {
+          setModal(MODAL_TYPES.LIQUIDITY_THRESHOLD);
+          //statements;
+          break;
+        }
+        case "Liquidity Penalty": {
+          setModal(MODAL_TYPES.LIQUIDITY_PENALTY);
+
+          break;
+        }
+        default: {
+          setModal(MODAL_TYPES.HEALTH_FACTOR);
+          break;
+        }
+      }
+      onOpen();
+    },
+    [onOpen]
+  );
   // TODO Used for stable borrowing, ready when implmented
   // const [useAsCol] = false);
 
@@ -104,10 +105,10 @@ const UserInfo: React.FC<{
         display="flex"
         flexDirection="column"
         textColor="white"
-        maxWidth={{base:"100%",lg:"450px"}}
+        maxWidth={{ base: "100%", lg: "450px" }}
         minWidth="25vw"
         p="0"
-        m={{base:"auto", md:"0"}}
+        m={{ base: "auto", md: "0" }}
         marginInlineEnd="0px"
         marginInlineStart="0px"
       >
@@ -117,11 +118,11 @@ const UserInfo: React.FC<{
         <Box
           position="relative"
           display="flex"
-          flexDirection={{ base: "column",md:"row", lg: "column" }}
+          flexDirection={{ base: "column", md: "row", lg: "column" }}
         >
           {/* Deposit Section Start */}
           <Box
-            mr={{base:"10px", lg:"0"}}
+            mr={{ base: "10px", lg: "0" }}
             w="100%"
             p="15px"
             mb="15px"
@@ -248,7 +249,7 @@ const UserInfo: React.FC<{
           </Box>
         </Box>
       </Container>
-	  <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
+      <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </React.Fragment>
   );
 };

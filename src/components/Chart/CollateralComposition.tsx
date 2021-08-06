@@ -22,7 +22,6 @@ import { useCollateralComposition } from "../../hooks/collateralComposition";
 import { bigNumberToString } from "../../utils/fixedPoint";
 
 export const CollateralComposition: React.FC = () => {
-
   const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
 
   const collateralComposition = useCollateralComposition();

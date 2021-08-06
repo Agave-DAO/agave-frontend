@@ -7,7 +7,7 @@ interface Props {
   value: any;
   type?: string;
   enableModal?: boolean;
-  modalOpen?: any
+  modalOpen?: any;
 }
 
 const UserInfoRow: React.FC<Props> = ({ ...props }) => {
@@ -26,12 +26,17 @@ const UserInfoRow: React.FC<Props> = ({ ...props }) => {
       >
         <Flex justifyContent="center" alignItems="center">
           <Text fontSize="2xl">{title}</Text>
-		  {props.enableModal && (
-            <ModalIcon position="relative" top="0" left="2" maxHeight="1.2rem" onOpen={() => props.modalOpen(props.title)} />
+          {props.enableModal && (
+            <ModalIcon
+              position="relative"
+              top="0"
+              left="2"
+              maxHeight="1.2rem"
+              onOpen={() => props.modalOpen(props.title)}
+            />
           )}
-          
         </Flex>
-		
+
         <Flex>
           <Text fontSize="2xl">
             {value} {type}

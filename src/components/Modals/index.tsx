@@ -57,9 +57,9 @@ const ModalLiqPenalty: React.FC<{}> = () => {
       <ModalBody>
         <Text>
           When a liquidation occurs, liquidators repay part or all of the
-          outstanding borrowed amount on behalf of the borrower.<br></br> In return, they
-          can buy the collateral at a discount and keep the difference as a
-          bonus!
+          outstanding borrowed amount on behalf of the borrower.<br></br> In
+          return, they can buy the collateral at a discount and keep the
+          difference as a bonus!
         </Text>
       </ModalBody>
     </>

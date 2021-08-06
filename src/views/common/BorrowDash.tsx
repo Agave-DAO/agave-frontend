@@ -292,9 +292,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </HStack>
         </Flex>
 
-        {isSmallerThan900 ? null : (
-          <CollateralComposition/>
-        )}
+        {isSmallerThan900 ? null : <CollateralComposition />}
       </Flex>
     </VStack>
   );

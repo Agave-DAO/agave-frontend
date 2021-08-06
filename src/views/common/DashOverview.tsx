@@ -18,7 +18,7 @@ export const DashOverviewIntro: React.FC<{
   balance: BigNumber | undefined;
 }> = ({ asset, mode, onSubmit, amount, setAmount, balance }) => {
   return (
-    <VStack w={{ base: "90%",sm:"75%", md: "60%", lg:"50%" }} spacing="0">
+    <VStack w={{ base: "90%", sm: "75%", md: "60%", lg: "50%" }} spacing="0">
       <ColoredText fontSize="1.8rem" textTransform="capitalize" pb="1rem">
         {mode}
       </ColoredText>

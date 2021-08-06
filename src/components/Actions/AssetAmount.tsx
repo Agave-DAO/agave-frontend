@@ -5,7 +5,7 @@ import { IMarketData } from "../../utils/constants";
 const AssetAmountWrapper = styled.div`
   margin-bottom: 20px;
   width: 100%;
-  border: 1px solid ${(props) => props.theme.color.textPrimary};
+  border: 1px solid ${props => props.theme.color.textPrimary};
   padding: 15px;
   border-radius: 2px;
   display: flex;
@@ -13,7 +13,7 @@ const AssetAmountWrapper = styled.div`
 
   .content-label {
     font-weight: 400;
-    color: ${(props) => props.theme.color.textPrimary};
+    color: ${props => props.theme.color.textPrimary};
   }
 
   .content-value {
@@ -43,7 +43,7 @@ const AssetAmountWrapper = styled.div`
 export interface AssetAmountProps {
   asset: IMarketData | undefined;
   amount: number;
-};
+}
 
 export const AssetAmount: React.FC<AssetAmountProps> = ({ asset, amount }) => {
   return (
@@ -57,9 +57,7 @@ export const AssetAmount: React.FC<AssetAmountProps> = ({ asset, amount }) => {
               {amount} {asset.name}
             </span>
           </div>
-          <div className="usd-amount">
-            $ {asset.asset_price * amount}
-          </div>
+          <div className="usd-amount">$ {asset.asset_price * amount}</div>
         </div>
       ) : (
         <></>

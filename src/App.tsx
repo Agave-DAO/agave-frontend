@@ -12,7 +12,10 @@ import { DashboardBanner } from "./views/Dashboard/layout";
 import { Deposit } from "./views/Deposit";
 import { DepositBanner } from "./views/Deposit/layout";
 import { DepositDetail } from "./views/Deposit/DepositDetail";
-import { WithdrawBanner, WithdrawDetail } from "./views/Withdraw/WithdrawDetail";
+import {
+  WithdrawBanner,
+  WithdrawDetail,
+} from "./views/Withdraw/WithdrawDetail";
 
 import { Borrow } from "./views/Borrow";
 import { BorrowBanner, BorrowDetail } from "./views/Borrow/BorrowDetail";
@@ -68,8 +71,8 @@ const theme = extendTheme({
       "::-webkit-scrollbar": {
         width: "11px",
         background: "rgba(0,0,0,0.6)",
-        top:"10px",
-        opacity:"0.2",
+        top: "10px",
+        opacity: "0.2",
       },
       "::-webkit-scrollbar-track": {
         // "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.3)",
@@ -80,7 +83,7 @@ const theme = extendTheme({
       "::-webkit-scrollbar-thumb": {
         borderRadius: "10px",
         background: "primary.100",
-        opacity:"0.8",
+        opacity: "0.8",
         // "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.5)",
       },
       "::-webkit-scrollbar-thumb:window-inactive": {

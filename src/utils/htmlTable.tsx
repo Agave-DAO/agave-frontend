@@ -100,7 +100,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
   );
   return React.useMemo(
     () => (
-      <Table {...getTableProps()}  {...tableStyle}>
+      <Table {...getTableProps()} {...tableStyle}>
         <Thead>
           {headerGroups.map(headerGroup => (
             <Tr {...headerGroup.getHeaderGroupProps()}>

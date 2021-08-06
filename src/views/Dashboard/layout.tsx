@@ -440,10 +440,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
           </Box>
         </UpperBox>
       </Flex>
-      <Box
-        mt="2rem"
-        overflowX="auto"
-      >
+      <Box mt="2rem" overflowX="auto">
         {depositsTable}
         {borrowsTable}
       </Box>
