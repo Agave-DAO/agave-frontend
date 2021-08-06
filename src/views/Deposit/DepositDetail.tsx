@@ -2,7 +2,7 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import { DepositDash } from "../common/DepositDash";
+import { DepositDash } from "./DepositDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveTokenDefinition,
