@@ -59,7 +59,7 @@ export interface WeiInputProps {
 
 export interface FixedDecimalInputProps {
   amount: BigNumber | undefined;
-  decimals: BigNumberish;
+  decimals: number;
   setAmount: (newValue: BigNumber | undefined) => void;
   minAmount?: BigNumber | undefined;
   maxAmount?: BigNumber | undefined;
@@ -70,7 +70,7 @@ export interface FixedDecimalInputProps {
 
 export interface WeiBoxProps {
   amount: BigNumber | undefined;
-  decimals: BigNumberish;
+  decimals: number;
   setAmount: (newValue: BigNumber | undefined) => void;
   // Dual mode enables both displays as textboxes, while int and fixed display one format or the other
   mode?: "dual" | "int" | "fixed";

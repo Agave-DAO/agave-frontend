@@ -136,6 +136,8 @@ const AmountSelectedComp: React.FC<{
       title={DepositTitle}
       amount={state.amountToDeposit}
       asset={state.token}
+      collateral={true}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -188,6 +190,8 @@ const DepositTxComp: React.FC<{
       title={DepositTitle}
       amount={state.amountToDeposit}
       asset={state.token}
+      collateral={true}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -223,6 +227,8 @@ const DepositedTxComp: React.FC<{
       title={DepositTitle}
       amount={state.amountToDeposit}
       asset={state.token}
+      collateral={true}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -232,7 +238,7 @@ const DepositedTxComp: React.FC<{
           state.token.symbol
         } successful`}
         actionName="Finish"
-        onActionClick={() => history.push("/deposit")}
+        onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}
       />
     </WizardOverviewWrapper>
@@ -285,9 +291,10 @@ const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
 };
 
 export const DepositDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();

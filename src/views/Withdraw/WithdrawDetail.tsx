@@ -78,7 +78,7 @@ export const WithdrawBanner: React.FC<{}> = () => {
         fontWeight="bold"
         color="white"
         fontSize={{ base: "1.8rem", md: "2.4rem" }}
-        onClick={() => history.push("/deposit")}
+        onClick={() => history.push("/dashboard")}
       >
         Withdraw
       </Text>
@@ -148,6 +148,8 @@ const WithdrawTxComp: React.FC<{
       title={WithdrawTitle}
       amount={state.amountToWithdraw}
       asset={state.token}
+      collateral={true}
+      increase={false}
     >
       {stepperBar}
       <ControllerItem
@@ -183,6 +185,8 @@ const WithdrawnTxComp: React.FC<{
       title={WithdrawTitle}
       amount={state.amountToWithdraw}
       asset={state.token}
+      collateral={true}
+      increase={false}
     >
       {stepperBar}
       <ControllerItem
@@ -192,7 +196,7 @@ const WithdrawnTxComp: React.FC<{
           state.token.symbol
         } successful`}
         actionName="Finish"
-        onActionClick={() => history.push("/withdraw")}
+        onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}
       />
     </WizardOverviewWrapper>
@@ -244,9 +248,10 @@ const WithdrawDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
 };
 
 export const WithdrawDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
@@ -283,7 +288,7 @@ export const WithdrawDetail: React.FC = () => {
             color="primary.100"
             bg="primary.500"
             onClick={() =>
-              history.length > 0 ? history.goBack() : history.push("/withdraw")
+              history.length > 0 ? history.goBack() : history.push("/dashboard")
             }
             size="xl"
             padding="1rem"
