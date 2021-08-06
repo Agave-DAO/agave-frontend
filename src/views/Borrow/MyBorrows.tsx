@@ -1,60 +1,20 @@
 import React from "react";
 import { Box, Text } from "@chakra-ui/layout";
-import { Divider, Flex, VStack, Tooltip } from "@chakra-ui/react";
+import { Divider, Flex, VStack } from "@chakra-ui/react";
 import { BorrowAsset } from ".";
-import { TokenIcon } from "../../utils/icons";
 import { bigNumberToString } from "../../utils/fixedPoint";
-
-const AssetBalanceDisplay: React.FC<{ asset: BorrowAsset }> = ({ asset }) => {
-  return React.useMemo(() => {
-    return (
-      <Flex direction="row" minH={30} h="100%" w="100%">
-        <Box
-          w="100%"
-          d="flex"
-          flexDir="row"
-          p={3}
-          px="2rem"
-          color="white"
-          alignSelf="center"
-          justifyContent="space-between"
-        >
-          <Box textAlign="center" alignSelf="center" d="flex">
-            <TokenIcon symbol={asset.symbol} />
-            <Text ml={4} alignSelf="center">
-              {asset.symbol}
-            </Text>
-          </Box>
-          <Box p={1} textAlign="end">
-            <Tooltip
-              fontSize="big"
-              label={bigNumberToString(asset.balance, 18) + " " + asset.symbol}
-              aria-label="balance in Wei"
-              bg="secondary.900"
-              placement="top-start"
-            >
-              <Text fontSize="smaller" onHover>
-                {bigNumberToString(asset.balance, 2)} x $
-                {bigNumberToString(asset.daiWeiPricePer, 2)}
-              </Text>
-            </Tooltip>
-            <Text fontWeight="bold">
-              $ {bigNumberToString(asset.daiWeiPriceTotal)}
-            </Text>
-          </Box>
-        </Box>
-      </Flex>
-    );
-  }, [asset]);
-};
+import { AssetBalanceDisplay } from "../../components/Card/AssetBalanceDisplay";
+import { constants } from "ethers";
 
 const Borrows: React.FC<{ assets: BorrowAsset[] }> = ({ assets }) => {
   const total = React.useMemo(() => {
     return assets.reduce(
-      (memo, next) => memo + Number(bigNumberToString(next.daiWeiPriceTotal)),
-      0
+      (memo, next) =>
+        next.daiWeiPriceTotal !== null ? memo.add(next.daiWeiPriceTotal) : memo,
+      constants.Zero
     );
   }, [assets]);
+
   const borrowDivider = React.useMemo(
     () => <Box h="0.1rem" backgroundColor="primary.50" />,
     []
@@ -80,7 +40,7 @@ const Borrows: React.FC<{ assets: BorrowAsset[] }> = ({ assets }) => {
           pt={6}
         >
           <Text>Total</Text>
-          <Text fontWeight="bold">$ {total.toFixed(2)}</Text>
+          <Text fontWeight="bold">$ {bigNumberToString(total, 2)}</Text>
         </Flex>
       </Flex>
     );

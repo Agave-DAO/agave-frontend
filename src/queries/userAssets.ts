@@ -126,7 +126,7 @@ export const useUserVariableDebtTokenBalances =
     }
   );
 
-interface VariableDebtTokenBalancesDaiWei {
+export interface VariableDebtTokenBalancesDaiWei {
   symbol: string;
   tokenAddress: string;
   balance: BigNumber;
@@ -207,7 +207,7 @@ export const useUserReserveAssetBalances =
     }
   );
 
-interface ReserveAssetBalancesDaiWei {
+export interface ReserveAssetBalancesDaiWei {
   symbol: string;
   tokenAddress: string;
   balance: BigNumber;
@@ -327,7 +327,7 @@ export const useUserDepositAssetBalancesWithReserveInfo =
     }
   );
 
-interface DepositAssetBalancesDaiWei {
+export interface DepositAssetBalancesDaiWei {
   symbol: string;
   aSymbol: string;
   tokenAddress: string;

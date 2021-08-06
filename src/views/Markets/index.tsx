@@ -105,7 +105,7 @@ const TotalBorrowedView: React.FC<{
 
   return React.useMemo(() => {
     const data = totalBorrowed.data;
-    if (data && data.dai != null) {
+    if (data && data.dai !== null) {
       const daiString = data.dai.round(2).toUnsafeFloat().toLocaleString();
       const weiString = (
         data.wei.mul(1000).div(weiPerToken(data.assetDecimals)).toNumber() /
@@ -305,6 +305,7 @@ const AssetTable: React.FC<{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
             bg: { base: "primary.500", md: "primary.900" },
             whiteSpace: "nowrap",
+			height:"55px"
           }}
           cellProps={{
             borderBottom: "none",

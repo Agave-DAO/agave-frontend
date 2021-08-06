@@ -35,12 +35,12 @@ export const internalAddressesPerNetwork: Record<
   rinkeby: {
     chainName: "rinkeby",
     chainId: 4,
-    lendingPool: "0xeBEb4Ff34423eA229967D56D7AE1dB270e0cAc8F",
+    lendingPool: "0x1E6A0Ae721ee7598B7FA53Ea91A93313b729e2A9",
     staking: "0xdefd31e8c8e5e7db1d2e2204c99d006e1607554b",
 
-    agaveOracle: "0xb42a48F27150469d8a55dA3ad258B73a37239451",
-    aaveProtocolDataProvider: "0x0223f6FE9c7d4AA52C8C1877efEB46DcabC5270B",
-    wrappedNativeGateway: "0x90Df46541E7a42e85E57CA92C29F0c8338c88BDd",
+    agaveOracle: "0xf1771FEcA72fbC347AD78f2B9D766EB7d97d4310",
+    aaveProtocolDataProvider: "0xb423A3A2b52E60e3e34968Dad6ed788e2575cd71",
+    wrappedNativeGateway: "0x8149c8E0F3561A89E343853a7f20A985374dca62",
 
     explorer: "https://rinkeby.etherscan.io",
   },
