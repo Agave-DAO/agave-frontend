@@ -84,7 +84,6 @@ const theme = extendTheme({
         borderRadius: "10px",
         background: "primary.100",
         opacity: "0.8",
-        opacity:"0.8",
         // "-webkit-box-shadow": "inset 0 0 6px rgba(0,0,0,0.5)",
       },
       "::-webkit-scrollbar-thumb:window-inactive": {
