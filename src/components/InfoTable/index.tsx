@@ -53,8 +53,8 @@ const TableWrapper = styled.div`
         border-radius: 2px;
         transition: all 0.2s ease 0s;
         border-bottom: 1px solid rgb(241, 241, 243);
-        background: ${(props) => props.theme.color.bgWhite};
-        color: ${(props) => props.theme.color.textPrimary};
+        background: ${props => props.theme.color.bgWhite};
+        color: ${props => props.theme.color.textPrimary};
 
         td {
           display: flex;
@@ -92,15 +92,15 @@ const TableWrapper = styled.div`
             font-weight: 600;
 
             &.yellow {
-              color: ${(props) => props.theme.color.yellow};
+              color: ${props => props.theme.color.yellow};
             }
 
             &.blue {
-              color: ${(props) => props.theme.color.blue};
+              color: ${props => props.theme.color.blue};
             }
 
             &.pink {
-              color: ${(props) => props.theme.color.pink};
+              color: ${props => props.theme.color.pink};
             }
           }
         }
@@ -120,24 +120,19 @@ function InfoTable<T extends object>({
   columns: Column<T>[];
   data: T[];
 }) {
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable<T>({
-    columns,
-    data,
-  });
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
+    useTable<T>({
+      columns,
+      data,
+    });
 
   return (
     <TableWrapper>
       <table {...getTableProps()}>
         <thead>
-          {headerGroups.map((headerGroup) => (
+          {headerGroups.map(headerGroup => (
             <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
+              {headerGroup.headers.map(column => (
                 <th {...column.getHeaderProps()}>
                   <div className="header-column">
                     <span

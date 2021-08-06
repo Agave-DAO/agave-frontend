@@ -1,5 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 const CardWrapper = styled.div`
   flex: 1 1 0%;
@@ -14,11 +14,7 @@ const CardWrapper = styled.div`
 `;
 
 const Card: React.FC<{}> = ({ children }) => {
-  return (
-    <CardWrapper>
-      {children}
-    </CardWrapper>
-  );
+  return <CardWrapper>{children}</CardWrapper>;
 };
 
 export default Card;

@@ -188,7 +188,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
             </Text>
           </HStack>
         </Stack>
-        <CollateralComposition/>
+        <CollateralComposition />
       </Flex>
     </VStack>
   );

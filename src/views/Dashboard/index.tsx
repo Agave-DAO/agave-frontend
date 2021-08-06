@@ -2,7 +2,7 @@ import React from "react";
 import { DashboardLayout } from "./layout";
 import {
   useUserDepositAssetBalancesWithReserveInfo,
-  useUserVariableDebtTokenBalances
+  useUserVariableDebtTokenBalances,
 } from "../../queries/userAssets";
 import { BigNumber } from "ethers";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -19,7 +19,9 @@ export interface AssetData {
 export const Dashboard: React.FC<{}> = () => {
   // Overall borrow information
   const { account: userAccountAddress } = useAppWeb3();
-  const { data: userAccountData } = useUserAccountData(userAccountAddress ?? undefined);
+  const { data: userAccountData } = useUserAccountData(
+    userAccountAddress ?? undefined
+  );
   const healthFactor = userAccountData?.healthFactor;
   const collateral = userAccountData?.totalCollateralEth;
   const borrowed = userAccountData?.totalDebtEth;
@@ -27,17 +29,20 @@ export const Dashboard: React.FC<{}> = () => {
   // Borrow list
   const borrows = useUserVariableDebtTokenBalances();
   const borrowedList: AssetData[] = React.useMemo(
-    () => (borrows?.data?.filter(asset => !asset.balance.isZero()) ?? []),
+    () => borrows?.data?.filter(asset => !asset.balance.isZero()) ?? [],
     [borrows]
   );
 
   // Deposit list
   const balances = useUserDepositAssetBalancesWithReserveInfo();
   const depositedList: AssetData[] = React.useMemo(
-    () => (balances?.data?.filter(asset => !asset.balance.isZero()) ?? []).map(a => ({ ...a, backingReserve: a.reserve })),
+    () =>
+      (balances?.data?.filter(asset => !asset.balance.isZero()) ?? []).map(
+        a => ({ ...a, backingReserve: a.reserve })
+      ),
     [balances]
   );
- 
+
   return (
     <DashboardLayout
       borrowed={borrowed}

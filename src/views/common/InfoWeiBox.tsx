@@ -1,5 +1,11 @@
 import React from "react";
-import { VStack, Flex, Text, StackProps, useMediaQuery } from "@chakra-ui/react";
+import {
+  VStack,
+  Flex,
+  Text,
+  StackProps,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import { BigNumber, FixedNumber } from "ethers";
 import { WeiBox } from "../../components/Actions/WeiBox";
 import { fontSizes } from "../../utils/constants";
@@ -14,7 +20,7 @@ const InfoWeiBox: React.FC<
     setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   } & StackProps
 > = ({ mode, balance, currency, amount, setAmount, ...props }) => {
-  const [isSmallerThan768] = useMediaQuery("(max-width: 765px)")
+  const [isSmallerThan768] = useMediaQuery("(max-width: 765px)");
   return (
     <VStack fontSize="1.5rem" {...props}>
       <Flex
@@ -26,14 +32,15 @@ const InfoWeiBox: React.FC<
           Available to {mode}
         </Text>
         <Text color="white" fontSize="inherit" textTransform="capitalize">
-          {balance && FixedNumber.fromValue(balance, 18).toString().slice(0,8)} {currency}
+          {balance && FixedNumber.fromValue(balance, 18).toString().slice(0, 8)}{" "}
+          {currency}
         </Text>
       </Flex>
       <WeiBox
         amount={amount}
         decimals={18}
         setAmount={setAmount}
-        icon={ isSmallerThan768? null : <TokenIcon symbol={currency} />}
+        icon={isSmallerThan768 ? null : <TokenIcon symbol={currency} />}
         maxAmount={balance}
       />
     </VStack>

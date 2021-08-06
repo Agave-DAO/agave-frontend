@@ -4,11 +4,10 @@ import { useHistory } from "react-router-dom";
 import { store as NotificationManager } from "react-notifications-component";
 import Button from "../../components/Button";
 import { IMarketData } from "../../utils/constants";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString } from "../../utils/fixedPoint";
 // import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
 
 const ActionDetailWrapper = styled.div`
-
   .content-wrapper {
     padding: 15px 0px;
     margin: 20px 0px 10px;
@@ -17,7 +16,7 @@ const ActionDetailWrapper = styled.div`
     align-items: center;
     justify-content: center;
     flex: 1 1 0%;
-    background: ${(props) => props.theme.color.bgWhite};
+    background: ${props => props.theme.color.bgWhite};
 
     .basic-form {
       max-width: 500px;
@@ -35,13 +34,13 @@ const ActionDetailWrapper = styled.div`
           font-weight: bold;
           text-align: center;
           margin-bottom: 10px;
-          color: ${(props) => props.theme.color.pink};
+          color: ${props => props.theme.color.pink};
         }
 
         .basic-form-header-content {
           font-size: 16px;
           text-align: center;
-          color: ${(props) => props.theme.color.textPrimary};
+          color: ${props => props.theme.color.textPrimary};
         }
       }
 
@@ -57,10 +56,10 @@ const ActionDetailWrapper = styled.div`
           justify-content: space-between;
           font-size: 14px;
           margin-bottom: 5px;
-          color: ${(props) => props.theme.color.textPrimary};
+          color: ${props => props.theme.color.textPrimary};
 
           .basic-form-content-top-label {
-            color: ${(props) => props.theme.color.textPrimary};
+            color: ${props => props.theme.color.textPrimary};
             font-weight: 400;
             font-size: 14px;
           }
@@ -70,7 +69,7 @@ const ActionDetailWrapper = styled.div`
             align-items: center;
             justify-content: flex-end;
             flex: 1 1 0%;
-            color: ${(props) => props.theme.color.textPrimary};
+            color: ${props => props.theme.color.textPrimary};
 
             span {
               font-weight: 600;
@@ -86,7 +85,7 @@ const ActionDetailWrapper = styled.div`
           padding: 0px 15px;
           border-radius: 2px;
           transition: all 0.2s ease 0s;
-          border: 1px solid ${(props) => props.theme.color.bgSecondary};
+          border: 1px solid ${props => props.theme.color.bgSecondary};
 
           .image-section {
             padding-right: 10px;
@@ -106,7 +105,7 @@ const ActionDetailWrapper = styled.div`
               box-shadow: none;
               outline: none;
               opacity: 1;
-              color: ${(props) => props.theme.color.textPrimary};
+              color: ${props => props.theme.color.textPrimary};
 
               &::-webkit-inner-spin-button {
                 -webkit-appearance: none;
@@ -119,7 +118,7 @@ const ActionDetailWrapper = styled.div`
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            color: ${(props) => props.theme.color.pink};
+            color: ${props => props.theme.color.pink};
             transition: all 0.2s ease 0s;
 
             &:hover {
@@ -146,14 +145,19 @@ export interface ActionDetailProps {
   balance: any; // Type?
   actionName: string;
   actionBaseRoute: string;
-};
+}
 
-export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, actionName, actionBaseRoute }) => {
+export const ActionDetail: React.FC<ActionDetailProps> = ({
+  asset,
+  balance,
+  actionName,
+  actionBaseRoute,
+}) => {
   const history = useHistory();
   const [amountStr, setAmountStr] = useState<string>("");
   const walletBalance = bigNumberToString(balance);
 
-  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+  const handleInputChange: React.ChangeEventHandler<HTMLInputElement> = e => {
     setAmountStr(e.target.value);
   };
 
@@ -219,8 +223,8 @@ export const ActionDetail: React.FC<ActionDetailProps> = ({ asset, balance, acti
               How much would you like to {actionName}?
             </div>
             <div className="basic-form-header-content">
-              Please enter an amount you would like to {actionName}.
-              The maximum amount you can {actionName} is shown below.
+              Please enter an amount you would like to {actionName}. The maximum
+              amount you can {actionName} is shown below.
             </div>
           </div>
           <div className="basic-form-content">

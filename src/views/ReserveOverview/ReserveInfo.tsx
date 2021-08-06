@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import APYCard from "./APYCards";
 import StatCard from "./StatCard";
 import MiddleCard from "./middleCards";
@@ -13,6 +13,9 @@ import { useTotalBorrowedForAsset } from "../../queries/totalBorrowedForAsset";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import { useDisclosure } from "@chakra-ui/hooks";
+import { fontSizes, spacings } from "../../utils/constants";
+import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
 import { UnlockIcon, LockIcon } from "@chakra-ui/icons";
 import {
@@ -24,6 +27,7 @@ import {
   Container,
   Box,
   Center,
+  Button,
 } from "@chakra-ui/react";
 
 // ** conversions and helpers
@@ -81,7 +85,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
     : undefined;
 
   const reserveSize = totalBorrowedForAsset?.dai?._value
-    ? `$${round2Fixed(
+    ? `$ ${round2Fixed(
         parseFloat(bigNumberToString(liquidity)) * price +
           parseFloat(totalBorrowedForAsset.dai._value)
       )}`
@@ -107,15 +111,13 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   // const variableOverTotal;
 
   // ** Bottom Stat Cards
-  const ltv = reserveData?.ltv._value
-    ? parseFloat(reserveData?.ltv._value) * 100
-    : "~";
-  const liqThrsh = reserveData?.liquidationThreshold._value
-    ? `${reserveData?.liquidationThreshold._value.substring(27, 25)}%`
-    : "0";
-  const liqPen = reserveData?.liquidationBonus._value
-    ? `${reserveData?.liquidationBonus._value.substring(27, 24)}%`
-    : "0";
+  const ltv = reserveData?.rawltv ? reserveData?.rawltv.toNumber() / 100 : "-";
+  const liqThrsh = reserveData?.rawliquidationThreshold
+    ? reserveData?.rawliquidationThreshold.toNumber() / 100
+    : "-";
+  const liqPen = reserveData?.rawliquidationBonus
+    ? reserveData?.rawliquidationBonus.toNumber() / 100 - 100
+    : "-";
   const collateral = reserveData?.usageAsCollateralEnabled ? "Yes" : "No";
   const stable = reserveData?.stableBorrowRateEnabled ? "Yes" : "No";
 
@@ -124,6 +126,37 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   const [isSmallTab] = useMediaQuery("(max-width: 800px)");
   const [isLargePhone] = useMediaQuery("(max-width: 600px)");
   const [isMobile] = useMediaQuery("(max-width: 450px)");
+
+  const [modal_type, setModal] = useState(MODAL_TYPES.HEALTH_FACTOR);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const setModalOpen = React.useCallback(
+    (selector: string) => {
+      switch (selector) {
+        case "Maximum LTV": {
+          setModal(MODAL_TYPES.MAXIMUM_LTV);
+          break;
+        }
+        case "Liquidity Threshold": {
+          setModal(MODAL_TYPES.LIQUIDITY_THRESHOLD);
+          //statements;
+          break;
+        }
+        case "Liquidity Penalty": {
+          setModal(MODAL_TYPES.LIQUIDITY_PENALTY);
+
+          break;
+        }
+        default: {
+          setModal(MODAL_TYPES.HEALTH_FACTOR);
+          break;
+        }
+      }
+
+      onOpen();
+    },
+    [onOpen]
+  );
 
   // ** Component Return
   return (
@@ -134,10 +167,10 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
         flexDirection="column"
         textColor="white"
         minWidth="70%"
-        pr={{base:"auto", lg:"2rem"}}
+        pr={{ base: "auto", lg: "2rem" }}
         marginInlineEnd="0px"
         marginInlineStart="0px"
-        overflowX={{base: "hidden" }}
+        overflowX={{ base: "hidden" }}
       >
         <Text fontSize="2xl" color="white" padding="1rem">
           Reserve Status & Configuration
@@ -173,7 +206,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                     </Text>
                   </Flex>
                   <Text fontSize="3xl" color="white" align="right">
-                    ${liquidityPrice}
+                    $ {liquidityPrice}
                   </Text>
                   <Box>
                     <Text fontSize="lg" color="white" align="right">
@@ -209,7 +242,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                     <LockIcon w={4} h={4} color="yellow.400" margin="0.25rem" />
                   </Flex>
                   <Text fontSize="3xl" color="white" align="left">
-                    ${totalBorrowedPrice}
+                    $ {totalBorrowedPrice}
                   </Text>
                   <Box>
                     <Text fontSize="lg" color="white" align="left">
@@ -285,16 +318,21 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 value={ltv}
                 type="%"
                 enableModal={true}
+                modalOpen={setModalOpen}
               />
               <StatCard
                 title="Liquidity Threshold"
                 value={liqThrsh}
+                type="%"
                 enableModal={true}
+                modalOpen={setModalOpen}
               />
               <StatCard
                 title="Liquidity Penalty"
                 value={liqPen}
+                type="%"
                 enableModal={true}
+                modalOpen={setModalOpen}
               />
               <StatCard
                 title="Used As Collateral"
@@ -310,6 +348,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
           </Box>
         </Box>
       </Flex>
+      <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </React.Fragment>
   );
 };

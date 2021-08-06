@@ -61,9 +61,9 @@ export function fixedNumberToPercentage(
   let outputStr = (inputAsFloat * 100).toFixed(decimalsTarget);
   // trim trailing 0's and the dot if it's the decimal separator
   while (decimalsTarget >= minimumNumberOfDecimals) {
-    if (outputStr.endsWith("0") || (decimalsTarget = 0 && outputStr.endsWith("."))) {
+    if (outputStr.endsWith("0") || (decimalsTarget === 0 && outputStr.endsWith("."))) {
       outputStr = outputStr.slice(0, -1);
-    } else decimalsTarget = 0;
+    } else decimalsTarget = -1;
     decimalsTarget--;
   }
   return outputStr;
