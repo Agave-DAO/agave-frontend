@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, ButtonGroup } from "@chakra-ui/react"
+import { Button, ButtonGroup } from "@chakra-ui/react";
 
 export function Switch<T>({
   values,
@@ -12,9 +12,11 @@ export function Switch<T>({
 }) {
   return (
     <ButtonGroup size="lg" isAttached variant="solid" rounded="none">
-      <Button 
+      <Button
         mr="-px"
-        backgroundColor={ activeValue === values[0] ? "secondary.900" : "primary.500"}
+        backgroundColor={
+          activeValue === values[0] ? "secondary.900" : "primary.500"
+        }
         _hover={{ bg: "primary.50" }}
         _focus={{
           borderColor: "secondary.900",
@@ -25,7 +27,9 @@ export function Switch<T>({
       </Button>
       <Button
         mr="-px"
-        backgroundColor={ activeValue === values[1] ? "secondary.900" : "primary.500"}
+        backgroundColor={
+          activeValue === values[1] ? "secondary.900" : "primary.500"
+        }
         _hover={{ bg: "primary.50" }}
         _focus={{
           borderColor: "secondary.900",

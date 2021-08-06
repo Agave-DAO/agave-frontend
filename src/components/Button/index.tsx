@@ -98,24 +98,24 @@ const Button: React.FC<
 const StyledButton = styled.div<
   { disabled?: boolean | undefined } & CSSProperties
 >`
-  background-color: ${(props) => props.backgroundColor};
+  background-color: ${props => props.backgroundColor};
   border: 1px solid transparent;
-  border-radius: ${(props) => props.borderRadius};
+  border-radius: ${props => props.borderRadius};
   box-shadow: none;
-  color: ${(props) => (!props.disabled ? props.color : `${props.color}55`)};
+  color: ${props => (!props.disabled ? props.color : `${props.color}55`)};
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: ${(props) => props.fontSize}px;
-  width: ${(props) => props.width}px;
-  height: ${(props) => props.height}px;
-  pointer-events: ${(props) => (!props.disabled ? undefined : "none")};
+  font-size: ${props => props.fontSize}px;
+  width: ${props => props.width}px;
+  height: ${props => props.height}px;
+  pointer-events: ${props => (!props.disabled ? undefined : "none")};
   transition: all 0.2s ease 0s;
   &:hover {
-    box-shadow: ${(props) => props.boxShadow};
-    border: 1px solid ${(props) => props.borderColor};
-    opacity: ${(props) => props.opacity};
+    box-shadow: ${props => props.boxShadow};
+    border: 1px solid ${props => props.borderColor};
+    opacity: ${props => props.opacity};
   }
 `;
 

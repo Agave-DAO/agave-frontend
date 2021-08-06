@@ -1,6 +1,22 @@
-import React from "react";
-import { Text, Box } from "@chakra-ui/react";
+import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Modal,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  ModalContent,
+  StackDivider,
+  Text,
+  VStack,
+  ModalBody,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import { ModalIcon } from "../../utils/icons";
+import { fontSizes, spacings } from "../../utils/constants";
 
 interface Props {
   title: string;
@@ -8,6 +24,7 @@ interface Props {
   value: any;
   type?: string;
   enableModal?: boolean;
+  modalOpen?: any;
 }
 
 const StatCard: React.FC<Props> = ({ ...props }) => {
@@ -33,7 +50,7 @@ const StatCard: React.FC<Props> = ({ ...props }) => {
               position="relative"
               top="0"
               left={{ base: "0.5", md: "2" }}
-              onOpen={() => {}}
+              onOpen={() => props.modalOpen(props.title)}
             />
           )}
         </Box>

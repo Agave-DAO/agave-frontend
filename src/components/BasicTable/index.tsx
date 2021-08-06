@@ -103,7 +103,8 @@ const TableWrapper = styled.div`
         cursor: pointer;
 
         &:hover {
-          box-shadow: ${props => props.theme.color.secondary[100]} 0px 0px 10px 0px;
+          box-shadow: ${props =>
+            props.theme.color.secondary[100]} 0px 0px 10px 0px;
         }
 
         td {

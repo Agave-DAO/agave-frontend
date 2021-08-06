@@ -81,7 +81,7 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
   return React.useMemo(
     () => (
       <ThreeStateSwitch
-        state={mutationIsLoading ? null : (reserveUsedAsCollateral ?? null)}
+        state={mutationIsLoading ? null : reserveUsedAsCollateral ?? null}
         onClick={toggleUseAssetAsCollateral}
       />
     ),
@@ -156,11 +156,14 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
         accessor: row => row.backingReserve?.tokenAddress ?? row.tokenAddress,
-        Cell: (({ value }) => (
+        Cell: (({ value }) =>
           /* There's a difference between the deposit APY and the borrow APR.
              Lending rates are obviously higher than borrowing rates */
-          mode === DashboardTableType.Borrow ? <BorrowAPRView tokenAddress={value} /> : <DepositAPYView tokenAddress={value} />
-        )) as Renderer<CellProps<AssetData, string>>,
+          mode === DashboardTableType.Borrow ? (
+            <BorrowAPRView tokenAddress={value} />
+          ) : (
+            <DepositAPYView tokenAddress={value} />
+          )) as Renderer<CellProps<AssetData, string>>,
       },
       {
         Header: "Collateral",

@@ -16,9 +16,12 @@ const ReserveBanner: React.FC<{}> = (props: any) => {
       marginRight="auto"
       fontWeight="bold"
     >
-      <Text fontSize="4xl" mx="1rem"> {title}</Text>
+      <Text fontSize="4xl" mx="1rem">
+        {" "}
+        {title}
+      </Text>
       <ColoredText fontSize="4xl" textTransform="capitalize">
-        {props.match.params.assetName ?? "-"} 
+        {props.match.params.assetName ?? "-"}
       </ColoredText>
       {/*}
       <Text align="left" fontSize="3xl">

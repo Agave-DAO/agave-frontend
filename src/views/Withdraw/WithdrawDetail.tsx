@@ -13,7 +13,7 @@ import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { bigNumberToString } from "../../utils/fixedPoint"
+import { bigNumberToString } from "../../utils/fixedPoint";
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import {
@@ -72,20 +72,20 @@ const WithdrawTitle = "Withdraw overview";
 export interface WithdrawBannerProps {}
 
 export const WithdrawBanner: React.FC<{}> = () => {
-	const history = useHistory();
-	return (
-	  <Center width="100%" justifyContent="space-between">
-		<Text
-		  fontWeight="bold"
-		  color="white"
-		  fontSize={{ base: "1.8rem", md: "2.4rem" }}
-		  onClick={() => history.push("/deposit")}
-		>
-		  Withdraw
-		</Text>		  
-	  </Center>
-	);
-  };
+  const history = useHistory();
+  return (
+    <Center width="100%" justifyContent="space-between">
+      <Text
+        fontWeight="bold"
+        color="white"
+        fontSize={{ base: "1.8rem", md: "2.4rem" }}
+        onClick={() => history.push("/deposit")}
+      >
+        Withdraw
+      </Text>
+    </Center>
+  );
+};
 
 const InitialComp: React.FC<{
   state: InitialState;
@@ -246,10 +246,9 @@ const WithdrawDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
 };
 
 export const WithdrawDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
@@ -290,7 +289,7 @@ export const WithdrawDetail: React.FC = () => {
             }
             size="xl"
             padding="1rem"
-			m="3rem"
+            m="3rem"
           >
             Take me back!
           </Button>

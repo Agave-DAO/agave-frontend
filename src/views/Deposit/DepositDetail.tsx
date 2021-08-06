@@ -293,10 +293,9 @@ const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
 };
 
 export const DepositDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
