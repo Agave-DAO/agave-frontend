@@ -1,114 +1,72 @@
-import { useMemo, useState } from "react";
-import { Text, Center, Button, Badge } from "@chakra-ui/react";
-import { Navbar } from "./navbar";
-import agaveLogo from "../../assets/image/agave-logo.svg";
-import darkMoon from "../../assets/image/dark-moon.svg";
-import lightMoon from "../../assets/image/light-moon.svg";
-import { selectAddress } from "../../features/auth/authSlice";
-import { useAppSelector } from "../../redux/hooks";
-import { NavLink } from "react-router-dom";
-import { NavTabLink } from "./tab-link";
-import { fontSizes } from "../../utils/constants";
+import {
+  Flex,
+  HStack,
+  TabList,
+  Tabs,
+  useColorModeValue as mode,
+} from "@chakra-ui/react";
+import React from "react";
+import { UserProfile } from "./NavComponents/userprofile";
+import { Links } from "./NavComponents/links";
+import { Brand } from "./NavComponents/brand";
+import { MobileNavOverlay } from "./mobile-nav";
+import { AgaveBackground } from "./NavComponents/BackgroundImage";
 
-function Header() {
-  // eslint-disable-next-line
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const address: string | undefined = useAppSelector(selectAddress);
-  const addressPretty = useMemo(
-    () =>
-      address
-        ? `${address.substring(0, 4)}...${address.substring(
-            address.length - 4,
-            address.length
-          )}`
-        : undefined,
-    [address]
-  );
-
+const Header: React.FC<{}> = () => {
   return (
-    <Navbar>
-      <Navbar.Brand>
-        <Center as={NavLink} to="/" marginEnd={6}>
-          <img src={agaveLogo} alt="AGAVE ALT" />
-          <Text color="white" ml={4} fontWeight="bold">
-            AGAVE
-          </Text>
-        </Center>
-      </Navbar.Brand>
-      <Navbar.Links>
-        <NavTabLink w="14rem" exact to="/dashboard" fontWeight="bold">
-          DASHBOARD
-        </NavTabLink>
-        <NavTabLink exact to="/markets" fontWeight="bold">
-          MARKETS
-        </NavTabLink>
-        <NavTabLink exact to="/borrow" fontWeight="bold">
-          BORROW
-        </NavTabLink>
-        <NavTabLink exact to="/deposit" fontWeight="bold">
-          DEPOSIT
-        </NavTabLink>
-        <NavTabLink exact to="/stake" fontWeight="bold">
-          STAKE
-        </NavTabLink>
-      </Navbar.Links>
-      <Navbar.UserProfile>
-        <Center
-          width="3rem"
-          height="3rem"
-          rounded="lg"
-          bg="primary.500"
-          cursor="pointer"
-          display="none"
+    <>
+      <Flex display={{ base: "none", md: "block" }}>
+        <Flex
+          zIndex="1"
+          className="NavBar"
+          bg={mode("primary.900", "secondary.900")}
+          boxShadow="none"
+          justifyContent="space-between"
+          alignItems="center"
+          p="0px 30px"
+          h="50px"
+          top="0"
+          wrap="wrap"
+          position="static"
+          borderBottomColor={"primary.50"}
+          borderBottomWidth="1px"
+          overflowY="hidden"
         >
-          <img src={isDarkMode ? darkMoon : lightMoon} alt="theme-mode" />
-        </Center>
-        <Center
-          minWidth="10rem"
-          height="3rem"
-          fontSize={fontSizes.md}
-          mx="1.5rem"
-          textTransform="uppercase"
-          color="white"
-          bg="primary.500"
-          rounded="lg"
-          display="none"
-        >
-          0 AGVE
-        </Center>
-        {addressPretty ? (
-          <Center
-            background="primary.500"
-            rounded="lg"
-            minWidth="10rem"
-            height="3rem"
-            color="white"
+          <Flex className="Brand" flex={{ base: "0", md: "1" }} zIndex={3}>
+            <Brand />
+          </Flex>
+          <Tabs
+            flex="3"
+            variant="unstyled"
+            className="Tabs"
+            display={{ base: "none", md: "flex" }}
+            h="100%"
+            justifyContent="center"
+            alignItems="center"
+            zIndex={3}
           >
-            <Badge
-              bg="yellow"
-              rounded="full"
-              width="1rem"
-              height="1rem"
-              mr="5px"
-            />
-            <Text fontSize={fontSizes.md}>{addressPretty}</Text>
-          </Center>
-        ) : (
-          <Button
-            background="primary.500"
-            rounded="lg"
-            minWidth="10rem"
-            height="3rem"
-            fontSize={fontSizes.md}
-            fontWeight="normal"
-            color="white"
+            <TabList className="TabList" display="flex" h="100%">
+              <Links />
+            </TabList>
+          </Tabs>
+          <HStack
+            className="profile"
+            flex="1"
+            justify="flex-end"
+            display={{ base: "none", md: "flex" }}
+            spacing={3}
+            zIndex={3}
           >
-            Connect
-          </Button>
-        )}
-      </Navbar.UserProfile>
-    </Navbar>
+            <UserProfile />
+          </HStack>
+        </Flex>
+        <AgaveBackground top="" />
+      </Flex>
+      <Flex display={{ base: "block", md: "none" }}>
+        <MobileNavOverlay />
+      </Flex>
+    </>
   );
-}
+};
 
 export default Header;
