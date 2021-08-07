@@ -10,7 +10,6 @@ import { BigNumber, BigNumberish, FixedNumber } from "ethers";
 import { WeiBox } from "../../components/Actions/WeiBox";
 import { fontSizes } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";
-import { weiPerToken } from "../../queries/decimalsForToken";
 
 const InfoWeiBox: React.FC<
   {

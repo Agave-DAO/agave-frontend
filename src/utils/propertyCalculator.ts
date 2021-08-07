@@ -96,7 +96,6 @@ function newHealthFactorGivenAssetsData(
   }, constants.Zero);
 
   // Collateral Calculations
-
   const changeCollateralMaxCapacity =
     tokenData &&
     tokenData.tokenConfig.rawliquidationThreshold &&
@@ -107,7 +106,7 @@ function newHealthFactorGivenAssetsData(
       ? tokenData.tokenConfig.rawliquidationThreshold
           .mul(amount)
           .mul(tokenData.assetPrice)
-          .div(weiPerToken(22))
+          .div(weiPerToken(tokenData?.tokenConfig.decimals.add(4)))
       : constants.Zero;
 
   const newTotalCollateralMaxCapacity =
@@ -130,7 +129,9 @@ function newHealthFactorGivenAssetsData(
     tokenData &&
     tokenData.assetPrice &&
     amount > constants.Zero
-      ? amount.mul(tokenData.assetPrice).div(weiPerToken(18))
+      ? amount
+          .mul(tokenData.assetPrice)
+          .div(weiPerToken(tokenData?.tokenConfig.decimals))
       : constants.Zero;
 
   const newTotalBorrowsvalue =

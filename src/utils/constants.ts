@@ -1,8 +1,9 @@
-import daiImg from "../assets/image/coins/dai.svg";
+import wxdaiImg from "../assets/image/coins/wxdai.svg";
 import ethImg from "../assets/image/coins/eth.svg";
 import agaveImg from "../assets/image/coins/agave.png";
 import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
+import usdcImg from "../assets/image/coins/usdc.svg";
 import { theme } from "@chakra-ui/theme";
 export const LINEAR_GRADIENT_BG =
   "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%)";
@@ -11,17 +12,16 @@ export const spacings = {
   md: "1.3rem",
 };
 
-
-export const assetColor:{ [key: string]: string }  = {
-	USDC: theme.colors.blue[400],
-	DAI: theme.colors.red[400],
-	WETH: theme.colors.gray[100],
-	AGVE: theme.colors.green[400],
-	HNY: theme.colors.yellow[400],
-	WBTC: theme.colors.orange[400],
-	STAKE: theme.colors.teal[400],
-	USDT: theme.colors.green[700],
-	LINK: theme.colors.pink[400]
+export const assetColor: { [key: string]: string } = {
+  USDC: theme.colors.blue[400],
+  DAI: theme.colors.red[400],
+  WETH: theme.colors.gray[100],
+  AGVE: theme.colors.green[400],
+  HNY: theme.colors.yellow[400],
+  WBTC: theme.colors.orange[400],
+  STAKE: theme.colors.teal[400],
+  USDT: theme.colors.green[700],
+  LINK: theme.colors.pink[400],
 };
 
 export const fontSizes = {
@@ -39,7 +39,7 @@ const addresses: Readonly<Record<string, string>> = {
   wETH: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
   HNY: "0xa30CCf67b489d627De8F8c035F5b9676442646e0",
   wBTC: "0x64Ed1291Fe07AdE7BB261c7AA8491e4bc0E8DE1c",
-  DAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2",
+  wxDAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2",
 };
 
 export const imagesBySymbol: Record<string, string | undefined> = {
@@ -47,7 +47,8 @@ export const imagesBySymbol: Record<string, string | undefined> = {
   WETH: ethImg,
   HNY: honeyImg,
   WBTC: wbtcImg,
-  USDC: daiImg,
+  USDC: usdcImg,
+  WXDAI: wxdaiImg,
 };
 
 export interface IMarketData {
@@ -77,8 +78,8 @@ export interface IMarketDataTable {
 
 export const marketData: ReadonlyArray<IMarketData> = [
   {
-    name: "DAI",
-    img: daiImg,
+    name: "WXDAI",
+    img: wxdaiImg,
     market_size: 14300,
     liquidity: 12000,
     total_borrowed: 2300,

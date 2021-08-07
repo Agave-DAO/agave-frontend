@@ -2,7 +2,7 @@ import { QuestionIcon } from "@chakra-ui/icons";
 import { Image, ImageProps } from "@chakra-ui/image";
 import AgaveLogo from "../assets/image/colored-agave-logo.svg";
 import BatLogo from "../assets/image/coins/bat.svg";
-import DaiLogo from "../assets/image/coins/dai.svg";
+import WxdaiLogo from "../assets/image/coins/wxdai.svg";
 import EthLogo from "../assets/image/coins/eth.svg";
 import HoneyLogo from "../assets/image/coins/honey.webp";
 import UniLogo from "../assets/image/coins/uni.svg";
@@ -20,9 +20,9 @@ export function imageForTokenSymbol(symbol: string): string | null {
       return AgaveLogo;
     case "BAT":
       return BatLogo;
-    case "DAI":
-    case "agDAI":
-      return DaiLogo;
+    case "WXDAI":
+    case "agWXDAI":
+      return WxdaiLogo;
     case "ETH":
     case "WETH":
     case "agWETH":

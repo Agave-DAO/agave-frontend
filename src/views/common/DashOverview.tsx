@@ -48,7 +48,7 @@ export const DashOverviewIntro: React.FC<{
         py=".8rem"
         onClick={() => onSubmit(amount || BigNumber.from(0))}
       >
-        {balance && amount?.gt(balance) ? "Not enough Collateral" : "Continue"}
+        {balance && amount?.gt(balance) ? "Not enough Balance" : "Continue"}
       </Button>
     </VStack>
   );

@@ -11,6 +11,7 @@ import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
@@ -25,6 +26,8 @@ export const WizardOverviewWrapper: React.FC<{
   const currentHealthFactor = useUserAccountData(
     userAccountAddress ?? undefined
   )?.data?.healthFactor;
+
+  const { data: decimals } = useDecimalCountForToken(asset.tokenAddress);
 
   const newHealthFactor = useNewHealthFactorCalculator(
     amount,
@@ -64,7 +67,7 @@ export const WizardOverviewWrapper: React.FC<{
               boxSize={{ base: "1.5rem", md: "1.8rem" }}
             />
             <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
-              {bigNumberToString(amount)} {asset.symbol}
+              {bigNumberToString(amount, 5, decimals)} {asset.symbol}
             </Text>
           </HStack>
         </HStack>
@@ -106,7 +109,6 @@ export const WizardOverviewWrapper: React.FC<{
     ),
     [asset.symbol, amount, currentHealthFactor]
   );
-
   return (
     <VStack w="95%" spacing="0" p="1rem 2rem">
       <ColoredText
