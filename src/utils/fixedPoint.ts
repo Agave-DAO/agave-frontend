@@ -1,4 +1,3 @@
-import { PinInput } from "@chakra-ui/react";
 import { BigNumber, FixedFormat, FixedNumber } from "@ethersproject/bignumber";
 import { ethers } from "ethers";
 

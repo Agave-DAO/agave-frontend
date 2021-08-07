@@ -96,7 +96,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
     (row: { original: { symbol: string } }) => {
       linkpage && reactHistory.push(`/${linkpage}/${row.original?.symbol}`);
     },
-    []
+    [linkpage, reactHistory]
   );
   return React.useMemo(
     () => (
@@ -156,26 +156,18 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
       headStyle,
       rowStyle,
       cellStyle,
+      handleRowClick
     ]
   );
 };
 
 export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
-  linkpage,
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
   tableProps: tableStyle,
   headProps: headStyle,
   rowProps: rowStyle,
   cellProps: cellStyle,
 }) => {
-  const reactHistory = useHistory();
-  const handleRowClick = React.useCallback(
-    (row: { original: { symbol: string } }) => {
-      linkpage && reactHistory.push(`/${linkpage}/${row.original?.symbol}`);
-    },
-    []
-  );
-
   const headerGroup = headerGroups[0];
 
   return React.useMemo(
@@ -226,15 +218,13 @@ export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
       </Box>
     ),
     [
-      getTableProps,
       getTableBodyProps,
-      headerGroups,
       rows,
       prepareRow,
       tableStyle,
-      headStyle,
       rowStyle,
       cellStyle,
+      headerGroup,
     ]
   );
 };

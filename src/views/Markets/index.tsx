@@ -27,7 +27,7 @@ import {
   TableRenderer,
   MobileTableRenderer,
 } from "../../utils/htmlTable";
-import { Link } from "react-router-dom";
+
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
   ["markets", "totalMarketSize", "wholeDai"],

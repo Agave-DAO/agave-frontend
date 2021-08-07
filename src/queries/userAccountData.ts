@@ -1,6 +1,6 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
-import { divIfNotZeroUnsafe, FixedFromRay } from "../utils/fixedPoint";
+import { divIfNotZeroUnsafe } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";

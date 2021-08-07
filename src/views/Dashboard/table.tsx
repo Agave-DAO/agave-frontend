@@ -8,7 +8,6 @@ import { AssetData } from ".";
 import ColoredText from "../../components/ColoredText";
 import { useCollateralModeMutation } from "../../mutations/collateralMode";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
-import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useUserReserveData } from "../../queries/protocolReserveData";
 import { fontSizes } from "../../utils/constants";
 import {
@@ -76,7 +75,7 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
     }
     const shouldUseAsCollateral = !reserveUsedAsCollateral;
     mutate(shouldUseAsCollateral);
-  }, [reserveUsedAsCollateral]);
+  }, [reserveUsedAsCollateral, mutate, mutationIsLoading]);
 
   return React.useMemo(
     () => (
@@ -85,7 +84,7 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
         onClick={toggleUseAssetAsCollateral}
       />
     ),
-    [reserveUsedAsCollateral, toggleUseAssetAsCollateral]
+    [reserveUsedAsCollateral, toggleUseAssetAsCollateral, mutationIsLoading]
   );
 };
 
@@ -93,9 +92,7 @@ export const DashboardTable: React.FC<{
   mode: DashboardTableType;
   assets: AssetData[];
 }> = ({ mode, assets }) => {
-  const [isSmallerThan400, isSmallerThan900, isSmallerThan1200] = useMediaQuery(
-    ["(max-width: 400px)", "(max-width: 900px)", "(max-width: 1200px)"]
-  );
+  const isSmallerThan1200 = useMediaQuery("(max-width: 1200px)");
   const history = useHistory();
   const onActionClicked = React.useCallback(
     (route: String, asset: Readonly<ReserveTokenDefinition>) => {
@@ -233,9 +230,6 @@ export const DashboardTable: React.FC<{
     [mode, onActionClicked]
   );
 
-  const filterColumns =
-    mode === DashboardTableType.Deposit ? columns : columns?.splice(3, 1);
-
   const renderer = React.useMemo<TableRenderer<AssetData>>(
     () => table =>
       (
@@ -280,7 +274,7 @@ export const DashboardTable: React.FC<{
           }}
         />
       ),
-    []
+    [mode, isSmallerThan1200]
   );
 
   return (

@@ -1,42 +1,30 @@
 import {
   Box,
   HStack,
-  Stack,
   Text,
   VStack,
   useMediaQuery,
   Flex,
-  tokenToCSSVar,
   Grid,
-  GridItem,
   Popover,
-  Button,
   PopoverTrigger,
   PopoverContent,
-  PopoverHeader,
   PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
 } from "@chakra-ui/react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
-import { ethers } from "ethers";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
-import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
-import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
+// import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 import { BigNumber, constants } from "ethers";
-import { useUserDepositAssetBalances } from "../../queries/userAssets";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
-import { useProtocolReserveData } from "../../queries/protocolReserveData";
+// import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
-import { ModalIcon } from "../../utils/icons";
 import { TokenIcon } from "../../utils/icons";
 
 type WithdrawDashProps = {
@@ -56,26 +44,25 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
       ),
     [reserves, token.tokenAddress]
   );
-  const { data: reserveProtocolData } = useProtocolReserveData(
-    reserve?.tokenAddress
-  );
-  const { data: reserveConfiguration } = useProtocolReserveConfiguration(
-    reserve?.tokenAddress
-  );
+  // const { data: reserveProtocolData } = useProtocolReserveData(
+  //   reserve?.tokenAddress
+  // );
+  // const { data: reserveConfiguration } = useProtocolReserveConfiguration(
+  //   reserve?.tokenAddress
+  // );
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
   const { data: allReservesData } = useUserReserveAssetBalancesDaiWei();
-  const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
+  // const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
   const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
-  const { data: utilizationData } = useAssetUtilizationRate(token.tokenAddress);
   const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
-  const utilizationRate = utilizationData?.utilizationRate;
-  const liquidityAvailable = reserveProtocolData?.availableLiquidity;
-  const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
-  const maximumLtv = reserveConfiguration?.ltv;
+  // const utilizationRate = utilizationData?.utilizationRate;
+  // const liquidityAvailable = reserveProtocolData?.availableLiquidity;
+  // const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;
+  // const maximumLtv = reserveConfiguration?.ltv;
   const currentLtv = userAccountData?.currentLtv;
-  const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
+  // const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
 
   const totalCollateralValue = React.useMemo(() => {
@@ -110,6 +97,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
 
   const collateralData = collateralComposition.map((x, index) => {
     if (x !== null) return x.substr(0, x.indexOf(".") + 3);
+    return null;
   });
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([

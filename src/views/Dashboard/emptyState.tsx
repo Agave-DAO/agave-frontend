@@ -13,9 +13,6 @@ export const DashboardEmptyState: React.FC<{
   onClick: MouseEventHandler;
   props?: CenterProps;
 }> = ({ type, onClick, ...props }) => {
-  const renderType = React.useMemo(() => {
-    return type === EMPTY_TYPE.Deposit ? "deposited" : "borrowed";
-  }, [type]);
 
   return (
     <Center

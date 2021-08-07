@@ -12,19 +12,15 @@ import { Box, Center, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
-import { useUserAssetBalance } from "../../queries/userAssets";
 import { formatEther } from "ethers/lib/utils";
-import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import {
   useBorrowMutation,
   UseBorrowMutationProps,
 } from "../../mutations/borrow";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
-import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
-import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -104,13 +100,6 @@ const InitialComp: React.FC<{
       dispatch(createState("borrowTx", { amountToBorrow, ...state })),
     [state, dispatch]
   );
-  const newHealthFactor = useNewHealthFactorCalculator(
-    amount,
-    state.token.tokenAddress,
-    false,
-    true
-  );
-  //console.log(state.token.symbol ,"borrow: " +amount ," - new HF: " +  newHealthFactor?.toString())
   return (
     <DashOverviewIntro
       asset={state.token}
@@ -133,7 +122,6 @@ const BorrowTxComp: React.FC<{
   state: BorrowTXState;
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
-  const chainAddresses = useChainAddresses();
   const { account } = useAppWeb3();
   const borrowArgs = React.useMemo<UseBorrowMutationProps>(
     () => ({
@@ -141,7 +129,7 @@ const BorrowTxComp: React.FC<{
       amount: state.amountToBorrow,
       onBehalfOf: account ?? undefined,
     }),
-    [state, chainAddresses?.lendingPool]
+    [state, account]
   );
   const {
     borrowMutation: { mutateAsync },

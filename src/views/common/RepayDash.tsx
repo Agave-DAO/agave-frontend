@@ -6,13 +6,7 @@ import {
   VStack,
   useMediaQuery,
   Flex,
-  Popover,
-  PopoverBody,
-  PopoverTrigger,
-  PopoverContent,
-  Grid,
 } from "@chakra-ui/react";
-import { BigNumber, constants } from "ethers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
@@ -20,19 +14,10 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useUserAccountData } from "../../queries/userAccountData";
 import {
-  useUserReserveData,
-  useProtocolReserveData,
-  useUserReservesData,
-} from "../../queries/protocolReserveData";
-import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
-import {
   useUserAssetBalance,
-  useUserReserveAssetBalancesDaiWei,
   useUserVariableDebtForAsset,
-  useUserVariableDebtTokenBalances,
 } from "../../queries/userAssets";
-import { fontSizes, spacings, assetColor } from "../../utils/constants";
-import { ModalIcon } from "../../utils/icons";
+import { fontSizes, spacings } from "../../utils/constants";
 import { CollateralComposition } from "../../components/Chart/CollateralComposition";
 
 type RepayDashProps = {
@@ -42,10 +27,6 @@ type RepayDashProps = {
 export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
   // General
   const { account: userAccountAddress } = useAppWeb3();
-  const { data: reserves } = useAllReserveTokensWithData();
-  const tokenAddresses = reserves?.map(token => {
-    return token.tokenAddress;
-  });
 
   // Debts
   const { data: debt } = useUserVariableDebtForAsset(token.tokenAddress);

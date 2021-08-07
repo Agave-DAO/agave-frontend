@@ -1,6 +1,5 @@
 import React from "react";
 import { Text, Box, Tooltip, Flex } from "@chakra-ui/react";
-import { fontSizes } from "../../utils/constants";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon } from "../../utils/icons";
 import { DepositAsset } from "../../views/Deposit";
