@@ -15,7 +15,6 @@ import {
   PopoverFooter,
   useMediaQuery,
 } from "@chakra-ui/react";
-import { borrowListener } from "../../utils/contracts/events/events";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import { useCollateralComposition } from "../../hooks/collateralComposition";

@@ -5,7 +5,6 @@ import { store as NotificationManager } from "react-notifications-component";
 import Button from "../../components/Button";
 import { IMarketData } from "../../utils/constants";
 import { bigNumberToString } from "../../utils/fixedPoint";
-// import { internalAddresses } from "../../utils/contracts/contractAddresses/internalAddresses";
 
 const ActionDetailWrapper = styled.div`
   .content-wrapper {
@@ -185,8 +184,13 @@ export const ActionDetail: React.FC<ActionDetailProps> = ({
   /*
   useEffect(() => { (async () => {
     console.log(`${library} : ${address} : ${asset}`);
-    if (library && address && assetName) {
-      const contract = AgaveLendingABI__factory.connect(internalAddresses.Lending, library.getSigner());
+
+    if (library && address && assetName && chainId) {
+      const chainAddresses = getChainAddresses(chainId);
+      if (!chainAddresses) {
+        return undefined;
+      }
+      const contract = AgaveLendingABI__factory.connect(chainAddresses?.Lending, library.getSigner());
       let accountData;
       try {
         accountData = await contract.getUserAccountData(address);   

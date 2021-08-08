@@ -4,31 +4,35 @@ import { useWeb3React } from "@web3-react/core";
 import { Web3Provider } from '@ethersproject/providers';
 import { Erc20abi__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
-import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
+import { getChainAddresses } from "../utils/chainAddresses";
 
 export interface UseApprovedDto {
   approved: BigNumber | undefined;
-  approvedQueryKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined];
+  approvedQueryKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined, number | undefined];
 };
 
 export const useApproved = (asset: IMarketData | undefined): UseApprovedDto => {
-  const { account: address, library } = useWeb3React<Web3Provider>();
-  const approvedQueryKey = [address, library, asset] as const;
+  const { account: address, library, chainId } = useWeb3React<Web3Provider>();
+  const approvedQueryKey = [address, library, asset, chainId] as const;
   
   const {
     data: approved,
   } = useQuery(
     approvedQueryKey,
     async (ctx): Promise<BigNumber | undefined> => {
-      const [address, library, asset]: typeof approvedQueryKey = ctx.queryKey;
-      if (!address || !library || !asset) {
+      const [address, library, asset, chainId]: typeof approvedQueryKey = ctx.queryKey;
+      if (!address || !library || !asset || !chainId) {
+        return undefined;
+      }
+      const chainAddresses = getChainAddresses(chainId);
+      if (!chainAddresses) {
         return undefined;
       }
       const contract = Erc20abi__factory.connect(
         asset.contractAddress,
         library.getSigner()
       );
-      const allowance = await contract.allowance(address, internalAddresses.Lending);
+      const allowance = await contract.allowance(address, chainAddresses.lendingPool);
       return allowance;
     },
     {
