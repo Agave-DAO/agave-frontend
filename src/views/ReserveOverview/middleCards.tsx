@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Flex, Box, useMediaQuery } from "@chakra-ui/react";
+import { Text, Flex, Box } from "@chakra-ui/react";
 
 interface Props {
   title: string;
@@ -13,8 +13,8 @@ const MiddleCard: React.FC<Props> = ({ ...props }) => {
 
   // const [isLargeTab] = useMediaQuery("(max-width: 1200px)");
   // const [isSmallTab] = useMediaQuery("(max-width: 800px)");
-  const [isLargePhone] = useMediaQuery("(max-width: 600px)");
-  const [isMobile] = useMediaQuery("(max-width: 450px)");
+  // const [isLargePhone] = useMediaQuery("(max-width: 600px)");
+  // const [isMobile] = useMediaQuery("(max-width: 450px)");
 
   return (
     <React.Fragment>

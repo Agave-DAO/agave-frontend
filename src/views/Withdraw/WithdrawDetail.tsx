@@ -14,7 +14,6 @@ import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { bigNumberToString } from "../../utils/fixedPoint";
-import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import {
   useWithdrawMutation,
@@ -115,7 +114,6 @@ const WithdrawTxComp: React.FC<{
   state: WithdrawTXState;
   dispatch: (nextState: WithdrawState) => void;
 }> = ({ state, dispatch }) => {
-  const chainAddresses = useChainAddresses();
   const { account } = useAppWeb3();
   const withdrawArgs = React.useMemo<UseWithdrawMutationProps>(
     () => ({
@@ -123,7 +121,7 @@ const WithdrawTxComp: React.FC<{
       amount: state.amountToWithdraw,
       recipientAccount: account ?? undefined,
     }),
-    [state, chainAddresses?.lendingPool]
+    [state, account]
   );
   const {
     withdrawMutation: { mutateAsync },

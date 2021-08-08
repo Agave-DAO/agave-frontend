@@ -101,7 +101,6 @@ const UpperBox: React.FC<{ title: string } & CenterProps> = ({
 
 const DashboardApproximateBalanceDisplay: React.FC<{}> = () => {
   const balancesDaiWei = useUserDepositAssetBalancesDaiWei();
-  const daiDecimals = 18; // TODO: get this dynamically
   const balance = React.useMemo(() => {
     return balancesDaiWei.data?.reduce(
       (memo: BigNumber, next) =>

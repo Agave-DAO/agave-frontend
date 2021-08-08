@@ -1,11 +1,11 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { AgaveLendingABI__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
-import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
 import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { useUserAssetAllowance, useUserAssetBalance } from "../queries/userAssets";
+import { getChainAddresses } from "../utils/chainAddresses";
 
 export interface UseRepayMutationProps {
   asset: string | undefined;
@@ -48,11 +48,15 @@ export const useRepayMutation = ({asset, amount}: UseRepayMutationProps): UseRep
   const repayMutation = useMutation(
     repayMutationKey,
     async () => {
-      if (!account || !library || !asset) {
+      if (!account || !library || !asset || !chainId) {
         throw new Error("Account or asset details are not available");
       }
+      const chainAddresses = getChainAddresses(chainId);
+      if (!chainAddresses) {
+        return undefined;
+      }
       const contract = AgaveLendingABI__factory.connect(
-        internalAddresses.Lending,
+        chainAddresses.lendingPool,
         library.getSigner()
       );
 

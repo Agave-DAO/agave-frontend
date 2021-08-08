@@ -14,7 +14,6 @@ import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { fontSizes, spacings } from "../../utils/constants";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
 import { UnlockIcon, LockIcon } from "@chakra-ui/icons";
@@ -27,12 +26,10 @@ import {
   Container,
   Box,
   Center,
-  Button,
 } from "@chakra-ui/react";
 
 // ** conversions and helpers
 import { round2Fixed } from "../../utils/helpers";
-import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon } from "../../utils/icons";
 
@@ -52,7 +49,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   const variableAPR = useVariableBorrowAPR(asset.tokenAddress)?.data?._value;
 
   // ** Check data for undefined and convert to usable front end data
-  const decimals = reserveData ? reserveData?.decimals.toNumber() : 18;
+  // const decimals = reserveData ? reserveData?.decimals.toNumber() : 18;
   const price = assetPrice ? parseFloat(assetPrice?._value) : 0;
   const liquidity = reserveProtocolData?.availableLiquidity;
   const liquidityPrice = liquidity
@@ -324,7 +321,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 title="Liquidity Threshold"
                 value={liqThrsh}
                 type="%"
-                enableModal={true}
+                enableModal
                 modalOpen={setModalOpen}
               />
               <StatCard

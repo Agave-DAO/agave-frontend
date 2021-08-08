@@ -13,7 +13,6 @@ import { useAssetPricesInDaiWei } from "../../queries/assetPriceInDai";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
 // Helpers
-import { round2Fixed } from "../../utils/helpers";
 import {
   bigNumberToString,
   fixedNumberToPercentage,

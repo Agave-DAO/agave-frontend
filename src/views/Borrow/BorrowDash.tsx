@@ -1,43 +1,24 @@
 import {
   Box,
   HStack,
-  Stack,
   Text,
   VStack,
   useMediaQuery,
   Flex,
-  tokenToCSSVar,
-  Grid,
-  GridItem,
-  Popover,
-  Button,
-  PopoverTrigger,
-  PopoverContent,
-  PopoverHeader,
-  PopoverBody,
-  PopoverFooter,
-  PopoverArrow,
-  PopoverCloseButton,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
-import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
-import { BigNumber, constants, FixedNumber } from "ethers";
 import { useUserAccountData } from "../../queries/userAccountData";
-import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import {
-  useUserReserveData,
   useProtocolReserveData,
   useUserReservesData,
 } from "../../queries/protocolReserveData";
-import { useUserAssetBalance } from "../../queries/userAssets";
-import { fontSizes, spacings, assetColor } from "../../utils/constants";
-import { ModalIcon } from "../../utils/icons";
+import { fontSizes, spacings } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";
 import {
   bigNumberToString,
@@ -68,23 +49,20 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const { data: reserveProtocolData } = useProtocolReserveData(
     reserve?.tokenAddress
   );
-  const { data: reserveConfiguration } = useProtocolReserveConfiguration(
-    reserve?.tokenAddress
-  );
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
-  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
-  const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
-  const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
+  // const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
+  // const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
+  // const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const { data: utilizationData } = useAssetUtilizationRate(token.tokenAddress);
   const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
   const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
 
   const utilizationRate = utilizationData?.utilizationRate;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
-  const maximumLtv = reserveConfiguration?.ltv;
-  const currentLtv = userAccountData?.currentLtv;
+  // const maximumLtv = reserveConfiguration?.ltv;
+  // const currentLtv = userAccountData?.currentLtv;
   const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
   const totalCollateralEth = userAccountData?.totalCollateralEth;

@@ -5,7 +5,6 @@ import { Text } from "@chakra-ui/layout";
 import { withRouter } from "react-router-dom";
 
 const ReserveBanner: React.FC<{}> = (props: any) => {
-  const message = props.location.pathname;
   const title = "Reserve Details";
 
   return (

@@ -1,5 +1,5 @@
 import React from "react";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { useUserVariableDebtTokenBalancesDaiWei } from "../../queries/userAssets";
 import { BorrowLayout } from "./layout";
 
@@ -7,6 +7,7 @@ export interface BorrowAsset {
   symbol: string;
   tokenAddress: string;
   balance: BigNumber;
+  decimals: BigNumberish;
   daiWeiPricePer: BigNumber | null;
   daiWeiPriceTotal: BigNumber | null;
 }

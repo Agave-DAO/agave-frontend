@@ -14,7 +14,6 @@ import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
-import { Link, useHistory } from "react-router-dom";
 
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
@@ -37,13 +36,12 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
         </Box>
       </Flex>
     );
-  }, [balanceNumber, balanceUSD]);
+  }, [balanceNumber, balanceUSD, isMobile]);
 };
 
 export const DepositTable: React.FC<{ activeType: string }> = ({
   activeType,
 }) => {
-  const history = useHistory();
   interface AssetRecord {
     symbol: string;
     tokenAddress: string;
@@ -102,7 +100,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
     ],
-    [history]
+    [isMobile]
   );
 
   const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(

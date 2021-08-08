@@ -1,5 +1,4 @@
 import React from "react";
-import { BigNumber, constants, FixedNumber, BigNumberish } from "ethers";
 import {
   HStack,
   Popover,
@@ -10,12 +9,9 @@ import {
   Flex,
   PopoverTrigger,
   PopoverContent,
-  PopoverHeader,
   PopoverBody,
-  PopoverFooter,
   useMediaQuery,
 } from "@chakra-ui/react";
-import { borrowListener } from "../../utils/contracts/events/events";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import { useCollateralComposition } from "../../hooks/collateralComposition";
@@ -26,14 +22,14 @@ export const CollateralComposition: React.FC = () => {
 
   const collateralComposition = useCollateralComposition();
 
-  const collateralData = collateralComposition.map((x, index) => {
-    if (x !== null) return bigNumberToString(x, 2);
+  const collateralData = collateralComposition.map(x => {
+    if (x !== null) {
+      return bigNumberToString(x, 2);
+    }
+    return null;
   });
 
-  const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
-    "(max-width: 400px)",
-    "(max-width: 900px)",
-  ]);
+  const isSmallerThan900 = useMediaQuery("(max-width: 900px)");
 
   return (
     <Flex

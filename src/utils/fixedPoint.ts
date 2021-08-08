@@ -1,5 +1,10 @@
 import { PinInput } from "@chakra-ui/react";
-import { BigNumber, FixedFormat, FixedNumber } from "@ethersproject/bignumber";
+import {
+  BigNumber,
+  BigNumberish,
+  FixedFormat,
+  FixedNumber,
+} from "@ethersproject/bignumber";
 import { ethers } from "ethers";
 
 export const FixedRayFormat = FixedFormat.from("fixed256x27");
@@ -29,42 +34,64 @@ export function divIfNotZeroUnsafe(
 
 export function bigNumberToString(
   input: BigNumber | null | undefined,
-  decimalsTarget: number = 2
+  decimalsTarget: BigNumberish = 2,
+  assetDecimals: BigNumberish = 18
 ): string {
   if (!input || input === null || input.isZero()) {
     return "0";
   } else if (input.gt("999999999999999999999999999999")) {
     return "∞";
   }
-  const inputAsString = Number(ethers.utils.formatEther(input)).toFixed(
-    decimalsTarget
-  );
+  let decimalsTargetNum: number =
+    typeof decimalsTarget === "number"
+      ? decimalsTarget | 0
+      : BigNumber.from(decimalsTarget).toNumber();
+  const decimalsAsset: number =
+    typeof assetDecimals === "number"
+      ? assetDecimals | 0
+      : BigNumber.from(assetDecimals).toNumber();
+  const inputAsString = Number(
+    ethers.utils.formatUnits(input, decimalsAsset)
+  ).toFixed(decimalsTargetNum);
   let outputStr = inputAsString;
-  while (decimalsTarget >= 0) {
+
+  while (decimalsTargetNum >= 0) {
     if (outputStr.endsWith("0") || outputStr.endsWith(".")) {
       outputStr = outputStr.slice(0, -1);
-    } else decimalsTarget = 0;
-    decimalsTarget--;
+    } else decimalsTargetNum = 0;
+    decimalsTargetNum--;
   }
   return outputStr;
 }
 
 export function fixedNumberToPercentage(
   input: FixedNumber | null | undefined,
-  decimalsTarget: number = 2,
-  minimumNumberOfDecimals: number = 0
+  decimalsTarget: BigNumberish = 2,
+  minimumNumberOfDecimals: BigNumberish = 0
 ): string {
   if (!input || input === null || input.isZero()) {
     return "0";
   }
   const inputAsFloat = input.toUnsafeFloat();
-  let outputStr = (inputAsFloat * 100).toFixed(decimalsTarget);
+  const minimumNumbOfDecimals: number =
+    typeof minimumNumberOfDecimals === "number"
+      ? minimumNumberOfDecimals | 0
+      : BigNumber.from(minimumNumberOfDecimals).toNumber();
+  let decimalsTargetNum: number =
+    typeof decimalsTarget === "number"
+      ? decimalsTarget | 0
+      : BigNumber.from(decimalsTarget).toNumber();
+  let outputStr = (inputAsFloat * 100).toFixed(decimalsTargetNum);
+
   // trim trailing 0's and the dot if it's the decimal separator
-  while (decimalsTarget >= minimumNumberOfDecimals) {
-    if (outputStr.endsWith("0") || (decimalsTarget === 0 && outputStr.endsWith("."))) {
+  while (decimalsTargetNum >= minimumNumbOfDecimals) {
+    if (
+      outputStr.endsWith("0") ||
+      (decimalsTargetNum === 0 && outputStr.endsWith("."))
+    ) {
       outputStr = outputStr.slice(0, -1);
-    } else decimalsTarget = -1;
-    decimalsTarget--;
+    } else decimalsTargetNum = -1;
+    decimalsTargetNum--;
   }
   return outputStr;
 }

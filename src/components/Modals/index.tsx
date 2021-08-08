@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { fontSizes, spacings } from "../../utils/constants";
 
 import {
   Text,
   Box,
   HStack,
-  Center,
   Modal,
   ModalBody,
   ModalFooter,
@@ -14,19 +13,12 @@ import {
   ModalContent,
   Button,
 } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/hooks";
 
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 
 // ** conversions and helpers
-import { round2Fixed } from "../../utils/helpers";
-import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
-import {
-  bigNumberToString,
-  fixedNumberToPercentage,
-} from "../../utils/fixedPoint";
-import { TokenIcon } from "../../utils/icons";
+import { fixedNumberToPercentage } from "../../utils/fixedPoint";
 
 export const MODAL_TYPES = {
   APROXIMATE_BALANCE: "APROXIMATE_BALANCE",

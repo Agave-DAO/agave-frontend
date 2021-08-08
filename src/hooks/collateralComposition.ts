@@ -10,7 +10,6 @@ import {
   UserReserveData,
 } from "../queries/protocolReserveData";
 import { constants } from "ethers";
-import { ConsoleView } from "react-device-detect";
 
 // TODO: move to propertyCalculator in utils once that has been merged
 function collateralCompositionCalculator(
