@@ -1,10 +1,10 @@
 import React from "react";
-
 import { fontSizes, spacings } from "../../utils/constants";
 
 import {
   Text,
   Box,
+  HStack,
   Modal,
   ModalBody,
   ModalFooter,
@@ -14,7 +14,15 @@ import {
   Button,
 } from "@chakra-ui/react";
 
+import { useUserAccountData } from "../../queries/userAccountData";
+import { useAppWeb3 } from "../../hooks/appWeb3";
+
+// ** conversions and helpers
+import { fixedNumberToPercentage } from "../../utils/fixedPoint";
+
 export const MODAL_TYPES = {
+  APROXIMATE_BALANCE: "APROXIMATE_BALANCE",
+  CURRENT_LTV: "CURRENT_LTV",
   MAXIMUM_LTV: "MAXIMUM_LTV",
   HEALTH_FACTOR: "HEALTH_FACTOR",
   LIQUIDITY_PENALTY: "LIQUIDITY_PENALTY",
@@ -100,6 +108,83 @@ const ModalMaxLTV: React.FC<{}> = () => {
   );
 };
 
+const ModalAPBalance: React.FC<{}> = () => {
+  return (
+    <>
+      <ModalHeader fontSize="1.8rem" fontWeight="bold">
+        Approximate Balance
+      </ModalHeader>
+      <ModalBody>
+        <Text fontSize="1.4rem">
+          Your aggregated balance shows the approximate value in USD of all the
+          assets you have deposited. It fluctuates based on the evolution of
+          prices.
+        </Text>
+        <Text mt={5} fontSize="1.4rem">
+          Please note that if your deposits consist of stable-coins the
+          approximate balance in USD could be slightly higher or lower than the
+          stable-coin balance, due to fluctuations in the stable-coin peg.
+        </Text>
+      </ModalBody>
+    </>
+  );
+};
+
+const ModalLTV: React.FC<{
+  currentLTV?: string;
+  maximumLTV?: string;
+  threshold?: string;
+}> = ({ currentLTV, maximumLTV, threshold }) => {
+  const { account: userAccountAddress } = useAppWeb3();
+  const { data: userAccountData } = useUserAccountData(
+    userAccountAddress ?? undefined
+  );
+  return (
+    <>
+      <ModalHeader fontSize="1.8rem" fontWeight="bold">
+        Liquidation Overview
+      </ModalHeader>
+      <ModalBody>
+        <Text fontSize="1.4rem">
+          Details about your Loan to Value (LTV) ratio and liquidation.
+        </Text>
+        <Text fontSize="1.2rem" mt={5}>
+          * Adjusted to the type of collateral deposited.
+        </Text>
+        <Box
+          mt="2rem"
+          py="1.5rem"
+          px="1rem"
+          border="solid"
+          borderRadius="xl"
+          borderWidth="0.5px"
+        >
+          <HStack pb="0.5rem" px="1em" justifyContent="space-between">
+            <Text fontSize="1.4rem">Current TVL</Text>
+            <Text fontSize="1.4rem">
+              {fixedNumberToPercentage(userAccountData?.currentLtv) ?? "-"}
+            </Text>
+          </HStack>
+          <HStack pb="0.5rem" px="1em" justifyContent="space-between">
+            <Text fontSize="1.4rem">Maximum LTV</Text>
+            <Text fontSize="1.4rem">
+              {fixedNumberToPercentage(userAccountData?.maximumLtv) ?? "-"}
+            </Text>
+          </HStack>
+          <HStack px="1em" justifyContent="space-between">
+            <Text fontSize="1.4rem">Liquidation threshold</Text>
+            <Text fontSize="1.4rem">
+              {fixedNumberToPercentage(
+                userAccountData?.currentLiquidationThreshold
+              ) ?? "-"}
+            </Text>
+          </HStack>
+        </Box>
+      </ModalBody>
+    </>
+  );
+};
+
 const ModalComponent: React.FC<{
   isOpen: boolean;
   mtype: string;
@@ -131,6 +216,8 @@ const ModalComponent: React.FC<{
               minW={{ base: "80%", md: "70%", lg: "30vw" }}
               minH={{ base: "50%", md: "30vh" }}
             >
+              {mtype === MODAL_TYPES.APROXIMATE_BALANCE && <ModalAPBalance />}
+              {mtype === MODAL_TYPES.CURRENT_LTV && <ModalLTV />}
               {mtype === MODAL_TYPES.MAXIMUM_LTV && <ModalMaxLTV />}
               {mtype === MODAL_TYPES.HEALTH_FACTOR && <ModalHFactor />}
               {mtype === MODAL_TYPES.LIQUIDITY_PENALTY && <ModalLiqPenalty />}

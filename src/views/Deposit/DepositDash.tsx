@@ -7,7 +7,7 @@ import {
   useMediaQuery,
   Flex,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import {
   bigNumberToString,
   fixedNumberToPercentage,
@@ -24,6 +24,8 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
+import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
+import { useDisclosure } from "@chakra-ui/hooks";
 
 type DepositDashProps = {
   token: ReserveTokenDefinition;
@@ -66,6 +68,14 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
     "(max-width: 400px)",
     "(max-width: 900px)",
   ]);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [modal_type, setModal] = useState(MODAL_TYPES.MAXIMUM_LTV);
+
+  const onSubmitMaxLTV = React.useCallback(() => {
+    setModal(MODAL_TYPES.MAXIMUM_LTV);
+    onOpen();
+  }, [onOpen]);
 
   return (
     <VStack spacing="0" w="100%" bg="primary.900" rounded="lg">
@@ -243,7 +253,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
               position="relative"
               top="0"
               right="0"
-              onOpen={() => {}}
+              onOpen={onSubmitMaxLTV}
             />
           </HStack>
         </Stack>
@@ -264,16 +274,15 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
               fontWeight="bold"
             >
               ${" "}
-              {assetPriceInDai
-                ?.toUnsafeFloat()
-                .toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 4,
-                }) ?? "-"}
+              {assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 4,
+              }) ?? "-"}
             </Text>
           </Stack>
         )}
       </Flex>
+      <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </VStack>
   );
 };
