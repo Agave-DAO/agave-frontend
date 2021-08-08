@@ -107,7 +107,7 @@ export const WizardOverviewWrapper: React.FC<{
         </HStack>
       </VStack>
     ),
-    [asset.symbol, amount, currentHealthFactor]
+    [asset.symbol, amount, currentHealthFactor, decimals, newHealthFactor, onSubmitHF]
   );
   return (
     <VStack w="95%" spacing="0" p="1rem 2rem">

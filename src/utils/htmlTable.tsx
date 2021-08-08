@@ -125,7 +125,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           ))}
         </Thead>
         <Tbody {...getTableBodyProps()}>
-          {rows.map((row, i) => {
+          {rows.map(row => {
             prepareRow(row);
             return (
               <Tr
@@ -164,7 +164,6 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
 export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
   tableProps: tableStyle,
-  headProps: headStyle,
   rowProps: rowStyle,
   cellProps: cellStyle,
 }) => {
@@ -181,20 +180,20 @@ export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
                 {row.cells.map((cell, index) => {
                   const reactRow =
                     index !== 0 ? (
-                      <Box {...cellStyle}>
+                      <Box {...cellStyle} {...cell.getCellProps()} as="td">
                         <Box
-                          as="td"
                           minWidth="50px"
                           {...headerGroup.getHeaderGroupProps()}
                         >
                           {headerGroup.headers[index].render("Header")}
                         </Box>
-                        <Box as="td" {...cell.getCellProps()}>
+                        <Box>
                           {cell.render("Cell")}
                         </Box>
                       </Box>
                     ) : (
                       <Box
+                        as="td"
                         style={{
                           display: "flex",
                           flexDirection: "row",
@@ -202,8 +201,9 @@ export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
                           justifyContent: "center",
                         }}
                         {...cellStyle}
+                        {...cell.getCellProps()}
                       >
-                        <Box as="td" {...cell.getCellProps()}>
+                        <Box>
                           {cell.render("Cell")}
                         </Box>
                       </Box>
