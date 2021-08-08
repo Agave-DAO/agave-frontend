@@ -18,10 +18,7 @@ import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
 import { useLendingReserveData } from "../queries/lendingReserveData";
 import { getChainAddresses } from "../utils/chainAddresses";
-import {
-  useUserReserveData,
-  useUserReservesData,
-} from "../queries/protocolReserveData";
+import { useUserReserveData } from "../queries/protocolReserveData";
 
 export interface UseBorrowMutationProps {
   asset: string | undefined;

@@ -1,8 +1,7 @@
 import React from "react";
-import { ethers } from "ethers";
 import { Box, Text } from "@chakra-ui/layout";
 import { bigNumberToString } from "../../utils/fixedPoint";
-import { BigNumber, BigNumberish, constants } from "ethers";
+import { BigNumber } from "ethers";
 
 export const BalanceView: React.FC<{ balanceBN: BigNumber }> = ({
   balanceBN,

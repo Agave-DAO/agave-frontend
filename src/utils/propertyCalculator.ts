@@ -1,11 +1,9 @@
 import React from "react";
-import { BigNumber, FixedFormat, FixedNumber } from "@ethersproject/bignumber";
-import { constants, ethers } from "ethers";
-import { useProtocolReserveConfiguration } from "../queries/protocolAssetConfiguration";
+import { BigNumber } from "@ethersproject/bignumber";
+import { constants } from "ethers";
 import {
   useUserDepositAssetBalancesDaiWei,
   useUserVariableDebtTokenBalancesDaiWei,
-  VariableDebtTokenBalancesDaiWei,
 } from "../queries/userAssets";
 import {
   useAllReserveTokensWithConfiguration,

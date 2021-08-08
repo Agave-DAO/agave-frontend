@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Box, Center, useMediaQuery } from "@chakra-ui/react";
+import { Text, Box, Center } from "@chakra-ui/react";
 
 interface Props {
   title: string;
@@ -14,13 +14,11 @@ const APYCard: React.FC<Props> = ({ ...props }) => {
   const title = props.title ? props.title : "Stats";
   const color = props.color ? props.color : "green";
   const apy = props.apy ? `${props.apy} %` : "—";
-  const avg = props.avg ? props.avg : "—";
-  const total = props.total ? `${props.total} %` : "—";
 
   // Media Queries to get the right fit
-  const [isSmallTab] = useMediaQuery("(max-width: 800px)");
-  const [isLargePhone] = useMediaQuery("(max-width: 600px)");
-  const [isMobile] = useMediaQuery("(max-width: 450px)");
+  // const [isSmallTab] = useMediaQuery("(max-width: 800px)");
+  // const [isLargePhone] = useMediaQuery("(max-width: 600px)");
+  // const [isMobile] = useMediaQuery("(max-width: 450px)");
 
   return (
     <React.Fragment>

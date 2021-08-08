@@ -8,7 +8,6 @@ import {
   HStack,
   Image,
   Text,
-  useMediaQuery,
 } from "@chakra-ui/react";
 import { useAppWeb3 } from "../hooks/appWeb3";
 export const Layout: React.FC<{ header: React.ReactNode }> = ({

@@ -164,13 +164,12 @@ const RepayTxComp: React.FC<{
   state: AmountSelectedState;
   dispatch: (nextState: RepayState) => void;
 }> = ({ state, dispatch }) => {
-  const chainAddresses = useChainAddresses();
   const repayArgs = React.useMemo<UseRepayMutationProps>(
     () => ({
       asset: state.token.tokenAddress,
       amount: state.amountToRepay,
     }),
-    [state, chainAddresses?.lendingPool]
+    [state]
   );
   const {
     repayMutation: { mutateAsync },

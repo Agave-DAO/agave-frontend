@@ -3,7 +3,6 @@ import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPricesInDaiWei } from "../../queries/assetPriceInDai";
 import { useChainAddresses } from "../../utils/chainAddresses";
-import { BigNumber } from "@ethersproject/bignumber";
 import {
   BasicTableRenderer,
   MobileTableRenderer,
@@ -13,10 +12,6 @@ import {
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
-import {
-  useUserAssetBalance,
-  useUserAssetAllowance,
-} from "../../queries/userAssets";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { PercentageView } from "../common/PercentageView";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
@@ -24,7 +19,6 @@ import {
   fixedNumberToPercentage,
   bigNumberToString,
 } from "../../utils/fixedPoint";
-import { Link, useHistory } from "react-router-dom";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 
 export const APYView: React.FC<{ tokenAddress: string }> = ({
@@ -67,7 +61,7 @@ const BorrowAvailability: React.FC<{
     availableBorrowsNativeAdjusted && price
       ? availableBorrowsNativeAdjusted.div(price[0])
       : null;
-  const [isMobile] = useMediaQuery("(max-width: 32em)");
+  const isMobile = useMediaQuery("(max-width: 32em)");
   return React.useMemo(() => {
     return (
       <Flex direction="column" minH={30} ml={2}>
@@ -84,13 +78,10 @@ const BorrowAvailability: React.FC<{
         </Box>
       </Flex>
     );
-  }, [balanceAsset, balanceNative]);
+  }, [balanceAsset, balanceNative, isMobile]);
 };
 
-export const BorrowTable: React.FC<{ activeType: string }> = ({
-  activeType,
-}) => {
-  const history = useHistory();
+export const BorrowTable: React.FC<{ activeType: string }> = () => {
   interface AssetRecord {
     symbol: string;
     tokenAddress: string;
@@ -153,7 +144,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = ({
         >,
       },
     ],
-    [history]
+    [isMobile, lendingPool]
   );
 
   const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(

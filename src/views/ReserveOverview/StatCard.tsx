@@ -1,22 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
-  Button,
-  Center,
-  Flex,
-  Modal,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  ModalContent,
-  StackDivider,
   Text,
-  VStack,
-  ModalBody,
-  useMediaQuery,
 } from "@chakra-ui/react";
 import { ModalIcon } from "../../utils/icons";
-import { fontSizes, spacings } from "../../utils/constants";
 
 interface Props {
   title: string;

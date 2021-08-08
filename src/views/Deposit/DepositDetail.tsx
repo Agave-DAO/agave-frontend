@@ -25,7 +25,6 @@ import {
   UseDepositMutationProps,
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
-import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -87,13 +86,6 @@ const InitialComp: React.FC<{
     [state, dispatch]
   );
 
-  const newHealthFactor = useNewHealthFactorCalculator(
-    amount,
-    state.token.tokenAddress,
-    true,
-    true
-  );
-  //console.log(state.token.symbol ,"deposit: " +amount ," - new HF: " +  newHealthFactor?.toString())
   return (
     <DashOverviewIntro
       asset={state.token}

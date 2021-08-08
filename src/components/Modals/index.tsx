@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 
 import { fontSizes, spacings } from "../../utils/constants";
 
 import {
   Text,
   Box,
-  Center,
   Modal,
   ModalBody,
   ModalFooter,
@@ -14,13 +13,6 @@ import {
   ModalContent,
   Button,
 } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/hooks";
-
-// ** conversions and helpers
-import { round2Fixed } from "../../utils/helpers";
-import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
-import { bigNumberToString } from "../../utils/fixedPoint";
-import { TokenIcon } from "../../utils/icons";
 
 export const MODAL_TYPES = {
   MAXIMUM_LTV: "MAXIMUM_LTV",
