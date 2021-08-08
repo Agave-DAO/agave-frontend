@@ -379,6 +379,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             setAmount={setAmount}
             currency="AGVE"
             mode="stake"
+            decimals={Number(18)}
           />
         </Box>
         <Button

@@ -54,7 +54,7 @@ export const MyBorrowsTable: React.FC<{ borrows: BorrowAsset[] }> = ({
     <div>
       <Box
         w="auto"
-        minW={{ md: 250 }}
+        minW={{ md: 300 }}
         ml={{ base: 0, md: 10 }}
         marginTop={0}
         boxSizing="content-box"

@@ -62,6 +62,7 @@ export const CollateralComposition: React.FC = () => {
           >
             {allUserReservesBalances?.map((token, index) => (
               <Box
+                key={token.symbol + "_comp"}
                 bg={assetColor[token.symbol]}
                 w="100%"
                 h="100%"

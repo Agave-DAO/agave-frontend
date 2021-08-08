@@ -96,14 +96,17 @@ function newHealthFactorGivenAssetsData(
   }, constants.Zero);
 
   // Collateral Calculations
-
   const changeCollateralMaxCapacity =
     tokenData &&
     tokenData.tokenConfig.rawliquidationThreshold &&
+    tokenData.assetPrice &&
     amount &&
     collateral &&
     amount > constants.Zero
-      ? tokenData.tokenConfig.rawliquidationThreshold.mul(amount).div(10000)
+      ? tokenData.tokenConfig.rawliquidationThreshold
+          .mul(amount)
+          .mul(tokenData.assetPrice)
+          .div(weiPerToken(tokenData?.tokenConfig.decimals.add(4)))
       : constants.Zero;
 
   const newTotalCollateralMaxCapacity =
@@ -126,7 +129,9 @@ function newHealthFactorGivenAssetsData(
     tokenData &&
     tokenData.assetPrice &&
     amount > constants.Zero
-      ? amount.mul(tokenData.assetPrice).div(weiPerToken(18))
+      ? amount
+          .mul(tokenData.assetPrice)
+          .div(weiPerToken(tokenData?.tokenConfig.decimals))
       : constants.Zero;
 
   const newTotalBorrowsvalue =
@@ -155,7 +160,7 @@ export function useNewHealthFactorCalculator(
   amount: BigNumber | undefined,
   tokenAddress: string,
   collateral: Boolean,
-  increase?: Boolean,
+  increase?: Boolean
 ) {
   //const amount = React.useMemo(() => amount, [amount]);
   const assetsData = useAllAssetsData();

@@ -85,7 +85,6 @@ const InitialComp: React.FC<{
       dispatch(createState("amountSelected", { amountToDeposit, ...state })),
     [state, dispatch]
   );
-
   return (
     <DashOverviewIntro
       asset={state.token}
@@ -136,6 +135,8 @@ const AmountSelectedComp: React.FC<{
       title={DepositTitle}
       amount={state.amountToDeposit}
       asset={state.token}
+      collateral={true}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -188,6 +189,8 @@ const DepositTxComp: React.FC<{
       title={DepositTitle}
       amount={state.amountToDeposit}
       asset={state.token}
+      collateral={true}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -223,6 +226,8 @@ const DepositedTxComp: React.FC<{
       title={DepositTitle}
       amount={state.amountToDeposit}
       asset={state.token}
+      collateral={true}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -232,7 +237,7 @@ const DepositedTxComp: React.FC<{
           state.token.symbol
         } successful`}
         actionName="Finish"
-        onActionClick={() => history.push("/deposit")}
+        onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}
       />
     </WizardOverviewWrapper>

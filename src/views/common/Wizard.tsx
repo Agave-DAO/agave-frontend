@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { VStack } from "@chakra-ui/layout";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { Box, Center, HStack, Text } from "@chakra-ui/react";
@@ -10,16 +10,39 @@ import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
+import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
+import { useDisclosure } from "@chakra-ui/hooks";
+import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
 export const WizardOverviewWrapper: React.FC<{
   title: string;
   asset: ReserveTokenDefinition;
   amount: BigNumber;
-}> = ({ title, asset, amount, children }) => {
+  collateral: boolean;
+  increase: boolean;
+}> = ({ title, asset, amount, children, collateral, increase }) => {
   const { account: userAccountAddress } = useAppWeb3();
   const currentHealthFactor = useUserAccountData(
     userAccountAddress ?? undefined
   )?.data?.healthFactor;
+
+  const { data: decimals } = useDecimalCountForToken(asset.tokenAddress);
+
+  const newHealthFactor = useNewHealthFactorCalculator(
+    amount,
+    asset.tokenAddress,
+    collateral,
+    increase
+  );
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [modal_type, setModal] = useState(MODAL_TYPES.HEALTH_FACTOR);
+
+  const onSubmitHF = React.useCallback(() => {
+    setModal(MODAL_TYPES.HEALTH_FACTOR);
+    onOpen();
+  }, [onOpen]);
 
   const infoBox = React.useMemo(
     () => (
@@ -44,7 +67,7 @@ export const WizardOverviewWrapper: React.FC<{
               boxSize={{ base: "1.5rem", md: "1.8rem" }}
             />
             <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
-              {bigNumberToString(amount)} {asset.symbol}
+              {bigNumberToString(amount, 5, decimals)} {asset.symbol}
             </Text>
           </HStack>
         </HStack>
@@ -57,7 +80,7 @@ export const WizardOverviewWrapper: React.FC<{
               Current health factor
             </Text>
             <ModalIcon
-              onOpen={() => {}}
+              onOpen={onSubmitHF}
               position="relative"
               top="0"
               right="0"
@@ -74,17 +97,18 @@ export const WizardOverviewWrapper: React.FC<{
           </ColoredText>
         </HStack>
         {/* Calculating this is hard - do it later */}
-        {/* <HStack justifyContent="space-between">
+        <HStack justifyContent="space-between">
           <Text lineHeight={fontSizes.md} fontSize="1rem">
-            Next health factor
+            New health factor
           </Text>
-          <ColoredText fontSize="1.2rem">(Unimplemented)</ColoredText>
-        </HStack> */}
+          <ColoredText fontSize="1.2rem">
+            {newHealthFactor ? newHealthFactor.round(2).toString() : ""}
+          </ColoredText>
+        </HStack>
       </VStack>
     ),
     [asset.symbol, amount, currentHealthFactor]
   );
-
   return (
     <VStack w="95%" spacing="0" p="1rem 2rem">
       <ColoredText
@@ -116,6 +140,7 @@ export const WizardOverviewWrapper: React.FC<{
           return <TransactionLog log={log} />;
         })} */}
       </VStack>
+      <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </VStack>
   );
 };

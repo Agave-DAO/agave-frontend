@@ -78,7 +78,7 @@ export const BorrowBanner: React.FC<{}> = () => {
         fontWeight="bold"
         color="white"
         fontSize={{ base: "1.8rem", md: "2.4rem" }}
-        onClick={() => history.push("/dashboard")}
+        onClick={() => history.push("/borrow")}
       >
         Borrow
       </Text>
@@ -156,6 +156,8 @@ const BorrowTxComp: React.FC<{
       title={BorrowTitle}
       amount={state.amountToBorrow}
       asset={state.token}
+      collateral={false}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -191,6 +193,8 @@ const BorrowedTxComp: React.FC<{
       title={BorrowTitle}
       amount={state.amountToBorrow}
       asset={state.token}
+      collateral={false}
+      increase={true}
     >
       {stepperBar}
       <ControllerItem
@@ -200,7 +204,7 @@ const BorrowedTxComp: React.FC<{
           state.token.symbol
         } successful`}
         actionName="Finish"
-        onActionClick={() => history.push("/borrow")}
+        onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}
       />
     </WizardOverviewWrapper>

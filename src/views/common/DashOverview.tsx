@@ -7,6 +7,7 @@ import { Button } from "@chakra-ui/button";
 
 import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
@@ -17,6 +18,7 @@ export const DashOverviewIntro: React.FC<{
   setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   balance: BigNumber | undefined;
 }> = ({ asset, mode, onSubmit, amount, setAmount, balance }) => {
+  const { data: decimals } = useDecimalCountForToken(asset.tokenAddress);
   return (
     <VStack w={{ base: "90%", sm: "75%", md: "60%", lg: "50%" }} spacing="0">
       <ColoredText fontSize="1.8rem" textTransform="capitalize" pb="1rem">
@@ -31,10 +33,11 @@ export const DashOverviewIntro: React.FC<{
         setAmount={setAmount}
         mode={mode}
         balance={balance}
+        decimals={decimals ? decimals : 18}
       />
       <Box h="4.3rem" />
       <Button
-        disabled={!amount?.gt(0)}
+        disabled={!amount?.gt(0) || (balance && amount?.gt(balance))}
         bg={LINEAR_GRADIENT_BG}
         _hover={{
           background: LINEAR_GRADIENT_BG,
@@ -45,7 +48,7 @@ export const DashOverviewIntro: React.FC<{
         py=".8rem"
         onClick={() => onSubmit(amount || BigNumber.from(0))}
       >
-        Continue
+        {balance && amount?.gt(balance) ? "Not enough Balance" : "Continue"}
       </Button>
     </VStack>
   );

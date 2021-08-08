@@ -146,6 +146,8 @@ const AmountSelectedComp: React.FC<{
       title={RepayTitle}
       amount={state.amountToRepay}
       asset={state.token}
+      collateral={false}
+      increase={false}
     >
       {stepperBar}
       <ControllerItem
@@ -196,6 +198,8 @@ const RepayTxComp: React.FC<{
       title={RepayTitle}
       amount={state.amountToRepay}
       asset={state.token}
+      collateral={false}
+      increase={false}
     >
       {stepperBar}
       <ControllerItem
@@ -231,6 +235,8 @@ const RepaidTxComp: React.FC<{
       title={RepayTitle}
       amount={state.amountToRepay}
       asset={state.token}
+      collateral={false}
+      increase={false}
     >
       {stepperBar}
       <ControllerItem
@@ -290,9 +296,10 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
 };
 
 export const RepayDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
@@ -330,7 +337,7 @@ export const RepayDetail: React.FC = () => {
             color="primary.100"
             bg="primary.500"
             onClick={() =>
-              history.length > 0 ? history.goBack() : history.push("/")
+              history.length > 0 ? history.goBack() : history.push("/dashboard")
             }
             size="xl"
             padding="1rem"
