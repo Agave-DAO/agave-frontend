@@ -1,5 +1,5 @@
 import React from "react";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { DepositLayout } from "./layout";
 
@@ -9,6 +9,7 @@ export interface DepositAsset {
   tokenAddress: string;
   aTokenAddress: string;
   balance: BigNumber;
+  decimals: BigNumberish;
   daiWeiPricePer: BigNumber | null;
   daiWeiPriceTotal: BigNumber | null;
 }

@@ -333,6 +333,7 @@ export interface DepositAssetBalancesDaiWei {
   tokenAddress: string;
   aTokenAddress: string;
   balance: BigNumber;
+  decimals: BigNumberish;
   daiWeiPricePer: BigNumber | null;
   daiWeiPriceTotal: BigNumber | null;
 }
@@ -383,6 +384,7 @@ export const useUserDepositAssetBalancesDaiWei =
           aTokenAddress: at.tokenAddress,
           tokenAddress: reserve.tokenAddress,
           balance: at.balance,
+          decimals: reserve.decimals,
           daiWeiPricePer: reserve.daiWeiPricePer,
           daiWeiPriceTotal: reserve.daiWeiPricePer
             ? at.balance
