@@ -6,7 +6,7 @@ import {
   StackProps,
   useMediaQuery,
 } from "@chakra-ui/react";
-import { BigNumber, BigNumberish, FixedNumber } from "ethers";
+import { BigNumber, FixedNumber } from "ethers";
 import { WeiBox } from "../../components/Actions/WeiBox";
 import { fontSizes } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";

@@ -1,18 +1,11 @@
 import React, { useState } from "react";
 import {
   Box,
-  Button,
   Center,
   Flex,
-  Modal,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  ModalContent,
   StackDivider,
   Text,
   VStack,
-  ModalBody,
   useMediaQuery,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
@@ -20,7 +13,6 @@ import {
   bigNumberToString,
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
-import { fontSizes, spacings } from "../../utils/constants";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
