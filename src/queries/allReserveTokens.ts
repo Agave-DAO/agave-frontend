@@ -1,10 +1,41 @@
 import { AaveProtocolDataProvider__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
-import { useProtocolReserveConfiguration, ReserveAssetConfiguration } from "./protocolAssetConfiguration";
+import {
+  useProtocolReserveConfiguration,
+  ReserveAssetConfiguration,
+} from "./protocolAssetConfiguration";
 
-export interface ReserveTokenDefinition {
+export const NATIVE_TOKEN: unique symbol = Symbol("NativeToken");
+export type NATIVE_TOKEN = typeof NATIVE_TOKEN;
+
+export interface ReserveOrNativeTokenDefinition {
+  readonly symbol: string;
+  readonly tokenAddress: string | NATIVE_TOKEN;
+}
+
+export interface ReserveTokenDefinition extends ReserveOrNativeTokenDefinition {
   readonly symbol: string;
   readonly tokenAddress: string;
+}
+
+export interface NativeTokenDefinition extends ReserveOrNativeTokenDefinition {
+  readonly symbol: string;
+  readonly tokenAddress: NATIVE_TOKEN;
+}
+
+export function isNativeTokenDefinition(
+  definition: Readonly<ReserveOrNativeTokenDefinition>
+): definition is Readonly<NativeTokenDefinition> {
+  return definition.tokenAddress === NATIVE_TOKEN;
+}
+
+export function isReserveTokenDefinition(
+  definition: Readonly<ReserveOrNativeTokenDefinition>
+): definition is Readonly<ReserveTokenDefinition> {
+  return (
+    definition.tokenAddress !== NATIVE_TOKEN &&
+    typeof definition.tokenAddress === "string"
+  );
 }
 
 export const useAllReserveTokens = buildQueryHookWhenParamsDefinedChainAddrs<

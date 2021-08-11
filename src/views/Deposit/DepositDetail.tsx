@@ -6,6 +6,9 @@ import { DepositDash } from "./DepositDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveTokenDefinition,
+  ReserveOrNativeTokenDefinition,
+  isNativeTokenDefinition,
+  isReserveTokenDefinition,
   useAllReserveTokens,
 } from "../../queries/allReserveTokens";
 import { Box, Center } from "@chakra-ui/react";
@@ -25,6 +28,7 @@ import {
   UseDepositMutationProps,
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -262,13 +266,19 @@ const DepositStateMachine: React.FC<{
   }
 };
 
-const DepositDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
-  asset,
-}) => {
+const DepositDetailForAsset: React.FC<{
+  asset: ReserveOrNativeTokenDefinition;
+}> = ({ asset }) => {
   const dash = React.useMemo(
-    () => (asset ? <DepositDash token={asset} /> : undefined),
+    () =>
+      asset && isReserveTokenDefinition(asset) ? (
+        <DepositDash token={asset} />
+      ) : undefined,
     [asset]
   );
+  if (asset && !isReserveTokenDefinition(asset)) {
+    throw new Error("Native token is not supported");
+  }
   const [depositState, setDepositState] = React.useState<DepositState>(
     createState("init", { token: asset })
   );
