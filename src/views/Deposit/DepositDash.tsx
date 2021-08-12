@@ -14,25 +14,51 @@ import {
 } from "../../utils/fixedPoint";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import {
+  ReserveTokenDefinition,
+  ReserveOrNativeTokenDefinition,
+  isNativeTokenDefinition,
+  isReserveTokenDefinition,
+  useAllReserveTokens,
+  NativeTokenDefinition,
+  NATIVE_TOKEN,
+} from "../../queries/allReserveTokens";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
-import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import {
+  useAllReserveTokensWithData,
+  ExtendedReserveTokenDefinition,
+} from "../../queries/lendingReserveData";
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { useUserAccountData } from "../../queries/userAccountData";
-import { useUserAssetBalance } from "../../queries/userAssets";
+import {
+  useUserAssetBalance,
+  useUserNativeBalance,
+} from "../../queries/userAssets";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { fontSizes, spacings } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { useDisclosure } from "@chakra-ui/hooks";
+import { BigNumber } from "ethers";
 
-type DepositDashProps = {
+type DepositDashReserveProps = {
   token: ReserveTokenDefinition;
 };
+type DepositDashNativeProps = {
+  token: ReserveOrNativeTokenDefinition;
+};
 
-export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
-  const { account: userAccountAddress } = useAppWeb3();
+type DepositDashLayoutProps = {
+  reserve: ExtendedReserveTokenDefinition | undefined;
+  tokenBalance: BigNumber | undefined;
+};
+
+export const DepositDashReserve: React.FC<DepositDashReserveProps> = ({
+  token,
+}) => {
+  const { data: wrappedNative } = useWrappedNativeDefinition();
   const { data: reserves } = useAllReserveTokensWithData();
   const reserve = React.useMemo(
     () =>
@@ -40,10 +66,41 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
       reserves?.find(
         reserve =>
           reserve.tokenAddress.toLowerCase() ===
-          token.tokenAddress.toLowerCase()
+          token.tokenAddress?.toLowerCase()
       ),
     [reserves, token.tokenAddress]
   );
+  const { data: tokenBalance } = useUserAssetBalance(reserve?.tokenAddress);
+  return <DepositDashLayout reserve={reserve} tokenBalance={tokenBalance} />;
+};
+
+export const DepositDashNative: React.FC<DepositDashNativeProps> = ({
+  token,
+}) => {
+  const { data: wrappedNative } = useWrappedNativeDefinition();
+  const { data: reserves } = useAllReserveTokensWithData();
+  const reserve = React.useMemo(
+    () =>
+      reserves?.find(
+        reserve => reserve.tokenAddress === wrappedNative?.tokenAddress
+      ) ??
+      reserves?.find(
+        reserve =>
+          reserve.tokenAddress.toLowerCase() ===
+          wrappedNative?.tokenAddress.toLowerCase()
+      ),
+    [reserves, token.tokenAddress]
+  );
+  const { data: tokenBalance } = useUserNativeBalance();
+  console.log(wrappedNative, reserve, tokenBalance?.toString());
+  return <DepositDashLayout reserve={reserve} tokenBalance={tokenBalance} />;
+};
+
+const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
+  reserve,
+  tokenBalance,
+}) => {
+  const { account: userAccountAddress } = useAppWeb3();
   const { data: reserveProtocolData } = useProtocolReserveData(
     reserve?.tokenAddress
   );
@@ -53,9 +110,10 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
-  const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
   const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
-  const { data: utilizationData } = useAssetUtilizationRate(token.tokenAddress);
+  const { data: utilizationData } = useAssetUtilizationRate(
+    reserve?.tokenAddress
+  );
   const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
   const utilizationRate = utilizationData?.utilizationRate;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
@@ -104,7 +162,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
               {bigNumberToString(aTokenBalance)}
             </Text>
-            {isSmallerThan400 ? null : " " + token.symbol}
+            {isSmallerThan400 ? null : " " + reserve?.symbol}
           </Box>
         </Flex>
         <Flex
@@ -122,7 +180,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
               {bigNumberToString(tokenBalance)}
             </Text>
-            {isSmallerThan400 ? null : " " + token.symbol}
+            {isSmallerThan400 ? null : " " + reserve?.symbol}
           </Box>
         </Flex>
         <Flex
@@ -186,7 +244,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) => {
               >
                 {bigNumberToString(liquidityAvailable)}
               </Text>{" "}
-              {token.symbol}
+              {reserve?.symbol}
             </HStack>
           </Stack>
         )}
