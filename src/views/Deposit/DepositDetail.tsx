@@ -5,9 +5,7 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { DepositDash } from "./DepositDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
-  ReserveTokenDefinition,
   ReserveOrNativeTokenDefinition,
-  isNativeTokenDefinition,
   isReserveTokenDefinition,
   useAllReserveTokens,
 } from "../../queries/allReserveTokens";
@@ -28,10 +26,9 @@ import {
   UseDepositMutationProps,
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
-import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
-  token: Readonly<ReserveTokenDefinition>;
+  token: Readonly<ReserveOrNativeTokenDefinition>;
 }
 
 interface AmountSelectedState extends InitialState {
@@ -83,7 +80,7 @@ const InitialComp: React.FC<{
   dispatch: (nextState: DepositState) => void;
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
-  const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
+  const { data: userBalance } = useUserAssetBalance(state.token);
   const onSubmit = React.useCallback(
     amountToDeposit =>
       dispatch(createState("amountSelected", { amountToDeposit, ...state })),
@@ -108,11 +105,15 @@ const AmountSelectedComp: React.FC<{
   const chainAddresses = useChainAddresses();
   const approvalArgs = React.useMemo<UseApprovalMutationProps>(
     () => ({
-      asset: state.token.tokenAddress,
+      asset: isReserveTokenDefinition(state.token)
+        ? state.token.tokenAddress
+        : undefined,
       amount: state.amountToDeposit,
-      spender: chainAddresses?.lendingPool,
+      spender: isReserveTokenDefinition(state.token)
+        ? chainAddresses?.lendingPool
+        : chainAddresses?.wrappedNativeGateway,
     }),
-    [state, chainAddresses?.lendingPool]
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
   );
   const {
     approvalMutation: { mutateAsync },
@@ -164,9 +165,11 @@ const DepositTxComp: React.FC<{
     () => ({
       asset: state.token.tokenAddress,
       amount: state.amountToDeposit,
-      spender: chainAddresses?.lendingPool,
+      spender: isReserveTokenDefinition(state.token)
+        ? chainAddresses?.lendingPool
+        : chainAddresses?.wrappedNativeGateway,
     }),
-    [state, chainAddresses?.lendingPool]
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
   );
   const {
     depositMutation: { mutateAsync },
@@ -276,9 +279,6 @@ const DepositDetailForAsset: React.FC<{
       ) : undefined,
     [asset]
   );
-  if (asset && !isReserveTokenDefinition(asset)) {
-    throw new Error("Native token is not supported");
-  }
   const [depositState, setDepositState] = React.useState<DepositState>(
     createState("init", { token: asset })
   );
@@ -300,9 +300,10 @@ const DepositDetailForAsset: React.FC<{
 };
 
 export const DepositDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
