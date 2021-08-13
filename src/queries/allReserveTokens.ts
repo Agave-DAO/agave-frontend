@@ -6,36 +6,37 @@ import {
 } from "./protocolAssetConfiguration";
 
 export const NATIVE_TOKEN: unique symbol = Symbol("NativeToken");
+// eslint-disable-next-line
 export type NATIVE_TOKEN = typeof NATIVE_TOKEN;
 
-export interface ReserveOrNativeTokenDefinition {
+export interface TokenDefinition {
   readonly symbol: string;
   readonly tokenAddress: string | NATIVE_TOKEN;
 }
 
-export interface ReserveTokenDefinition extends ReserveOrNativeTokenDefinition {
+export interface ReserveTokenDefinition extends TokenDefinition {
   readonly symbol: string;
   readonly tokenAddress: string;
 }
 
-export interface NativeTokenDefinition extends ReserveOrNativeTokenDefinition {
+export interface NativeTokenDefinition extends TokenDefinition {
   readonly symbol: string;
   readonly tokenAddress: NATIVE_TOKEN;
 }
 
+export type ReserveOrNativeTokenDefinition = ReserveTokenDefinition | NativeTokenDefinition;
+
 export function isNativeTokenDefinition(
-  definition: Readonly<ReserveOrNativeTokenDefinition>
+  definition: Readonly<ReserveOrNativeTokenDefinition> | null | undefined
 ): definition is Readonly<NativeTokenDefinition> {
-  return definition.tokenAddress === NATIVE_TOKEN;
+  return definition?.tokenAddress === NATIVE_TOKEN;
 }
 
 export function isReserveTokenDefinition(
-  definition: Readonly<ReserveOrNativeTokenDefinition>
+  definition: Readonly<ReserveOrNativeTokenDefinition> | null | undefined
 ): definition is Readonly<ReserveTokenDefinition> {
-  return (
-    definition.tokenAddress !== NATIVE_TOKEN &&
-    typeof definition.tokenAddress === "string"
-  );
+  const addr = definition?.tokenAddress;
+  return addr !== NATIVE_TOKEN && typeof addr === "string";
 }
 
 export const useAllReserveTokens = buildQueryHookWhenParamsDefinedChainAddrs<
