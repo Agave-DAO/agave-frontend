@@ -80,14 +80,15 @@ export function useAllAssetsData() {
 
 function newHealthFactorGivenAssetsData(
   amount: BigNumber | undefined,
-  tokenAddress: string,
+  tokenAddress: string | undefined,
   assetsData: AssetsData[] | undefined,
   collateral: Boolean,
   increase?: Boolean | false
 ) {
-  const tokenData = assetsData
-    ? assetsData.find(t => t.tokenConfig.tokenAddress === tokenAddress)
-    : undefined;
+  const tokenData =
+    tokenAddress !== undefined && assetsData
+      ? assetsData.find(t => t.tokenConfig.tokenAddress === tokenAddress)
+      : undefined;
 
   const oldTotalCollateralMaxCapacity = assetsData?.reduce((acc, next) => {
     return next.collateralMaxCapacity
@@ -158,7 +159,7 @@ function newHealthFactorGivenAssetsData(
 
 export function useNewHealthFactorCalculator(
   amount: BigNumber | undefined,
-  tokenAddress: string,
+  tokenAddress: string | undefined,
   collateral: Boolean,
   increase?: Boolean
 ) {
