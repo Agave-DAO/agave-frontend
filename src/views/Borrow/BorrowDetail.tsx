@@ -5,6 +5,10 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { BorrowDash } from "./BorrowDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
+  isReserveTokenDefinition,
+  NativeTokenDefinition,
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
   useAllReserveTokens,
 } from "../../queries/allReserveTokens";
@@ -21,6 +25,7 @@ import {
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -228,13 +233,20 @@ const BorrowStateMachine: React.FC<{
 END IMPL SECTION
 */
 
-const BorrowDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
-  asset,
-}) => {
+const BorrowDetailForAsset: React.FC<{
+  asset: ReserveOrNativeTokenDefinition;
+}> = ({ asset }) => {
   const dash = React.useMemo(
-    () => (asset ? <BorrowDash token={asset} /> : undefined),
+    () =>
+      asset && isReserveTokenDefinition(asset) ? (
+        <BorrowDash token={asset} />
+      ) : undefined,
     [asset]
   );
+
+  if (asset && !isReserveTokenDefinition(asset)) {
+    throw new Error("Native token is not supported");
+  }
   const [borrowState, setBorrowState] = React.useState<BorrowState>(
     createState("init", { token: asset })
   );
@@ -262,15 +274,30 @@ export const BorrowDetail: React.FC = () => {
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
-  const asset = React.useMemo(
-    () =>
-      assetName === undefined
-        ? undefined
-        : allReserves?.data?.find(
-            asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
-          ),
-    [allReserves, assetName]
-  );
+  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
+  const asset: ReserveOrNativeTokenDefinition | undefined =
+    React.useMemo(() => {
+      if (assetName === undefined) {
+        return undefined;
+      }
+      const foundReserve = allReserves?.data?.find(
+        asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
+      );
+      if (foundReserve === undefined && wrappedNativeToken !== undefined) {
+        const wrappedWithoutW = wrappedNativeToken.symbol.replace(/^[wW]/, "");
+        // And if the asset we're looking at matches wrapped minus the W...
+        if (assetName === wrappedWithoutW) {
+          const native: NativeTokenDefinition = {
+            symbol: wrappedWithoutW,
+            tokenAddress: NATIVE_TOKEN,
+          };
+          // Return it early, because we know it's the wrapped token
+          return native;
+        }
+        // Otherwise, default to found reserve, which is undefined in this context
+      }
+      return foundReserve;
+    }, [allReserves, assetName, wrappedNativeToken]);
   if (!asset) {
     return (
       <Box
