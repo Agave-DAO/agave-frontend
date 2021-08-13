@@ -5,6 +5,10 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { RepayDash } from "../common/RepayDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
+  isReserveTokenDefinition,
+  NativeTokenDefinition,
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
   useAllReserveTokens,
 } from "../../queries/allReserveTokens";
@@ -24,6 +28,7 @@ import {
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -268,51 +273,71 @@ const RepayStateMachine: React.FC<{
   }
 };
 
-const RepayDetailForAsset: React.FC<{ asset: ReserveTokenDefinition }> = ({
-  asset,
-}) => {
-  const dash = React.useMemo(
-    () => (asset ? <RepayDash token={asset} /> : undefined),
-    [asset]
-  );
-  const [repayState, setRepayState] = React.useState<RepayState>(
-    createState("init", { token: asset })
-  );
+const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
+  ({ asset }) => {
+    const dash = React.useMemo(
+      () =>
+        asset && isReserveTokenDefinition(asset) ? (
+          <RepayDash token={asset} />
+        ) : undefined,
+      [asset]
+    );
 
-  return (
-    <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
-      {dash}
-      <Center
-        w="100%"
-        color="primary.100"
-        bg="primary.900"
-        rounded="lg"
-        padding="1em"
-      >
-        <RepayStateMachine state={repayState} setState={setRepayState} />
-      </Center>
-    </VStack>
-  );
-};
+    if (asset && !isReserveTokenDefinition(asset)) {
+      throw new Error("Native token is not supported");
+    }
+
+    const [repayState, setRepayState] = React.useState<RepayState>(
+      createState("init", { token: asset })
+    );
+
+    return (
+      <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
+        {dash}
+        <Center
+          w="100%"
+          color="primary.100"
+          bg="primary.900"
+          rounded="lg"
+          padding="1em"
+        >
+          <RepayStateMachine state={repayState} setState={setRepayState} />
+        </Center>
+      </VStack>
+    );
+  };
 
 export const RepayDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
-  const asset = React.useMemo(
-    () =>
-      assetName === undefined
-        ? undefined
-        : allReserves?.data?.find(
-            asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
-          ),
-    [allReserves, assetName]
-  );
-
+  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
+  const asset: ReserveOrNativeTokenDefinition | undefined =
+    React.useMemo(() => {
+      if (assetName === undefined) {
+        return undefined;
+      }
+      const foundReserve = allReserves?.data?.find(
+        asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
+      );
+      if (foundReserve === undefined && wrappedNativeToken !== undefined) {
+        const wrappedWithoutW = wrappedNativeToken.symbol.replace(/^[wW]/, "");
+        // And if the asset we're looking at matches wrapped minus the W...
+        if (assetName === wrappedWithoutW) {
+          const native: NativeTokenDefinition = {
+            symbol: wrappedWithoutW,
+            tokenAddress: NATIVE_TOKEN,
+          };
+          // Return it early, because we know it's the wrapped token
+          return native;
+        }
+        // Otherwise, default to found reserve, which is undefined in this context
+      }
+      return foundReserve;
+    }, [allReserves, assetName, wrappedNativeToken]);
   if (!asset) {
     return (
       <Box
