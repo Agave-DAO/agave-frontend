@@ -6,14 +6,14 @@ import { BigNumber } from "ethers";
 import { Button } from "@chakra-ui/button";
 
 import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import { ReserveOrNativeTokenDefinition } from "../../queries/allReserveTokens";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
   mode: string;
   onSubmit: (value: BigNumber) => void;
-  asset: ReserveTokenDefinition;
+  asset: ReserveOrNativeTokenDefinition;
   amount: BigNumber | undefined;
   setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   balance: BigNumber | undefined;
