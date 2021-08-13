@@ -2,7 +2,13 @@ import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAllATokens } from "./allATokens";
-import { useAllReserveTokens } from "./allReserveTokens";
+import {
+  isNativeTokenDefinition,
+  isReserveTokenDefinition,
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
+  useAllReserveTokens,
+} from "./allReserveTokens";
 import { useUserReserveData } from "./protocolReserveData";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
@@ -10,14 +16,15 @@ import {
   ExtendedReserveTokenDefinition,
   useAllReserveTokensWithData,
 } from "./lendingReserveData";
+import { constants } from "ethers";
 
 export const useUserNativeBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
-  [_p1: "user", _p2: "native", _p3: "balance"],
+  [_p1: "user", _p2: NATIVE_TOKEN, _p3: "balance"],
   []
 >(
   async params => params.library.getBalance(params.account),
-  () => ["user", "native", "balance"],
+  () => ["user", NATIVE_TOKEN, "balance"],
   () => undefined,
   {
     staleTime: 2 * 60 * 1000,
@@ -27,18 +34,39 @@ export const useUserNativeBalance = buildQueryHookWhenParamsDefinedChainAddrs<
 
 export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
-  [_p1: "user", _p2: "asset", assetAddress: string | undefined, _p3: "balance"],
-  [assetAddress: string]
+  [
+    _p1: "user",
+    _p2: "asset",
+    assetOrAddress: string | NATIVE_TOKEN | undefined,
+    _p3: "balance"
+  ],
+  [assetOrAddress: string | ReserveOrNativeTokenDefinition]
 >(
-  async (params, assetAddress) => {
+  async (params, assetOrAddress) => {
+    if (typeof assetOrAddress !== "string") {
+      if (isNativeTokenDefinition(assetOrAddress)) {
+        return params.library.getBalance(params.account);
+      } else if (!isReserveTokenDefinition(assetOrAddress)) {
+        return constants.Zero;
+      }
+    }
     const asset = Erc20abi__factory.connect(
-      assetAddress,
+      typeof assetOrAddress === "string"
+        ? assetOrAddress
+        : assetOrAddress.tokenAddress,
       params.library
     );
 
     return asset.balanceOf(params.account);
   },
-  assetAddress => ["user", "asset", assetAddress, "balance"],
+  assetOrAddress => [
+    "user",
+    "asset",
+    typeof assetOrAddress === "string"
+      ? assetOrAddress
+      : assetOrAddress?.tokenAddress,
+    "balance",
+  ],
   () => undefined,
   {
     staleTime: 2 * 60 * 1000,
@@ -58,10 +86,7 @@ export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
   [assetAddress: string, spender: string]
 >(
   async (params, assetAddress, spender) => {
-    const asset = Erc20abi__factory.connect(
-      assetAddress,
-      params.library
-    );
+    const asset = Erc20abi__factory.connect(assetAddress, params.library);
 
     return asset.allowance(params.account, spender);
   },
