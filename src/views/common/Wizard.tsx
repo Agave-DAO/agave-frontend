@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { VStack } from "@chakra-ui/layout";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import {
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
+} from "../../queries/allReserveTokens";
 import { Box, Center, HStack, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
@@ -14,10 +17,11 @@ import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
+import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
 
 export const WizardOverviewWrapper: React.FC<{
   title: string;
-  asset: ReserveTokenDefinition;
+  asset: ReserveOrNativeTokenDefinition;
   amount: BigNumber;
   collateral: boolean;
   increase: boolean;
@@ -28,10 +32,14 @@ export const WizardOverviewWrapper: React.FC<{
   )?.data?.healthFactor;
 
   const { data: decimals } = useDecimalCountForToken(asset.tokenAddress);
+  // TODO: Switch to use `useWrappedNativeDefinition` when PR is in
+  const { data: wrappedNativeAddress } = useWrappedNativeAddress();
 
   const newHealthFactor = useNewHealthFactorCalculator(
     amount,
-    asset.tokenAddress,
+    asset.tokenAddress !== NATIVE_TOKEN
+      ? asset.tokenAddress
+      : wrappedNativeAddress,
     collateral,
     increase
   );
@@ -107,7 +115,14 @@ export const WizardOverviewWrapper: React.FC<{
         </HStack>
       </VStack>
     ),
-    [asset.symbol, amount, currentHealthFactor, decimals, newHealthFactor, onSubmitHF]
+    [
+      asset.symbol,
+      amount,
+      currentHealthFactor,
+      decimals,
+      newHealthFactor,
+      onSubmitHF,
+    ]
   );
   return (
     <VStack w="95%" spacing="0" p="1rem 2rem">
