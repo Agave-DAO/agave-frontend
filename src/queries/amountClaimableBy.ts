@@ -15,7 +15,7 @@ export const useAmountClaimableBy = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, stakerAddress) => {
     const contract = StakedToken__factory.connect(
       params.chainAddrs.staking,
-      params.library.getSigner()
+      params.library
     );
     let balance;
     try {

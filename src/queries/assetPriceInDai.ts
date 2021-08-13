@@ -19,7 +19,7 @@ export const useAssetPriceInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, assetAddress) => {
     const contract = AaveOracle__factory.connect(
       params.chainAddrs.agaveOracle,
-      params.library.getSigner()
+      params.library
     );
     try {
       return await contract.getAssetPrice(assetAddress); // price in dai per token
@@ -67,7 +67,7 @@ export const useAssetPricesInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, assetAddresses) => {
     const contract = AaveOracle__factory.connect(
       params.chainAddrs.agaveOracle,
-      params.library.getSigner()
+      params.library
     );
     return await contract.getAssetsPrices(assetAddresses); // price in dai per token
   },
@@ -91,7 +91,7 @@ export const useAllAssetPricesInDaiWei =
       const allAssets = await useAllReserveTokens.fetchQueryDefined(params);
       const contract = AaveOracle__factory.connect(
         params.chainAddrs.agaveOracle,
-        params.library.getSigner()
+        params.library
       );
       const prices = await contract.getAssetsPrices(
         allAssets.map(asset => asset.tokenAddress)

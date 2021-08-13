@@ -15,7 +15,7 @@ export const useDecimalCountForToken =
     async (params, assetAddress) => {
       const contract = Erc20abi__factory.connect(
         assetAddress,
-        params.library.getSigner()
+        params.library
       );
       return contract.decimals();
     },

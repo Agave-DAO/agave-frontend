@@ -143,7 +143,7 @@ export const useUserReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, assetAddress) => {
     const contract = AaveProtocolDataProvider__factory.connect(
       params.chainAddrs.aaveProtocolDataProvider,
-      params.library.getSigner()
+      params.library
     );
     return await contract
       .getUserReserveData(assetAddress, params.account)

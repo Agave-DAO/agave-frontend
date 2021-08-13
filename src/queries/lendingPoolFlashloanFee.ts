@@ -10,7 +10,7 @@ export const useFlashLoanFee = buildQueryHookWhenParamsDefinedChainAddrs<
   async params => {
     const lendingPool = AgaveLendingABI__factory.connect(
       params.chainAddrs.lendingPool,
-      params.library.getSigner()
+      params.library
     );
     return lendingPool
       .FLASHLOAN_PREMIUM_TOTAL()

@@ -11,7 +11,7 @@ export const useLendingPoolMaxStableBorrow =
     async params => {
       const lendingPool = AgaveLendingABI__factory.connect(
         params.chainAddrs.lendingPool,
-        params.library.getSigner()
+        params.library
       );
       return lendingPool
         .MAX_STABLE_RATE_BORROW_SIZE_PERCENT()

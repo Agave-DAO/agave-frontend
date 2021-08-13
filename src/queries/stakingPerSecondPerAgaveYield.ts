@@ -15,12 +15,12 @@ export const useStakingPerSecondPerAgaveYield =
     async params => {
       const contract = StakedToken__factory.connect(
         params.chainAddrs.staking,
-        params.library.getSigner()
+        params.library
       );
       const totalStaked = await contract.totalSupply();
       const emissionManager = AaveDistributionManager__factory.connect(
         params.chainAddrs.staking,
-        params.library.getSigner()
+        params.library
       );
       const stakedTokenAssetInfo = await emissionManager.assets(
         params.chainAddrs.staking

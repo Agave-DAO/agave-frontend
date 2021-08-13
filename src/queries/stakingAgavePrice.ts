@@ -13,7 +13,7 @@ export const useStakingAgavePrice = buildQueryHookWhenParamsDefinedChainAddrs<
   []
 >(
   async params => {
-    const signer = params.library.getSigner();
+    const signer = params.library;
     const stakingContract = StakedToken__factory.connect(
       params.chainAddrs.staking,
       signer

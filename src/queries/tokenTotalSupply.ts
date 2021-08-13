@@ -10,7 +10,7 @@ export const useTokenTotalSupply = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, assetAddress) => {
     const atoken = Erc20abi__factory.connect(
       assetAddress,
-      params.library.getSigner()
+      params.library
     );
     return await atoken.totalSupply();
   },

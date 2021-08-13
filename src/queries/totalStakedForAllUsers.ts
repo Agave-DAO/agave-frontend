@@ -12,7 +12,7 @@ export const useTotalStakedForAllUsers =
     async params => {
       const contract = StakedToken__factory.connect(
         params.chainAddrs.staking,
-        params.library.getSigner()
+        params.library
       );
       let balance;
       try {

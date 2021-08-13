@@ -33,7 +33,7 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, assetAddress) => {
     const asset = Erc20abi__factory.connect(
       assetAddress,
-      params.library.getSigner()
+      params.library
     );
 
     return asset.balanceOf(params.account);
@@ -60,7 +60,7 @@ export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, assetAddress, spender) => {
     const asset = Erc20abi__factory.connect(
       assetAddress,
-      params.library.getSigner()
+      params.library
     );
 
     return asset.allowance(params.account, spender);

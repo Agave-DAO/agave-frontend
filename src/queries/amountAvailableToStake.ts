@@ -15,14 +15,14 @@ export const useAmountAvailableToStake =
     async (params, stakerAddress) => {
       const contract = StakedToken__factory.connect(
         params.chainAddrs.staking,
-        params.library.getSigner()
+        params.library
       );
       return await contract
         .STAKED_TOKEN()
         .then(stakedToken =>
           Erc20abi__factory.connect(
             stakedToken,
-            params.library.getSigner()
+            params.library
           ).balanceOf(stakerAddress)
         );
     },

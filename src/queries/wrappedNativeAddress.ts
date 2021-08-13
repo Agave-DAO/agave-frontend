@@ -15,7 +15,7 @@ export const useWrappedNativeAddress =
     async params => {
       const contract = WETHGateway__factory.connect(
         params.chainAddrs.wrappedNativeGateway,
-        params.library.getSigner()
+        params.library
       );
       return await contract.getWETHAddress();
     },
