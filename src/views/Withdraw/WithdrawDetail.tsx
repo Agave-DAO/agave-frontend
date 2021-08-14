@@ -6,11 +6,9 @@ import { WithdrawDash } from "../common/WithdrawDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   isReserveTokenDefinition,
-  NativeTokenDefinition,
-  NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
-  useAllReserveTokens,
+  useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
 import { Box, Center, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
@@ -26,7 +24,6 @@ import {
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
   token: Readonly<ReserveTokenDefinition>;
@@ -260,36 +257,13 @@ const WithdrawDetailForAsset: React.FC<{
 };
 
 export const WithdrawDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
-  const allReserves = useAllReserveTokens();
-  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
-  const asset: ReserveOrNativeTokenDefinition | undefined =
-    React.useMemo(() => {
-      if (assetName === undefined) {
-        return undefined;
-      }
-      const foundReserve = allReserves?.data?.find(
-        asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
-      );
-      if (foundReserve === undefined && wrappedNativeToken !== undefined) {
-        const wrappedWithoutW = wrappedNativeToken.symbol.replace(/^[wW]/, "");
-        // And if the asset we're looking at matches wrapped minus the W...
-        if (assetName === wrappedWithoutW) {
-          const native: NativeTokenDefinition = {
-            symbol: wrappedWithoutW,
-            tokenAddress: NATIVE_TOKEN,
-          };
-          // Return it early, because we know it's the wrapped token
-          return native;
-        }
-        // Otherwise, default to found reserve, which is undefined in this context
-      }
-      return foundReserve;
-    }, [allReserves, assetName, wrappedNativeToken]);
+  const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
   if (!asset) {
     return (
       <Box
@@ -300,7 +274,7 @@ export const WithdrawDetail: React.FC = () => {
         padding="3em"
       >
         <Center>
-          {allReserves.data ? (
+          {allReserves ? (
             <>
               No reserve found with asset symbol&nbsp;
               <ColoredText>{assetName}</ColoredText>
