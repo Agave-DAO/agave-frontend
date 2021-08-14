@@ -17,11 +17,8 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import {
   ReserveTokenDefinition,
   ReserveOrNativeTokenDefinition,
-  isNativeTokenDefinition,
   isReserveTokenDefinition,
-  useAllReserveTokens,
   NativeTokenDefinition,
-  NATIVE_TOKEN,
 } from "../../queries/allReserveTokens";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
@@ -43,22 +40,37 @@ import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { BigNumber } from "ethers";
 
-type DepositDashReserveProps = {
-  token: ReserveTokenDefinition;
+export type DepositDashProps = {
+  token: Readonly<ReserveOrNativeTokenDefinition>;
 };
+
+type DepositDashReserveProps = {
+  token: Readonly<ReserveTokenDefinition>;
+};
+
 type DepositDashNativeProps = {
-  token: ReserveOrNativeTokenDefinition;
+  token: Readonly<NativeTokenDefinition>;
 };
 
 type DepositDashLayoutProps = {
-  reserve: ExtendedReserveTokenDefinition | undefined;
+  reserve: Readonly<ExtendedReserveTokenDefinition> | undefined;
   tokenBalance: BigNumber | undefined;
 };
 
-export const DepositDashReserve: React.FC<DepositDashReserveProps> = ({
+export const DepositDash: React.FC<DepositDashProps> = ({ token }) =>
+  React.useMemo(
+    () =>
+      isReserveTokenDefinition(token) ? (
+        <DepositDashReserve token={token} />
+      ) : (
+        <DepositDashNative token={token} />
+      ),
+    [token]
+  );
+
+const DepositDashReserve: React.FC<DepositDashReserveProps> = ({
   token,
 }) => {
-  const { data: wrappedNative } = useWrappedNativeDefinition();
   const { data: reserves } = useAllReserveTokensWithData();
   const reserve = React.useMemo(
     () =>
@@ -74,8 +86,8 @@ export const DepositDashReserve: React.FC<DepositDashReserveProps> = ({
   return <DepositDashLayout reserve={reserve} tokenBalance={tokenBalance} />;
 };
 
-export const DepositDashNative: React.FC<DepositDashNativeProps> = ({
-  token,
+const DepositDashNative: React.FC<DepositDashNativeProps> = ({
+  token: _tokenReservedForSymbolUse,
 }) => {
   const { data: wrappedNative } = useWrappedNativeDefinition();
   const { data: reserves } = useAllReserveTokensWithData();
@@ -89,7 +101,7 @@ export const DepositDashNative: React.FC<DepositDashNativeProps> = ({
           reserve.tokenAddress.toLowerCase() ===
           wrappedNative?.tokenAddress.toLowerCase()
       ),
-    [reserves, token.tokenAddress]
+    [reserves, wrappedNative?.tokenAddress]
   );
   const { data: tokenBalance } = useUserNativeBalance();
   console.log(wrappedNative, reserve, tokenBalance?.toString());

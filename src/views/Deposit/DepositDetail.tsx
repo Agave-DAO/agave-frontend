@@ -2,7 +2,7 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import { DepositDashNative, DepositDashReserve } from "./DepositDash";
+import { DepositDash } from "./DepositDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   ReserveOrNativeTokenDefinition,
@@ -10,7 +10,6 @@ import {
   useAllReserveTokens,
   NativeTokenDefinition,
   NATIVE_TOKEN,
-  isNativeTokenDefinition,
 } from "../../queries/allReserveTokens";
 import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
@@ -276,22 +275,10 @@ const DepositStateMachine: React.FC<{
 const DepositDetailForAsset: React.FC<{
   asset: ReserveOrNativeTokenDefinition;
 }> = ({ asset }) => {
-  console.log(asset);
-  const dash = React.useMemo(
-    () =>
-      asset ? (
-        isNativeTokenDefinition(asset) ? (
-          <DepositDashNative token={asset} />
-        ) : (
-          <DepositDashReserve token={asset} />
-        )
-      ) : undefined,
-    [asset]
-  );
-  const [depositState, setDepositState] = React.useState<DepositState>(
+  const dash = React.useMemo(() => <DepositDash token={asset} />, [asset]);
+  const [depositState, setDepositState] = React.useState<DepositState>(() =>
     createState("init", { token: asset })
   );
-
   return (
     <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
       {dash}
