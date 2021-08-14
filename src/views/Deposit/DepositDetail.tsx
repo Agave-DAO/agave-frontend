@@ -8,6 +8,8 @@ import {
   ReserveOrNativeTokenDefinition,
   isReserveTokenDefinition,
   useAllReserveTokens,
+  NativeTokenDefinition,
+  NATIVE_TOKEN,
 } from "../../queries/allReserveTokens";
 import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
@@ -26,6 +28,7 @@ import {
   UseDepositMutationProps,
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -307,15 +310,31 @@ export const DepositDetail: React.FC = () => {
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
-  const asset = React.useMemo(
-    () =>
-      assetName === undefined
-        ? undefined
-        : allReserves?.data?.find(
-            asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
-          ),
-    [allReserves, assetName]
-  );
+  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
+  const asset: ReserveOrNativeTokenDefinition | undefined =
+    React.useMemo(() => {
+      if (assetName === undefined) {
+        return undefined;
+      }
+      const foundReserve = allReserves?.data?.find(
+        asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
+      );
+      // If the reserve isn't defined, but we know about our wrapped token...
+      if (foundReserve === undefined && wrappedNativeToken !== undefined) {
+        const wrappedWithoutW = wrappedNativeToken.symbol.replace(/^[wW]/, "");
+        // And if the asset we're looking at matches wrapped minus the W...
+        if (assetName === wrappedWithoutW) {
+          const native: NativeTokenDefinition = {
+            symbol: wrappedWithoutW,
+            tokenAddress: NATIVE_TOKEN,
+          };
+          // Return it early, because we know it's the wrapped token
+          return native;
+        }
+        // Otherwise, default to found reserve, which is undefined in this context
+      }
+      return foundReserve;
+    }, [allReserves, assetName, wrappedNativeToken]);
   if (!asset) {
     return (
       <Box
