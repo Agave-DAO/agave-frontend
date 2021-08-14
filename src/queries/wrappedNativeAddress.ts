@@ -1,10 +1,6 @@
 import { WETHGateway__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
-import {
-  NativeTokenDefinition,
-  ReserveTokenDefinition,
-  useAllReserveTokens,
-} from "./allReserveTokens";
+import { ReserveTokenDefinition } from "./allReserveTokens";
 import { useTokenSymbol } from "./tokenSymbol";
 
 export const useWrappedNativeAddress =
