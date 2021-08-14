@@ -29,10 +29,7 @@ import {
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { useUserAccountData } from "../../queries/userAccountData";
-import {
-  useUserAssetBalance,
-  useUserNativeBalance,
-} from "../../queries/userAssets";
+import { useUserAssetBalance } from "../../queries/userAssets";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { fontSizes, spacings } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
