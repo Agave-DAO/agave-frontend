@@ -136,6 +136,6 @@ export function useTokenDefinitionBySymbol(assetName: string | undefined): {
       wrappedNativeToken,
       token: asset,
     }),
-    [allReserves, assetName, wrappedNativeToken]
+    [asset, allReserves, wrappedNativeToken]
   );
 }
