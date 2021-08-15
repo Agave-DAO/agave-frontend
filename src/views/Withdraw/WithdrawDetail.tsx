@@ -2,9 +2,10 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import { WithdrawDash } from "../common/WithdrawDash";
+import { WithdrawDash } from "./WithdrawDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
+  isNativeTokenDefinition,
   isReserveTokenDefinition,
   ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
@@ -222,17 +223,11 @@ const WithdrawStateMachine: React.FC<{
 const WithdrawDetailForAsset: React.FC<{
   asset: ReserveOrNativeTokenDefinition;
 }> = ({ asset }) => {
-  const dash = React.useMemo(
-    () =>
-      asset && isReserveTokenDefinition(asset) ? (
-        <WithdrawDash token={asset} />
-      ) : undefined,
-    [asset]
-  );
-
   if (asset && !isReserveTokenDefinition(asset)) {
     throw new Error("Native token is not supported");
   }
+  const dash = React.useMemo(() => <WithdrawDash token={asset} />, [asset]);
+
   const [withdrawState, setWithdrawState] = React.useState<WithdrawState>(
     createState("init", { token: asset })
   );
@@ -257,13 +252,16 @@ const WithdrawDetailForAsset: React.FC<{
 };
 
 export const WithdrawDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
-  const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
+  const {
+    allReserves,
+    token: asset,
+    wrappedNativeToken,
+  } = useTokenDefinitionBySymbol(assetName);
   if (!asset) {
     return (
       <Box
