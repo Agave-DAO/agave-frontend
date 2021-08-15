@@ -15,6 +15,7 @@ import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
 import { useLendingReserveData } from "../queries/lendingReserveData";
 import { getChainAddresses } from "../utils/chainAddresses";
+import { NATIVE_TOKEN } from "../queries/allReserveTokens";
 
 export interface UseWithdrawMutationProps {
   asset: string | undefined;
@@ -80,7 +81,11 @@ export const useWithdrawMutation = ({
         chainAddresses.lendingPool,
         library.getSigner()
       );
-      const withdraw = lendingContract.withdraw(asset, amount, recipientAccount);
+      const withdraw = lendingContract.withdraw(
+        asset,
+        amount,
+        recipientAccount
+      );
       const withdrawConfirmation = await usingProgressNotification(
         "Awaiting withdraw approval",
         "Please sign the transaction for withdrawal.",
@@ -109,7 +114,10 @@ export const useWithdrawMutation = ({
                 [
                   useUserDepositAssetBalances.buildKey(chainId, account),
                   useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
-                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(
+                    chainId,
+                    account
+                  ),
                   useUserReserveAssetBalances.buildKey(chainId, account),
                   useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
                 ].map(k => queryClient.invalidateQueries(k))
