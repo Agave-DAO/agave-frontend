@@ -233,13 +233,7 @@ END IMPL SECTION
 const BorrowDetailForAsset: React.FC<{
   asset: ReserveOrNativeTokenDefinition;
 }> = ({ asset }) => {
-  const dash = React.useMemo(
-    () =>
-      asset && isReserveTokenDefinition(asset) ? (
-        <BorrowDash token={asset} />
-      ) : undefined,
-    [asset]
-  );
+  const dash = React.useMemo(() => <BorrowDash token={asset} />, [asset]);
 
   if (asset && !isReserveTokenDefinition(asset)) {
     throw new Error("Native token is not supported");
@@ -265,10 +259,9 @@ const BorrowDetailForAsset: React.FC<{
 };
 
 export const BorrowDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);

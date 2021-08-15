@@ -9,10 +9,18 @@ import {
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import {
+  useAllReserveTokensWithData,
+  ExtendedReserveTokenDefinition,
+} from "../../queries/lendingReserveData";
+import {
+  ReserveTokenDefinition,
+  ReserveOrNativeTokenDefinition,
+  isReserveTokenDefinition,
+  NativeTokenDefinition,
+} from "../../queries/allReserveTokens";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
-import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useUserAccountData } from "../../queries/userAccountData";
 import {
   useProtocolReserveData,
@@ -25,52 +33,95 @@ import {
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
 import { CollateralComposition } from "../../components/Chart/CollateralComposition";
+import { BigNumber } from "ethers";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 type BorrowDashProps = {
-  token: ReserveTokenDefinition;
+  token: Readonly<ReserveOrNativeTokenDefinition>;
 };
 
-export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
-  const { account: userAccountAddress } = useAppWeb3();
+type BorrowDashReserveProps = {
+  token: Readonly<ReserveTokenDefinition>;
+};
+
+type BorrowDashNativeProps = {
+  token: Readonly<NativeTokenDefinition>;
+};
+
+type BorrowDashLayoutProps = {
+  reserve: Readonly<ExtendedReserveTokenDefinition> | undefined;
+};
+
+export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) =>
+  React.useMemo(
+    () =>
+      isReserveTokenDefinition(token) ? (
+        <BorrowDashReserve token={token} />
+      ) : (
+        <BorrowDashNative token={token} />
+      ),
+    [token]
+  );
+
+const BorrowDashReserve: React.FC<BorrowDashReserveProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
-  const tokenAddresses = reserves?.map(token => {
-    return token.tokenAddress;
-  });
   const reserve = React.useMemo(
     () =>
       reserves?.find(reserve => reserve.tokenAddress === token.tokenAddress) ??
       reserves?.find(
         reserve =>
           reserve.tokenAddress.toLowerCase() ===
-          token.tokenAddress.toLowerCase()
+          token.tokenAddress?.toLowerCase()
       ),
     [reserves, token.tokenAddress]
   );
+  return <BorrowDashLayout reserve={reserve} />;
+};
+
+const BorrowDashNative: React.FC<BorrowDashNativeProps> = ({ token }) => {
+  const { data: reserves } = useAllReserveTokensWithData();
+  const { data: wrappedNative } = useWrappedNativeDefinition();
+  const reserve = React.useMemo(
+    () =>
+      reserves?.find(
+        reserve => reserve.tokenAddress === wrappedNative?.tokenAddress
+      ) ??
+      reserves?.find(
+        reserve =>
+          reserve.tokenAddress.toLowerCase() ===
+          wrappedNative?.tokenAddress.toLowerCase()
+      ),
+    [reserves, wrappedNative?.tokenAddress]
+  );
+  return <BorrowDashLayout reserve={reserve} />;
+};
+
+const BorrowDashLayout: React.FC<BorrowDashLayoutProps> = ({ reserve }) => {
+  const { account: userAccountAddress } = useAppWeb3();
   const { data: reserveProtocolData } = useProtocolReserveData(
     reserve?.tokenAddress
   );
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
-  // const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
-  // const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
-  // const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
-  const { data: utilizationData } = useAssetUtilizationRate(token.tokenAddress);
+  const { data: utilizationData } = useAssetUtilizationRate(
+    reserve?.tokenAddress
+  );
   const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
-  const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
-
   const utilizationRate = utilizationData?.utilizationRate;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
-  // const maximumLtv = reserveConfiguration?.ltv;
-  // const currentLtv = userAccountData?.currentLtv;
-  const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
+
+  const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
   const totalCollateralEth = userAccountData?.totalCollateralEth;
 
+  const allUserReservesData = useUserReservesData([
+    `${reserve?.tokenAddress}`,
+  ]).data;
   const userStableDebt =
-    allUserReservesData?.[token.tokenAddress]?.currentStableDebt;
+    allUserReservesData?.[`${reserve?.tokenAddress}`]?.currentStableDebt;
   const userVariableDebt =
-    allUserReservesData?.[token.tokenAddress]?.currentVariableDebt;
+    allUserReservesData?.[`${reserve?.tokenAddress}`]?.currentVariableDebt;
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
     "(max-width: 400px)",
@@ -96,7 +147,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           justifyContent="flex-start"
         >
           <TokenIcon
-            symbol={token.symbol}
+            symbol={reserve?.symbol || "XDAI"}
             borderRadius="100%"
             p="2px"
             background="whiteAlpha.500"
@@ -116,7 +167,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
               }}
               mx="1.5rem"
             >
-              {token.symbol}
+              {reserve?.symbol || "XDAI"}
             </ColoredText>
             <Text
               fontSize={{
@@ -221,7 +272,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
                 3
               )}
             </Text>
-            {isSmallerThan400 ? null : " " + token.symbol}
+            {isSmallerThan400 ? null : " " + reserve?.symbol}
           </Box>
         </Flex>
         <Flex
