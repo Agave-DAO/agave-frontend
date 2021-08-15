@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { AgaveLendingABI__factory } from "../contracts";
+import { AgaveLendingABI__factory, WETHGateway__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
 import {
   useUserAssetAllowance,
@@ -15,11 +15,14 @@ import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
 import { useLendingReserveData } from "../queries/lendingReserveData";
 import { getChainAddresses } from "../utils/chainAddresses";
+import { NATIVE_TOKEN } from "../queries/allReserveTokens";
+import { useWrappedNativeDefinition } from "../queries/wrappedNativeAddress";
 
 export interface UseWithdrawMutationProps {
-  asset: string | undefined;
+  asset: string | NATIVE_TOKEN | undefined;
   recipientAccount: string | undefined;
   amount: BigNumber | undefined;
+  spender: string | undefined;
 }
 
 export interface UseWithdrawMutationDto {
@@ -40,9 +43,11 @@ export const useWithdrawMutation = ({
   asset,
   recipientAccount,
   amount,
+  spender,
 }: UseWithdrawMutationProps): UseWithdrawMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
+  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
 
   const userAccountDataQueryKey = useUserAccountData.buildKey(
     chainId ?? undefined,
@@ -52,12 +57,12 @@ export const useWithdrawMutation = ({
   const assetBalanceQueryKey = useUserAssetBalance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset
+    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
   );
   const allowanceQueryKey = useUserAssetAllowance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset,
+    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
     recipientAccount ?? undefined
   );
   const withdrawnQueryKey = [...allowanceQueryKey, "withdraw"] as const;
@@ -73,14 +78,25 @@ export const useWithdrawMutation = ({
       if (!chainAddresses) {
         return undefined;
       }
-      if (!asset || !recipientAccount || !amount) {
+      if (!asset || !recipientAccount || !amount || !spender) {
         return undefined;
       }
-      const lendingContract = AgaveLendingABI__factory.connect(
-        chainAddresses.lendingPool,
-        library.getSigner()
-      );
-      const withdraw = lendingContract.withdraw(asset, amount, recipientAccount);
+      let withdraw;
+      if (asset === NATIVE_TOKEN) {
+        const gatewayContract = WETHGateway__factory.connect(
+          spender,
+          library.getSigner()
+        );
+        // Function: withdrawETH(address lendingPool, uint256 amount, address to)
+        withdraw = gatewayContract.withdrawETH(amount, account);
+      } else {
+        const lendingContract = AgaveLendingABI__factory.connect(
+          chainAddresses.lendingPool,
+          library.getSigner()
+        );
+        withdraw = lendingContract.withdraw(asset, amount, recipientAccount);
+      }
+
       const withdrawConfirmation = await usingProgressNotification(
         "Awaiting withdraw approval",
         "Please sign the transaction for withdrawal.",
@@ -109,28 +125,43 @@ export const useWithdrawMutation = ({
                 [
                   useUserDepositAssetBalances.buildKey(chainId, account),
                   useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
-                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(
+                    chainId,
+                    account
+                  ),
                   useUserReserveAssetBalances.buildKey(chainId, account),
                   useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
                 ].map(k => queryClient.invalidateQueries(k))
               )
             : Promise.resolve(),
           asset && account && chainAddrs && chainId && library
-            ? useLendingReserveData
-                .fetchQueryDefined(
-                  { account, chainAddrs, chainId, library, queryClient },
-                  asset
-                )
-                .then(reserveData =>
-                  useUserAssetBalance.buildKey(
-                    chainId ?? undefined,
-                    account ?? undefined,
-                    reserveData.aTokenAddress
-                  )
-                )
-                .then(aTokenBalanceQueryKey =>
-                  queryClient.invalidateQueries(aTokenBalanceQueryKey)
-                )
+            ? useWrappedNativeDefinition
+                .fetchQueryDefined({
+                  account,
+                  chainAddrs,
+                  chainId,
+                  library,
+                  queryClient,
+                })
+                .then(wrappedNativeToken => {
+                  useLendingReserveData
+                    .fetchQueryDefined(
+                      { account, chainAddrs, chainId, library, queryClient },
+                      asset !== NATIVE_TOKEN
+                        ? asset
+                        : wrappedNativeToken.tokenAddress
+                    )
+                    .then(reserveData =>
+                      useUserAssetBalance.buildKey(
+                        chainId ?? undefined,
+                        account ?? undefined,
+                        reserveData.aTokenAddress
+                      )
+                    )
+                    .then(aTokenBalanceQueryKey =>
+                      queryClient.invalidateQueries(aTokenBalanceQueryKey)
+                    );
+                })
             : Promise.resolve(),
         ]);
       },
