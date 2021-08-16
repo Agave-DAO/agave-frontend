@@ -1,6 +1,6 @@
 import wxdaiImg from "../assets/image/coins/wxdai.svg";
 import ethImg from "../assets/image/coins/eth.svg";
-import agaveImg from "../assets/image/coins/agave.png";
+import agaveImg from "../assets/image/coins/agave.webp";
 import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
 import usdcImg from "../assets/image/coins/usdc.svg";

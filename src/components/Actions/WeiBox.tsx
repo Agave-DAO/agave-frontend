@@ -255,7 +255,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
           boxSizing="content-box"
           w="max-content"
           mx={4}
-          h="90%"
+          h="100%"
           children={
             typeof icon === "string" ? (
               <Image

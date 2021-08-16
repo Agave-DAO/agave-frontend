@@ -1,6 +1,6 @@
 import { QuestionIcon } from "@chakra-ui/icons";
 import { Image, ImageProps } from "@chakra-ui/image";
-import AgaveLogo from "../assets/image/colored-agave-logo.svg";
+import AgaveLogo from "../assets/image/coins/agave.webp";
 import BatLogo from "../assets/image/coins/bat.svg";
 import WxdaiLogo from "../assets/image/coins/wxdai.svg";
 import EthLogo from "../assets/image/coins/eth.svg";
@@ -21,6 +21,7 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "BAT":
       return BatLogo;
     case "WXDAI":
+    case "XDAI":
     case "agWXDAI":
       return WxdaiLogo;
     case "ETH":
