@@ -4,7 +4,6 @@ import AgaveLogo from "../assets/image/coins/agave.webp";
 import WxdaiLogo from "../assets/image/coins/wxdai.svg";
 import EthLogo from "../assets/image/coins/eth.svg";
 import HoneyLogo from "../assets/image/coins/honey.webp";
-import UniLogo from "../assets/image/coins/uni.svg";
 import UsdcLogo from "../assets/image/coins/usdc.svg";
 import UsdtLogo from "../assets/image/coins/usdt.svg";
 import WbtcLogo from "../assets/image/coins/wbtc.svg";
@@ -27,8 +26,6 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "HONEY":
     case "HNY":
       return HoneyLogo;
-    case "UNI":
-      return UniLogo;
     case "USDC":
     case "agUSDC":
       return UsdcLogo;
