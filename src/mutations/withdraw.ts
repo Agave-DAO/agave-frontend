@@ -81,6 +81,7 @@ export const useWithdrawMutation = ({
       if (!asset || !recipientAccount || !amount || !spender) {
         return undefined;
       }
+
       let withdraw;
       if (asset === NATIVE_TOKEN) {
         const gatewayContract = WETHGateway__factory.connect(
