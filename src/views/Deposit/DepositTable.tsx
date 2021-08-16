@@ -14,6 +14,7 @@ import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
+import { isMobile } from "react-device-detect";
 
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
@@ -22,9 +23,6 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const balanceUSD = balanceNumber
     ? (Number(price.data) * balanceNumber).toFixed(2)
     : "-";
-
-  const [isMobile] = useMediaQuery("(max-width: 32em)");
-
   return React.useMemo(() => {
     return (
       <Flex direction="column" minH={30} ml={2}>
@@ -32,6 +30,7 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
           <Text p={3} fontWeight="bold">
             {balanceNumber?.toFixed(3) ?? "-"}
           </Text>
+
           {isMobile ? null : <Text p={3}>$ {balanceUSD ?? "-"}</Text>}
         </Box>
       </Flex>

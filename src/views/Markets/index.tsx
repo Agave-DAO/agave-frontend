@@ -305,7 +305,7 @@ const AssetTable: React.FC<{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
             bg: { base: "primary.500", md: "primary.900" },
             whiteSpace: "nowrap",
-            height: "55px",
+            height: "69px",
           }}
           cellProps={{
             borderBottom: "none",

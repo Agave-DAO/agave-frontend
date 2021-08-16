@@ -1,7 +1,8 @@
 import { Box, Text } from "@chakra-ui/layout";
-import { Button, Flex, Switch, useMediaQuery } from "@chakra-ui/react";
+import { Button, Flex, Switch, Tooltip, useMediaQuery } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import React from "react";
+import { isMobile, isDesktop } from "react-device-detect";
 import { Link, useHistory } from "react-router-dom";
 import { CellProps, Column, Renderer } from "react-table";
 import { AssetData } from ".";
@@ -34,25 +35,40 @@ const ThreeStateSwitch: React.FC<{
 
   return React.useMemo(
     () => (
-      <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
-        <Text
-          fontWeight="bold"
-          width="60px"
-          color={
-            state === null ? "grey.300" : state ? "green.300" : "orange.300"
-          }
-        >
-          {state === null ? "-" : state ? "Yes" : "No"}
-        </Text>
-        <Switch
-          size="md"
-          colorScheme="yellow"
-          aria-checked={state === null ? "mixed" : undefined}
-          isChecked={state === null ? undefined : state}
-          isDisabled={state === null}
-          onChange={onClickWrapped}
-        />
-      </Box>
+      <Tooltip
+        placement="top-end"
+        bg="gray.700"
+        label={
+          state === null
+            ? ""
+            : state
+            ? "Toggle to NOT use this Asset as collateral"
+            : "Toggle to use this Asset as collateral"
+        }
+        fontSize="2xl"
+        openDelay={400}
+      >
+        <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
+          <Text
+            fontWeight="bold"
+            color={
+              state === null ? "grey.300" : state ? "green.300" : "orange.300"
+            }
+          >
+            {state === null ? "-" : state ? "Yes" : "No"}
+          </Text>
+
+          <Switch
+            ml="3rem"
+            size="lg"
+            colorScheme="yellow"
+            aria-checked={state === null ? "mixed" : undefined}
+            isChecked={state === null ? undefined : state}
+            isDisabled={state === null}
+            onChange={onClickWrapped}
+          />
+        </Box>
+      </Tooltip>
     ),
     [onClickWrapped, state]
   );
@@ -92,7 +108,6 @@ export const DashboardTable: React.FC<{
   mode: DashboardTableType;
   assets: AssetData[];
 }> = ({ mode, assets }) => {
-  const isSmallerThan1200 = useMediaQuery("(max-width: 1200px)");
   const history = useHistory();
   const onActionClicked = React.useCallback(
     (route: String, asset: Readonly<ReserveTokenDefinition>) => {
@@ -163,17 +178,14 @@ export const DashboardTable: React.FC<{
           )) as Renderer<CellProps<AssetData, string>>,
       },
       {
-        Header: "Collateral",
+        Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
         accessor: row => row.backingReserve,
         Cell: (({ row }) =>
           mode === DashboardTableType.Deposit && row.original.backingReserve ? (
             <CollateralView
               tokenAddress={row.original.backingReserve?.tokenAddress}
             />
-          ) : (
-            <></>
-          )) as Renderer<CellProps<AssetData, string>>,
-        /* drop the collateralView make this button toggle directly a mutation call */
+          ) : null) as Renderer<CellProps<AssetData, string>>,
       },
       {
         Header: mode === DashboardTableType.Borrow ? "Actions" : "Actions",
@@ -241,10 +253,8 @@ export const DashboardTable: React.FC<{
               borderCollapse: "separate",
               float: "left",
               marginRight:
-                mode === DashboardTableType.Deposit && !isSmallerThan1200
-                  ? "2%"
-                  : "0%",
-              width: isSmallerThan1200 ? "100%" : "49%",
+                mode === DashboardTableType.Deposit && isDesktop ? "2%" : "0%",
+              width: isDesktop ? "49%" : "100%",
             },
           }}
           headProps={{
@@ -254,6 +264,8 @@ export const DashboardTable: React.FC<{
             border: "0px solid ",
             maxWidth: "15rem",
             whiteSpace: "nowrap",
+            textAlign: "center",
+            _first: { textAlign: "start" },
           }}
           rowProps={{
             // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
@@ -269,12 +281,17 @@ export const DashboardTable: React.FC<{
             maxWidth: "15rem",
             paddingInlineStart: "0.1rem",
             paddingInlineEnd: "0.1rem",
-            _first: { borderLeftRadius: "10px", paddingInlineStart: "1rem" },
+            textAlign: "center",
+            _first: {
+              borderLeftRadius: "10px",
+              paddingInlineStart: "1rem",
+              textAlign: "start",
+            },
             _last: { borderRightRadius: "10px", paddingInlineEnd: "1rem" },
           }}
         />
       ),
-    [mode, isSmallerThan1200]
+    [mode, isDesktop]
   );
 
   return (
