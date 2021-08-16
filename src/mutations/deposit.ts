@@ -17,6 +17,7 @@ import { useLendingReserveData } from "../queries/lendingReserveData";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { NATIVE_TOKEN } from "../queries/allReserveTokens";
 import { useWrappedNativeAddress } from "../queries/wrappedNativeAddress";
+import { useUserReserveData } from "../queries/protocolReserveData";
 
 export interface UseDepositMutationProps {
   asset: string | NATIVE_TOKEN | undefined;
@@ -152,6 +153,12 @@ export const useDepositMutation = ({
                     .then(aTokenBalanceQueryKey =>
                       queryClient.invalidateQueries(aTokenBalanceQueryKey)
                     );
+                  const userReserveDataKey = useUserReserveData.buildKey(
+                    chainId ?? undefined,
+                    account ?? undefined,
+                    asset !== NATIVE_TOKEN ? asset : wrappedNativeTokenAddress
+                  );
+                  queryClient.invalidateQueries(userReserveDataKey);
                 })
             : Promise.resolve(),
         ]);

@@ -120,11 +120,6 @@ export const useBorrowMutation = ({
           account
         );
       }
-      const lendingContract = AgaveLendingABI__factory.connect(
-        chainAddresses.lendingPool,
-        library.getSigner()
-      );
-
       const borrowConfirmation = await usingProgressNotification(
         "Awaiting borrow approval",
         "Please sign the borrowing transaction.",
