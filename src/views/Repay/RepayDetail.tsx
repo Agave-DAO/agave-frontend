@@ -6,6 +6,7 @@ import { RepayDash } from "../common/RepayDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   isReserveTokenDefinition,
+  NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
@@ -26,9 +27,10 @@ import {
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
-  token: Readonly<ReserveTokenDefinition>;
+  token: Readonly<ReserveOrNativeTokenDefinition>;
 }
 
 interface AmountSelectedState extends InitialState {
@@ -80,9 +82,13 @@ const InitialComp: React.FC<{
   dispatch: (nextState: RepayState) => void;
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
-  const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
+
+  const { data: userBalance } = useUserAssetBalance(asset?.tokenAddress);
   const { data: debtForAsset } = useUserVariableDebtForAsset(
-    state.token.tokenAddress
+    asset?.tokenAddress
   );
   const availableToRepay = React.useMemo(() => {
     if (!userBalance || !debtForAsset) {
@@ -115,9 +121,13 @@ const AmountSelectedComp: React.FC<{
   dispatch: (nextState: RepayState) => void;
 }> = ({ state, dispatch }) => {
   const chainAddresses = useChainAddresses();
+
   const approvalArgs = React.useMemo<UseApprovalMutationProps>(
     () => ({
-      asset: state.token.tokenAddress,
+      asset:
+        state.token.tokenAddress === NATIVE_TOKEN
+          ? undefined
+          : state.token.tokenAddress,
       amount: state.amountToRepay,
       spender: chainAddresses?.lendingPool,
     }),
@@ -272,17 +282,7 @@ const RepayStateMachine: React.FC<{
 
 const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
   ({ asset }) => {
-    const dash = React.useMemo(
-      () =>
-        asset && isReserveTokenDefinition(asset) ? (
-          <RepayDash token={asset} />
-        ) : undefined,
-      [asset]
-    );
-
-    if (asset && !isReserveTokenDefinition(asset)) {
-      throw new Error("Native token is not supported");
-    }
+    const dash = React.useMemo(() => <RepayDash token={asset} />, [asset]);
 
     const [repayState, setRepayState] = React.useState<RepayState>(
       createState("init", { token: asset })
@@ -305,10 +305,9 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
   };
 
 export const RepayDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);

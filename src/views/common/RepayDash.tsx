@@ -11,7 +11,11 @@ import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import {
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
+  ReserveTokenDefinition,
+} from "../../queries/allReserveTokens";
 import { useUserAccountData } from "../../queries/userAccountData";
 import {
   useUserAssetBalance,
@@ -19,23 +23,27 @@ import {
 } from "../../queries/userAssets";
 import { fontSizes, spacings } from "../../utils/constants";
 import { CollateralComposition } from "../../components/Chart/CollateralComposition";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 type RepayDashProps = {
-  token: ReserveTokenDefinition;
+  token: ReserveOrNativeTokenDefinition;
 };
 
 export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
   // General
   const { account: userAccountAddress } = useAppWeb3();
 
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset = token.tokenAddress === NATIVE_TOKEN ? wNative : token;
+
   // Debts
-  const { data: debt } = useUserVariableDebtForAsset(token.tokenAddress);
+  const { data: debt } = useUserVariableDebtForAsset(asset?.tokenAddress);
 
   // User account data and balances
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
-  const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
+  const { data: tokenBalance } = useUserAssetBalance(asset?.tokenAddress);
 
   // Debt position information
   const totalCollateral = userAccountData?.totalCollateralEth;

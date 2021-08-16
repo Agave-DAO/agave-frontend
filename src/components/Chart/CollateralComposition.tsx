@@ -51,7 +51,7 @@ export const CollateralComposition: React.FC = () => {
             role="button"
             w="100%"
             templateColumns={
-              collateralData.filter(x => x !== undefined).join("% ") + "%"
+              collateralData.filter(x => x != undefined).join("% ") + "%"
             }
             h="2rem"
             borderRadius="8px"
@@ -62,7 +62,7 @@ export const CollateralComposition: React.FC = () => {
           >
             {allUserReservesBalances?.map((token, index) => (
               <Box
-                key={token.symbol + "_comp"}
+                key={"comp_" + index}
                 bg={assetColor[token.symbol]}
                 w="100%"
                 h="100%"
@@ -81,7 +81,7 @@ export const CollateralComposition: React.FC = () => {
               {allUserReservesBalances?.map((token, index) =>
                 collateralComposition[index] !== null ? (
                   <Flex
-                    id={index + token.symbol}
+                    key={"flex-collateralComposition_" + index}
                     alignItems="center"
                     justifyContent="space-between"
                     w="100%"
@@ -99,9 +99,7 @@ export const CollateralComposition: React.FC = () => {
                     </Text>
                     <Text ml="1em"> {collateralData[index] + "%"}</Text>
                   </Flex>
-                ) : (
-                  <Text></Text>
-                )
+                ) : null
               )}
             </VStack>
           </PopoverBody>
