@@ -13,33 +13,10 @@ import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { useUserAccountData } from "../../queries/userAccountData";
-import { PercentageView } from "../common/PercentageView";
-import { useProtocolReserveData } from "../../queries/protocolReserveData";
-import {
-  fixedNumberToPercentage,
-  bigNumberToString,
-} from "../../utils/fixedPoint";
+import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-
-export const APYView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
-}) => {
-  const { data: reserveProtocolData } = useProtocolReserveData(tokenAddress);
-  // if it's an aToken this will return null. Handle it differently!
-  const variableBorrowAPY = reserveProtocolData?.variableBorrowRate;
-
-  return React.useMemo(() => {
-    if (variableBorrowAPY === undefined) {
-      return <>-</>;
-    }
-
-    return (
-      <PercentageView
-        ratio={fixedNumberToPercentage(variableBorrowAPY, 4, 2)}
-      />
-    );
-  }, [variableBorrowAPY]);
-};
+import { isMobile } from "react-device-detect";
+import { BorrowAPRView } from "../common/RatesView";
 
 const BorrowAvailability: React.FC<{
   tokenAddress: string;
@@ -61,7 +38,6 @@ const BorrowAvailability: React.FC<{
     availableBorrowsNativeAdjusted && price
       ? availableBorrowsNativeAdjusted.div(price[0])
       : null;
-  const isMobile = useMediaQuery("(max-width: 32em)");
   return React.useMemo(() => {
     return (
       <Flex direction="column" minH={30} ml={2}>
@@ -139,9 +115,9 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
       {
         Header: isMobile ? "APR" : "Variable APR",
         accessor: row => row.tokenAddress,
-        Cell: (({ value }) => <APYView tokenAddress={value} />) as Renderer<
-          CellProps<AssetRecord, string>
-        >,
+        Cell: (({ value }) => (
+          <BorrowAPRView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
     ],
     [isMobile, lendingPool]

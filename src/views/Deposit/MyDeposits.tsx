@@ -53,7 +53,7 @@ export const MyDepositsTable: React.FC<{ deposits: DepositAsset[] }> = ({
     <div>
       <Box
         w="auto"
-        minW={{ md: 250 }}
+        minW={{ md: 300 }}
         ml={{ base: 0, md: 10 }}
         marginTop={0}
         boxSizing="content-box"

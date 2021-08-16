@@ -2,6 +2,7 @@ import React, { MouseEventHandler } from "react";
 import { Button, Center, CenterProps } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
+import { isMobile, isDesktop } from "react-device-detect";
 
 export const EMPTY_TYPE = {
   Deposit: "Deposit",
@@ -13,18 +14,19 @@ export const DashboardEmptyState: React.FC<{
   onClick: MouseEventHandler;
   props?: CenterProps;
 }> = ({ type, onClick, ...props }) => {
-
   return (
     <Center
+      w={isDesktop ? "49%" : "100%"}
       boxSizing="content-box"
       flexDirection="column"
       rounded="xl"
+      float="left"
       minH="25.6rem"
-      minW={{ base: "ineherit", lg: "inherit" }}
-      flex={1}
       bg="primary.900"
-      px={{ base: "2rem", md: "4rem" }}
+      px={{ base: "0rem", md: "0rem" }}
       py="2.4rem"
+      marginRight={type === "Deposit" && isDesktop ? "2%" : "0%"}
+      marginBottom={type === "Deposit" && isDesktop ? "0%" : "2rem"}
       {...props}
     >
       <ColoredText

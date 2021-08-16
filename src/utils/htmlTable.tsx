@@ -117,7 +117,9 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
                       ) : (
                         <TriangleUpIcon ml={3} />
                       )
-                    ) : null}
+                    ) : (
+                      <TriangleDownIcon ml={3} color="transparent" />
+                    )}
                   </span>
                 </Th>
               ))}
@@ -156,7 +158,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
       headStyle,
       rowStyle,
       cellStyle,
-      handleRowClick
+      handleRowClick,
     ]
   );
 };
@@ -187,9 +189,7 @@ export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
                         >
                           {headerGroup.headers[index].render("Header")}
                         </Box>
-                        <Box>
-                          {cell.render("Cell")}
-                        </Box>
+                        <Box>{cell.render("Cell")}</Box>
                       </Box>
                     ) : (
                       <Box
@@ -203,9 +203,7 @@ export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
                         {...cellStyle}
                         {...cell.getCellProps()}
                       >
-                        <Box>
-                          {cell.render("Cell")}
-                        </Box>
+                        <Box>{cell.render("Cell")}</Box>
                       </Box>
                     );
 
