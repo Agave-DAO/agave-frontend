@@ -6,6 +6,7 @@ import { BorrowDash } from "./BorrowDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   isReserveTokenDefinition,
+  NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
@@ -23,9 +24,10 @@ import {
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
-  token: Readonly<ReserveTokenDefinition>;
+  token: Readonly<ReserveOrNativeTokenDefinition>;
 }
 
 interface AmountSelectedState extends InitialState {
@@ -94,8 +96,11 @@ const InitialComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
   const { account } = useAppWeb3();
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
   const maxToBorrow =
-    useAvailableToBorrowAssetWei(account ?? undefined, state.token.tokenAddress)
+    useAvailableToBorrowAssetWei(account ?? undefined, asset?.tokenAddress)
       .data ?? undefined;
   const onSubmit = React.useCallback(
     amountToBorrow =>
@@ -233,17 +238,8 @@ END IMPL SECTION
 const BorrowDetailForAsset: React.FC<{
   asset: ReserveOrNativeTokenDefinition;
 }> = ({ asset }) => {
-  const dash = React.useMemo(
-    () =>
-      asset && isReserveTokenDefinition(asset) ? (
-        <BorrowDash token={asset} />
-      ) : undefined,
-    [asset]
-  );
+  const dash = React.useMemo(() => <BorrowDash token={asset} />, [asset]);
 
-  if (asset && !isReserveTokenDefinition(asset)) {
-    throw new Error("Native token is not supported");
-  }
   const [borrowState, setBorrowState] = React.useState<BorrowState>(
     createState("init", { token: asset })
   );
@@ -265,10 +261,9 @@ const BorrowDetailForAsset: React.FC<{
 };
 
 export const BorrowDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
