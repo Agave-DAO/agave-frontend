@@ -104,7 +104,6 @@ export const useBorrowMutation = ({
           spender,
           library.getSigner()
         );
-        // Function: withdrawETH(address lendingPool, uint256 amount, address to)
         borrow = gatewayContract.borrowETH(
           amount,
           interestRateMode,
