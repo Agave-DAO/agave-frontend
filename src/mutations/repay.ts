@@ -15,7 +15,6 @@ import { useWrappedNativeDefinition } from "../queries/wrappedNativeAddress";
 export interface UseRepayMutationProps {
   asset: string | NATIVE_TOKEN | undefined;
   amount: BigNumber;
-  spender: string | undefined;
 }
 
 export interface UseRepayMutationDto {
@@ -36,7 +35,6 @@ export interface UseRepayMutationDto {
 export const useRepayMutation = ({
   asset,
   amount,
-  spender,
 }: UseRepayMutationProps): UseRepayMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
@@ -71,7 +69,7 @@ export const useRepayMutation = ({
       if (!chainAddresses) {
         return undefined;
       }
-      if (!asset || !amount || !spender) {
+      if (!asset || !amount) {
         return undefined;
       }
       let repay;
@@ -80,7 +78,7 @@ export const useRepayMutation = ({
       const rateMode = 2;
       if (asset === NATIVE_TOKEN) {
         const gatewayContract = WETHGateway__factory.connect(
-          spender,
+          chainAddresses.wrappedNativeGateway,
           library.getSigner()
         );
         repay = gatewayContract.repayETH(amount, rateMode, account);
