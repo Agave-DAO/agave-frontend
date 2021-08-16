@@ -7,6 +7,7 @@ import { DashOverviewIntro } from "../common/DashOverview";
 import {
   isNativeTokenDefinition,
   isReserveTokenDefinition,
+  NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
@@ -26,9 +27,10 @@ import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useChainAddresses } from "../../utils/chainAddresses";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 interface InitialState {
-  token: Readonly<ReserveTokenDefinition>;
+  token: Readonly<ReserveOrNativeTokenDefinition>;
 }
 
 interface AmountSelectedState extends InitialState {
@@ -95,7 +97,10 @@ const InitialComp: React.FC<{
   dispatch: (nextState: WithdrawState) => void;
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
-  const { data: reserve } = useLendingReserveData(state.token.tokenAddress);
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
+  const { data: reserve } = useLendingReserveData(asset?.tokenAddress);
   const { data: userAgBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const onSubmit = React.useCallback(
     amountToWithdraw =>
@@ -228,9 +233,6 @@ const WithdrawStateMachine: React.FC<{
 const WithdrawDetailForAsset: React.FC<{
   asset: ReserveOrNativeTokenDefinition;
 }> = ({ asset }) => {
-  if (asset && !isReserveTokenDefinition(asset)) {
-    throw new Error("Native token is not supported");
-  }
   const dash = React.useMemo(() => <WithdrawDash token={asset} />, [asset]);
 
   const [withdrawState, setWithdrawState] = React.useState<WithdrawState>(

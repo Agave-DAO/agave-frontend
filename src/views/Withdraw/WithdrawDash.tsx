@@ -15,7 +15,11 @@ import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import {
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
+  ReserveTokenDefinition,
+} from "../../queries/allReserveTokens";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 // import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
@@ -26,21 +30,27 @@ import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
 type WithdrawDashProps = {
-  token: ReserveTokenDefinition;
+  token: ReserveOrNativeTokenDefinition;
 };
 
 export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
   const { account: userAccountAddress } = useAppWeb3();
   const { data: reserves } = useAllReserveTokensWithData();
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset = token.tokenAddress === NATIVE_TOKEN ? wNative : token;
+  const tokenAddresses = reserves?.map(asset => {
+    return asset.tokenAddress;
+  });
   const reserve = React.useMemo(
     () =>
-      reserves?.find(reserve => reserve.tokenAddress === token.tokenAddress) ??
+      reserves?.find(reserve => reserve.tokenAddress === asset?.tokenAddress) ??
       reserves?.find(
         reserve =>
           reserve.tokenAddress.toLowerCase() ===
-          token.tokenAddress.toLowerCase()
+          asset?.tokenAddress.toLowerCase()
       ),
     [reserves, token.tokenAddress]
   );
@@ -260,6 +270,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
               >
                 {allReservesData?.map((token, index) => (
                   <Box
+                    key={"box" + index}
                     bg={assetColor[token.symbol]}
                     w="100%"
                     h="100%"
@@ -278,6 +289,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
                   {allReservesData?.map((token, index) =>
                     collateralComposition[index] !== null ? (
                       <Flex
+                        key={"flex" + index}
                         id={index + token.symbol}
                         alignItems="center"
                         justifyContent="space-between"
@@ -296,9 +308,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
                         </Text>
                         <Text ml="1em"> {collateralData[index] + "%"}</Text>
                       </Flex>
-                    ) : (
-                      <Text></Text>
-                    )
+                    ) : null
                   )}
                 </VStack>
               </PopoverBody>
