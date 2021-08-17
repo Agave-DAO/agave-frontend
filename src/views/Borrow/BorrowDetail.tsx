@@ -25,6 +25,7 @@ import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import { useProtocolReserveData } from "../../queries/protocolReserveData";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -99,9 +100,18 @@ const InitialComp: React.FC<{
   const { data: wNative } = useWrappedNativeDefinition();
   const asset =
     state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
-  const maxToBorrow =
+
+  const { data: reserveProtocolData } = useProtocolReserveData(
+    asset?.tokenAddress
+  );
+  const userAssetMaxAvailable =
     useAvailableToBorrowAssetWei(account ?? undefined, asset?.tokenAddress)
       .data ?? undefined;
+  const liquidityAvailable = reserveProtocolData?.availableLiquidity;
+  const maxToBorrow =
+    liquidityAvailable && userAssetMaxAvailable?.gt(liquidityAvailable)
+      ? liquidityAvailable
+      : userAssetMaxAvailable;
   const onSubmit = React.useCallback(
     amountToBorrow =>
       dispatch(createState("borrowTx", { amountToBorrow, ...state })),
