@@ -1,15 +1,12 @@
 import { QuestionIcon } from "@chakra-ui/icons";
 import { Image, ImageProps } from "@chakra-ui/image";
-import AgaveLogo from "../assets/image/colored-agave-logo.svg";
-import BatLogo from "../assets/image/coins/bat.svg";
+import AgaveLogo from "../assets/image/coins/agave.webp";
 import WxdaiLogo from "../assets/image/coins/wxdai.svg";
 import EthLogo from "../assets/image/coins/eth.svg";
 import HoneyLogo from "../assets/image/coins/honey.webp";
-import UniLogo from "../assets/image/coins/uni.svg";
 import UsdcLogo from "../assets/image/coins/usdc.svg";
 import UsdtLogo from "../assets/image/coins/usdt.svg";
 import WbtcLogo from "../assets/image/coins/wbtc.svg";
-import ZrxLogo from "../assets/image/coins/zrx.svg";
 import React, { MouseEventHandler } from "react";
 import { SquareProps, Circle, Center } from "@chakra-ui/react";
 
@@ -18,9 +15,8 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "AGVE":
     case "agAGVE":
       return AgaveLogo;
-    case "BAT":
-      return BatLogo;
     case "WXDAI":
+    case "XDAI":
     case "agWXDAI":
       return WxdaiLogo;
     case "ETH":
@@ -30,8 +26,6 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "HONEY":
     case "HNY":
       return HoneyLogo;
-    case "UNI":
-      return UniLogo;
     case "USDC":
     case "agUSDC":
       return UsdcLogo;
@@ -41,8 +35,6 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "WBTC":
     case "agWBTC":
       return WbtcLogo;
-    case "ZRX":
-      return ZrxLogo;
     default:
       return null;
   }
