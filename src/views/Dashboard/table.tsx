@@ -35,40 +35,26 @@ const ThreeStateSwitch: React.FC<{
 
   return React.useMemo(
     () => (
-      <Tooltip
-        placement="top-end"
-        bg="gray.700"
-        label={
-          state === null
-            ? ""
-            : state
-            ? "Toggle to NOT use this Asset as collateral"
-            : "Toggle to use this Asset as collateral"
-        }
-        fontSize="2xl"
-        openDelay={400}
-      >
-        <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
-          <Text
-            fontWeight="bold"
-            color={
-              state === null ? "grey.300" : state ? "green.300" : "orange.300"
-            }
-          >
-            {state === null ? "-" : state ? "Yes" : "No"}
-          </Text>
+      <Box d="flex" flexDir="row" alignItems="center" justifyContent="center">
+        <Text
+          fontWeight="bold"
+          color={
+            state === null ? "grey.300" : state ? "green.300" : "orange.300"
+          }
+        >
+          {state === null ? "-" : state ? "Yes" : "No"}
+        </Text>
 
-          <Switch
-            ml="3rem"
-            size="lg"
-            colorScheme="yellow"
-            aria-checked={state === null ? "mixed" : undefined}
-            isChecked={state === null ? undefined : state}
-            isDisabled={state === null}
-            onChange={onClickWrapped}
-          />
-        </Box>
-      </Tooltip>
+        <Switch
+          ml="3rem"
+          size="lg"
+          colorScheme="yellow"
+          aria-checked={state === null ? "mixed" : undefined}
+          isChecked={state === null ? undefined : state}
+          isDisabled={state === null}
+          onChange={onClickWrapped}
+        />
+      </Box>
     ),
     [onClickWrapped, state]
   );
@@ -95,10 +81,24 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
 
   return React.useMemo(
     () => (
-      <ThreeStateSwitch
-        state={mutationIsLoading ? null : reserveUsedAsCollateral ?? null}
-        onClick={toggleUseAssetAsCollateral}
-      />
+      <Tooltip
+        placement="top-end"
+        bg="gray.700"
+        label={
+          mutationIsLoading || reserveUsedAsCollateral === undefined
+            ? ""
+            : reserveUsedAsCollateral
+            ? "Disable use of this asset as collateral"
+            : "Enable use of this asset as collateral"
+        }
+        fontSize="2xl"
+        openDelay={400}
+      >
+        <ThreeStateSwitch
+          state={mutationIsLoading ? null : reserveUsedAsCollateral ?? null}
+          onClick={toggleUseAssetAsCollateral}
+        />
+      </Tooltip>
     ),
     [reserveUsedAsCollateral, toggleUseAssetAsCollateral, mutationIsLoading]
   );
