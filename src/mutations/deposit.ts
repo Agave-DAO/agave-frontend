@@ -16,7 +16,10 @@ import { useUserAccountData } from "../queries/userAccountData";
 import { useLendingReserveData } from "../queries/lendingReserveData";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { NATIVE_TOKEN } from "../queries/allReserveTokens";
-import { useWrappedNativeAddress } from "../queries/wrappedNativeAddress";
+import {
+  useWrappedNativeAddress,
+  useWrappedNativeDefinition,
+} from "../queries/wrappedNativeAddress";
 import { useUserReserveData } from "../queries/protocolReserveData";
 
 export interface UseDepositMutationProps {
@@ -46,8 +49,7 @@ export const useDepositMutation = ({
 }: UseDepositMutationProps): UseDepositMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
-  // TODO: Switch to use `useWrappedNativeDefinition` when PR is in
-  const { data: wrappedNativeTokenAddress } = useWrappedNativeAddress();
+  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
 
   const userAccountDataQueryKey = useUserAccountData.buildKey(
     chainId ?? undefined,
@@ -57,12 +59,12 @@ export const useDepositMutation = ({
   const assetBalanceQueryKey = useUserAssetBalance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeTokenAddress
+    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
   );
   const allowanceQueryKey = useUserAssetAllowance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeTokenAddress,
+    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
     spender ?? undefined
   );
   const depositedQueryKey = [...allowanceQueryKey, "deposit"] as const;
