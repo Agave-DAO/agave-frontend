@@ -111,7 +111,14 @@ const InitialComp: React.FC<{
   const { data: userAgBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const onSubmit = React.useCallback(
     amountToWithdraw =>
-      dispatch(createState("amountSelected", { amountToWithdraw, ...state })),
+      dispatch(
+        createState(
+          state.token.tokenAddress === NATIVE_TOKEN
+            ? "amountSelected"
+            : "withdrawTx",
+          { amountToWithdraw, ...state }
+        )
+      ),
     [state, dispatch]
   );
   return (
