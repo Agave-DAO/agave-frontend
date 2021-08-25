@@ -31,6 +31,7 @@ import { useUserAssetBalance } from "../../queries/userAssets";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import { CollateralComposition } from "../../components/Chart/CollateralComposition";
 
 type WithdrawDashProps = {
   token: ReserveOrNativeTokenDefinition;
@@ -82,33 +83,6 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
       constants.Zero
     );
   }, [allReservesData]);
-
-  const collateralComposition = React.useMemo(() => {
-    const compositionArray = allReservesData?.map(next => {
-      if (
-        next.daiWeiPriceTotal !== null &&
-        next.decimals &&
-        totalCollateralValue
-      ) {
-        const decimalPower = BigNumber.from(10).pow(next.decimals);
-        return next.daiWeiPriceTotal
-          .mul(decimalPower)
-          .div(totalCollateralValue);
-      } else return BigNumber.from(0);
-    });
-    return compositionArray
-      ? compositionArray.map(share => {
-          if (share.gt(0)) {
-            return bigNumberToString(share.mul(100));
-          } else return null;
-        })
-      : [];
-  }, [allReservesData, totalCollateralValue]);
-
-  const collateralData = collateralComposition.map((x, index) => {
-    if (x !== null) return x.substr(0, x.indexOf(".") + 3);
-    return null;
-  });
 
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
     "(max-width: 400px)",
@@ -241,80 +215,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
             </Text>
           </HStack>
         </Flex>
-        <Flex
-          spacing={spacings.md}
-          mr={{ base: "0rem", md: "1rem" }}
-          alignItems="center"
-          justifyContent="flex-start"
-          flexDirection="column"
-        >
-          <HStack px={{ base: "0rem", md: "1rem" }}>
-            <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
-              {isSmallerThan900 ? "Collateral" : "Collateral Composition"}
-            </Text>
-          </HStack>
-          <Popover trigger="hover">
-            <PopoverTrigger>
-              <Grid
-                role="button"
-                w="100%"
-                templateColumns={
-                  collateralData.filter(x => x !== null).join("% ") + "%"
-                }
-                h="2rem"
-                borderRadius="8px"
-                borderColor="#444"
-                borderStyle="solid"
-                borderWidth="3px"
-                overflow="hidden"
-              >
-                {allReservesData?.map((token, index) => (
-                  <Box
-                    key={"box" + index}
-                    bg={assetColor[token.symbol]}
-                    w="100%"
-                    h="100%"
-                    borderRadius="0"
-                    _hover={{ bg: assetColor[token.symbol], boxShadow: "xl" }}
-                    _active={{ bg: assetColor[token.symbol] }}
-                    _focus={{ boxShadow: "xl" }}
-                    d={collateralComposition[index] !== null ? "block" : "none"}
-                  />
-                ))}
-              </Grid>
-            </PopoverTrigger>
-            <PopoverContent bg="primary.300" border="2px solid">
-              <PopoverBody bg="gray.700">
-                <VStack m="auto" py="2rem" w="90%">
-                  {allReservesData?.map((token, index) =>
-                    collateralComposition[index] !== null ? (
-                      <Flex
-                        key={"flex" + index}
-                        id={index + token.symbol}
-                        alignItems="center"
-                        justifyContent="space-between"
-                        w="100%"
-                      >
-                        <Box
-                          bg={assetColor[token.symbol]}
-                          boxSize="1em"
-                          minW="1em"
-                          minH="1em"
-                          borderRadius="1em"
-                        />
-                        <Text ml="1em" width="50%">
-                          {" "}
-                          {token.symbol}
-                        </Text>
-                        <Text ml="1em"> {collateralData[index] + "%"}</Text>
-                      </Flex>
-                    ) : null
-                  )}
-                </VStack>
-              </PopoverBody>
-            </PopoverContent>
-          </Popover>
-        </Flex>
+        <CollateralComposition />
       </Flex>
     </VStack>
   );
