@@ -28,6 +28,10 @@ import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useChainAddresses } from "../../utils/chainAddresses";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import {
+  useApprovalMutation,
+  UseApprovalMutationProps,
+} from "../../mutations/approval";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -47,6 +51,7 @@ interface WithdrawnTXState extends WithdrawTXState {
 
 type WithdrawState = OneTaggedPropertyOf<{
   init: InitialState;
+  amountSelected: AmountSelectedState;
   withdrawTx: WithdrawTXState;
   withdrawnTx: WithdrawnTXState;
 }>;
@@ -63,11 +68,13 @@ function createState<SelectedState extends PossibleTags<WithdrawState>>(
 
 const stateNames: Record<PossibleTags<WithdrawState>, string> = {
   init: "Token",
+  amountSelected: "Approval",
   withdrawTx: "Withdraw",
   withdrawnTx: "Withdrawn",
 };
 
 const visibleStateNames: ReadonlyArray<PossibleTags<WithdrawState>> = [
+  "amountSelected",
   "withdrawTx",
   "withdrawnTx",
 ] as const;
@@ -104,7 +111,7 @@ const InitialComp: React.FC<{
   const { data: userAgBalance } = useUserAssetBalance(reserve?.aTokenAddress);
   const onSubmit = React.useCallback(
     amountToWithdraw =>
-      dispatch(createState("withdrawTx", { amountToWithdraw, ...state })),
+      dispatch(createState("amountSelected", { amountToWithdraw, ...state })),
     [state, dispatch]
   );
   return (
@@ -116,6 +123,68 @@ const InitialComp: React.FC<{
       onSubmit={onSubmit}
       balance={userAgBalance}
     />
+  );
+};
+
+const AmountSelectedComp: React.FC<{
+  state: AmountSelectedState;
+  dispatch: (nextState: WithdrawState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
+  const { data: reserve } = useLendingReserveData(asset?.tokenAddress);
+  const approvalArgs = React.useMemo<UseApprovalMutationProps>(
+    () => ({
+      asset: isReserveTokenDefinition(state.token)
+        ? state.token.tokenAddress
+        : reserve?.aTokenAddress,
+      amount: state.amountToWithdraw,
+      spender: isReserveTokenDefinition(state.token)
+        ? chainAddresses?.lendingPool
+        : chainAddresses?.wrappedNativeGateway,
+    }),
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+  );
+  const {
+    approvalMutation: { mutateAsync },
+  } = useApprovalMutation(approvalArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("withdrawTx", { ...state })))
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<WithdrawState> = "amountSelected";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={WithdrawTitle}
+      amount={state.amountToWithdraw}
+      asset={state.token}
+      collateral={true}
+      increase={true}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={1}
+        stepName="Approval"
+        stepDesc="Please submit to approve"
+        actionName="Approve"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
   );
 };
 
@@ -223,6 +292,10 @@ const WithdrawStateMachine: React.FC<{
   switch (state.type) {
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
+    case "amountSelected":
+      return (
+        <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
+      );
     case "withdrawTx":
       return <WithdrawTxComp state={state.withdrawTx} dispatch={setState} />;
     case "withdrawnTx":
