@@ -40,15 +40,15 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
     assetOrAddress: string | NATIVE_TOKEN | undefined,
     _p3: "balance"
   ],
-  [assetOrAddress: string | ReserveOrNativeTokenDefinition]
+  [assetOrAddress: string | ReserveOrNativeTokenDefinition | NATIVE_TOKEN]
 >(
   async (params, assetOrAddress) => {
-    if (typeof assetOrAddress !== "string") {
-      if (isNativeTokenDefinition(assetOrAddress)) {
-        return params.library.getBalance(params.account);
-      } else if (!isReserveTokenDefinition(assetOrAddress)) {
-        return constants.Zero;
-      }
+    if (
+      typeof assetOrAddress !== "string" &&
+      (assetOrAddress === NATIVE_TOKEN ||
+        isNativeTokenDefinition(assetOrAddress))
+    ) {
+      return params.library.getBalance(params.account);
     }
     const asset = Erc20abi__factory.connect(
       typeof assetOrAddress === "string"
@@ -63,6 +63,8 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
     "user",
     "asset",
     typeof assetOrAddress === "string"
+      ? assetOrAddress
+      : assetOrAddress === NATIVE_TOKEN
       ? assetOrAddress
       : assetOrAddress?.tokenAddress,
     "balance",

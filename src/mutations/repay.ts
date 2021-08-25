@@ -48,7 +48,7 @@ export const useRepayMutation = ({
   const assetBalanceQueryKey = useUserAssetBalance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
+    asset
   );
   const allowanceQueryKey = useUserAssetAllowance.buildKey(
     chainId ?? undefined,
@@ -81,7 +81,10 @@ export const useRepayMutation = ({
           chainAddresses.wrappedNativeGateway,
           library.getSigner()
         );
-        repay = gatewayContract.repayETH(amount, rateMode, account);
+        console.log(amount.toString());
+        repay = gatewayContract.repayETH(amount, rateMode, account, {
+          value: amount,
+        });
       } else {
         const lendingContract = AgaveLendingABI__factory.connect(
           chainAddresses.lendingPool,

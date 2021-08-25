@@ -65,9 +65,7 @@ export const DepositDash: React.FC<DepositDashProps> = ({ token }) =>
     [token]
   );
 
-const DepositDashReserve: React.FC<DepositDashReserveProps> = ({
-  token,
-}) => {
+const DepositDashReserve: React.FC<DepositDashReserveProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
   const reserve = React.useMemo(
     () =>
@@ -83,9 +81,7 @@ const DepositDashReserve: React.FC<DepositDashReserveProps> = ({
   return <DepositDashLayout reserve={reserve} tokenBalance={tokenBalance} />;
 };
 
-const DepositDashNative: React.FC<DepositDashNativeProps> = ({
-  token,
-}) => {
+const DepositDashNative: React.FC<DepositDashNativeProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
   const { data: tokenBalance } = useUserAssetBalance(token);
   const { data: wrappedNative } = useWrappedNativeDefinition();
