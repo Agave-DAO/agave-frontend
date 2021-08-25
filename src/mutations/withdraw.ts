@@ -48,6 +48,9 @@ export const useWithdrawMutation = ({
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
   const { data: wrappedNativeToken } = useWrappedNativeDefinition();
+  const { data: agNativeData } = useLendingReserveData(
+    wrappedNativeToken?.tokenAddress
+  );
 
   const userAccountDataQueryKey = useUserAccountData.buildKey(
     chainId ?? undefined,
@@ -57,13 +60,13 @@ export const useWithdrawMutation = ({
   const assetBalanceQueryKey = useUserAssetBalance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
+    asset !== NATIVE_TOKEN ? asset : agNativeData?.aTokenAddress
   );
   const allowanceQueryKey = useUserAssetAllowance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
-    recipientAccount ?? undefined
+    asset !== NATIVE_TOKEN ? asset : agNativeData?.aTokenAddress,
+    spender
   );
   const withdrawnQueryKey = [...allowanceQueryKey, "withdraw"] as const;
 

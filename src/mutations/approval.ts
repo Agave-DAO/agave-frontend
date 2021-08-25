@@ -32,7 +32,6 @@ export const useApprovalMutation = ({
 }: UseApprovalMutationProps): UseApprovalMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
-
   const approvedQueryKey = useUserAssetAllowance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
@@ -40,6 +39,7 @@ export const useApprovalMutation = ({
     spender
   );
 
+  console.log(asset, spender, amount);
   const approvalMutationKey = [...approvedQueryKey, amount] as const;
   const approvalMutation = useMutation(
     approvalMutationKey,
