@@ -32,6 +32,7 @@ import {
 import { round2Fixed } from "../../utils/helpers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon } from "../../utils/icons";
+import { BigNumber } from "ethers";
 
 const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,
@@ -53,26 +54,40 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   const price = assetPrice ? parseFloat(assetPrice?._value) : 0;
   const liquidity = reserveProtocolData?.availableLiquidity;
   const liquidityPrice = liquidity
-    ? round2Fixed(parseFloat(bigNumberToString(liquidity)) * price)
+    ? round2Fixed(
+        parseFloat(
+          bigNumberToString(
+            liquidity,
+            reserveData?.decimals,
+            reserveData?.decimals
+          )
+        ) * price
+      )
     : "0";
   const liqudityNative = liquidity
-    ? round2Fixed(parseFloat(bigNumberToString(liquidity)))
+    ? bigNumberToString(liquidity, 3, reserveData?.decimals)
     : "0";
   const totalBorrowedPrice = totalBorrowedForAsset?.dai?._value
     ? round2Fixed(totalBorrowedForAsset.dai._value)
     : "0";
   const totalBorrowedNative = totalBorrowedForAsset?.wei
-    ? bigNumberToString(totalBorrowedForAsset.wei)
+    ? bigNumberToString(
+        totalBorrowedForAsset.wei,
+        3,
+        totalBorrowedForAsset.assetDecimals
+      )
     : "0";
 
   // ** percetage between availible liquidity and total borrowed : number between 1-100
-  const graph = totalBorrowedForAsset?.wei
-    ? (parseFloat(totalBorrowedNative) /
-        (parseFloat(totalBorrowedNative) +
-          parseFloat(bigNumberToString(liquidity)))) *
-      100
-    : 0;
-
+  const totalMarket =
+    liquidity && totalBorrowedForAsset
+      ? totalBorrowedForAsset.wei.add(liquidity)
+      : null;
+  const graph =
+    totalBorrowedForAsset && totalMarket
+      ? (parseFloat(totalBorrowedForAsset.wei.toString()) * 100) /
+        parseFloat(totalMarket.toString())
+      : 0;
   const utilizationRate = assetUtilization?.utilizationRate
     ? `${round2Fixed(
         (
