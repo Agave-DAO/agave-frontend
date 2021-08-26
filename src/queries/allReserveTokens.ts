@@ -7,7 +7,7 @@ import {
 } from "./protocolAssetConfiguration";
 import { useWrappedNativeDefinition } from "./wrappedNativeAddress";
 
-export const NATIVE_TOKEN: unique symbol = Symbol("NativeToken");
+export const NATIVE_TOKEN: unique symbol = Symbol.for("NativeToken");
 // eslint-disable-next-line
 export type NATIVE_TOKEN = typeof NATIVE_TOKEN;
 
