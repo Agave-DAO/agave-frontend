@@ -12,6 +12,8 @@ import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import {
+  isReserveTokenDefinition,
+  NativeTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
@@ -19,31 +21,104 @@ import {
 import { useUserAccountData } from "../../queries/userAccountData";
 import {
   useUserAssetBalance,
+  useUserNativeBalance,
   useUserVariableDebtForAsset,
 } from "../../queries/userAssets";
 import { fontSizes, spacings } from "../../utils/constants";
 import { CollateralComposition } from "../../components/Chart/CollateralComposition";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import {
+  ExtendedReserveTokenDefinition,
+  useAllReserveTokensWithData,
+} from "../../queries/lendingReserveData";
+import { BigNumber } from "ethers";
 
-type RepayDashProps = {
-  token: ReserveOrNativeTokenDefinition;
+export type RepayDashProps = {
+  token: Readonly<ReserveOrNativeTokenDefinition>;
 };
 
-export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
+type RepayDashReserveProps = {
+  token: Readonly<ReserveTokenDefinition>;
+};
+
+type RepayDashNativeProps = {
+  token: Readonly<NativeTokenDefinition>;
+};
+
+type RepayDashLayoutProps = {
+  token: Readonly<ExtendedReserveTokenDefinition> | undefined;
+  tokenBalance: BigNumber | undefined;
+  native?: Readonly<NativeTokenDefinition>;
+};
+
+export const RepayDash: React.FC<RepayDashProps> = ({ token }) =>
+  React.useMemo(
+    () =>
+      isReserveTokenDefinition(token) ? (
+        <RepayDashReserve token={token} />
+      ) : (
+        <RepayDashNative token={token} />
+      ),
+    [token]
+  );
+
+const RepayDashReserve: React.FC<RepayDashReserveProps> = ({ token }) => {
+  const { data: reserves } = useAllReserveTokensWithData();
+  const reserve = React.useMemo(
+    () =>
+      reserves?.find(reserve => reserve.tokenAddress === token.tokenAddress) ??
+      reserves?.find(
+        reserve =>
+          reserve.tokenAddress.toLowerCase() ===
+          token.tokenAddress?.toLowerCase()
+      ),
+    [reserves, token.tokenAddress]
+  );
+  const { data: tokenBalance } = useUserAssetBalance(reserve?.tokenAddress);
+  return <RepayDashLayout token={reserve} tokenBalance={tokenBalance} />;
+};
+
+const RepayDashNative: React.FC<RepayDashNativeProps> = ({ token }) => {
+  const { data: reserves } = useAllReserveTokensWithData();
+  const { data: tokenBalance } = useUserNativeBalance();
+  const { data: wrappedNative } = useWrappedNativeDefinition();
+  const reserve = React.useMemo(
+    () =>
+      reserves?.find(
+        reserve => reserve.tokenAddress === wrappedNative?.tokenAddress
+      ) ??
+      reserves?.find(
+        reserve =>
+          reserve.tokenAddress.toLowerCase() ===
+          wrappedNative?.tokenAddress.toLowerCase()
+      ),
+    [reserves, wrappedNative?.tokenAddress]
+  );
+  return (
+    <RepayDashLayout
+      token={reserve}
+      tokenBalance={tokenBalance}
+      native={token}
+    />
+  );
+};
+
+export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
+  token,
+  tokenBalance,
+  native,
+}) => {
   // General
   const { account: userAccountAddress } = useAppWeb3();
-
-  const { data: wNative } = useWrappedNativeDefinition();
-  const asset = token.tokenAddress === NATIVE_TOKEN ? wNative : token;
-
   // Debts
-  const { data: debt } = useUserVariableDebtForAsset(asset?.tokenAddress);
+  const { data: debt } = useUserVariableDebtForAsset(token?.tokenAddress);
 
   // User account data and balances
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
-  const { data: tokenBalance } = useUserAssetBalance(asset?.tokenAddress);
+
+  const symbol = native ? native.symbol : token?.symbol;
 
   // Debt position information
   const totalCollateral = userAccountData?.totalCollateralEth;
@@ -82,7 +157,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
               {bigNumberToString(debt)}
             </Text>
-            {isSmallerThan400 ? null : " " + token.symbol}
+            {isSmallerThan400 ? null : " " + symbol}
           </Box>
         </Flex>
         <Flex
@@ -100,7 +175,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
               {bigNumberToString(tokenBalance)}
             </Text>
-            {isSmallerThan400 ? null : " " + token.symbol}
+            {isSmallerThan400 ? null : " " + symbol}
           </Box>
         </Flex>
         <Flex
@@ -146,7 +221,7 @@ export const RepayDash: React.FC<RepayDashProps> = ({ token }) => {
               >
                 $ {bigNumberToString(totalCollateral)}
               </Text>{" "}
-              {token.symbol}
+              {symbol}
             </HStack>
           </Stack>
         )}
