@@ -40,35 +40,17 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
     assetOrAddress: string | NATIVE_TOKEN | undefined,
     _p3: "balance"
   ],
-  [assetOrAddress: string | ReserveOrNativeTokenDefinition | NATIVE_TOKEN]
+  [assetOrAddress: string | NATIVE_TOKEN]
 >(
   async (params, assetOrAddress) => {
-    if (
-      typeof assetOrAddress !== "string" &&
-      (assetOrAddress === NATIVE_TOKEN ||
-        isNativeTokenDefinition(assetOrAddress))
-    ) {
+    if (assetOrAddress === NATIVE_TOKEN) {
       return params.library.getBalance(params.account);
     }
-    const asset = Erc20abi__factory.connect(
-      typeof assetOrAddress === "string"
-        ? assetOrAddress
-        : assetOrAddress.tokenAddress,
-      params.library
-    );
+    const asset = Erc20abi__factory.connect(assetOrAddress, params.library);
 
     return asset.balanceOf(params.account);
   },
-  assetOrAddress => [
-    "user",
-    "asset",
-    typeof assetOrAddress === "string"
-      ? assetOrAddress
-      : assetOrAddress === NATIVE_TOKEN
-      ? assetOrAddress
-      : assetOrAddress?.tokenAddress,
-    "balance",
-  ],
+  assetOrAddress => ["user", "asset", assetOrAddress, "balance"],
   () => undefined,
   {
     staleTime: 2 * 60 * 1000,

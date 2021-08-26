@@ -80,7 +80,8 @@ const InitialComp: React.FC<{
   dispatch: (nextState: DepositState) => void;
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
-  const { data: userBalance } = useUserAssetBalance(state.token);
+  console.log(state.token.tokenAddress);
+  const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
   const onSubmit = React.useCallback(
     amountToDeposit =>
       dispatch(createState("amountSelected", { amountToDeposit, ...state })),
@@ -293,10 +294,9 @@ const DepositDetailForAsset: React.FC<{
 };
 
 export const DepositDetail: React.FC = () => {
-  const match =
-    useRouteMatch<{
-      assetName: string | undefined;
-    }>();
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);

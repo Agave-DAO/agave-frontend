@@ -29,7 +29,10 @@ import {
 import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { useUserAccountData } from "../../queries/userAccountData";
-import { useUserAssetBalance } from "../../queries/userAssets";
+import {
+  useUserAssetBalance,
+  useUserNativeBalance,
+} from "../../queries/userAssets";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { fontSizes, spacings } from "../../utils/constants";
 import { ModalIcon } from "../../utils/icons";
@@ -83,7 +86,7 @@ const DepositDashReserve: React.FC<DepositDashReserveProps> = ({ token }) => {
 
 const DepositDashNative: React.FC<DepositDashNativeProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
-  const { data: tokenBalance } = useUserAssetBalance(token);
+  const { data: tokenBalance } = useUserNativeBalance();
   const { data: wrappedNative } = useWrappedNativeDefinition();
   const reserve = React.useMemo(
     () =>
