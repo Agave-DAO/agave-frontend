@@ -3,10 +3,9 @@ import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAllATokens } from "./allATokens";
 import {
-  isNativeTokenDefinition,
-  isReserveTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
+  selectReserveTokenAddress,
   useAllReserveTokens,
 } from "./allReserveTokens";
 import { useUserReserveData } from "./protocolReserveData";
@@ -16,7 +15,6 @@ import {
   ExtendedReserveTokenDefinition,
   useAllReserveTokensWithData,
 } from "./lendingReserveData";
-import { constants } from "ethers";
 
 export const useUserNativeBalance = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
@@ -40,33 +38,25 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
     assetOrAddress: string | NATIVE_TOKEN | undefined,
     _p3: "balance"
   ],
-  [assetOrAddress: string | ReserveOrNativeTokenDefinition | NATIVE_TOKEN]
+  [assetOrAddress: string | NATIVE_TOKEN| ReserveOrNativeTokenDefinition]
 >(
   async (params, assetOrAddress) => {
-    if (
-      typeof assetOrAddress !== "string" &&
-      (assetOrAddress === NATIVE_TOKEN ||
-        isNativeTokenDefinition(assetOrAddress))
-    ) {
-      return params.library.getBalance(params.account);
+    assetOrAddress = selectReserveTokenAddress(assetOrAddress);
+
+    if (assetOrAddress === NATIVE_TOKEN) {
+      return await params.library.getBalance(params.account);
     }
     const asset = Erc20abi__factory.connect(
-      typeof assetOrAddress === "string"
-        ? assetOrAddress
-        : assetOrAddress.tokenAddress,
+      assetOrAddress,
       params.library
     );
 
-    return asset.balanceOf(params.account);
+    return await asset.balanceOf(params.account);
   },
   assetOrAddress => [
     "user",
     "asset",
-    typeof assetOrAddress === "string"
-      ? assetOrAddress
-      : assetOrAddress === NATIVE_TOKEN
-      ? assetOrAddress
-      : assetOrAddress?.tokenAddress,
+    selectReserveTokenAddress(assetOrAddress),
     "balance",
   ],
   () => undefined,

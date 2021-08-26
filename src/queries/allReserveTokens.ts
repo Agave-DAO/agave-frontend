@@ -43,6 +43,22 @@ export function isReserveTokenDefinition(
   return addr !== NATIVE_TOKEN && typeof addr === "string";
 }
 
+export function selectReserveTokenAddress(item: string | NATIVE_TOKEN | ReserveOrNativeTokenDefinition): string | NATIVE_TOKEN;
+export function selectReserveTokenAddress(item: string | NATIVE_TOKEN | ReserveOrNativeTokenDefinition | undefined): string | NATIVE_TOKEN | undefined;
+export function selectReserveTokenAddress(item: string | NATIVE_TOKEN | ReserveOrNativeTokenDefinition | undefined): string | NATIVE_TOKEN | undefined {
+  if (item === undefined) {
+    return item;
+  } else if (item === NATIVE_TOKEN || (typeof item === "string")) {
+      // Keep as-is
+      return item;
+  } else if (isReserveTokenDefinition(item)) {
+    return item.tokenAddress;
+  } else if (isNativeTokenDefinition(item)) {
+    return NATIVE_TOKEN;
+  }
+}
+
+
 export const useAllReserveTokens = buildQueryHookWhenParamsDefinedChainAddrs<
   ReadonlyArray<ReserveTokenDefinition>,
   [_p1: "AaveProtocolDataProvider", _p2: "getAllReserveTokens"],
