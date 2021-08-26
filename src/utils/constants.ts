@@ -14,12 +14,12 @@ export const spacings = {
 
 export const assetColor: { [key: string]: string } = {
   USDC: theme.colors.blue[400],
-  DAI: theme.colors.orange[400],
-  WXDAI: theme.colors.orange[400],
+  DAI: theme.colors.orange[300],
+  WXDAI: theme.colors.orange[300],
   WETH: theme.colors.gray[100],
   AGVE: theme.colors.green[400],
   HNY: theme.colors.yellow[400],
-  WBTC: theme.colors.black[400],
+  WBTC: theme.colors.orange[500],
   STAKE: theme.colors.teal[400],
   USDT: theme.colors.green[700],
   LINK: theme.colors.pink[400],
