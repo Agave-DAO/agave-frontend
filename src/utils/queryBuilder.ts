@@ -103,7 +103,7 @@ export function buildQueryHook<
         [
           chainId ?? undefined,
           account ?? undefined,
-          ...buildKey(...params),
+          ...(buildKey(...params).map(item => typeof item === "symbol" ? `__GLOBAL_SYMBOL_TABLE|${Symbol.keyFor(item)}` : item) as any as ReturnType<typeof buildKey>),
         ] as const,
       // eslint-disable-next-line
       [chainId, account, library, ...params]
@@ -178,7 +178,7 @@ export function buildQueryHook<
   ): [ChainId | undefined, string | undefined, ...TKey] => [
     chainId,
     address,
-    ...buildKey(...args),
+    ...(buildKey(...args).map(item => typeof item === "symbol" ? `__GLOBAL_SYMBOL_TABLE|${Symbol.keyFor(item)}` : item) as any as ReturnType<typeof buildKey>),
   ];
   useBuiltQueryHook.invoke = invoke;
   useBuiltQueryHook.fetchQuery = (async (hookParams, ...args) => {
