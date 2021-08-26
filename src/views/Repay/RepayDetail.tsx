@@ -2,7 +2,7 @@ import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import { RepayDash } from "../common/RepayDash";
+import { RepayDash } from "./RepayDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
   isReserveTokenDefinition,
@@ -86,7 +86,7 @@ const InitialComp: React.FC<{
   const asset =
     state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
 
-  const { data: userBalance } = useUserAssetBalance(asset?.tokenAddress);
+  const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
   const { data: debtForAsset } = useUserVariableDebtForAsset(
     asset?.tokenAddress
   );
