@@ -48,10 +48,17 @@ export const DepositBanner: React.FC<{}> = () => {
 };
 
 export const DepositLayout: React.FC<DepositLayoutProps> = props => {
-  const deposits: DepositAsset[] = React.useMemo(
-    () => props.depositedList ?? [],
-    [props.depositedList]
-  );
+  const deposits: DepositAsset[] = React.useMemo(() => {
+    const assets = props.depositedList ?? [];
+    return assets.map(asset => {
+      return asset.symbol === "WXDAI"
+        ? {
+            ...asset,
+            symbol: "XDAI",
+          }
+        : asset;
+    });
+  }, [props.depositedList]);
   const depositTable = React.useMemo(
     () => <DepositTable activeType="All" />,
     []

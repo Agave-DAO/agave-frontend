@@ -160,7 +160,7 @@ const ModalLTV: React.FC<{
           borderWidth="0.5px"
         >
           <HStack pb="0.5rem" px="1em" justifyContent="space-between">
-            <Text fontSize="1.4rem">Current TVL</Text>
+            <Text fontSize="1.4rem">Current LTV</Text>
             <Text fontSize="1.4rem">
               {fixedNumberToPercentage(userAccountData?.currentLtv) ?? "-"}
             </Text>

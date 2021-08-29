@@ -28,20 +28,35 @@ export const Dashboard: React.FC<{}> = () => {
 
   // Borrow list
   const borrows = useUserVariableDebtTokenBalances();
-  const borrowedList: AssetData[] = React.useMemo(
-    () => borrows?.data?.filter(asset => !asset.balance.isZero()) ?? [],
-    [borrows]
-  );
+  const borrowedList: AssetData[] = React.useMemo(() => {
+    const assets =
+      borrows?.data?.filter(asset => !asset.balance.isZero()) ?? [];
+
+    return assets.map(asset => {
+      return asset.symbol === "WXDAI"
+        ? {
+            ...asset,
+            symbol: "XDAI",
+          }
+        : asset;
+    });
+  }, [borrows]);
 
   // Deposit list
   const balances = useUserDepositAssetBalancesWithReserveInfo();
-  const depositedList: AssetData[] = React.useMemo(
-    () =>
-      (balances?.data?.filter(asset => !asset.balance.isZero()) ?? []).map(
-        a => ({ ...a, backingReserve: a.reserve })
-      ),
-    [balances]
-  );
+  const depositedList: AssetData[] = React.useMemo(() => {
+    const assets = (
+      balances?.data?.filter(asset => !asset.balance.isZero()) ?? []
+    ).map(a => ({ ...a, backingReserve: a.reserve }));
+    return assets.map(asset => {
+      return asset.backingReserve && asset.backingReserve.symbol === "WXDAI"
+        ? {
+            ...asset,
+            backingReserve: { ...asset.backingReserve, symbol: "XDAI" },
+          }
+        : asset;
+    });
+  }, [balances]);
 
   return (
     <DashboardLayout

@@ -68,15 +68,22 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
 
   const reserves = useAllReserveTokensWithData();
   const assetRecords = React.useMemo(() => {
-    return (
+    const assets =
       reserves.data?.map(
         ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
           symbol,
           tokenAddress,
           aTokenAddress,
         })
-      ) ?? []
-    );
+      ) ?? [];
+    return assets.map(asset => {
+      return asset.symbol === "WXDAI"
+        ? {
+            ...asset,
+            symbol: "XDAI",
+          }
+        : asset;
+    });
   }, [reserves]);
 
   const chainAddresses = useChainAddresses();

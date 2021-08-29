@@ -48,10 +48,17 @@ export const BorrowBanner: React.FC<{}> = () => {
 };
 
 export const BorrowLayout: React.FC<BorrowLayoutProps> = props => {
-  const borrows: BorrowAsset[] = React.useMemo(
-    () => props.borrowedList ?? [],
-    [props.borrowedList]
-  );
+  const borrows: BorrowAsset[] = React.useMemo(() => {
+    const assets = props.borrowedList ?? [];
+    return assets.map(asset => {
+      return asset.symbol === "WXDAI"
+        ? {
+            ...asset,
+            symbol: "XDAI",
+          }
+        : asset;
+    });
+  }, [props.borrowedList]);
   const borrowTable = React.useMemo(() => <BorrowTable activeType="All" />, []);
   const myBorrows = React.useMemo(
     () => <MyBorrowsTable borrows={borrows} />,
