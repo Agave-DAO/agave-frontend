@@ -21,7 +21,6 @@ import {
 import { useUserAccountData } from "../../queries/userAccountData";
 import {
   useUserAssetBalance,
-  useUserNativeBalance,
   useUserVariableDebtForAsset,
 } from "../../queries/userAssets";
 import { fontSizes, spacings } from "../../utils/constants";
@@ -80,7 +79,7 @@ const RepayDashReserve: React.FC<RepayDashReserveProps> = ({ token }) => {
 
 const RepayDashNative: React.FC<RepayDashNativeProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
-  const { data: tokenBalance } = useUserNativeBalance();
+  const { data: tokenBalance } = useUserAssetBalance(token);
   const { data: wrappedNative } = useWrappedNativeDefinition();
   const reserve = React.useMemo(
     () =>
