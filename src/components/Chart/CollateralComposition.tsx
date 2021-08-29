@@ -20,6 +20,15 @@ import { bigNumberToString } from "../../utils/fixedPoint";
 export const CollateralComposition: React.FC = () => {
   const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
 
+  const reserves = allUserReservesBalances?.map(asset => {
+    return asset.symbol === "WXDAI"
+      ? {
+          ...asset,
+          symbol: "XDAI",
+        }
+      : asset;
+  });
+
   const collateralComposition = useCollateralComposition();
 
   const collateralData = collateralComposition.map(x => {
@@ -60,7 +69,7 @@ export const CollateralComposition: React.FC = () => {
             borderWidth="3px"
             overflow="hidden"
           >
-            {allUserReservesBalances?.map((token, index) => (
+            {reserves?.map((token, index) => (
               <Box
                 key={"comp_" + index}
                 bg={assetColor[token.symbol]}
@@ -78,7 +87,7 @@ export const CollateralComposition: React.FC = () => {
         <PopoverContent bg="primary.300" border="2px solid">
           <PopoverBody bg="gray.700">
             <VStack m="auto" py="2rem" w="90%">
-              {allUserReservesBalances?.map((token, index) =>
+              {reserves?.map((token, index) =>
                 collateralComposition[index] !== null ? (
                   <Flex
                     key={"flex-collateralComposition_" + index}
