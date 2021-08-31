@@ -12,7 +12,6 @@ import { QueryClient, QueryClientProvider, QueryCache } from "react-query";
 import { BigNumber, FixedNumber } from "ethers";
 import {
   AmbientConnectionContext,
-  AmbientConnections,
   CreateAmbientConnectionContext,
   useAmbientConnection,
 } from "./hooks/injectedConnectors";
@@ -21,8 +20,6 @@ import { ReactQueryDevtools } from "react-query/devtools";
 const reactQueryClient = new QueryClient({
   queryCache: new QueryCache(),
 });
-
-const ambientConnectionContext = CreateAmbientConnectionContext();
 
 function getWeb3Library(
   provider: any,
