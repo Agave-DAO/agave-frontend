@@ -38,7 +38,7 @@ const PrivacySection = (
   </Box>
 );
 
-const UnlockWallet: React.FC<{}> = props => {
+export const UnlockWallet: React.FC<{}> = props => {
   const { activate, error } = useWeb3React();
 
   let detail = null;
@@ -156,5 +156,3 @@ const UnlockWallet: React.FC<{}> = props => {
     </Center>
   );
 };
-
-export default UnlockWallet;
