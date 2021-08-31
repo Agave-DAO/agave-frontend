@@ -35,7 +35,7 @@ function getWeb3Library(
 
 const AppWeb3ConnectionWrapper: React.FC<{}> = () => {
   useAmbientConnection();
-  return <App />;
+  return React.useMemo(() => <App />, []);
 };
 
 const AppRoot: React.FC<{}> = () => {
