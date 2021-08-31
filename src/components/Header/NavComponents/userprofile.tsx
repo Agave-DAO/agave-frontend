@@ -2,27 +2,19 @@ import React, { useMemo } from "react";
 import {
   Text,
   Center,
-  Button,
   Badge,
-  Image,
-  useColorMode,
   useColorModeValue as mode,
 } from "@chakra-ui/react";
-import darkMoon from "../../../assets/image/dark-moon.svg";
-import lightMoon from "../../../assets/image/light-moon.svg";
-import { selectAddress } from "../../../features/auth/authSlice";
-import { useAppSelector } from "../../../redux/hooks";
 import { bigNumberToString } from "../../../utils/fixedPoint";
-import { useUserAssetBalance } from "../../../queries/userAssets";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
-import ColoredText from "../../ColoredText";
+import { useAppWeb3 } from "../../../hooks/appWeb3";
 
 export const UserProfile: React.FC<{}> = () => {
   // Light/Dark button functions
-  const { colorMode, toggleColorMode } = useColorMode();
+  // const { colorMode, toggleColorMode } = useColorMode();
 
   // Address button functions
-  const address: string | undefined = useAppSelector(selectAddress);
+  const address: string | undefined = useAppWeb3().account ?? undefined;
   const addressPretty = useMemo(
     () =>
       address
