@@ -31,7 +31,6 @@ import "./App.css";
 //import "animate.css/animate.min.css";
 import "react-notifications-component/dist/theme.css";
 import ReactNotification from "react-notifications-component";
-import { useReduxWeb3Updater } from "./hooks/reduxWeb3";
 
 import BaseTheme from "./theme";
 
@@ -101,7 +100,6 @@ interface IAppProps {}
 const App: React.FC<IAppProps> = props => {
   const notifications = React.useMemo(() => <ReactNotification />, []);
 
-  useReduxWeb3Updater();
   return (
     <ChakraProvider theme={theme}>
       <ThemeProvider theme={BaseTheme}>
