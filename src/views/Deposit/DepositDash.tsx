@@ -84,20 +84,27 @@ const DepositDashReserve: React.FC<DepositDashReserveProps> = ({ token }) => {
 const DepositDashNative: React.FC<DepositDashNativeProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
   const { data: tokenBalance } = useUserAssetBalance(token);
-  const { data: wrappedNative } = useWrappedNativeDefinition();
+  const { data: wnative } = useWrappedNativeDefinition();
   const reserve = React.useMemo(
     () =>
       reserves?.find(
-        reserve => reserve.tokenAddress === wrappedNative?.tokenAddress
+        reserve => reserve.tokenAddress === wnative?.tokenAddress
       ) ??
       reserves?.find(
         reserve =>
           reserve.tokenAddress.toLowerCase() ===
-          wrappedNative?.tokenAddress.toLowerCase()
+          wnative?.tokenAddress.toLowerCase()
       ),
-    [reserves, wrappedNative?.tokenAddress]
+    [reserves, wnative?.tokenAddress]
   );
-  return <DepositDashLayout reserve={reserve} tokenBalance={tokenBalance} />;
+  const modReserve =
+    reserve && reserve.symbol === "WXDAI"
+      ? {
+          ...reserve,
+          symbol: "XDAI",
+        }
+      : reserve;
+  return <DepositDashLayout reserve={modReserve} tokenBalance={tokenBalance} />;
 };
 
 const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({

@@ -27,15 +27,16 @@ const ReserveOverview: React.FC = () => {
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
-  const asset = React.useMemo(
-    () =>
+  const asset = React.useMemo(() => {
+    const aseetSymbol = assetName === "XDAI" ? "WXDAI" : assetName;
+    const asset =
       assetName === undefined
         ? undefined
         : allReserves?.data?.find(
-            asset => asset.symbol.toLowerCase() === assetName?.toLowerCase()
-          ),
-    [allReserves, assetName]
-  );
+            asset => asset.symbol.toLowerCase() === aseetSymbol?.toLowerCase()
+          );
+    return asset?.symbol === "WXDAI" ? { ...asset, symbol: "XDAI" } : asset;
+  }, [allReserves, assetName]);
 
   return (
     <Container maxWidth="100%" p="0">

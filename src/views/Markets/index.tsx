@@ -61,7 +61,7 @@ export const MarketsBanner: React.FC<{}> = () => {
   );
 };
 
-interface AssetRecord {
+export interface AssetRecord {
   symbol: string;
   tokenAddress: string;
   aTokenAddress: string;
@@ -185,15 +185,22 @@ const AssetTable: React.FC<{
 
   const reserves = useAllReserveTokensWithData();
   const assetRecords = React.useMemo(() => {
-    return (
+    const assets =
       reserves.data?.map(
         ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
           symbol,
           tokenAddress,
           aTokenAddress,
         })
-      ) ?? []
-    );
+      ) ?? [];
+    return assets.map(asset => {
+      return asset.symbol === "WXDAI"
+        ? {
+            ...asset,
+            symbol: "XDAI",
+          }
+        : asset;
+    });
   }, [reserves]);
 
   const columns: Column<AssetRecord>[] = [

@@ -49,15 +49,7 @@ export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
     if (svg === null) {
       return <QuestionIcon w="24px" h="24px" />;
     }
-    return (
-      <Image
-        src={svg}
-        width="14"
-        height="14"
-        alt="token icon"
-        {...imageProps}
-      />
-    );
+    return <Image src={svg} width="14" height="14" alt="?" {...imageProps} />;
   }, [symbol, imageProps]);
 };
 
