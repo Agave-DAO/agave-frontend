@@ -36,8 +36,8 @@ export const DashOverviewIntro: React.FC<{
   const newHealthFactor = useNewHealthFactorCalculator(
     amount,
     tokenAddress,
-    mode === "withdraw" || mode === "deposit" ? true : false,
-    mode === "deposit" || mode === "borrow" ? true : false
+    mode === "withdraw" || mode === "deposit",
+    mode === "deposit" || mode === "borrow"
   );
 
   const maxAmount = useMaxChangeGivenHealthFactor(
