@@ -94,10 +94,13 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
         fontSize="2xl"
         openDelay={400}
       >
-        <ThreeStateSwitch
-          state={mutationIsLoading ? null : reserveUsedAsCollateral ?? null}
-          onClick={toggleUseAssetAsCollateral}
-        />
+        {/* Fragment around ThreeStateSwitch avoids "Function components cannot be given refs" error */}
+        <>
+          <ThreeStateSwitch
+            state={mutationIsLoading ? null : reserveUsedAsCollateral ?? null}
+            onClick={toggleUseAssetAsCollateral}
+          />
+        </>
       </Tooltip>
     ),
     [reserveUsedAsCollateral, toggleUseAssetAsCollateral, mutationIsLoading]
