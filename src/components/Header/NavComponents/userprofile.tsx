@@ -67,7 +67,7 @@ export const UserProfile: React.FC<{}> = () => {
         px="5px"
       >
         <Text mr="5px">{userBal}</Text>
-        <Text font-weight="400">AGVE</Text>
+        <Text fontWeight="400">AGVE</Text>
       </Center>
 
       <Center
