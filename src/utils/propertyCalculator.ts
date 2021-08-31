@@ -1,5 +1,5 @@
 import React from "react";
-import { BigNumber } from "@ethersproject/bignumber";
+import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
 import {
   useUserDepositAssetBalancesDaiWei,
@@ -11,6 +11,7 @@ import {
 } from "../queries/allReserveTokens";
 import { FixedFromRay } from "../utils/fixedPoint";
 import { weiPerToken } from "../queries/decimalsForToken";
+import { truncateSync } from "fs";
 
 interface AssetsData {
   tokenConfig: ReserveTokensConfiguration;
@@ -177,6 +178,78 @@ export function useNewHealthFactorCalculator(
       ),
     [amount, tokenAddress, assetsData, collateral, increase]
   );
-
   return newHealthFactor;
+}
+
+export function useMaxChangeGivenHealthFactor(
+  amount: BigNumber | undefined,
+  tokenAddress: string | undefined,
+  mode: string,
+  targetValue: BigNumber
+) {
+  const assetsData = useAllAssetsData();
+  if (mode === "withdraw" || mode === "borrow") {
+    const collateral = mode === "withdraw" ? true : false;
+    const tokenData =
+      tokenAddress !== undefined && assetsData
+        ? assetsData.find(t => t.tokenConfig.tokenAddress === tokenAddress)
+        : undefined;
+
+    const oldTotalCollateralMaxCapacity = assetsData?.reduce((acc, next) => {
+      return next.collateralMaxCapacity
+        ? acc.add(next.collateralMaxCapacity)
+        : acc;
+    }, constants.Zero);
+
+    const oldTotalBorrowsvalue = assetsData?.reduce((acc, next) => {
+      return next.borrowsValue ? acc.add(next.borrowsValue) : acc;
+    }, constants.Zero);
+
+    let maxAmountLimit = amount;
+
+    if (!collateral && tokenData && amount && oldTotalBorrowsvalue) {
+      const newTBV = oldTotalCollateralMaxCapacity
+        ? oldTotalCollateralMaxCapacity.mul(1000).div(targetValue)
+        : amount;
+
+      const deltaTBV =
+        oldTotalCollateralMaxCapacity && newTBV
+          ? newTBV.sub(oldTotalBorrowsvalue)
+          : constants.Zero;
+
+      maxAmountLimit =
+        deltaTBV && tokenData.tokenConfig.decimals && tokenData.assetPrice
+          ? deltaTBV
+              .mul(weiPerToken(tokenData?.tokenConfig.decimals))
+              .div(tokenData.assetPrice)
+          : amount;
+    } else if (
+      collateral &&
+      tokenData &&
+      amount &&
+      oldTotalCollateralMaxCapacity
+    ) {
+      const newTCMC = oldTotalBorrowsvalue
+        ? oldTotalBorrowsvalue.mul(targetValue).div(1000)
+        : undefined;
+
+      const deltaTCMC =
+        oldTotalCollateralMaxCapacity && newTCMC
+          ? oldTotalCollateralMaxCapacity.sub(newTCMC)
+          : constants.Zero;
+
+      maxAmountLimit =
+        deltaTCMC && tokenData.tokenConfig.decimals && tokenData.assetPrice
+          ? deltaTCMC
+              .mul(weiPerToken(tokenData?.tokenConfig.decimals.add(4)))
+              .div(
+                tokenData.tokenConfig.rawliquidationThreshold.mul(
+                  tokenData.assetPrice
+                )
+              )
+          : amount;
+    }
+    return maxAmountLimit;
+  }
+  return amount;
 }
