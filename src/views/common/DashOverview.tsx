@@ -16,10 +16,14 @@ import {
   useNewHealthFactorCalculator,
 } from "../../utils/propertyCalculator";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import {
+  MIN_SAFE_HEALTH_FACTOR,
+  MINIMUM_NATIVE_RESERVE,
+} from "../../utils/constants";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
-  mode: string;
+  mode: "repay" | "deposit" | "withdraw" | "borrow";
   onSubmit: (value: BigNumber) => void;
   asset: ReserveOrNativeTokenDefinition;
   amount: BigNumber | undefined;
@@ -36,15 +40,15 @@ export const DashOverviewIntro: React.FC<{
   const newHealthFactor = useNewHealthFactorCalculator(
     amount,
     tokenAddress,
-    mode === "withdraw" || mode === "deposit" ? true : false,
-    mode === "deposit" || mode === "borrow" ? true : false
+    mode === "withdraw" || mode === "deposit",
+    mode === "deposit" || mode === "borrow"
   );
 
   const maxAmount = useMaxChangeGivenHealthFactor(
     balance,
     tokenAddress,
     mode,
-    BigNumber.from(1200)
+    MIN_SAFE_HEALTH_FACTOR
   );
 
   const limitAmount = balance && maxAmount?.lt(balance) ? maxAmount : balance;
@@ -67,7 +71,7 @@ export const DashOverviewIntro: React.FC<{
           // If NATIVE don't allow to deposit the full balance in a wallet! Leave 0.1
           asset.tokenAddress === NATIVE_TOKEN &&
           (mode === "deposit" || mode === "repay")
-            ? limitAmount?.sub(BigNumber.from(10).pow(17))
+            ? limitAmount?.sub(MINIMUM_NATIVE_RESERVE)
             : limitAmount
         }
         decimals={decimals ? decimals : 18}

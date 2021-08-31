@@ -20,7 +20,7 @@ import { ColoredText } from "../../components/ColoredText";
 const InfoWeiBox: React.FC<
   {
     currency: string;
-    mode: string;
+    mode: "repay" | "deposit" | "withdraw" | "borrow" | "stake";
     balance: BigNumber | undefined;
     healthFactor?: FixedNumber | undefined;
     amount: BigNumber | undefined;

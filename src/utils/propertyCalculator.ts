@@ -184,10 +184,13 @@ export function useNewHealthFactorCalculator(
 export function useMaxChangeGivenHealthFactor(
   amount: BigNumber | undefined,
   tokenAddress: string | undefined,
-  mode: string,
+  mode: "repay" | "deposit" | "withdraw" | "borrow",
   targetValue: BigNumber
 ) {
   const assetsData = useAllAssetsData();
+  if (mode !== "withdraw" && mode !== "borrow") {
+    return amount;
+  }
   if (mode === "withdraw" || mode === "borrow") {
     const collateral = mode === "withdraw" ? true : false;
     const tokenData =
@@ -251,5 +254,4 @@ export function useMaxChangeGivenHealthFactor(
     }
     return maxAmountLimit;
   }
-  return amount;
 }

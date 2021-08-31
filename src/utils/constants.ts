@@ -5,12 +5,16 @@ import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
 import usdcImg from "../assets/image/coins/usdc.svg";
 import { theme } from "@chakra-ui/theme";
+import { BigNumber, constants } from "ethers";
 export const LINEAR_GRADIENT_BG =
   "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%)";
 
 export const spacings = {
   md: "1.3rem",
 };
+
+export const MIN_SAFE_HEALTH_FACTOR = BigNumber.from(1200);
+export const MINIMUM_NATIVE_RESERVE = constants.WeiPerEther.div(10);
 
 export const assetColor: { [key: string]: string } = {
   USDC: theme.colors.blue[400],
