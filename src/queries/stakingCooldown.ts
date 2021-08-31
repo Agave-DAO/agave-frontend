@@ -15,7 +15,7 @@ export const useStakingCooldown = buildQueryHookWhenParamsDefinedChainAddrs<
   async params => {
     const contract = StakedToken__factory.connect(
       params.chainAddrs.staking,
-      params.library.getSigner()
+      params.library
     );
     const [cooldownPeriodSeconds, unstakeWindowSeconds] = await Promise.all([
       contract.COOLDOWN_SECONDS(),

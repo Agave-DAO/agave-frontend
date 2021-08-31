@@ -1,104 +1,194 @@
-import React, { useMemo } from "react";
-import { useHistory } from "react-router-dom";
-import { useTable, useSortBy, Column } from "react-table";
-import BasicTable from "../../components/BasicTable";
-import { IMarketData, marketData } from "../../utils/constants";
+import React from "react";
+import { bigNumberToString } from "../../utils/fixedPoint";
+import { CellProps, Column, Renderer } from "react-table";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
+import {
+  BasicTableRenderer,
+  MobileTableRenderer,
+  SortedHtmlTable,
+  TableRenderer,
+} from "../../utils/htmlTable";
+import { DepositAPYView } from "../common/RatesView";
+import { Box, Text } from "@chakra-ui/layout";
+import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
+import { TokenIcon } from "../../utils/icons";
+import { useUserAssetBalance } from "../../queries/userAssets";
+import { isMobile } from "react-device-detect";
 
-const DepositTable: React.FC<{ activeType: string }> = ({ activeType }) => {
-  const history = useHistory();
-  const data = useMemo(() => {
-    if (activeType === "All") {
-      return marketData;
-    }
+const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
+  const price = useAssetPriceInDai(tokenAddress);
+  const balance = useUserAssetBalance(tokenAddress);
+  const balanceNumber = Number(bigNumberToString(balance.data));
+  const balanceUSD = balanceNumber
+    ? (Number(price.data) * balanceNumber).toFixed(2)
+    : "-";
+  return React.useMemo(() => {
+    return (
+      <Flex direction="column" minH={30} ml={2}>
+        <Box textAlign={{ base: "end", md: "center" }} whiteSpace="nowrap">
+          <Text p={3} fontWeight="bold">
+            {balanceNumber?.toFixed(3) ?? "-"}
+          </Text>
 
-    return marketData.slice(0, 3);
-  }, [activeType]);
+          {isMobile ? null : <Text p={3}>$ {balanceUSD ?? "-"}</Text>}
+        </Box>
+      </Flex>
+    );
+  }, [balanceNumber, balanceUSD, isMobile]);
+};
 
-  const columns: Column<IMarketData>[] = useMemo(
+export const DepositTable: React.FC<{ activeType: string }> = ({
+  activeType,
+}) => {
+  interface AssetRecord {
+    symbol: string;
+    tokenAddress: string;
+    aTokenAddress: string;
+  }
+  const [isMobile] = useMediaQuery("(max-width: 32em)");
+
+  const reserves = useAllReserveTokensWithData();
+  const assetRecords = React.useMemo(() => {
+    const assets =
+      reserves.data?.map(
+        ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
+          symbol,
+          tokenAddress,
+          aTokenAddress,
+        })
+      ) ?? [];
+    return assets.map(asset => {
+      return asset.symbol === "WXDAI"
+        ? {
+            ...asset,
+            symbol: "XDAI",
+          }
+        : asset;
+    });
+  }, [reserves]);
+
+  const columns: Column<AssetRecord>[] = React.useMemo(
     () => [
       {
-        Header: 'Asset',
-        accessor: 'name',
-        Cell: row => {
-          return (
-            <div>
-              <img src={row.row.original.img} width="35" height="35" alt="" />
-              <span>{row.value}</span>
-            </div>
-          )
-        }
+        Header: "Asset",
+        accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+        Cell: (({ value }) => (
+          <Flex
+            width="100%"
+            height="100%"
+            alignItems={"center"}
+            mb={{ base: "2rem", md: "0rem" }}
+          >
+            <Center width="4rem">
+              <TokenIcon symbol={value} />
+            </Center>
+            <Box w="1rem"></Box>
+
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
-        Header: 'Your wallet balance',
-        accessor: 'wallet_balance',
-        Cell: row => (
-            <span className="value">{row.value}</span>
-        )
+        Header: isMobile ? "Your wallet" : "Your wallet balance",
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => <BalanceView tokenAddress={value} />) as Renderer<
+          CellProps<AssetRecord, string>
+        >,
       },
       {
-        Header: 'APY',
-        accessor: 'deposit_apy',
-        Cell: row => (
-          <div className="value-section">
-            <span className="value yellow">{row.value}</span> %
-          </div>
-        )
+        Header: isMobile ? "APY" : "Deposit APY",
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+          <DepositAPYView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
     ],
+    [isMobile]
+  );
+
+  const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <MobileTableRenderer
+        linkpage="deposit"
+        table={table}
+        tableProps={{
+          textAlign: "center",
+          display: "flex",
+          width: "100%",
+          flexDirection: "column",
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+        }}
+        rowProps={{
+          display: "flex",
+          flexDirection: "column",
+          margin: "1em 0",
+          padding: "1em",
+          borderRadius: "1em",
+          bg: { base: "secondary.900" },
+          whiteSpace: "nowrap",
+        }}
+        cellProps={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      />
+    ),
     []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable<IMarketData>(
-    {
-      columns,
-      data: Array.from(data),
-    },
-    useSortBy
+  const renderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <BasicTableRenderer
+        linkpage="deposit"
+        table={table}
+        tableProps={{
+          style: {
+            borderSpacing: "0 1em",
+            borderCollapse: "separate",
+          },
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+          textAlign: "center",
+          _first: { textAlign: "start" },
+        }}
+        rowProps={{
+          // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
+          bg: { base: "secondary.900" },
+          whiteSpace: "nowrap",
+        }}
+        cellProps={{
+          borderBottom: "none",
+          border: "0px solid",
+          textAlign: "center",
+          _first: { borderLeftRadius: "10px", textAlign: "start" },
+          _last: { borderRightRadius: "10px" },
+        }}
+      />
+    ),
+    []
   );
 
-  return (
-    <BasicTable>
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                  <div className="header-column">
-                    <span className={!column.isSorted ? '' : column.isSortedDesc ? 'desc' : 'asc'}>
-                      {column.render('Header')}
-                    </span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, index) => {
-            prepareRow(row)
-            return (
-              <tr {...row.getRowProps()} onClick={() => history.push(`/deposit/${row.values.name}`)} key={index}>
-                {row.cells.map(cell => {
-                  return (
-                    <td {...cell.getCellProps()}>
-                      {cell.render('Cell')}
-                    </td>
-                  )
-                })}
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </BasicTable>
-  )
-}
+  const [ismaxWidth] = useMediaQuery("(max-width: 32em)");
 
-export default DepositTable;
+  return (
+    <div>
+      <SortedHtmlTable columns={columns} data={assetRecords}>
+        {ismaxWidth ? mobileRenderer : renderer}
+      </SortedHtmlTable>
+    </div>
+  );
+};

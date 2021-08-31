@@ -1,7 +1,12 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
+import { FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import {
+  ReserveTokenDefinition,
+  useAllReserveTokens,
+} from "./allReserveTokens";
 
 export interface LendingReserveData {
   //stores the reserve configuration
@@ -55,14 +60,11 @@ export function reserveDataFromWeb3Result({
 }: Web3ReserveDataResult): LendingReserveData {
   return {
     configuration,
-    liquidityIndex: FixedNumber.fromValue(liquidityIndex, 27),
-    variableBorrowIndex: FixedNumber.fromValue(variableBorrowIndex, 27),
-    currentLiquidityRate: FixedNumber.fromValue(currentLiquidityRate, 27),
-    currentVariableBorrowRate: FixedNumber.fromValue(
-      currentVariableBorrowRate,
-      27
-    ),
-    currentStableBorrowRate: FixedNumber.fromValue(currentStableBorrowRate, 27),
+    liquidityIndex: FixedFromRay(liquidityIndex),
+    variableBorrowIndex: FixedFromRay(variableBorrowIndex),
+    currentLiquidityRate: FixedFromRay(currentLiquidityRate),
+    currentVariableBorrowRate: FixedFromRay(currentVariableBorrowRate),
+    currentStableBorrowRate: FixedFromRay(currentStableBorrowRate),
     lastUpdateTimestamp,
     aTokenAddress,
     stableDebtTokenAddress,
@@ -87,8 +89,8 @@ export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
 >(
   async (params, assetAddress) => {
     const contract = AgaveLendingABI__factory.connect(
-      params.chainAddrs.aaveProtocolDataProvider,
-      params.library.getSigner()
+      params.chainAddrs.lendingPool,
+      params.library
     );
     return await contract
       .getReserveData(assetAddress)
@@ -101,3 +103,39 @@ export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
     staleTime: 60 * 5 * 1000,
   }
 );
+
+export interface ExtendedReserveTokenDefinition
+  extends ReserveTokenDefinition,
+    LendingReserveData {}
+
+export const useAllReserveTokensWithData =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    ExtendedReserveTokenDefinition[],
+    [_p1: "AgaveLendingPool", _p2: "allReserveTokensWithData"],
+    []
+  >(
+    async params => {
+      const allReserves = await useAllReserveTokens.fetchQueryDefined(params);
+
+      const reservesWithData = await Promise.all(
+        allReserves.map(reserve =>
+          useLendingReserveData
+            .fetchQueryDefined(params, reserve.tokenAddress)
+            .then(
+              (data): ExtendedReserveTokenDefinition => ({
+                ...data,
+                ...reserve,
+              })
+            )
+        )
+      );
+
+      return reservesWithData;
+    },
+    () => ["AgaveLendingPool", "allReserveTokensWithData"],
+    () => undefined,
+    {
+      cacheTime: 60 * 15 * 1000,
+      staleTime: 60 * 5 * 1000,
+    }
+  );

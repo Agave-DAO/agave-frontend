@@ -1,12 +1,9 @@
 import React from "react";
-import { WeiBox } from "../../components/Actions/WeiBox";
 import {
   Center,
-  HStack,
   Text,
   Button,
   VStack,
-  Circle,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -19,11 +16,13 @@ import {
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
-import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useStakingAgavePrice } from "../../queries/stakingAgavePrice";
 import { StakingCooldownInfo } from "../../queries/stakingCooldown";
 import { useTotalStakedForAllUsers } from "../../queries/totalStakedForAllUsers";
+import { ModalIcon } from "../../utils/icons";
+import InfoWeiBox from "../common/InfoWeiBox";
+import { fontSizes, spacings } from "../../utils/constants";
 
 export interface StakingBannerProps {}
 
@@ -67,11 +66,7 @@ export const StakingBanner: React.FC<StakingBannerProps> = props => {
       : tokensLocked;
 
   return (
-    <Center
-      px={{ base: "2.3rem", md: "4.7rem" }}
-      width="100%"
-      justifyContent="space-between"
-    >
+    <Center width="100%" justifyContent="space-between">
       <Text
         fontWeight="bold"
         color="white"
@@ -131,36 +126,19 @@ const StakingSubCard: React.FC<{
   return (
     <Box
       w="100%"
-      justifyContent="space-between"
+      maxW="100%"
       px={{ base: "1.1rem", md: "2.2rem" }}
-      py={{ base: "1.3rem", md: "1.9rem" }}
+      py={{ base: spacings.md, md: "1.5rem" }}
       bg="secondary.900"
       rounded="2xl"
       position="relative"
       minH="14.4rem"
-	  minW="40%"
-	  m="0.5em"
-	  align="center"
+      minW="40%"
+      mx={{ base: "0.5rem", md: "1rem" }}
+      my="1rem"
+      align="center"
     >
-      {isModalTrigger && (
-        <Circle
-          borderWidth={{ base: "1px", md: "2px" }}
-          width={{ base: "1.2rem", md: "1.5rem" }}
-          minHeight={{ base: "1.2rem", md: "1.5rem" }}
-          boxSizing="content-box"
-          as={Center}
-          fontSize={{ base: ".85rem", md: "1rem" }}
-          color="#FFC01B"
-          borderColor="#FFC01B"
-          position="absolute"
-          top={{ base: "0.75rem", md: "1rem" }}
-          right={{ base: "0.75rem", md: "1rem" }}
-          cursor="pointer"
-          onClick={onOpen}
-        >
-          ?
-        </Circle>
-      )}
+      {isModalTrigger && <ModalIcon onOpen={onOpen} />}
       <Text
         color="white"
         fontSize={{ base: "1.2rem", md: "1.5rem" }}
@@ -175,7 +153,7 @@ const StakingSubCard: React.FC<{
       {buttonOverrideContent === undefined ? (
         <Button
           color="white"
-          fontSize={{ base: "1rem", md: "1.4rem" }}
+          fontSize={{ base: "1rem", md: fontSizes.md }}
           fontWeight="normal"
           bg="primary.300"
           py="1rem"
@@ -208,7 +186,7 @@ const StakingSubCard: React.FC<{
                 w={{ base: "100%", md: "60%" }}
                 m="auto"
                 py="1.5rem"
-                fontSize={{ base: "1.6rem", md: "1.4rem" }}
+                fontSize={{ base: "1.6rem", md: fontSizes.md }}
                 bg="secondary.100"
                 color="white"
                 fontWeight="normal"
@@ -357,23 +335,30 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   }, [amountStaked, yieldPerYear, yieldPerAgavePerSecond]);
   return (
     <Flex
-	  align="center" flexBasis="auto" spacing="1em" w="100%" flexDirection={{ base: "column", lg: "row" }} m="auto"
+      align="center"
+      flexBasis="auto"
+      spacing="1em"
+      w="100%"
+      flexDirection={{ base: "column", lg: "row" }}
     >
       <Center
         boxSizing="content-box"
         flexDirection="column"
         rounded="xl"
         minH="35.6rem"
-        minW={{ base: "100%", lg: "inherit" }}
+        minW={{ base: "50%", lg: "inherit" }}
+        maxW="80vw"
         flex={1}
         bg="primary.900"
-        px={{ base: "2rem", md: "4rem" }}
-        py="2.4rem"
-        mr={{ base: "2.6rem" }}
+        px={{ base: "1.5rem", md: "3rem" }}
+        py="1rem"
+        my={{ base: "2.6rem", lg: "0rem" }}
+        mx={{ base: "auto", lg: "0rem" }}
+        mr={{ base: "auto", lg: "2.6rem" }}
       >
         <ColoredText
           fontSize={{ base: "1.6rem", md: "1.8rem" }}
-          marginBottom="1.3rem"
+          marginBottom={spacings.md}
           textAlign="center"
         >
           How much you would like to stake?
@@ -382,35 +367,20 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           color="white"
           textAlign="center"
           marginBottom="2.8rem"
-          fontSize={{ base: "1.4rem", md: "inherit" }}
+          fontSize={{ base: fontSizes.md, md: "inherit" }}
         >
           Staking Agave in the Safety Module helps to secure the protocol in
           exchange for protocol incentives
         </Text>
         <Box w="100%">
-          <VStack fontSize="1.5rem">
-            <Flex
-              w="100%"
-              justifyContent="space-between"
-              fontSize={{ base: "1.4rem", md: "inherit" }}
-            >
-              <Text color="white" fontSize="inherit">
-                Available to Stake
-              </Text>
-              <Text color="white" fontSize="inherit">
-                {availableToStake &&
-                  FixedNumber.fromValue(availableToStake, 18).toString()}{" "}
-                Agave
-              </Text>
-            </Flex>
-            <WeiBox
-              amount={amount}
-              decimals={18}
-              setAmount={setAmount}
-              icon={coloredAgaveLogo}
-              maxAmount={availableToStake}
-            />
-          </VStack>
+          <InfoWeiBox
+            balance={availableToStake}
+            amount={amount}
+            setAmount={setAmount}
+            currency="AGVE"
+            mode="stake"
+            decimals={Number(18)}
+          />
         </Box>
         <Button
           mt="2.4rem"
@@ -420,7 +390,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           fontWeight="bold"
           px={{ base: "10rem", md: "6rem" }}
           py="1.5rem"
-          fontSize="1.4rem"
+          fontSize={fontSizes.md}
           disabled={
             amount === undefined ||
             amount.lte(0) ||
@@ -442,14 +412,23 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         flexDirection="column"
         rounded="xl"
         minH="35.6rem"
-        minW={{ base: "100%", lg: "inherit" }}
+        minW={{ base: "80%", md: "90%", lg: "inherit" }}
+        maxW="100%"
         flex={1}
         bg="primary.900"
-        px={{ base: "2rem", md: "4rem" }}
-        py="2.4rem"
-        m={{ base: "2.rem" }}
+        px={{ base: "1.5rem", md: "3rem" }}
+        py="1rem"
+        mb={{ base: "2.6rem", lg: "0rem" }}
+        mx={{ base: "auto", lg: "0rem" }}
       >
-        <Flex align="center" flexBasis="auto" spacing="1em" w="100%" flexDirection={{ base: "column", lg: "row" }} m="auto">
+        <Flex
+          w="100%"
+          align="center"
+          justify="space-between"
+          flexBasis="auto"
+          spacing="1em"
+          flexDirection={{ base: "row", lg: "row" }}
+        >
           <StakingSubCard
             isModalTrigger
             buttonText={
@@ -458,7 +437,6 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
                 : "Unstake all"
             }
             title="Agave staked"
-
             value={
               amountStaked
                 ? FixedNumber.fromValue(amountStaked, 18).toString()
@@ -528,21 +506,27 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
             title="Claimable Agave"
             value={
               availableToClaim
-                ? FixedNumber.fromValue(availableToClaim, 18).toString().slice(0,10)
+                ? FixedNumber.fromValue(availableToClaim, 18)
+                    .toString()
+                    .slice(0, 9)
                 : "-"
             }
             subValue={`$ ${dollarValueStringOf(availableToClaim)}`}
             buttonText="Claim"
             disabled={!(availableToClaim?.gt(0) ?? false)}
             onClick={() => {
-              if (account != null && availableToClaim?.gt(0)) {
+              if (
+                account !== null &&
+                account !== undefined &&
+                availableToClaim?.gt(0)
+              ) {
                 claimRewards(availableToClaim, account);
               }
             }}
           />
         </Flex>
         {/* TODO: Allow custom recipients */}
-        {/* <Input
+        {/* <Input 
           size="lg"
           py="1.5rem"
           variant="filled"
@@ -551,7 +535,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           _hover={{ background: "secondary.900" }}
           _focus={{ background: "secondary.900" }}
           background="secondary.900"
-          fontSize={{ base: "1.4rem", md: "1.6rem" }}
+          fontSize={{ base: fontSizes.md, md: "1.6rem" }}
           width="100%"
           color="white"
           name="customAddress"
@@ -560,7 +544,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         /> */}
         <VStack
           color="white"
-          fontSize="1.4rem"
+          fontSize={fontSizes.md}
           spacing={{ base: "1rem", md: ".5rem" }}
           width="100%"
         >

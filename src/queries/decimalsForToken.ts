@@ -1,6 +1,7 @@
-import { BigNumber, BigNumberish, FixedNumber } from "@ethersproject/bignumber";
+import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { NATIVE_TOKEN } from "./allReserveTokens";
 
 export function weiPerToken(decimals: BigNumberish): BigNumber {
   return BigNumber.from(10).pow(decimals);
@@ -9,13 +10,16 @@ export function weiPerToken(decimals: BigNumberish): BigNumber {
 export const useDecimalCountForToken =
   buildQueryHookWhenParamsDefinedChainAddrs<
     number,
-    [_p1: "erc20", assetAddress: string | undefined, _p2: "decimals"],
-    [assetAddress: string]
+    [_p1: "erc20", assetAddress: string | NATIVE_TOKEN | undefined, _p2: "decimals"],
+    [assetAddress: string | NATIVE_TOKEN]
   >(
     async (params, assetAddress) => {
+      if (assetAddress === NATIVE_TOKEN) {
+        return 18; // Native currencies always have 18 decimals in Ethereum (Right...?)
+      }
       const contract = Erc20abi__factory.connect(
         assetAddress,
-        params.library.getSigner()
+        params.library
       );
       return contract.decimals();
     },

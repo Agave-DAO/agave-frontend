@@ -1,9 +1,10 @@
-import { Center, Text } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import React from "react";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getChainAddresses } from "../../utils/chainAddresses";
 import { StakingLayout } from "./layout";
+import { ErrorWrapper as StakingErrorWrapper } from "../common/ErrorWrapper";
 
 import { useAmountAvailableToStake } from "../../queries/amountAvailableToStake";
 import { useAmountClaimableBy } from "../../queries/amountClaimableBy";
@@ -19,24 +20,6 @@ import { useRedeemMutation } from "../../mutations/redeem";
 import { useStakeMutation } from "../../mutations/stake";
 
 export interface StakingProps {}
-
-const StakingErrorWrapper: React.FC = ({ children }) => {
-  return (
-    <Center
-      minW={["31vw"]}
-      maxW="53.6rem"
-      minH="40vh"
-      maxH="33.6rem"
-      m="auto"
-      px="7.2rem"
-      bg="primary.500"
-      flexDirection="column"
-      rounded="lg"
-    >
-      {children}
-    </Center>
-  );
-};
 
 export const Staking: React.FC<StakingProps> = _props => {
   const w3 = useAppWeb3(); // We don't unpack because otherwise typescript loses useAppWeb3's magic

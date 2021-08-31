@@ -1,47 +1,90 @@
-import daiImg from '../assets/image/coins/dai.svg';
-import ethImg from '../assets/image/coins/eth.svg';
-import agaveImg from '../assets/image/coins/agave.png';
-import honeyImg from '../assets/image/coins/honey.svg';
-import wbtcImg from '../assets/image/coins/wbtc.svg';
+import wxdaiImg from "../assets/image/coins/wxdai.svg";
+import ethImg from "../assets/image/coins/eth.svg";
+import agaveImg from "../assets/image/coins/agave.webp";
+import honeyImg from "../assets/image/coins/honey.webp";
+import wbtcImg from "../assets/image/coins/wbtc.svg";
+import usdcImg from "../assets/image/coins/usdc.svg";
+import { theme } from "@chakra-ui/theme";
+import { BigNumber, constants } from "ethers";
+export const LINEAR_GRADIENT_BG =
+  "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%)";
+
+export const spacings = {
+  md: "1.3rem",
+};
+
+export const MIN_SAFE_HEALTH_FACTOR = BigNumber.from(1200);
+export const MINIMUM_NATIVE_RESERVE = constants.WeiPerEther.div(10);
+
+export const assetColor: { [key: string]: string } = {
+  USDC: theme.colors.blue[400],
+  XDAI: theme.colors.orange[300],
+  WXDAI: theme.colors.orange[300],
+  WETH: theme.colors.gray[100],
+  AGVE: theme.colors.green[400],
+  HNY: theme.colors.yellow[400],
+  WBTC: theme.colors.orange[500],
+  STAKE: theme.colors.teal[400],
+  USDT: theme.colors.green[700],
+  LINK: theme.colors.pink[400],
+};
+
+export const fontSizes = {
+  md: "1.4rem",
+  sm: "1.2rem",
+  xs: "1rem",
+  lg: "1.6rem",
+  xl: "1.8rem",
+  "2xl": "2rem",
+  xxl: "2rem",
+};
 
 const addresses: Readonly<Record<string, string>> = {
   Agave: "0xaE88624C894668E1bBABc9AFE87E8CA0fb74eC2a",
   wETH: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
   HNY: "0xa30CCf67b489d627De8F8c035F5b9676442646e0",
   wBTC: "0x64Ed1291Fe07AdE7BB261c7AA8491e4bc0E8DE1c",
-  DAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2"
-}
+  wxDAI: "0x569AafF8F90A5E48B27C154249eE5A08eD0C44E2",
+};
 
 export const imagesBySymbol: Record<string, string | undefined> = {
   AGVE: agaveImg,
   WETH: ethImg,
   HNY: honeyImg,
   WBTC: wbtcImg,
-  USDC: daiImg,
+  USDC: usdcImg,
+  WXDAI: wxdaiImg,
 };
 
 export interface IMarketData {
-  name: string,
-  img: string,
-  market_size: number,
-  liquidity: number,
-  total_borrowed: number,
-  deposit_apy: number,
-  variable_borrow_apr: number,
-  stable_borrow_apr: number,
-  asset_price: number,
-  wallet_balance: number,
-  supply_balance: number,
-  borrow_balance: number,
-  collateral: boolean,
-  isVariable: boolean,
-  contractAddress: string,
+  name: string;
+  img: string;
+  market_size: number;
+  liquidity: number;
+  total_borrowed: number;
+  deposit_apy: number;
+  variable_borrow_apr: number;
+  stable_borrow_apr: number;
+  asset_price: number;
+  wallet_balance: number;
+  supply_balance: number;
+  borrow_balance: number;
+  collateral: boolean;
+  isVariable: boolean;
+  contractAddress: string;
+}
+
+export interface IMarketDataTable {
+  name: string;
+  img: string;
+  wallet_balance: number;
+  deposit_apy: number;
 }
 
 export const marketData: ReadonlyArray<IMarketData> = [
   {
-    name: 'DAI',
-    img: daiImg,
+    name: "WXDAI",
+    img: wxdaiImg,
     market_size: 14300,
     liquidity: 12000,
     total_borrowed: 2300,
@@ -54,10 +97,10 @@ export const marketData: ReadonlyArray<IMarketData> = [
     borrow_balance: 320,
     collateral: true,
     isVariable: true,
-    contractAddress: addresses.DAI
+    contractAddress: addresses.DAI,
   },
   {
-    name: 'AG',
+    name: "AG",
     img: agaveImg,
     market_size: 32000,
     liquidity: 27200,
@@ -71,10 +114,10 @@ export const marketData: ReadonlyArray<IMarketData> = [
     borrow_balance: 500,
     collateral: false,
     isVariable: false,
-    contractAddress: addresses.Agave
+    contractAddress: addresses.Agave,
   },
   {
-    name: 'HNY',
+    name: "HNY",
     img: honeyImg,
     market_size: 9800,
     liquidity: 6600,
@@ -88,10 +131,10 @@ export const marketData: ReadonlyArray<IMarketData> = [
     borrow_balance: 0,
     collateral: true,
     isVariable: true,
-    contractAddress: addresses.HNY
+    contractAddress: addresses.HNY,
   },
   {
-    name: 'wBTC',
+    name: "wBTC",
     img: wbtcImg,
     market_size: 6420,
     liquidity: 5120,
@@ -105,10 +148,10 @@ export const marketData: ReadonlyArray<IMarketData> = [
     borrow_balance: 200,
     collateral: true,
     isVariable: true,
-    contractAddress: addresses.wBTC
+    contractAddress: addresses.wBTC,
   },
   {
-    name: 'ETH',
+    name: "ETH",
     img: ethImg,
     market_size: 3600,
     liquidity: 2100,
@@ -122,6 +165,6 @@ export const marketData: ReadonlyArray<IMarketData> = [
     borrow_balance: 450,
     collateral: false,
     isVariable: false,
-    contractAddress: addresses.wETH
-  }
+    contractAddress: addresses.wETH,
+  },
 ];

@@ -1,127 +1,216 @@
-import React, { useMemo } from "react";
-import { useHistory } from "react-router-dom";
-import { useTable, useSortBy, Column } from "react-table";
-import BasicTable from "../../components/BasicTable";
-import { IMarketData, marketData } from "../../utils/constants";
+import React from "react";
+import { CellProps, Column, Renderer } from "react-table";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import { useAssetPricesInDaiWei } from "../../queries/assetPriceInDai";
+import { useChainAddresses } from "../../utils/chainAddresses";
+import {
+  BasicTableRenderer,
+  MobileTableRenderer,
+  SortedHtmlTable,
+  TableRenderer,
+} from "../../utils/htmlTable";
+import { Box, Text } from "@chakra-ui/layout";
+import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
+import { TokenIcon } from "../../utils/icons";
+import { useUserAccountData } from "../../queries/userAccountData";
+import { bigNumberToString } from "../../utils/fixedPoint";
+import { useAppWeb3 } from "../../hooks/appWeb3";
+import { isMobile } from "react-device-detect";
+import { BorrowAPRView } from "../common/RatesView";
 
-const BorrowTable: React.FC<{ activeType: string }> = ({ activeType }) => {
-  const history = useHistory();
-  const data = useMemo(() => {
-    if (activeType === "All") {
-      return marketData;
-    }
+const BorrowAvailability: React.FC<{
+  tokenAddress: string;
+  lendingPool: string | undefined;
+}> = ({ tokenAddress, lendingPool }) => {
+  const { account: userAccountAddress } = useAppWeb3();
 
-    return marketData.slice(0, 3);
-  }, [activeType]);
+  const price = useAssetPricesInDaiWei([tokenAddress]).data;
+  const userAccountData = useUserAccountData(
+    userAccountAddress ?? undefined
+  ).data;
+  const availableBorrowsNative = userAccountData?.availableBorrowsEth;
+  const balanceNative = availableBorrowsNative
+    ? bigNumberToString(availableBorrowsNative)
+    : null;
 
-  const columns: Column<IMarketData>[] = useMemo(
+  const availableBorrowsNativeAdjusted = availableBorrowsNative?.mul(1000);
+  const balanceAsset =
+    availableBorrowsNativeAdjusted && price
+      ? availableBorrowsNativeAdjusted.div(price[0])
+      : null;
+  return React.useMemo(() => {
+    return (
+      <Flex direction="column" minH={30} ml={2}>
+        <Box
+          w="auto"
+          textAlign={{ base: "end", md: "center" }}
+          whiteSpace="nowrap"
+        >
+          <Text p={3} fontWeight="bold">
+            {balanceAsset ? balanceAsset.toNumber() / 1000 : "-"}
+          </Text>
+
+          {isMobile ? null : <Text p={3}>$ {balanceNative ?? "-"}</Text>}
+        </Box>
+      </Flex>
+    );
+  }, [balanceAsset, balanceNative, isMobile]);
+};
+
+export const BorrowTable: React.FC<{ activeType: string }> = () => {
+  interface AssetRecord {
+    symbol: string;
+    tokenAddress: string;
+    aTokenAddress: string;
+  }
+
+  const [isMobile] = useMediaQuery("(max-width: 32em)");
+
+  const reserves = useAllReserveTokensWithData();
+  const assetRecords = React.useMemo(() => {
+    const assets =
+      reserves.data?.map(
+        ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
+          symbol,
+          tokenAddress,
+          aTokenAddress,
+        })
+      ) ?? [];
+    return assets.map(asset => {
+      return asset.symbol === "WXDAI"
+        ? {
+            ...asset,
+            symbol: "XDAI",
+          }
+        : asset;
+    });
+  }, [reserves]);
+
+  const chainAddresses = useChainAddresses();
+  const lendingPool = chainAddresses?.lendingPool;
+
+  const columns: Column<AssetRecord>[] = React.useMemo(
     () => [
       {
         Header: "Asset",
-        accessor: "name",
-        Cell: (row) => {
-          return (
-            <div>
-              <img src={row.row.original.img} alt="" width="35" height="35" />
-              <span>{row.value}</span>
-            </div>
-          );
-        },
+        accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+        Cell: (({ value }) => (
+          <Flex
+            width="100%"
+            height="100%"
+            alignItems={"center"}
+            mb={{ base: "2rem", md: "0rem" }}
+          >
+            <Center width="4rem">
+              <TokenIcon symbol={value} />
+            </Center>
+            <Box w="1rem"></Box>
+
+            <Box>
+              <Text>{value}</Text>
+            </Box>
+          </Flex>
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
-        Header: "Available to borrow",
-        accessor: "wallet_balance",
-        Cell: (row) => (
-          <div>
-            <span className="value">
-              {row.value} {row.row.original.name}
-            </span>
-          </div>
-        ),
+        Header: "You can Borrow",
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+          <BorrowAvailability tokenAddress={value} lendingPool={lendingPool} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
-        Header: "Variable APR",
-        accessor: "variable_borrow_apr",
-        Cell: (row) => (
-          <div className="value-section">
-            <span className="value blue">{row.value}</span> %
-          </div>
-        ),
-      },
-      {
-        Header: "Stable APR",
-        accessor: "stable_borrow_apr",
-        Cell: (row) => (
-          <div className="value-section">
-            <span className="value pink">{row.value}</span> %
-          </div>
-        ),
+        Header: isMobile ? "APR" : "Variable APR",
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+          <BorrowAPRView tokenAddress={value} />
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
     ],
+    [isMobile, lendingPool]
+  );
+
+  const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <MobileTableRenderer
+        linkpage="borrow"
+        table={table}
+        tableProps={{
+          textAlign: "center",
+          display: "flex",
+          width: "100%",
+          flexDirection: "column",
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+          textAlign: "center",
+        }}
+        rowProps={{
+          display: "flex",
+          flexDirection: "column",
+          margin: "1em 0",
+          padding: "1em",
+          borderRadius: "1em",
+          bg: { base: "secondary.900" },
+          whiteSpace: "nowrap",
+        }}
+        cellProps={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      />
+    ),
     []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    rows,
-    prepareRow,
-  } = useTable<IMarketData>(
-    {
-      columns,
-      data: Array.from(data),
-    },
-    useSortBy
+  const renderer = React.useCallback<TableRenderer<AssetRecord>>(
+    table => (
+      <BasicTableRenderer
+        linkpage="borrow"
+        table={table}
+        tableProps={{
+          style: {
+            borderSpacing: "0 1em",
+            borderCollapse: "separate",
+          },
+        }}
+        headProps={{
+          fontSize: "12px",
+          fontFamily: "inherit",
+          color: "white",
+          border: "none",
+          textAlign: "center",
+          _first: { textAlign: "start" },
+        }}
+        rowProps={{
+          // rounded: { md: "lg" }, // "table-row" display mode can't do rounded corners
+          bg: { base: "secondary.900" },
+          whiteSpace: "nowrap",
+        }}
+        cellProps={{
+          borderBottom: "none",
+          border: "0px solid",
+          textAlign: "center",
+          _first: { borderLeftRadius: "10px", textAlign: "start" },
+          _last: { borderRightRadius: "10px" },
+        }}
+      />
+    ),
+    []
   );
+
+  const [ismaxWidth] = useMediaQuery("(max-width: 32em)");
 
   return (
-    <BasicTable>
-      <table {...getTableProps()}>
-        <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                  <div className="header-column">
-                    <span
-                      className={
-                        !column.isSorted
-                          ? ""
-                          : column.isSortedDesc
-                          ? "desc"
-                          : "asc"
-                      }
-                    >
-                      {column.render("Header")}
-                    </span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row, index) => {
-            prepareRow(row);
-            return (
-              <tr
-                {...row.getRowProps()}
-                onClick={() => history.push(`/borrow/${row.values.name}`)}
-                key={index}
-              >
-                {row.cells.map((cell) => {
-                  return (
-                    <td {...cell.getCellProps()}>{cell.render("Cell")}</td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </BasicTable>
+    <div>
+      <SortedHtmlTable columns={columns} data={assetRecords}>
+        {ismaxWidth ? mobileRenderer : renderer}
+      </SortedHtmlTable>
+    </div>
   );
 };
-
-export default BorrowTable;

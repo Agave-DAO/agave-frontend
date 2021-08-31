@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import { Web3ReactProvider } from "@web3-react/core";
 import React from "react";
-import store from './redux/store';
+import store from "./redux/store";
 import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
 import { Provider } from "react-redux";
 import type { AbstractConnector } from "@web3-react/abstract-connector";

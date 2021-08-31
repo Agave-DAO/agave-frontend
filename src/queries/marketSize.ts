@@ -1,17 +1,14 @@
-import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
+import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
-import { Erc20abi__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAllReserveTokens } from "./allReserveTokens";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
+import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
 import { useLendingReserveData } from "./lendingReserveData";
-
-export function weiPerToken(decimals: BigNumberish): BigNumber {
-  return BigNumber.from(10).pow(decimals);
-}
+import { useTokenTotalSupply } from "./tokenTotalSupply";
 
 export const useMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
-  BigNumber,
+  BigNumber | null,
   [_p1: "market", _p2: "size", assetAddress: string | undefined],
   [assetAddress: string]
 >(
@@ -21,19 +18,23 @@ export const useMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
       useLendingReserveData.fetchQueryDefined(params, assetAddress),
     ]);
 
-    const atoken = Erc20abi__factory.connect(
-      reserveData.aTokenAddress,
-      params.library.getSigner()
-    );
-    const atokenTotalSupply = await atoken.totalSupply();
+    const [aTokenTotalSupply, aTokenDecimals] = await Promise.all([
+      useTokenTotalSupply.fetchQueryDefined(params, reserveData.aTokenAddress),
+      useDecimalCountForToken.fetchQueryDefined(
+        params,
+        reserveData.aTokenAddress
+      ),
+    ]);
 
-    return atokenTotalSupply.mul(priceInDaiWei);
+    return priceInDaiWei
+      ? aTokenTotalSupply.mul(priceInDaiWei).div(weiPerToken(aTokenDecimals))
+      : null;
   },
   assetAddress => ["market", "size", assetAddress],
   () => undefined,
   {
-    staleTime: 15 * 1000,
-    cacheTime: 120 * 1000,
+    staleTime: 30 * 1000,
+    cacheTime: 360 * 1000,
   }
 );
 
@@ -49,7 +50,11 @@ export const useTotalMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
         useMarketSize.fetchQueryDefined(params, reserve.tokenAddress)
       )
     );
-    return sizes.reduce((a, b) => a.add(b), constants.Zero);
+    return sizes.reduce(
+      (a: BigNumber, b: BigNumber | null): BigNumber =>
+        a.add(b ?? constants.Zero),
+      constants.Zero
+    );
   },
   () => ["market", "size", "total"],
   () => undefined,
@@ -57,4 +62,17 @@ export const useTotalMarketSize = buildQueryHookWhenParamsDefinedChainAddrs<
     staleTime: 30 * 1000,
     cacheTime: 120 * 1000,
   }
+);
+
+export const useMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
+  FixedNumber | null,
+  [_p1: "market", _p2: "size", assetAddress: string | undefined, _p3: "dai"],
+  [assetAddress: string]
+>(
+  async (params, assetAddress) => {
+    const totalWei = await useMarketSize.fetchQueryDefined(params, assetAddress);
+    return totalWei ? FixedNumber.fromValue(totalWei, 18) : null; // HACK: Assumes DAI are always 18 decimals
+  },
+  assetAddress => ["market", "size", assetAddress, "dai"],
+  () => undefined
 );

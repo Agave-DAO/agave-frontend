@@ -1,64 +1,168 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { IMarketData } from "../utils/constants";
-import { Web3Provider } from '@ethersproject/providers';
-import { AgaveLendingABI__factory } from "../contracts";
+import { AgaveLendingABI__factory, WETHGateway__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
-import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
-import { ethers } from "ethers";
-import { useApproved } from "../hooks/approved";
-import { useBalance } from "../hooks/balance";
-import { useApprovalMutation } from "./approval";
+import {
+  useUserAssetAllowance,
+  useUserAssetBalance,
+  useUserDepositAssetBalances,
+  useUserDepositAssetBalancesDaiWei,
+  useUserDepositAssetBalancesWithReserveInfo,
+  useUserReserveAssetBalances,
+  useUserReserveAssetBalancesDaiWei,
+} from "../queries/userAssets";
+import { useAppWeb3 } from "../hooks/appWeb3";
+import { usingProgressNotification } from "../utils/progressNotification";
+import { useUserAccountData } from "../queries/userAccountData";
+import { useLendingReserveData } from "../queries/lendingReserveData";
+import { getChainAddresses } from "../utils/chainAddresses";
+import { NATIVE_TOKEN } from "../queries/allReserveTokens";
+import {
+  useWrappedNativeAddress,
+  useWrappedNativeDefinition,
+} from "../queries/wrappedNativeAddress";
+import { useUserReserveData } from "../queries/protocolReserveData";
 
 export interface UseDepositMutationProps {
-  asset: IMarketData | undefined;
-  amount: number;
-  onSuccess: () => void;
-};
+  asset: string | NATIVE_TOKEN | undefined;
+  spender: string | undefined;
+  amount: BigNumber | undefined;
+}
 
 export interface UseDepositMutationDto {
-  depositMutation: UseMutationResult<BigNumber | undefined, unknown, BigNumber, unknown>;
-  depositMutationKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined, number];
-};
+  depositMutation: UseMutationResult<
+    BigNumber | undefined,
+    unknown,
+    void,
+    unknown
+  >;
+  depositMutationKey: readonly [
+    ...ReturnType<typeof useUserAssetAllowance.buildKey>,
+    "deposit",
+    BigNumber | undefined
+  ];
+}
 
-export const useDepositMutation = ({asset, amount, onSuccess}: UseDepositMutationProps): UseDepositMutationDto => {
+export const useDepositMutation = ({
+  asset,
+  spender,
+  amount,
+}: UseDepositMutationProps): UseDepositMutationDto => {
   const queryClient = useQueryClient();
-  // FIXME: would be nice not to invoke a list of hooks just to get query keys
-  const { approvedQueryKey } = useApproved(asset);
-	const { approvalMutationKey } = useApprovalMutation({ asset, amount, onSuccess: () => {}});
-  const { balanceQueryKey } = useBalance(asset);
-  const assetQueryKey = [asset?.name] as const; 
-  
-  const depositMutationKey = [...approvedQueryKey, amount] as const;
-  const depositMutation = useMutation<BigNumber | undefined, unknown, BigNumber, unknown>(
+  const { chainId, account, library } = useAppWeb3();
+  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
+
+  const userAccountDataQueryKey = useUserAccountData.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    account ?? undefined
+  );
+  const assetBalanceQueryKey = useUserAssetBalance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
+  );
+  const allowanceQueryKey = useUserAssetAllowance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
+    spender ?? undefined
+  );
+  const depositedQueryKey = [...allowanceQueryKey, "deposit"] as const;
+
+  const depositMutationKey = [...depositedQueryKey, amount] as const;
+  const depositMutation = useMutation(
     depositMutationKey,
-    async (unitAmount): Promise<BigNumber | undefined> => {
-      const [address, library, asset, ] = depositMutationKey;
-      if (!address || !library || !asset) {
+    async () => {
+      if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
       }
-      const contract = AgaveLendingABI__factory.connect(
-        internalAddresses.Lending,
-        library.getSigner()
+      if (!asset || !spender || !amount) {
+        return undefined;
+      }
+      let deposit;
+      if (asset === NATIVE_TOKEN) {
+        const gatewayContract = WETHGateway__factory.connect(
+          spender,
+          library.getSigner()
+        );
+        deposit = gatewayContract.depositETH(account, 0, { value: amount });
+      } else {
+        const lendingContract = AgaveLendingABI__factory.connect(
+          spender,
+          library.getSigner()
+        );
+        deposit = lendingContract.deposit(asset, amount, account, 0);
+      }
+      const depositConfirmation = await usingProgressNotification(
+        "Awaiting deposit approval",
+        "Please sign the transaction for deposit.",
+        "info",
+        deposit
       );
-      const referralCode = 0;
-      console.log("depositMutationKey:deposit");
-      console.log(Number(ethers.utils.formatEther(unitAmount)));
-      const tx = await contract.deposit(
-        asset.contractAddress,
-        unitAmount,
-        address,
-        referralCode
+      const receipt = await usingProgressNotification(
+        "Awaiting deposit confirmation",
+        "Please wait while the blockchain processes your transaction",
+        "info",
+        depositConfirmation.wait()
       );
-      const receipt = await tx.wait();
-      return receipt.status ? BigNumber.from(unitAmount) : undefined;
+      return receipt.status ? amount : undefined;
     },
     {
-      onSuccess: async (unitAmountResult, vars, context) => {
+      onSuccess: async (result, vars, context) => {
+        const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
         await Promise.allSettled([
-          queryClient.invalidateQueries(approvedQueryKey),
-          queryClient.invalidateQueries(approvalMutationKey),
-          queryClient.invalidateQueries(balanceQueryKey),
-          queryClient.invalidateQueries(assetQueryKey),
+          queryClient.invalidateQueries(assetBalanceQueryKey),
+          queryClient.invalidateQueries(userAccountDataQueryKey),
+          queryClient.invalidateQueries(allowanceQueryKey),
+          queryClient.invalidateQueries(depositedQueryKey),
+          queryClient.invalidateQueries(depositMutationKey),
+          chainId && account
+            ? Promise.allSettled(
+                [
+                  useUserDepositAssetBalances.buildKey(chainId, account),
+                  useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(
+                    chainId,
+                    account
+                  ),
+                  useUserReserveAssetBalances.buildKey(chainId, account),
+                  useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                ].map(k => queryClient.invalidateQueries(k))
+              )
+            : Promise.resolve(),
+          asset && account && chainAddrs && chainId && library
+            ? useWrappedNativeAddress
+                .fetchQueryDefined({
+                  account,
+                  chainAddrs,
+                  chainId,
+                  library,
+                  queryClient,
+                })
+                .then(wrappedNativeTokenAddress => {
+                  useLendingReserveData
+                    .fetchQueryDefined(
+                      { account, chainAddrs, chainId, library, queryClient },
+                      asset !== NATIVE_TOKEN ? asset : wrappedNativeTokenAddress
+                    )
+                    .then(reserveData =>
+                      useUserAssetBalance.buildKey(
+                        chainId ?? undefined,
+                        account ?? undefined,
+                        reserveData.aTokenAddress
+                      )
+                    )
+                    .then(aTokenBalanceQueryKey =>
+                      queryClient.invalidateQueries(aTokenBalanceQueryKey)
+                    );
+                  const userReserveDataKey = useUserReserveData.buildKey(
+                    chainId ?? undefined,
+                    account ?? undefined,
+                    asset !== NATIVE_TOKEN ? asset : wrappedNativeTokenAddress
+                  );
+                  queryClient.invalidateQueries(userReserveDataKey);
+                })
+            : Promise.resolve(),
         ]);
       },
     }

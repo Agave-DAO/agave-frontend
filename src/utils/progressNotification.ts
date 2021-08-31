@@ -1,3 +1,4 @@
+import { isMobile } from "react-device-detect";
 import {
   ReactNotificationOptions,
   store as NotificationManager,
@@ -10,7 +11,7 @@ export async function usingProgressNotification<T>(
   promise: Promise<T>
 ): Promise<T> {
   const notification = NotificationManager.addNotification({
-    container: "bottom-center",
+    container: isMobile ? "center" : "bottom-right",
     title: title,
     dismiss: {
       click: false,

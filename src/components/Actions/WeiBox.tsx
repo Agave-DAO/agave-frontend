@@ -13,6 +13,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { RepeatIcon } from "@chakra-ui/icons";
+import { fontSizes } from "../../utils/constants";
 
 // Equate (BigNumber | undefined) instances with eachother
 function eqBigNumberOptions(
@@ -58,7 +59,7 @@ export interface WeiInputProps {
 
 export interface FixedDecimalInputProps {
   amount: BigNumber | undefined;
-  decimals: BigNumberish;
+  decimals: number;
   setAmount: (newValue: BigNumber | undefined) => void;
   minAmount?: BigNumber | undefined;
   maxAmount?: BigNumber | undefined;
@@ -69,7 +70,7 @@ export interface FixedDecimalInputProps {
 
 export interface WeiBoxProps {
   amount: BigNumber | undefined;
-  decimals: BigNumberish;
+  decimals: number;
   setAmount: (newValue: BigNumber | undefined) => void;
   // Dual mode enables both displays as textboxes, while int and fixed display one format or the other
   mode?: "dual" | "int" | "fixed";
@@ -82,10 +83,10 @@ const TextInput: React.FC<InputProps> = props => {
   return (
     <Input
       size="lg"
-      pl={{ base: "3.5rem", md: "5rem" }}
+      pl={{ base: "1rem", md: "5rem" }}
       pr={{ base: "13rem", md: "15rem" }}
       py="2rem"
-      fontSize={{ base: "1.4rem", md: "1.6rem" }}
+      fontSize={{ base: fontSizes.md, md: "1.6rem" }}
       alignItems="center"
       _hover={{ background: "primary.500", color: "secondary.900" }}
       _focus={{ background: "secondary.900", color: "white" }}
@@ -275,11 +276,11 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
     () => (
       <InputRightElement minWidth="4.5rem" height="100%" w="max-content">
         <HStack spacing="1rem" mr="1rem" height="100%">
-          <Text fontSize={{ base: "1.4rem", md: "inherit" }} color="white">
+          <Text fontSize={{ base: fontSizes.md, md: "inherit" }} color="white">
             {weiView ? " Wei" : " Tokens"}
           </Text>
           <Button
-            fontSize={{ base: "1.4rem", md: "inherit" }}
+            fontSize={{ base: fontSizes.md, md: "inherit" }}
             h="100%"
             size="xl"
             background="transparent"
@@ -295,7 +296,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
             <>
               &nbsp;
               <Button
-                fontSize={{ base: "1.4rem", md: "inherit" }}
+                fontSize={{ base: fontSizes.md, md: "inherit" }}
                 h="100%"
                 size="xl"
                 background="transparent"

@@ -1,4 +1,5 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
+import { divIfNotZeroUnsafe } from "../utils/fixedPoint";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useProtocolReserveData } from "./protocolReserveData";
 
@@ -29,7 +30,8 @@ export const useAssetUtilizationRate =
         totalStableDebt: reserveData.totalStableDebt,
         totalVariableDebt: reserveData.totalVariableDebt,
         availableLiquidity: reserveData.availableLiquidity,
-        utilizationRate: FixedNumber.from(totalDebt).divUnsafe(
+        utilizationRate: divIfNotZeroUnsafe(
+          FixedNumber.from(totalDebt),
           FixedNumber.from(totalDebt.add(reserveData.availableLiquidity))
         ),
       };

@@ -1,55 +1,101 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { IMarketData } from "../utils/constants";
-import { Web3Provider } from '@ethersproject/providers';
 import { Erc20abi__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
-import { internalAddresses } from "../utils/contracts/contractAddresses/internalAddresses";
-import { ethers } from "ethers";
-import { useApproved } from "../hooks/approved";
+import { constants } from "ethers";
+import { useUserAssetAllowance } from "../queries/userAssets";
+import { useAppWeb3 } from "../hooks/appWeb3";
+import { usingProgressNotification } from "../utils/progressNotification";
 
 export interface UseApprovalMutationProps {
-  asset: IMarketData | undefined;
-  amount: number;
-  onSuccess: () => void;
-};
+  asset: string | undefined;
+  spender: string | undefined;
+  amount: BigNumber | undefined;
+}
 
 export interface UseApprovalMutationDto {
-  approvalMutation: UseMutationResult<BigNumber, unknown, void, unknown>;
-  approvalMutationKey: readonly [string | null | undefined, Web3Provider | undefined, IMarketData | undefined, number];
-};
+  approvalMutation: UseMutationResult<
+    BigNumber | undefined,
+    unknown,
+    void,
+    unknown
+  >;
+  approvalMutationKey: readonly [
+    ...ReturnType<typeof useUserAssetAllowance.buildKey>,
+    BigNumber | undefined
+  ];
+}
 
-export const useApprovalMutation = ({asset, amount, onSuccess}: UseApprovalMutationProps): UseApprovalMutationDto => {
+export const useApprovalMutation = ({
+  asset,
+  spender,
+  amount,
+}: UseApprovalMutationProps): UseApprovalMutationDto => {
   const queryClient = useQueryClient();
-  const { approvedQueryKey } = useApproved(asset);
-  
+  const { chainId, account, library } = useAppWeb3();
+  const approvedQueryKey = useUserAssetAllowance.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset,
+    spender
+  );
+
+  console.log(asset, spender, amount);
   const approvalMutationKey = [...approvedQueryKey, amount] as const;
   const approvalMutation = useMutation(
     approvalMutationKey,
-    async (newValue) => {
-      const [address, library, asset, amount] = approvalMutationKey;
-      if (!address || !library || !asset) {
+    async () => {
+      if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
       }
-      const contract = Erc20abi__factory.connect(
-        asset.contractAddress,
+      if (!asset || !spender || !amount) {
+        return undefined;
+      }
+      const tokenContract = Erc20abi__factory.connect(
+        asset,
         library.getSigner()
       );
-      const unitAmount = ethers.utils.parseEther(amount.toString());
-      const tx = await contract.approve(internalAddresses.Lending, unitAmount);
-      const receipt = await tx.wait();
-      return BigNumber.from(receipt.status ? unitAmount : 0);
+      const priorAllowance = await tokenContract.allowance(account, spender);
+      if (priorAllowance.lt(amount)) {
+        if (!priorAllowance.isZero()) {
+          const approvalReset = tokenContract.approve(spender, constants.Zero);
+          const approvalResetConfirmation = await usingProgressNotification(
+            "Awaiting approval reset",
+            "Some ERC20-like tokens require setting your allowance to 0 before changing it. Please sign the transaction resetting approval to 0.",
+            "warning",
+            approvalReset
+          );
+          await usingProgressNotification(
+            "Awaiting approval reset confirmation",
+            "Please wait while the blockchain processes your transaction",
+            "info",
+            approvalResetConfirmation.wait()
+          );
+        }
+
+        const approval = tokenContract.approve(spender, amount);
+        const approvalConfirmation = await usingProgressNotification(
+          "Awaiting spend approval",
+          "Please sign the transaction for ERC20 approval.",
+          "info",
+          approval
+        );
+        const receipt = await usingProgressNotification(
+          "Awaiting approval confirmation",
+          "Please wait while the blockchain processes your transaction",
+          "info",
+          approvalConfirmation.wait()
+        );
+        return receipt.status ? amount : undefined;
+      } else {
+        return amount;
+      }
     },
     {
-      onSuccess: async (unitAmountResult, vars, context) => {
-        console.log("approvalMutation:onSuccess");
+      onSuccess: async (result, vars, context) => {
         await Promise.allSettled([
-          // queryClient.invalidateQueries(approvedQueryKey), // Request that the approval query refreshes
-          queryClient.setQueryData(approvedQueryKey, ethers.utils.parseEther(amount.toString())), // Update the approved amount query immediately
+          queryClient.invalidateQueries(approvedQueryKey),
           queryClient.invalidateQueries(approvalMutationKey),
         ]);
-        if (onSuccess) {
-          onSuccess();
-        }
       },
     }
   );

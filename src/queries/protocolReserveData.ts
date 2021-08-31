@@ -5,6 +5,7 @@ import {
 } from "../contracts";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { FixedFromRay } from "../utils/fixedPoint";
 
 export interface ProtocolReserveData {
   // ERC20(LendingPoolReserveData.aTokenAddress).balanceOf(reserve.aTokenAddress)
@@ -29,10 +30,6 @@ export interface ProtocolReserveData {
   lastUpdateTimestamp: number;
 }
 
-function rayFixed(input: BigNumber): FixedNumber {
-  return FixedNumber.fromValue(input, 27);
-}
-
 export function reserveDataFromWeb3Result({
   availableLiquidity,
   totalStableDebt,
@@ -49,12 +46,12 @@ export function reserveDataFromWeb3Result({
     availableLiquidity,
     totalStableDebt,
     totalVariableDebt,
-    liquidityRate: rayFixed(liquidityRate),
-    variableBorrowRate: rayFixed(variableBorrowRate),
-    stableBorrowRate: rayFixed(stableBorrowRate),
-    averageStableBorrowRate: rayFixed(averageStableBorrowRate),
-    liquidityIndex: rayFixed(liquidityIndex),
-    variableBorrowIndex: rayFixed(variableBorrowIndex),
+    liquidityRate: FixedFromRay(liquidityRate),
+    variableBorrowRate: FixedFromRay(variableBorrowRate),
+    stableBorrowRate: FixedFromRay(stableBorrowRate),
+    averageStableBorrowRate: FixedFromRay(averageStableBorrowRate),
+    liquidityIndex: FixedFromRay(liquidityIndex),
+    variableBorrowIndex: FixedFromRay(variableBorrowIndex),
     lastUpdateTimestamp,
   };
 }
@@ -75,13 +72,107 @@ export const useProtocolReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, assetAddress) => {
     const contract = AaveProtocolDataProvider__factory.connect(
       params.chainAddrs.aaveProtocolDataProvider,
-      params.library.getSigner()
+      params.library
     );
     return await contract
       .getReserveData(assetAddress)
       .then(reserveData => reserveDataFromWeb3Result(reserveData));
   },
   assetAddress => ["AaveProtocolDataProvider", "reserveData", assetAddress],
+  () => undefined,
+  {
+    cacheTime: 60 * 15 * 1000,
+    staleTime: 60 * 5 * 1000,
+  }
+);
+
+export interface UserReserveData {
+  // ERC20(LendingPoolReserveData.aTokenAddress).balanceOf(user)
+  currentATokenBalance: BigNumber;
+  // ERC20(reserve.stableDebtTokenAddress).balanceOf(user)
+  currentStableDebt: BigNumber;
+  // ERC20(reserve.variableDebtTokenAddress).balanceOf(user)
+  currentVariableDebt: BigNumber;
+  // The principal stable debt of the user
+  principalStableDebt: BigNumber;
+  // Scaled variable debt of the user
+  scaledVariableDebt: BigNumber;
+  // The stable borrow rate of the user (expressed in ray)
+  stableBorrowRate: FixedNumber;
+  // The interest rate being earned by the user for deposits (expressed in ray)
+  liquidityRate: FixedNumber;
+  // The last time the stable rate was updated for this reserve
+  stableRateLastUpdated: number;
+  // Whether or not this reserve can be used as collateral
+  usageAsCollateralEnabled: boolean;
+}
+
+export function userReserveDataFromWeb3Result({
+  currentATokenBalance,
+  currentStableDebt,
+  currentVariableDebt,
+  principalStableDebt,
+  scaledVariableDebt,
+  stableBorrowRate, // ray
+  liquidityRate, // ray
+  stableRateLastUpdated,
+  usageAsCollateralEnabled,
+}: Web3ProtocolUserReserveDataResult): UserReserveData {
+  return {
+    currentATokenBalance,
+    currentStableDebt,
+    currentVariableDebt,
+    principalStableDebt,
+    scaledVariableDebt,
+    stableBorrowRate: FixedFromRay(stableBorrowRate),
+    liquidityRate: FixedFromRay(liquidityRate),
+    stableRateLastUpdated,
+    usageAsCollateralEnabled,
+  };
+}
+
+type Web3ProtocolUserReserveDataResult = PromisedType<
+  ReturnType<typeof AaveProtocolDataProvider.prototype.getUserReserveData>
+>;
+
+export const useUserReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
+  UserReserveData,
+  [_p1: "user", _p2: "reserveData", assetAddress: string | undefined],
+  [assetAddress: string]
+>(
+  async (params, assetAddress) => {
+    const contract = AaveProtocolDataProvider__factory.connect(
+      params.chainAddrs.aaveProtocolDataProvider,
+      params.library
+    );
+    return await contract
+      .getUserReserveData(assetAddress, params.account)
+      .then(userReserveData => userReserveDataFromWeb3Result(userReserveData));
+  },
+  assetAddress => ["user", "reserveData", assetAddress],
+  () => undefined,
+  {
+    cacheTime: 60 * 15 * 1000,
+    staleTime: 60 * 5 * 1000,
+  }
+);
+
+export const useUserReservesData = buildQueryHookWhenParamsDefinedChainAddrs<
+  { [assetAddress: string]: UserReserveData },
+  [_p1: "user", _p2: "reserveData", assetAddresses: string[] | undefined],
+  [assetAddresses: string[]]
+>(
+  async (params, assetAddresses) => {
+    const reserveData = await Promise.all(
+      assetAddresses.map(assetAddress =>
+        useUserReserveData
+          .fetchQueryDefined(params, assetAddress)
+          .then(result => [assetAddress, result])
+      )
+    );
+    return Object.fromEntries(reserveData);
+  },
+  assetAddresses => ["user", "reserveData", assetAddresses],
   () => undefined,
   {
     cacheTime: 60 * 15 * 1000,

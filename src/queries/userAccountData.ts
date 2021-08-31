@@ -1,5 +1,6 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
+import { divIfNotZeroUnsafe } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
@@ -15,11 +16,7 @@ export interface UserAccountData {
   maximumLtvDiscrete: BigNumber; //  Fixed4 e.g. 5781 = 57.81 MaximumLTV
   currentLtv: FixedNumber; // 0 <-> Math.min(maximumLtv, 1), totalDebt / totalCollateral
   usedBorrowingPower: FixedNumber;
-  healthFactor: FixedNumber; //  Ray e.g. 1500403183017056862 = 1.50
-}
-
-function rayFixed(input: BigNumber): FixedNumber {
-  return FixedNumber.fromValue(input, 27);
+  healthFactor: BigNumber; //  e.g. 2500000000000000000 in wei
 }
 
 export function userAccountDataFromWeb3Result({
@@ -31,7 +28,8 @@ export function userAccountDataFromWeb3Result({
   healthFactor, //  Ray e.g. 1500403183017056862 = 1.50
 }: Web3UserAccountData): UserAccountData {
   const maximumLtv = FixedNumber.fromValue(ltv, 4);
-  const currentLtv = FixedNumber.fromValue(totalDebtETH, 18).divUnsafe(
+  const currentLtv = divIfNotZeroUnsafe(
+    FixedNumber.fromValue(totalDebtETH, 18),
     FixedNumber.fromValue(totalCollateralETH, 18)
   );
   return {
@@ -45,8 +43,8 @@ export function userAccountDataFromWeb3Result({
     maximumLtvDiscrete: ltv,
     maximumLtv,
     currentLtv,
-    usedBorrowingPower: currentLtv.divUnsafe(maximumLtv),
-    healthFactor: rayFixed(healthFactor),
+    usedBorrowingPower: divIfNotZeroUnsafe(currentLtv, maximumLtv),
+    healthFactor,
   };
 }
 
@@ -66,7 +64,7 @@ export const useUserAccountData = buildQueryHookWhenParamsDefinedChainAddrs<
   async (params, accountAddress) => {
     const contract = AgaveLendingABI__factory.connect(
       params.chainAddrs.lendingPool,
-      params.library.getSigner()
+      params.library
     );
     return await contract
       .getUserAccountData(accountAddress)
@@ -82,7 +80,7 @@ export const useUserAccountData = buildQueryHookWhenParamsDefinedChainAddrs<
 
 export const useAvailableToBorrowAssetWei =
   buildQueryHookWhenParamsDefinedChainAddrs<
-    BigNumber,
+    BigNumber | null,
     [
       _p1: "LendingPool",
       _p2: "userAccountData",
@@ -99,9 +97,11 @@ export const useAvailableToBorrowAssetWei =
         useDecimalCountForToken.fetchQueryDefined(params, assetAddress),
       ]);
 
-      return accountData.availableBorrowsEth
-        .mul(weiPerToken(assetDecimals))
-        .div(assetPrice);
+      return assetPrice
+        ? accountData.availableBorrowsEth
+            .mul(weiPerToken(assetDecimals))
+            .div(assetPrice)
+        : null;
     },
     (accountAddress, assetAddress) => [
       "LendingPool",

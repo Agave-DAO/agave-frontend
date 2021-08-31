@@ -19,7 +19,7 @@ export const useTotalRewardsBalance = buildQueryHook<
     }
     const contract = StakedToken__factory.connect(
       chainAddresses.staking,
-      library.getSigner()
+      library
     );
     let balance;
     try {

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import styled from 'styled-components';
+import styled from "styled-components";
 import Switch from "react-switch";
 
-const CheckBoxWrapper = styled.div<{isChecked: boolean}>`
+const CheckBoxWrapper = styled.div<{ isChecked: boolean }>`
   display: flex;
   align-items: center;
 
@@ -21,16 +21,20 @@ const CheckBoxWrapper = styled.div<{isChecked: boolean}>`
   }
 
   .react-switch-bg {
-    background: ${props => !props.isChecked ? props.theme.color.red + ' !important' : ''};
+    background: ${props =>
+      !props.isChecked ? props.theme.color.red + " !important" : ""};
   }
 `;
 
 const CheckBox: React.FC<{
-  isChecked?: boolean | null | undefined,
-  labels: ReadonlyArray<string>,
-  handleChange: React.ComponentProps<typeof Switch>["onChange"],
+  isChecked?: boolean | null | undefined;
+  labels: ReadonlyArray<string>;
+  handleChange: React.ComponentProps<typeof Switch>["onChange"];
 }> = ({ isChecked, labels, handleChange }) => {
-  const [labelList, setLabelList] = useState<ReadonlyArray<string>>(['Yes', 'No']);
+  const [labelList, setLabelList] = useState<ReadonlyArray<string>>([
+    "Yes",
+    "No",
+  ]);
 
   useEffect(() => {
     if (labels && labels.length > 0) {
@@ -40,7 +44,9 @@ const CheckBox: React.FC<{
 
   return (
     <CheckBoxWrapper isChecked={isChecked ?? false}>
-      <span className={isChecked ? 'green' : 'red'}>{isChecked ? labelList[0] : labelList[1]}</span>
+      <span className={isChecked ? "green" : "red"}>
+        {isChecked ? labelList[0] : labelList[1]}
+      </span>
       <Switch
         checked={isChecked ?? false}
         onChange={handleChange}
@@ -58,6 +64,6 @@ const CheckBox: React.FC<{
       />
     </CheckBoxWrapper>
   );
-}
+};
 
 export default CheckBox;

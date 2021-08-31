@@ -3,11 +3,16 @@ import {
   AaveProtocolDataProvider,
   AaveProtocolDataProvider__factory,
 } from "../contracts";
+import { FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 
 export interface ReserveAssetConfiguration {
   decimals: BigNumber;
+  rawltv: BigNumber;
+  rawliquidationThreshold: BigNumber;
+  rawliquidationBonus: BigNumber;
+  rawreserveFactor: BigNumber;
   ltv: FixedNumber; // 4-fractional-decimal precision ratio e.g. 0.5000 => 50%, 1.2500 => 1.25
   liquidationThreshold: FixedNumber;
   liquidationBonus: FixedNumber;
@@ -32,10 +37,6 @@ export interface ReserveAssetConfiguration {
 //bit 64-79: reserve factor
 export interface ReserveConfigurationMap extends BigNumber {}
 
-function rayFixed(input: BigNumber): FixedNumber {
-  return FixedNumber.fromValue(input, 27);
-}
-
 export function reserveConfigurationFromWeb3Result({
   decimals,
   ltv,
@@ -50,10 +51,14 @@ export function reserveConfigurationFromWeb3Result({
 }: Web3ProtocolReserveDataResult): ReserveAssetConfiguration {
   return {
     decimals,
+    rawltv: ltv,
+    rawliquidationThreshold: liquidationThreshold,
+    rawliquidationBonus: liquidationBonus,
+    rawreserveFactor: reserveFactor,
     ltv: FixedNumber.fromValue(ltv, 4),
-    liquidationThreshold: rayFixed(liquidationThreshold),
-    liquidationBonus: rayFixed(liquidationBonus),
-    reserveFactor: rayFixed(reserveFactor),
+    liquidationThreshold: FixedFromRay(liquidationThreshold),
+    liquidationBonus: FixedFromRay(liquidationBonus),
+    reserveFactor: FixedFromRay(reserveFactor),
     usageAsCollateralEnabled,
     borrowingEnabled,
     stableBorrowRateEnabled,
@@ -63,31 +68,40 @@ export function reserveConfigurationFromWeb3Result({
 }
 
 type Web3ProtocolReserveDataResult = PromisedType<
-  ReturnType<typeof AaveProtocolDataProvider.prototype.getReserveConfigurationData>
+  ReturnType<
+    typeof AaveProtocolDataProvider.prototype.getReserveConfigurationData
+  >
 >;
 
-export const useProtocolReserveConfiguration = buildQueryHookWhenParamsDefinedChainAddrs<
-  ReserveAssetConfiguration,
-  [
-    _p1: "AaveProtocolDataProvider",
-    _p2: "reserveData",
-    assetAddress: string | undefined
-  ],
-  [assetAddress: string]
->(
-  async (params, assetAddress) => {
-    const contract = AaveProtocolDataProvider__factory.connect(
-      params.chainAddrs.aaveProtocolDataProvider,
-      params.library.getSigner()
-    );
-    return await contract
-      .getReserveConfigurationData(assetAddress)
-      .then(reserveConfiguration => reserveConfigurationFromWeb3Result(reserveConfiguration));
-  },
-  assetAddress => ["AaveProtocolDataProvider", "reserveData", assetAddress],
-  () => undefined,
-  {
-    cacheTime: 60 * 15 * 1000,
-    staleTime: 60 * 5 * 1000,
-  }
-);
+export const useProtocolReserveConfiguration =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    ReserveAssetConfiguration,
+    [
+      _p1: "AaveProtocolDataProvider",
+      _p2: "assetConfiguration",
+      assetAddress: string | undefined
+    ],
+    [assetAddress: string]
+  >(
+    async (params, assetAddress) => {
+      const contract = AaveProtocolDataProvider__factory.connect(
+        params.chainAddrs.aaveProtocolDataProvider,
+        params.library
+      );
+      return await contract
+        .getReserveConfigurationData(assetAddress)
+        .then(reserveConfiguration =>
+          reserveConfigurationFromWeb3Result(reserveConfiguration)
+        );
+    },
+    assetAddress => [
+      "AaveProtocolDataProvider",
+      "assetConfiguration",
+      assetAddress,
+    ],
+    () => undefined,
+    {
+      cacheTime: 60 * 15 * 1000,
+      staleTime: 60 * 5 * 1000,
+    }
+  );

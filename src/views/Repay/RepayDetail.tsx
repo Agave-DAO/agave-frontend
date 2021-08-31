@@ -1,233 +1,352 @@
-import React from 'react';
-import styled from 'styled-components';
-import { useRouteMatch } from "react-router-dom";
-import Page from '../../components/Page';
-import { useAsset } from "../../hooks/asset";
-import { useBalance } from "../../hooks/balance";
-import RepayOverview from './RepayOverview';
-import { ActionDetail } from "../../components/Actions/ActionDetail";
+import React from "react";
+import { VStack } from "@chakra-ui/layout";
+import { Button } from "@chakra-ui/button";
+import { useHistory, useRouteMatch } from "react-router-dom";
+import { RepayDash } from "./RepayDash";
+import { DashOverviewIntro } from "../common/DashOverview";
+import {
+  isReserveTokenDefinition,
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
+  ReserveTokenDefinition,
+  useTokenDefinitionBySymbol,
+} from "../../queries/allReserveTokens";
+import { Box, Center } from "@chakra-ui/react";
+import ColoredText from "../../components/ColoredText";
+import { BigNumber } from "ethers";
+import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
+import {
+  useUserAssetBalance,
+  useUserVariableDebtForAsset,
+} from "../../queries/userAssets";
+import { useRepayMutation, UseRepayMutationProps } from "../../mutations/repay";
+import {
+  useApprovalMutation,
+  UseApprovalMutationProps,
+} from "../../mutations/approval";
+import { useChainAddresses } from "../../utils/chainAddresses";
+import { ControllerItem } from "../../components/ControllerItem";
+import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 
-const RepayDetailWrapper = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+interface InitialState {
+  token: Readonly<ReserveOrNativeTokenDefinition>;
+}
 
-  .content-wrapper {
-    padding: 15px 0px;
-    margin: 20px 0px 10px;
-    flex-direction: column;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 0%;
-    background: ${props => props.theme.color.bgWhite};
+interface AmountSelectedState extends InitialState {
+  amountToRepay: BigNumber;
+}
 
-    .basic-form {
-      max-width: 500px;
-      margin: 0px auto;
+interface RepayTXState extends AmountSelectedState {
+  // approvalTXHash: string;
+}
 
-      .basic-form-header {
-        margin-bottom: 30px;
-        text-align: center;
-        width: 100%;
-        overflow: hidden;
+interface RepaidTXState extends RepayTXState {
+  // repayTXHash: string;
+}
 
-        .basic-form-header-title {
-          width: 100%;
-          font-size: 16px;
-          font-weight: bold;
-          text-align: center;
-          margin-bottom: 10px;
-          color: ${props => props.theme.color.pink};
-        }
+type RepayState = OneTaggedPropertyOf<{
+  init: InitialState;
+  amountSelected: AmountSelectedState;
+  repayTx: RepayTXState;
+  repaidTx: RepaidTXState;
+}>;
 
-        .basic-form-header-content {
-          font-size: 16px;
-          text-align: center;
-          color: ${props => props.theme.color.textPrimary};
-        }
-      }
+function createState<SelectedState extends PossibleTags<RepayState>>(
+  type: SelectedState,
+  value: RepayState[SelectedState]
+): RepayState {
+  return {
+    type,
+    [type]: value,
+  } as any;
+}
 
-      .basic-form-content {
-        width: 335px;
-        padding-bottom: 25px;
-        margin: 0px auto;
+const stateNames: Record<PossibleTags<RepayState>, string> = {
+  init: "Token",
+  amountSelected: "Approval",
+  repayTx: "Repayment",
+  repaidTx: "Finished",
+};
 
-        .basic-form-content-top {
-          display: flex;
-          flex-flow: row wrap;
-          align-items: flex-start;
-          justify-content: space-between;
-          font-size: 14px;
-          margin-bottom: 5px;
-          color: ${props => props.theme.color.textPrimary};
+const visibleStateNames: ReadonlyArray<PossibleTags<RepayState>> = [
+  "amountSelected",
+  "repayTx",
+  "repaidTx",
+] as const;
 
-          .basic-form-content-top-label {
-            color: ${props => props.theme.color.textPrimary};
-            font-weight: 400;
-            font-size: 14px;
-          }
+const RepayTitle = "Repay overview";
 
-          .basic-form-content-top-value {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            flex: 1 1 0%;
-            color: ${props => props.theme.color.textPrimary};
+const InitialComp: React.FC<{
+  state: InitialState;
+  dispatch: (nextState: RepayState) => void;
+}> = ({ state, dispatch }) => {
+  const [amount, setAmount] = React.useState<BigNumber>();
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
 
-            span {
-              font-weight: 600;
-              margin-right: 5px;
-            }
-          }
-        }
-
-        .basic-form-content-body {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0px 15px;
-          border-radius: 2px;
-          transition: all 0.2s ease 0s;
-          border: 1px solid ${props => props.theme.color.bgSecondary};
-
-          .image-section {
-            padding-right: 10px;
-          }
-
-          .input-section {
-            width: 100%;
-            input {
-              border: none;
-              background: transparent;
-              font-family: roboto-font, sans-serif;
-              transition: all 0.2s ease 0s;
-              font-size: 16px;
-              width: 100%;
-              padding: 13px 5px 13px 0px;
-              appearance: none;
-              box-shadow: none;
-              outline: none;
-              opacity: 1;
-              color: ${props => props.theme.color.textPrimary};
-
-              &::-webkit-inner-spin-button {
-                -webkit-appearance: none;
-                margin: 0;
-              }
-            }
-          }
-
-          .max-section {
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            color: ${props => props.theme.color.pink};
-            transition: all 0.2s ease 0s;
-
-            &:hover {
-              opacity: 0.7;
-            }
-          }
-        }
-      }
-
-      .basic-form-footer {
-        margin-top: 50px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-        height: 80px;
-      }
+  const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
+  const { data: debtForAsset } = useUserVariableDebtForAsset(
+    asset?.tokenAddress
+  );
+  const availableToRepay = React.useMemo(() => {
+    if (!userBalance || !debtForAsset) {
+      return BigNumber.from(0);
     }
-  }
-`;
 
-const RepayDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined,
-  }>();
-  const assetName = match.params.assetName;
-  const { asset } = useAsset(assetName);
-  const { library, address, balance } = useBalance(asset);
-  if (!asset) {
-    return <>No asset found with details </>;
-  }
+    // availableToRepay = min(debt, balance)
+    return userBalance.gt(debtForAsset) ? debtForAsset : userBalance;
+  }, [debtForAsset, userBalance]);
 
-  if (!address || !library) {
-    return <>No account loaded</>;
-  }
-
+  const onSubmit = React.useCallback(
+    amountToRepay =>
+      dispatch(createState("amountSelected", { amountToRepay, ...state })),
+    [state, dispatch]
+  );
   return (
-    <Page>
-      <RepayDetailWrapper>
-        <RepayOverview asset={asset} />
-        <ActionDetail asset={asset} balance={balance} actionName="repay" actionBaseRoute="repay" />
-      </RepayDetailWrapper>
-    </Page>
+    <DashOverviewIntro
+      asset={state.token}
+      amount={amount}
+      setAmount={setAmount}
+      mode="repay"
+      onSubmit={onSubmit}
+      balance={availableToRepay}
+    />
   );
 };
-/*
-  const handleInputChange = (e) => {
-    setAmount(e.target.value);
-  };
 
-  const handleRepay = () => {
-    if (!amount) {
-      NotificationManager.error('Please input the correct amount');
-      return;
-    }
-    history.push(`/repay/confirm/${asset.name}/${amount}`);
-  };
-*/
+const AmountSelectedComp: React.FC<{
+  state: AmountSelectedState;
+  dispatch: (nextState: RepayState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
 
-
-/*
-  return (
-    <Page>
-      <RepayDetailWrapper>
-        <RepayOverview asset={asset} />
-        <div className="content-wrapper">
-          <div className="basic-form">
-            <div className="basic-form-header">
-              <div className="basic-form-header-title">
-                Repay
-              </div>
-              <div className="basic-form-header-content">
-                How much do you want to repay?
-              </div>
-            </div>
-            <div className="basic-form-content">
-              <div className="basic-form-content-top">
-                <div className="basic-form-content-top-label">
-                  Available to repay
-                </div>
-                <div className="basic-form-content-top-value">
-                  <span>{asset.borrow_balance}</span> {asset.name}
-                </div>
-              </div>
-              <div className="basic-form-content-body">
-                <div className="image-section">
-                  <img src={asset.img} alt="" width={30} height={30} />
-                </div>
-                <div className="input-section">
-                  <input type="number" placeholder="Amount" step="any" min="0" max={asset.borrow_balance} value={amount} onChange={handleInputChange} />
-                </div>
-                <div className="max-section" onClick={() => setAmount(asset.borrow_balance)}>
-                  Max
-                </div>
-              </div>
-            </div>
-            <div className="basic-form-footer">
-              <Button variant="secondary" onClick={handleRepay}>Continue</Button>
-              <Button variant="outline" onClick={() => history.goBack()}>Go back</Button>
-            </div>
-          </div>
-        </div>
-      </RepayDetailWrapper>
-    </Page>
+  const approvalArgs = React.useMemo<UseApprovalMutationProps>(
+    () => ({
+      asset:
+        state.token.tokenAddress === NATIVE_TOKEN
+          ? undefined
+          : state.token.tokenAddress,
+      amount: state.amountToRepay,
+      spender: chainAddresses?.lendingPool,
+    }),
+    [state, chainAddresses?.lendingPool]
   );
-} */
+  const {
+    approvalMutation: { mutateAsync },
+  } = useApprovalMutation(approvalArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("repayTx", { ...state })))
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<RepayState> = "amountSelected";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={RepayTitle}
+      amount={state.amountToRepay}
+      asset={state.token}
+      collateral={false}
+      increase={false}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={1}
+        stepName="Approval"
+        stepDesc="Please submit to approve"
+        actionName="Approve"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
+  );
+};
 
-export default RepayDetail;
+const RepayTxComp: React.FC<{
+  state: AmountSelectedState;
+  dispatch: (nextState: RepayState) => void;
+}> = ({ state, dispatch }) => {
+  const repayArgs = React.useMemo<UseRepayMutationProps>(
+    () => ({
+      asset: state.token.tokenAddress,
+      amount: state.amountToRepay,
+    }),
+    [state]
+  );
+  const {
+    repayMutation: { mutateAsync },
+  } = useRepayMutation(repayArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("repaidTx", { ...state })))
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<RepayState> = "repayTx";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={RepayTitle}
+      amount={state.amountToRepay}
+      asset={state.token}
+      collateral={false}
+      increase={false}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={2}
+        stepName="Repay"
+        stepDesc="Please submit to repay"
+        actionName="Repay"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
+  );
+};
+
+const RepaidTxComp: React.FC<{
+  state: RepaidTXState;
+  dispatch: (nextState: RepayState) => void;
+}> = ({ state }) => {
+  const history = useHistory();
+  const currentStep: PossibleTags<RepayState> = "repaidTx";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={RepayTitle}
+      amount={state.amountToRepay}
+      asset={state.token}
+      collateral={false}
+      increase={false}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={3}
+        stepName="Success"
+        actionName="Dashboard"
+        onActionClick={() => history.push("/dashboard")}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
+  );
+};
+
+const RepayStateMachine: React.FC<{
+  state: RepayState;
+  setState: (newState: RepayState) => void;
+}> = ({ state, setState }) => {
+  switch (state.type) {
+    case "init":
+      return <InitialComp state={state.init} dispatch={setState} />;
+    case "amountSelected":
+      return (
+        <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
+      );
+    case "repayTx":
+      return <RepayTxComp state={state.repayTx} dispatch={setState} />;
+    case "repaidTx":
+      return <RepaidTxComp state={state.repaidTx} dispatch={setState} />;
+  }
+};
+
+const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
+  ({ asset }) => {
+    const dash = React.useMemo(() => <RepayDash token={asset} />, [asset]);
+
+    const [repayState, setRepayState] = React.useState<RepayState>(
+      createState("init", { token: asset })
+    );
+
+    return (
+      <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
+        {dash}
+        <Center
+          w="100%"
+          color="primary.100"
+          bg="primary.900"
+          rounded="lg"
+          padding="1em"
+        >
+          <RepayStateMachine state={repayState} setState={setRepayState} />
+        </Center>
+      </VStack>
+    );
+  };
+
+export const RepayDetail: React.FC = () => {
+  const match = useRouteMatch<{
+    assetName: string | undefined;
+  }>();
+  const history = useHistory();
+  const assetName = match.params.assetName;
+  const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
+  if (!asset) {
+    return (
+      <Box
+        w="100%"
+        color="primary.100"
+        bg="primary.900"
+        rounded="lg"
+        padding="3em"
+      >
+        <Center>
+          {allReserves ? (
+            <>
+              No reserve found with asset symbol&nbsp;
+              <ColoredText>{assetName}</ColoredText>
+            </>
+          ) : (
+            "Loading reserves..."
+          )}
+        </Center>
+        <Center>
+          <Button
+            color="primary.100"
+            bg="primary.500"
+            onClick={() =>
+              history.length > 0 ? history.goBack() : history.push("/dashboard")
+            }
+            size="xl"
+            padding="1rem"
+            m="3rem"
+          >
+            Take me back!
+          </Button>
+        </Center>
+      </Box>
+    );
+  }
+
+  return <RepayDetailForAsset asset={asset} />;
+};

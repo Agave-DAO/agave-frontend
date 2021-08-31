@@ -1,5 +1,4 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
-import { constants } from "ethers";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
@@ -7,7 +6,7 @@ import { useProtocolReserveData } from "./protocolReserveData";
 
 export const useTotalBorrowedForAsset =
   buildQueryHookWhenParamsDefinedChainAddrs<
-    { wei: BigNumber; dai: FixedNumber },
+    { wei: BigNumber; dai: FixedNumber | null; assetDecimals: number },
     [_p1: "asset", assetAddress: string | undefined, _p2: "borrowed"],
     [assetAddress: string]
   >(
@@ -23,17 +22,20 @@ export const useTotalBorrowedForAsset =
         reserveData.totalVariableDebt
       );
 
-      const daiBorrowed = FixedNumber.fromValue(
-        totalBorrowedWei
-          .mul(assetPriceInDaiWei)
-          .mul(constants.WeiPerEther)
-          .div(weiPerToken(assetDecimals)),
-        18
-      );
+      const daiBorrowed =
+        assetPriceInDaiWei !== null
+          ? FixedNumber.fromValue(
+              totalBorrowedWei
+                .mul(assetPriceInDaiWei)
+                .div(weiPerToken(assetDecimals)),
+              18
+            )
+          : null;
 
       return {
         wei: totalBorrowedWei,
         dai: daiBorrowed,
+        assetDecimals,
       };
     },
     assetAddress => ["asset", assetAddress, "borrowed"],
