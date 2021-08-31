@@ -38,7 +38,11 @@ export const useStakingAgavePrice = buildQueryHookWhenParamsDefinedChainAddrs<
     try {
       return await priceOracle.getAssetPrice(stakedTokenAddress);
     } catch (e) {
-      if (e.code === -32603) {
+      if (
+        e &&
+        typeof e === "object" &&
+        (e as { code?: number | undefined })?.code === -32603
+      ) {
         console.log("Price oracle missing for token");
         return undefined;
       }
