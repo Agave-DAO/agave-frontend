@@ -107,7 +107,7 @@ export const UnlockWallet: React.FC<{}> = props => {
         <Box>
           <Text color="white">Supported chains:</Text>
           <List spacing={3}>
-            {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
+            {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) => (
                 <ListItem key={name} color="white">
                   {name}: {addrs.chainId}
                 </ListItem>
