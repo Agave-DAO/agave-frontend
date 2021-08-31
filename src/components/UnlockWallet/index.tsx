@@ -108,11 +108,10 @@ export const UnlockWallet: React.FC<{}> = props => {
           <Text color="white">Supported chains:</Text>
           <List spacing={3}>
             {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
-              name !== "rinkeby" ? (
                 <ListItem key={name} color="white">
                   {name}: {addrs.chainId}
                 </ListItem>
-              ) : null
+              )
             )}
           </List>
           {PrivacySection}
