@@ -16,9 +16,11 @@ import {
   List,
   ListItem,
   Stack,
+  HStack,
 } from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
 import { URI_AVAILABLE } from "@web3-react/walletconnect-connector";
+import ColoredText from "../ColoredText";
 
 function warnUser(title: string, message?: string | undefined): void {
   NotificationManager.addNotification({
@@ -48,6 +50,19 @@ const PrivacySection = (
       those Providers. Your access to the wallet might be reliant on the
       External Provider being operational.
     </Text>
+
+    <Text fontSize={{ base: "1.4rem", md: fontSizes.lg }}>
+      Do you need help?
+    </Text>
+    <HStack>
+      <Text fontSize={{ base: "1.2rem", md: fontSizes.md }}>
+        {" "}
+        Contact us on
+      </Text>
+      <a href="https://discord.gg/bkVwdxSfCn" target="_blank">
+        <ColoredText>Discord</ColoredText>
+      </a>
+    </HStack>
   </Box>
 );
 
@@ -86,14 +101,13 @@ export const UnlockWallet: React.FC<{}> = props => {
             mb={{ base: ".8rem", md: "1.6rem" }}
             fontSize={{ base: fontSizes.md, md: "inherit" }}
           >
-            Currently selected chain: {selectedChain}
+            Currently selected chain ID: {selectedChain}
           </Text>
         ) : null}
         <Box>
           <Text color="white">Supported chains:</Text>
           <List spacing={3}>
-            {Object.entries(internalAddressesPerNetwork).map(
-              ([name, addrs]) => (
+            {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) => (
                 <ListItem key={name} color="white">
                   {name}: {addrs.chainId}
                 </ListItem>
