@@ -1,10 +1,27 @@
 import { InjectedConnector } from "@web3-react/injected-connector";
+import { FrameConnector } from "@web3-react/frame-connector";
+import {
+  WalletConnectConnector,
+  WalletConnectConnectorArguments,
+} from "@web3-react/walletconnect-connector";
 import React, { useEffect, useMemo, useState } from "react";
 import { ValidNetworkIds } from "../utils/contracts/contractAddresses/internalAddresses";
 import { useAppWeb3 } from "./appWeb3";
 
 export const injectedConnector = new InjectedConnector({
   supportedChainIds: Object.values(ValidNetworkIds),
+});
+
+export const frameConnector = new FrameConnector({
+  supportedChainIds: Object.values([0x64]), // Frame connector can only connect to one chain at a time, so let's just use XDAI
+});
+
+export const walletConnectConnector = new WalletConnectConnector({
+  supportedChainIds: Object.values(ValidNetworkIds),
+  bridge: "https://bridge.walletconnect.org",
+  rpc: {
+    0x64: "https://rpc.xdaichain.com/",
+  },
 });
 
 export interface AmbientConnectionState {

@@ -2,10 +2,23 @@ import React from "react";
 import { store as NotificationManager } from "react-notifications-component";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
-import { injectedConnector } from "../../hooks/injectedConnectors";
+import {
+  frameConnector,
+  injectedConnector,
+  walletConnectConnector,
+} from "../../hooks/injectedConnectors";
 import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
-import { Box, Center, Text, Button, List, ListItem } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Text,
+  Button,
+  List,
+  ListItem,
+  Stack,
+} from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
+import { URI_AVAILABLE } from "@web3-react/walletconnect-connector";
 
 function warnUser(title: string, message?: string | undefined): void {
   NotificationManager.addNotification({
@@ -104,6 +117,31 @@ export const UnlockWallet: React.FC<{}> = props => {
     await activate(injectedConnector);
   };
 
+  const onFrameConnect = async () => {
+    if (typeof (window as any).ethereum === "undefined") {
+      warnUser(
+        "Please install MetaMask!",
+        "Agave requires Metamask to be installed in your browser to work properly."
+      );
+      return;
+    }
+    await activate(frameConnector);
+  };
+
+  const onWalletConnect = async () => {
+    if (typeof (window as any).ethereum === "undefined") {
+      warnUser(
+        "Please install MetaMask!",
+        "Agave requires Metamask to be installed in your browser to work properly."
+      );
+      return;
+    }
+    walletConnectConnector.once(URI_AVAILABLE, uri => {
+      console.log(`WalletConnect URI: ${uri}`);
+    });
+    await activate(walletConnectConnector);
+  };
+
   return (
     <Center
       minW={{ md: "31vw" }}
@@ -141,16 +179,38 @@ export const UnlockWallet: React.FC<{}> = props => {
             To see your deposited / borrowed assets, you need to connect your
             wallet to xDai network.
           </Text>
-          <Button
-            minW={{ base: "100%", md: "15.8rem" }}
-            fontSize={{ base: fontSizes.md, md: "inherit" }}
-            py={{ base: "1.5rem", md: ".8rem" }}
-            color="secondary.900"
-            bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-            onClick={onMetamaskConnect}
-          >
-            Connect
-          </Button>
+          <Stack>
+            <Button
+              minW={{ base: "100%", md: "15.8rem" }}
+              fontSize={{ base: fontSizes.md, md: "inherit" }}
+              py={{ base: "1.5rem", md: ".8rem" }}
+              color="secondary.900"
+              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+              onClick={onMetamaskConnect}
+            >
+              MetaMask
+            </Button>
+            <Button
+              minW={{ base: "100%", md: "15.8rem" }}
+              fontSize={{ base: fontSizes.md, md: "inherit" }}
+              py={{ base: "1.5rem", md: ".8rem" }}
+              color="secondary.900"
+              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+              onClick={onFrameConnect}
+            >
+              Frame
+            </Button>
+            <Button
+              minW={{ base: "100%", md: "15.8rem" }}
+              fontSize={{ base: fontSizes.md, md: "inherit" }}
+              py={{ base: "1.5rem", md: ".8rem" }}
+              color="secondary.900"
+              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+              onClick={onWalletConnect}
+            >
+              WalletConnect
+            </Button>
+          </Stack>
         </>
       )}
     </Center>
