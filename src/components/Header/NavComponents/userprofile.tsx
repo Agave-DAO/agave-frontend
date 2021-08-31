@@ -14,7 +14,8 @@ import { selectAddress } from "../../../features/auth/authSlice";
 import { useAppSelector } from "../../../redux/hooks";
 import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useUserAssetBalance } from "../../../queries/userAssets";
-import { useAllReserveTokensWithData } from "../../../queries/lendingReserveData";
+import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
+import ColoredText from "../../ColoredText";
 
 export const UserProfile: React.FC<{}> = () => {
   // Light/Dark button functions
@@ -34,18 +35,12 @@ export const UserProfile: React.FC<{}> = () => {
   );
 
   // Agve button functions
-  const reserves = useAllReserveTokensWithData()?.data;
-  const reserve = React.useMemo(
-    () =>
-      reserves?.find(reserve => reserve?.symbol === "AGVE") ??
-      reserves?.find(reserve => reserve.tokenAddress),
-    [reserves]
-  );
-  const tokenBalance = useUserAssetBalance(reserve?.tokenAddress)?.data;
-  const userBal = tokenBalance ? bigNumberToString(tokenBalance) : "0";
+  const { data: agaveBalance } = useAmountAvailableToStake(address);
+  const userBal = agaveBalance ? bigNumberToString(agaveBalance, 3) : "0";
 
   return (
     <>
+      {/* NIGHTMODE 
       <Center
         width={{ base: "4rem", md: "3rem" }}
         height={{ base: "4rem", md: "3rem" }}
@@ -58,7 +53,8 @@ export const UserProfile: React.FC<{}> = () => {
           src={colorMode === "dark" ? darkMoon : lightMoon}
           alt="theme-mode"
         />
-      </Center>
+        
+    </Center>*/}
       <Center
         minWidth="10rem"
         height={{ base: "4rem", md: "3rem" }}
@@ -68,8 +64,10 @@ export const UserProfile: React.FC<{}> = () => {
         color="white"
         bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
         rounded="lg"
+        px="5px"
       >
-        {userBal.substring(0, 4)} AGVE
+        <Text mr="5px">{userBal}</Text>
+        <Text font-weight="400">AGVE</Text>
       </Center>
 
       <Center
