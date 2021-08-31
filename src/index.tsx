@@ -10,12 +10,18 @@ import { Web3ReactProvider } from "@web3-react/core";
 import { Web3Provider } from "@ethersproject/providers";
 import { QueryClient, QueryClientProvider, QueryCache } from "react-query";
 import { BigNumber, FixedNumber } from "ethers";
-import { useAmbientConnection } from "./hooks/injectedConnectors";
+import {
+  AmbientConnectionContext,
+  CreateAmbientConnectionContext,
+  useAmbientConnection,
+} from "./hooks/injectedConnectors";
 import { ReactQueryDevtools } from "react-query/devtools";
 
 const reactQueryClient = new QueryClient({
   queryCache: new QueryCache(),
 });
+
+const ambientConnectionContext = CreateAmbientConnectionContext();
 
 function getWeb3Library(
   provider: any,
@@ -34,16 +40,18 @@ const AppRoot: React.FC<{}> = () => {
 // function wrapper is used to enable HMR
 function renderApp() {
   ReactDOM.render(
-    <Web3ReactProvider getLibrary={getWeb3Library}>
-      <Provider store={store}>
-        <QueryClientProvider client={reactQueryClient}>
-          <React.StrictMode>
-            <AppRoot />
-          </React.StrictMode>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </Provider>
-    </Web3ReactProvider>,
+    <AmbientConnectionContext.Provider value={ambientConnectionContext}>
+      <Web3ReactProvider getLibrary={getWeb3Library}>
+        <Provider store={store}>
+          <QueryClientProvider client={reactQueryClient}>
+            <React.StrictMode>
+              <AppRoot />
+            </React.StrictMode>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </Provider>
+      </Web3ReactProvider>
+    </AmbientConnectionContext.Provider>,
     document.getElementById("root")
   );
 }
