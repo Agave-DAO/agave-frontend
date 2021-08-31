@@ -118,24 +118,10 @@ export const UnlockWallet: React.FC<{}> = props => {
   };
 
   const onFrameConnect = async () => {
-    if (typeof (window as any).ethereum === "undefined") {
-      warnUser(
-        "Please install MetaMask!",
-        "Agave requires Metamask to be installed in your browser to work properly."
-      );
-      return;
-    }
     await activate(frameConnector);
   };
 
   const onWalletConnect = async () => {
-    if (typeof (window as any).ethereum === "undefined") {
-      warnUser(
-        "Please install MetaMask!",
-        "Agave requires Metamask to be installed in your browser to work properly."
-      );
-      return;
-    }
     walletConnectConnector.once(URI_AVAILABLE, uri => {
       console.log(`WalletConnect URI: ${uri}`);
     });
