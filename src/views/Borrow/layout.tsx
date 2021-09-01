@@ -51,7 +51,7 @@ export const BorrowLayout: React.FC<BorrowLayoutProps> = props => {
   const borrows: BorrowAsset[] = React.useMemo(() => {
     const assets = props.borrowedList ?? [];
     return assets.map(asset => {
-      return asset.symbol === "WXDAI"
+      return asset.symbol === "XDAI"
         ? {
             ...asset,
             symbol: "XDAI",
