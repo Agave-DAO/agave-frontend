@@ -81,7 +81,6 @@ export const useRepayMutation = ({
           chainAddresses.wrappedNativeGateway,
           library.getSigner()
         );
-        console.log(amount.toString());
         repay = gatewayContract.repayETH(amount, rateMode, account, {
           value: amount,
         });

@@ -36,7 +36,6 @@ function collateralCompositionCalculator(
       allUserReservesData && allUserReservesData?.[nextAddress]
         ? allUserReservesData?.[nextAddress].usageAsCollateralEnabled
         : undefined;
-    console.log(next.symbol, allUserReservesData?.[nextAddress]);
     if (
       next.daiWeiPriceTotal !== null &&
       next.decimals &&

@@ -175,92 +175,91 @@ const CollateralConfirmWrapper = styled.div`
 `;
 
 function CollateralConfirm({ asset, history, match }) {
-  const [step, setStep] = useState(1);
-  const address = useSelector(state => state.authUser.address);
-  const approveCollateral = async () => {
-     let r = await collateral(address, match.params.assetName);
-     console.log(r);
-     approveCollateralReceipt(r);
-  }
-  const approveCollateralReceipt = async (hash) => {
-    let res = await reserveListner(hash);
-    if(res.status){
-      setStep(step + 1);
+    const [step, setStep] = useState(1);
+    const address = useSelector(state => state.authUser.address);
+    const approveCollateral = async () => {
+        let r = await collateral(address, match.params.assetName);
+        approveCollateralReceipt(r);
     }
-  }
-  return (
-    <CollateralConfirmWrapper>
-      <div className="content-wrapper">
-        <div className="basic-form">
-          <div className="basic-form-header">
-            <div className="basic-form-header-title">
-              {asset.collateral ? `Do not use ${asset.name} as collateral` : `Use ${asset.name} as collateral`}
-            </div>
-            <div className="basic-form-header-content">
-              These are your transaction details. Make sure to check if this is correct before submitting.
-            </div>
-          </div>
-          <div className="basic-form-content">
-            <div className="form-content-view">
-              <div className="content-label">
-                Currency
-              </div>
-              <div className="content-value">
-                <div className="token-amount">
-                  <img src={asset.img} alt="" />
-                  <span>{asset.name}</span>
-                </div>
-              </div>
-            </div>
-            <div className="form-action-view">
-              <div className="form-action-header">
-                <div className={`form-action-step ${step === 2 ? 'success' : step > 0 ? 'active' : ''}`}>
-                  <span>1</span> Usage as collateral
-                </div>
-                <div className={`form-action-step ${step === 2 ? 'success' : step > 1 ? 'active' : ''}`}>
-                  <span>2</span> Finished
-                </div>
-              </div>
-              {step === 1 && (
-                <div className="form-action-body">
-                  <div className="form-action-body-left">
-                    <div className="title">
-                      Usage as collateral
+    const approveCollateralReceipt = async (hash) => {
+        let res = await reserveListner(hash);
+        if (res.status) {
+            setStep(step + 1);
+        }
+    }
+    return (
+        <CollateralConfirmWrapper>
+            <div className="content-wrapper">
+                <div className="basic-form">
+                    <div className="basic-form-header">
+                        <div className="basic-form-header-title">
+                            {asset.collateral ? `Do not use ${asset.name} as collateral` : `Use ${asset.name} as collateral`}
+                        </div>
+                        <div className="basic-form-header-content">
+                            These are your transaction details. Make sure to check if this is correct before submitting.
+                        </div>
                     </div>
-                    <div className="desc">
-                      {asset.collateral ? `Please submit not to use ${asset.name} as collateral` : `Please submit to use ${asset.name} as collateral`}
+                    <div className="basic-form-content">
+                        <div className="form-content-view">
+                            <div className="content-label">
+                                Currency
+                            </div>
+                            <div className="content-value">
+                                <div className="token-amount">
+                                    <img src={asset.img} alt="" />
+                                    <span>{asset.name}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="form-action-view">
+                            <div className="form-action-header">
+                                <div className={`form-action-step ${step === 2 ? 'success' : step > 0 ? 'active' : ''}`}>
+                                    <span>1</span> Usage as collateral
+                                </div>
+                                <div className={`form-action-step ${step === 2 ? 'success' : step > 1 ? 'active' : ''}`}>
+                                    <span>2</span> Finished
+                                </div>
+                            </div>
+                            {step === 1 && (
+                                <div className="form-action-body">
+                                    <div className="form-action-body-left">
+                                        <div className="title">
+                                            Usage as collateral
+                                        </div>
+                                        <div className="desc">
+                                            {asset.collateral ? `Please submit not to use ${asset.name} as collateral` : `Please submit to use ${asset.name} as collateral`}
+                                        </div>
+                                    </div>
+                                    <div className="form-action-body-right">
+                                        <Button variant="secondary" onClick={() => {
+                                            approveCollateral();
+                                        }}>Submit</Button>
+                                    </div>
+                                </div>
+                            )}
+                            {step === 2 && (
+                                <div className="form-action-body">
+                                    <div className="form-action-body-left">
+                                        <div className="title green">
+                                            Success!
+                                        </div>
+                                    </div>
+                                    <div className="form-action-body-right">
+                                        <Button variant="secondary" onClick={() => history.push('/dashboard')}>Dashboard</Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                  </div>
-                  <div className="form-action-body-right">
-                    <Button variant="secondary" onClick={() => {
-                      approveCollateral();
-                    }}>Submit</Button>
-                  </div>
+                    {step !== 2 && (
+                        <div className="basic-form-footer">
+                            <Button variant="outline" onClick={() => history.goBack()}>Go back</Button>
+                        </div>
+                    )}
                 </div>
-              )}
-              {step === 2 && (
-                <div className="form-action-body">
-                  <div className="form-action-body-left">
-                    <div className="title green">
-                      Success!
-                    </div>
-                  </div>
-                  <div className="form-action-body-right">
-                    <Button variant="secondary" onClick={() => history.push('/dashboard')}>Dashboard</Button>
-                  </div>
-                </div>
-              )}
             </div>
-          </div>
-          {step !== 2 && (
-            <div className="basic-form-footer">
-              <Button variant="outline" onClick={() => history.goBack()}>Go back</Button>
-            </div>
-          )}
-        </div>
-      </div>
-    </CollateralConfirmWrapper>
-  );
+        </CollateralConfirmWrapper>
+    );
 }
 
 export default withRouter(CollateralConfirm);
