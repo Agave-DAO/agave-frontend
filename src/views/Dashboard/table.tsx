@@ -4,7 +4,7 @@ import { BigNumber } from "ethers";
 import React from "react";
 import { isMobile, isDesktop } from "react-device-detect";
 import { Link, useHistory } from "react-router-dom";
-import { CellProps, Column, Renderer } from "react-table";
+import { CellProps, Column, Renderer, useRowSelect } from "react-table";
 import { AssetData } from ".";
 import ColoredText from "../../components/ColoredText";
 import { useCollateralModeMutation } from "../../mutations/collateralMode";
@@ -164,9 +164,12 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "Borrowed" : "Deposited",
         accessor: row => row.balance,
-        Cell: (({ value }) => <BalanceView balanceBN={value} />) as Renderer<
-          CellProps<AssetData, BigNumber>
-        >,
+        Cell: (({ row }) => (
+          <BalanceView
+            balanceBN={row.original.balance}
+            tokenAddress={row.original.tokenAddress}
+          />
+        )) as Renderer<CellProps<AssetData, BigNumber>>,
       },
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",

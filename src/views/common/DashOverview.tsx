@@ -2,7 +2,7 @@ import { Box, Text, VStack } from "@chakra-ui/layout";
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import InfoWeiBox from "./InfoWeiBox";
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 import { Button } from "@chakra-ui/button";
 
 import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
@@ -51,7 +51,12 @@ export const DashOverviewIntro: React.FC<{
     MIN_SAFE_HEALTH_FACTOR
   );
 
-  const limitAmount = balance && maxAmount?.lt(balance) ? maxAmount : balance;
+  const limitAmount =
+    balance && maxAmount?.lt(balance)
+      ? maxAmount.gt(0)
+        ? maxAmount
+        : constants.Zero
+      : balance;
 
   return (
     <VStack w={{ base: "90%", sm: "75%", md: "60%", lg: "50%" }} spacing="0">

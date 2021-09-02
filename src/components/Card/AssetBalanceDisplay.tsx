@@ -44,7 +44,7 @@ export const AssetBalanceDisplay: React.FC<{
               placement="top-start"
             >
               <Text fontSize="smaller">
-                {bigNumberToString(asset?.balance, 4)} x $
+                {bigNumberToString(asset?.balance, 2, asset?.decimals)} x $
                 {bigNumberToString(asset?.daiWeiPricePer, 2)}
               </Text>
             </Tooltip>
