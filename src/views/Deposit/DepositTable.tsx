@@ -15,11 +15,13 @@ import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { isMobile } from "react-device-detect";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
   const balance = useUserAssetBalance(tokenAddress);
-  const balanceNumber = Number(bigNumberToString(balance.data));
+  const decimals = useDecimalCountForToken(tokenAddress).data;
+  const balanceNumber = Number(bigNumberToString(balance.data, 4, decimals));
   const balanceUSD = balanceNumber
     ? (Number(price.data) * balanceNumber).toFixed(2)
     : "-";
