@@ -53,7 +53,7 @@ export const DashOverviewIntro: React.FC<{
 
   const limitAmount =
     balance && maxAmount?.lt(balance)
-      ? maxAmount.gt(0)
+      ? maxAmount.gt(constants.Zero)
         ? maxAmount
         : constants.Zero
       : balance;
