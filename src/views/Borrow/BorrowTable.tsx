@@ -77,7 +77,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
         })
       ) ?? [];
     return assets.map(asset => {
-      return asset.symbol === "XDAI"
+      return asset.symbol === "WXDAI"
         ? {
             ...asset,
             symbol: "XDAI",

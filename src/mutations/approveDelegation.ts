@@ -1,18 +1,17 @@
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
-import { Erc20abi__factory } from "../contracts";
+import { VariableDebtToken__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
-import { constants } from "ethers";
 import { useUserAssetAllowance } from "../queries/userAssets";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
 
-export interface UseApprovalMutationProps {
+export interface UseApproveDelegationMutationProps {
   asset: string | undefined;
   spender: string | undefined;
   amount: BigNumber | undefined;
 }
 
-export interface UseApprovalMutationDto {
+export interface UseApproveDelegationMutationDto {
   approvalMutation: UseMutationResult<
     BigNumber | undefined,
     unknown,
@@ -25,11 +24,11 @@ export interface UseApprovalMutationDto {
   ];
 }
 
-export const useApprovalMutation = ({
+export const useApproveDelegationMutation = ({
   asset,
   spender,
   amount,
-}: UseApprovalMutationProps): UseApprovalMutationDto => {
+}: UseApproveDelegationMutationProps): UseApproveDelegationMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
   const approvedQueryKey = useUserAssetAllowance.buildKey(
@@ -38,7 +37,6 @@ export const useApprovalMutation = ({
     asset,
     spender
   );
-
   const approvalMutationKey = [...approvedQueryKey, amount] as const;
   const approvalMutation = useMutation(
     approvalMutationKey,
@@ -49,29 +47,18 @@ export const useApprovalMutation = ({
       if (!asset || !spender || !amount) {
         return undefined;
       }
-      const tokenContract = Erc20abi__factory.connect(
+      const tokenContract = VariableDebtToken__factory.connect(
         asset,
         library.getSigner()
       );
-      const priorAllowance = await tokenContract.allowance(account, spender);
+      console.log(asset, spender, amount, tokenContract);
+      const priorAllowance = await tokenContract.borrowAllowance(
+        account,
+        spender
+      );
+      console.log(asset, spender, amount, priorAllowance);
       if (priorAllowance.lt(amount)) {
-        if (!priorAllowance.isZero()) {
-          const approvalReset = tokenContract.approve(spender, constants.Zero);
-          const approvalResetConfirmation = await usingProgressNotification(
-            "Awaiting approval reset",
-            "Some ERC20-like tokens require setting your allowance to 0 before changing it. Please sign the transaction resetting approval to 0.",
-            "warning",
-            approvalReset
-          );
-          await usingProgressNotification(
-            "Awaiting approval reset confirmation",
-            "Please wait while the blockchain processes your transaction",
-            "info",
-            approvalResetConfirmation.wait()
-          );
-        }
-
-        const approval = tokenContract.approve(spender, amount);
+        const approval = tokenContract.approveDelegation(spender, amount);
         const approvalConfirmation = await usingProgressNotification(
           "Awaiting spend approval",
           "Please sign the transaction for ERC20 approval.",
