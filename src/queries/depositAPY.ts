@@ -1,20 +1,21 @@
 import { FixedNumber } from "@ethersproject/bignumber";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { ReserveOrNativeTokenDefinition } from "./allReserveTokens";
 import { useProtocolReserveData } from "./protocolReserveData";
 
 export const useDepositAPY = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
-  [_p1: "asset", assetAddress: string | undefined, _p2: "depositAPY"],
-  [assetAddress: string]
+  [_p1: "asset", asset: ReserveOrNativeTokenDefinition | undefined, _p2: "depositAPY"],
+  [asset: ReserveOrNativeTokenDefinition]
 >(
-  async (params, assetAddress) => {
+  async (params, asset) => {
     const { liquidityRate } = await useProtocolReserveData.fetchQueryDefined(
       params,
-      assetAddress
+      asset
     );
     return liquidityRate;
   },
-  assetAddress => ["asset", assetAddress, "depositAPY"],
+  asset => ["asset", asset, "depositAPY"],
   () => undefined,
   {
     staleTime: 5 * 1000,
@@ -24,15 +25,15 @@ export const useDepositAPY = buildQueryHookWhenParamsDefinedChainAddrs<
 
 export const useVariableBorrowAPR = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
-  [_p1: "asset", assetAddress: string | undefined, _p2: "variableBorrowAPR"],
-  [assetAddress: string]
+  [_p1: "asset", asset: ReserveOrNativeTokenDefinition | undefined, _p2: "variableBorrowAPR"],
+  [asset: ReserveOrNativeTokenDefinition]
 >(
-  async (params, assetAddress) => {
+  async (params, asset) => {
     const { variableBorrowRate } =
-      await useProtocolReserveData.fetchQueryDefined(params, assetAddress);
+      await useProtocolReserveData.fetchQueryDefined(params, asset);
     return variableBorrowRate;
   },
-  assetAddress => ["asset", assetAddress, "variableBorrowAPR"],
+  asset => ["asset", asset, "variableBorrowAPR"],
   () => undefined,
   {
     staleTime: 5 * 1000,
@@ -42,17 +43,17 @@ export const useVariableBorrowAPR = buildQueryHookWhenParamsDefinedChainAddrs<
 
 export const useStableBorrowAPR = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
-  [_p1: "asset", assetAddress: string | undefined, _p2: "stableBorrowAPR"],
-  [assetAddress: string]
+  [_p1: "asset", asset: ReserveOrNativeTokenDefinition | undefined, _p2: "stableBorrowAPR"],
+  [asset: ReserveOrNativeTokenDefinition]
 >(
-  async (params, assetAddress) => {
+  async (params, asset) => {
     const { stableBorrowRate } = await useProtocolReserveData.fetchQueryDefined(
       params,
-      assetAddress
+      asset
     );
     return stableBorrowRate;
   },
-  assetAddress => ["asset", assetAddress, "stableBorrowAPR"],
+  asset => ["asset", asset, "stableBorrowAPR"],
   () => undefined,
   {
     staleTime: 5 * 1000,

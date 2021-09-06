@@ -27,6 +27,11 @@ import {
   TableRenderer,
   MobileTableRenderer,
 } from "../../utils/htmlTable";
+import {
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
+  TokenDefinition,
+} from "../../queries/allReserveTokens";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -63,12 +68,12 @@ export const MarketsBanner: React.FC<{}> = () => {
 
 export interface AssetRecord {
   symbol: string;
-  tokenAddress: string;
+  tokenAddress: string | NATIVE_TOKEN;
   aTokenAddress: string;
 }
 
-const PriceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
-  const price = useAssetPriceInDai(tokenAddress);
+const PriceView: React.FC<{ asset: AssetRecord }> = ({ asset }) => {
+  const price = useAssetPriceInDai(asset);
 
   return React.useMemo(() => {
     return (
@@ -79,10 +84,8 @@ const PriceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   }, [price.data]);
 };
 
-const MarketSizeView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
-}) => {
-  const marketSize = useMarketSizeInDai(tokenAddress);
+const MarketSizeView: React.FC<{ asset: AssetRecord }> = ({ asset }) => {
+  const marketSize = useMarketSizeInDai(asset);
   const marketSizeInDai = React.useMemo(
     () => marketSize.data?.round(2).toUnsafeFloat().toLocaleString() ?? null,
     [marketSize.data]
@@ -97,11 +100,8 @@ const MarketSizeView: React.FC<{ tokenAddress: string }> = ({
   }, [marketSizeInDai]);
 };
 
-const TotalBorrowedView: React.FC<{
-  assetSymbol: string;
-  tokenAddress: string;
-}> = ({ tokenAddress }) => {
-  const totalBorrowed = useTotalBorrowedForAsset(tokenAddress);
+const TotalBorrowedView: React.FC<TokenDefinition> = token => {
+  const totalBorrowed = useTotalBorrowedForAsset(token);
 
   return React.useMemo(() => {
     const data = totalBorrowed.data;
@@ -131,10 +131,10 @@ const TotalBorrowedView: React.FC<{
   }, [totalBorrowed.data]);
 };
 
-const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
+const DepositAPYView: React.FC<{ token: ReserveOrNativeTokenDefinition }> = ({
+  token,
 }) => {
-  const query = useDepositAPY(tokenAddress);
+  const query = useDepositAPY(token);
   return React.useMemo(() => {
     if (query.data === undefined) {
       return <>-</>;
@@ -144,10 +144,10 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
   }, [query.data]);
 };
 
-const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
+const VariableAPRView: React.FC<{ token: ReserveOrNativeTokenDefinition }> = ({
+  token,
 }) => {
-  const query = useVariableBorrowAPR(tokenAddress);
+  const query = useVariableBorrowAPR(token);
   return React.useMemo(() => {
     if (query.data === undefined) {
       return <>-</>;
@@ -161,10 +161,10 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
   }, [query.data]);
 };
 
-const StableAPRView: React.FC<{ tokenAddress: string }> = ({
-  tokenAddress,
+const StableAPRView: React.FC<{ token: ReserveOrNativeTokenDefinition }> = ({
+  token,
 }) => {
-  const query = useStableBorrowAPR(tokenAddress);
+  const query = useStableBorrowAPR(token);
   return React.useMemo(() => {
     if (query.data === undefined) {
       return <>-</>;
@@ -207,7 +207,7 @@ const AssetTable: React.FC<{
     {
       id: "symbol",
       Header: "Asset",
-      accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+      accessor: row => row.symbol, // We use row.original instead of just row here so we can sort by symbol
       Cell: (({ value, row }) => (
         <Flex alignItems={"center"}>
           <Box>
@@ -223,10 +223,10 @@ const AssetTable: React.FC<{
     {
       id: "price",
       Header: "Price",
-      accessor: record => record.tokenAddress,
-      Cell: (({ value }) => (
+      accessor: row => row.tokenAddress,
+      Cell: (({ row }) => (
         <Center>
-          <PriceView tokenAddress={value} />
+          <PriceView asset={row.original} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
@@ -234,10 +234,10 @@ const AssetTable: React.FC<{
     {
       id: "marketSize",
       Header: "Market Size",
-      accessor: record => record.tokenAddress,
-      Cell: (({ value }) => (
+      accessor: row => row.tokenAddress,
+      Cell: (({ row }) => (
         <Center>
-          <MarketSizeView tokenAddress={value} />
+          <MarketSizeView asset={row.original} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
@@ -248,7 +248,7 @@ const AssetTable: React.FC<{
       accessor: row => row,
       Cell: (({ value }) => (
         <TotalBorrowedView
-          assetSymbol={value.symbol}
+          symbol={value.symbol}
           tokenAddress={value.tokenAddress}
         />
       )) as Renderer<CellProps<AssetRecord, AssetRecord>>,
@@ -258,9 +258,9 @@ const AssetTable: React.FC<{
       id: "depositAPY",
       Header: "Deposit APY",
       accessor: row => row.tokenAddress,
-      Cell: (({ value }) => (
+      Cell: (({ row }) => (
         <Center>
-          <DepositAPYView tokenAddress={value} />
+          <DepositAPYView token={row.original} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
@@ -269,9 +269,9 @@ const AssetTable: React.FC<{
       id: "variableBorrowAPR",
       Header: "Variable Borrow APR",
       accessor: row => row.tokenAddress,
-      Cell: (({ value }) => (
+      Cell: (({ row }) => (
         <Center>
-          <VariableAPRView tokenAddress={value} />
+          <VariableAPRView token={row.original} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
@@ -280,9 +280,9 @@ const AssetTable: React.FC<{
       id: "stableBorrowAPR",
       Header: "Stable Borrow APR",
       accessor: row => row.tokenAddress,
-      Cell: (({ value }) => (
+      Cell: (({ row }) => (
         <Center>
-          <StableAPRView tokenAddress={value} />
+          <StableAPRView token={row.original} />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,

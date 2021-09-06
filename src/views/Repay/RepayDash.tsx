@@ -14,7 +14,6 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import {
   isReserveTokenDefinition,
   NativeTokenDefinition,
-  NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
   ReserveTokenDefinition,
 } from "../../queries/allReserveTokens";

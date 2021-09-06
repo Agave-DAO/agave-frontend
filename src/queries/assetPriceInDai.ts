@@ -1,11 +1,17 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { parseUnits } from "@ethersproject/units";
 import { constants } from "ethers";
-import React from "react";
 import { AaveOracle__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
-import { useAllReserveTokens } from "./allReserveTokens";
-import { useWrappedNativeAddress } from "./wrappedNativeAddress";
+import {
+  isReserveTokenDefinition,
+  ReserveOrNativeTokenDefinition,
+  useAllReserveTokens,
+} from "./allReserveTokens";
+import {
+  useWrappedNativeAddress,
+  useWrappedNativeDefinition,
+} from "./wrappedNativeAddress";
 
 type Tail<T extends [unknown, ...unknown[]]> = T extends [unknown, ...infer X]
   ? [...X]
@@ -13,16 +19,24 @@ type Tail<T extends [unknown, ...unknown[]]> = T extends [unknown, ...infer X]
 
 export const useAssetPriceInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber | null,
-  [_p1: "prices", _p2: "dai", _p3: "asset", assetAddress: string | undefined],
-  [assetAddress: string]
+  [
+    _p1: "prices",
+    _p2: "dai",
+    _p3: "asset",
+    assetAddress: ReserveOrNativeTokenDefinition | undefined
+  ],
+  [assetAddress: ReserveOrNativeTokenDefinition]
 >(
   async (params, assetAddress) => {
+    const tokenAddress = isReserveTokenDefinition(assetAddress)
+      ? assetAddress.tokenAddress
+      : useWrappedNativeAddress().data ?? constants.AddressZero;
     const contract = AaveOracle__factory.connect(
       params.chainAddrs.agaveOracle,
       params.library
     );
     try {
-      return await contract.getAssetPrice(assetAddress); // price in dai per token
+      return await contract.getAssetPrice(tokenAddress); // price in dai per token
     } catch (e) {
       return null;
     }
@@ -36,7 +50,7 @@ export const useAssetPriceInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber | null,
   // A trick to compensate for buildKey including chainId and account
   Tail<Tail<ReturnType<typeof useAssetPriceInDaiWei.buildKey>>>,
-  [assetAddress: string],
+  [assetAddress: ReserveOrNativeTokenDefinition],
   FixedNumber | null
 >(
   useAssetPriceInDaiWei.invokeWhenDefined,
@@ -51,7 +65,7 @@ export const useAssetPriceInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   },
   () => undefined,
   undefined,
-  res => res ? FixedNumber.fromValue(res, 18) : null
+  res => (res ? FixedNumber.fromValue(res, 18) : null)
 );
 
 export const useAssetPricesInDaiWei = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -101,15 +115,15 @@ export const useAllAssetPricesInDaiWei =
         price: entry,
       }));
       // Update cached values for all single-element entries
-      for (const { tokenAddress, price } of items) {
+      for (const reserve of items) {
         // TODO: Make set-cache and clear-cache utilities on QueryHook for doing this with `params` with strong types
         //       When making said utilities, apply options to the setQueryData call automatically
         const assetKey = useAssetPriceInDaiWei.buildKey(
           params.chainId,
           params.account,
-          tokenAddress
+          reserve
         );
-        params.queryClient.setQueryData(assetKey, price);
+        params.queryClient.setQueryData(assetKey, prices);
       }
       return items;
     },
@@ -140,30 +154,32 @@ export const useAssetPriceInNative = buildQueryHookWhenParamsDefinedChainAddrs<
     _p1: "prices",
     _p2: "native",
     _p3: "asset",
-    assetAddress: string | undefined
+    assetAddress: ReserveOrNativeTokenDefinition | undefined
   ],
-  [assetAddress: string],
+  [assetAddress: ReserveOrNativeTokenDefinition],
   FixedNumber | null
 >(
   async (params, assetAddress) => {
     const [assetPrice, wethPrice] = await Promise.all([
       useAssetPriceInDai.fetchQueryDefined(params, assetAddress),
-      useWrappedNativeAddress
+      useWrappedNativeDefinition
         .fetchQueryDefined(params)
-        .then(nativeAddr =>
-          useAssetPriceInDai.fetchQueryDefined(params, nativeAddr)
+        .then(nativeRes =>
+          useAssetPriceInDai.fetchQueryDefined(params, nativeRes)
         ),
     ]);
-    return assetPrice !== null ? calculateRelativeTokenPrice(assetPrice, wethPrice!) : null;
+    return assetPrice !== null
+      ? calculateRelativeTokenPrice(assetPrice, wethPrice!)
+      : null;
   },
   assetAddress => ["prices", "native", "asset", assetAddress],
   () => undefined,
   undefined
 );
 
-// An example of how older hook composition worked:
+/* An example of how older hook composition worked:
 export function _useAssetPriceInNativeCompositeHook(
-  assetAddress: string | undefined
+  assetAddress: ReserveOrNativeTokenDefinition | undefined
 ):
   | { data: undefined; error: unknown }
   | { data: FixedNumber; error: undefined }
@@ -194,3 +210,4 @@ export function _useAssetPriceInNativeCompositeHook(
     }
   }, [assetPrice, wethPrice, eNativeAddress, eDaiPrice, eNativePrice]);
 }
+*/

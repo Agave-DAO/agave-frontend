@@ -1,6 +1,6 @@
 import React from "react";
 import { bigNumberToString } from "../../utils/fixedPoint";
-import { CellProps, Column, Renderer } from "react-table";
+import { CellProps, Column, Renderer, useRowSelect } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import {
@@ -16,14 +16,31 @@ import { TokenIcon } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { isMobile } from "react-device-detect";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
+import {
+  isReserveTokenDefinition,
+  NATIVE_TOKEN,
+  ReserveOrNativeTokenDefinition,
+  selectReserveTokenAddress,
+  useTokenDefinitionByAddress,
+  useTokenDefinitionBySymbol,
+} from "../../queries/allReserveTokens";
+import { AssetRecord } from "../Markets";
+import { constants } from "ethers";
+import { type } from "os";
+import { AssetData } from "../Dashboard";
 
-const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
-  const price = useAssetPriceInDai(tokenAddress);
-  const balance = useUserAssetBalance(tokenAddress);
-  const decimals = useDecimalCountForToken(tokenAddress).data;
-  const balanceNumber = Number(bigNumberToString(balance.data, 4, decimals));
+const BalanceView: React.FC<{ asset: AssetRecord }> = ({ asset }) => {
+  const tokenReserve = useTokenDefinitionBySymbol(asset.symbol);
+  const balance = useUserAssetBalance(tokenReserve.token).data;
+  const price = useAssetPriceInDai(
+    isReserveTokenDefinition(tokenReserve.token)
+      ? tokenReserve.token
+      : tokenReserve.wrappedNativeToken
+  ).data;
+  const decimals = useDecimalCountForToken(tokenReserve.token).data;
+  const balanceNumber = Number(bigNumberToString(balance, 4, decimals));
   const balanceUSD = balanceNumber
-    ? (Number(price.data) * balanceNumber).toFixed(2)
+    ? (Number(price) * balanceNumber).toFixed(2)
     : "-";
   return React.useMemo(() => {
     return (
@@ -37,17 +54,12 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
         </Box>
       </Flex>
     );
-  }, [balanceNumber, balanceUSD, isMobile]);
+  }, [balanceNumber, balanceUSD]);
 };
 
 export const DepositTable: React.FC<{ activeType: string }> = ({
   activeType,
 }) => {
-  interface AssetRecord {
-    symbol: string;
-    tokenAddress: string;
-    aTokenAddress: string;
-  }
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
@@ -65,6 +77,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
         ? {
             ...asset,
             symbol: "XDAI",
+            tokenAddress: typeof NATIVE_TOKEN,
           }
         : asset;
     });
@@ -91,13 +104,13 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
               <Text>{value}</Text>
             </Box>
           </Flex>
-        )) as Renderer<CellProps<AssetRecord, string>>,
+        )) as Renderer<CellProps<AssetRecord>>,
       },
       {
         Header: isMobile ? "Your wallet" : "Your wallet balance",
         accessor: row => row.tokenAddress,
-        Cell: (({ value }) => <BalanceView tokenAddress={value} />) as Renderer<
-          CellProps<AssetRecord, string>
+        Cell: (({ row }) => <BalanceView asset={row.original} />) as Renderer<
+          CellProps<AssetRecord>
         >,
       },
       {
@@ -105,7 +118,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
         accessor: row => row.tokenAddress,
         Cell: (({ value }) => (
           <DepositAPYView tokenAddress={value} />
-        )) as Renderer<CellProps<AssetRecord, string>>,
+        )) as Renderer<CellProps<AssetData>>,
       },
     ],
     [isMobile]

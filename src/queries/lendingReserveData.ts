@@ -1,12 +1,15 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
+import { constants } from "ethers";
 import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
 import { FixedFromRay } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import {
+  NATIVE_TOKEN,
   ReserveTokenDefinition,
   useAllReserveTokens,
 } from "./allReserveTokens";
+import { useWrappedNativeAddress } from "./wrappedNativeAddress";
 
 export interface LendingReserveData {
   //stores the reserve configuration
@@ -83,17 +86,21 @@ export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
   [
     _p1: "AgaveLendingPool",
     _p2: "reserveData",
-    assetAddress: string | undefined
+    assetAddress: string | NATIVE_TOKEN | undefined
   ],
-  [assetAddress: string]
+  [assetAddress: string | NATIVE_TOKEN]
 >(
   async (params, assetAddress) => {
     const contract = AgaveLendingABI__factory.connect(
       params.chainAddrs.lendingPool,
       params.library
     );
+    const reserveAddress =
+      assetAddress === NATIVE_TOKEN
+        ? useWrappedNativeAddress().data ?? constants.AddressZero
+        : assetAddress;
     return await contract
-      .getReserveData(assetAddress)
+      .getReserveData(reserveAddress)
       .then(reserveData => reserveDataFromWeb3Result(reserveData));
   },
   assetAddress => ["AgaveLendingPool", "reserveData", assetAddress],
@@ -116,7 +123,6 @@ export const useAllReserveTokensWithData =
   >(
     async params => {
       const allReserves = await useAllReserveTokens.fetchQueryDefined(params);
-
       const reservesWithData = await Promise.all(
         allReserves.map(reserve =>
           useLendingReserveData

@@ -112,9 +112,7 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
   tokenBalance,
 }) => {
   const { account: userAccountAddress } = useAppWeb3();
-  const { data: reserveProtocolData } = useProtocolReserveData(
-    reserve?.tokenAddress
-  );
+  const { data: reserveProtocolData } = useProtocolReserveData(reserve);
   const { data: reserveConfiguration } = useProtocolReserveConfiguration(
     reserve?.tokenAddress
   );
@@ -122,10 +120,8 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
     userAccountAddress ?? undefined
   );
   const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
-  const { data: utilizationData } = useAssetUtilizationRate(
-    reserve?.tokenAddress
-  );
-  const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
+  const { data: utilizationData } = useAssetUtilizationRate(reserve);
+  const { data: assetPriceInDai } = useAssetPriceInDai(reserve);
   const utilizationRate = utilizationData?.utilizationRate;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
   const isCollateralized = reserveConfiguration?.usageAsCollateralEnabled;

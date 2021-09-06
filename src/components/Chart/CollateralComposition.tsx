@@ -60,7 +60,7 @@ export const CollateralComposition: React.FC = () => {
             role="button"
             w="100%"
             templateColumns={
-              collateralData.filter(x => x != undefined).join("% ") + "%"
+              collateralData.filter(x => typeof x === 'string').join("% ") + "%"
             }
             h="2rem"
             borderRadius="8px"

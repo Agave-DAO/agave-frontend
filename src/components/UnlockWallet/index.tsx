@@ -59,7 +59,7 @@ const PrivacySection = (
         {" "}
         Contact us on
       </Text>
-      <a href="https://discord.gg/bkVwdxSfCn" target="_blank">
+      <a href="https://discord.gg/bkVwdxSfCn" target="_blank" rel="noreferrer">
         <ColoredText>Discord</ColoredText>
       </a>
     </HStack>

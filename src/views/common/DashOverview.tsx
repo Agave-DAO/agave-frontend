@@ -30,7 +30,7 @@ export const DashOverviewIntro: React.FC<{
   setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   balance: BigNumber | undefined;
 }> = ({ asset, mode, onSubmit, amount, setAmount, balance }) => {
-  const { data: decimals } = useDecimalCountForToken(asset.tokenAddress);
+  const { data: decimals } = useDecimalCountForToken(asset);
   const { data: wNative } = useWrappedNativeDefinition();
   const tokenAddress =
     asset.tokenAddress === NATIVE_TOKEN

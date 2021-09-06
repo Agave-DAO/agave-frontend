@@ -11,10 +11,6 @@ import { BigNumber, FixedNumber } from "ethers";
 import { WeiBox } from "../../components/Actions/WeiBox";
 import { fontSizes } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";
-import {
-  bigNumberToString,
-  fixedNumberToPercentage,
-} from "../../utils/fixedPoint";
 import { ColoredText } from "../../components/ColoredText";
 
 const InfoWeiBox: React.FC<

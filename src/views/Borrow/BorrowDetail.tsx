@@ -113,10 +113,10 @@ const InitialComp: React.FC<{
     state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
 
   const { data: reserveProtocolData } = useProtocolReserveData(
-    asset?.tokenAddress
+    asset
   );
   const userAssetMaxAvailable =
-    useAvailableToBorrowAssetWei(account ?? undefined, asset?.tokenAddress)
+    useAvailableToBorrowAssetWei(account ?? undefined, asset)
       .data ?? undefined;
   const liquidityAvailable = reserveProtocolData?.availableLiquidity;
   const maxToBorrow =
@@ -156,7 +156,7 @@ const AmountSelectedComp: React.FC<{
       amount: state.amountToBorrow,
       spender: chainAddresses?.wrappedNativeGateway,
     }),
-    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+    [state, reserveData?.variableDebtTokenAddress, chainAddresses?.wrappedNativeGateway]
   );
   const {
     approvalMutation: { mutateAsync },

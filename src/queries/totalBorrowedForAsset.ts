@@ -1,5 +1,6 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { ReserveOrNativeTokenDefinition } from "./allReserveTokens";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
 import { useProtocolReserveData } from "./protocolReserveData";
@@ -7,8 +8,8 @@ import { useProtocolReserveData } from "./protocolReserveData";
 export const useTotalBorrowedForAsset =
   buildQueryHookWhenParamsDefinedChainAddrs<
     { wei: BigNumber; dai: FixedNumber | null; assetDecimals: number },
-    [_p1: "asset", assetAddress: string | undefined, _p2: "borrowed"],
-    [assetAddress: string]
+    [_p1: "asset", assetAddress: ReserveOrNativeTokenDefinition | undefined, _p2: "borrowed"],
+    [assetAddress: ReserveOrNativeTokenDefinition]
   >(
     async (params, assetAddress) => {
       const [reserveData, assetPriceInDaiWei, assetDecimals] =

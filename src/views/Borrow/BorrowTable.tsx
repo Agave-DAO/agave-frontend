@@ -17,6 +17,7 @@ import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { isMobile } from "react-device-detect";
 import { BorrowAPRView } from "../common/RatesView";
+import { AssetRecord } from "../Markets";
 
 const BorrowAvailability: React.FC<{
   tokenAddress: string;
@@ -54,16 +55,10 @@ const BorrowAvailability: React.FC<{
         </Box>
       </Flex>
     );
-  }, [balanceAsset, balanceNative, isMobile]);
+  }, [balanceAsset, balanceNative]);
 };
 
 export const BorrowTable: React.FC<{ activeType: string }> = () => {
-  interface AssetRecord {
-    symbol: string;
-    tokenAddress: string;
-    aTokenAddress: string;
-  }
-
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
@@ -93,7 +88,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
     () => [
       {
         Header: "Asset",
-        accessor: record => record.symbol, // We use row.original instead of just record here so we can sort by symbol
+        accessor: row => row.symbol, // We use row.original instead of just record here so we can sort by symbol
         Cell: (({ value }) => (
           <Flex
             width="100%"

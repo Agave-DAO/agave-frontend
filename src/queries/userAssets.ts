@@ -167,11 +167,11 @@ export const useUserVariableDebtTokenBalancesDaiWei =
           Promise.all([
             useAssetPriceInDaiWei.fetchQueryDefined(
               params,
-              reserve.tokenAddress
+              reserve
             ),
             useDecimalCountForToken.fetchQueryDefined(
               params,
-              reserve.tokenAddress
+              reserve
             ),
           ]).then(([daiPricePerToken, decimals]) => ({
             ...reserve,
@@ -248,11 +248,11 @@ export const useUserReserveAssetBalancesDaiWei =
           Promise.all([
             useAssetPriceInDaiWei.fetchQueryDefined(
               params,
-              reserve.tokenAddress
+              reserve
             ),
             useDecimalCountForToken.fetchQueryDefined(
               params,
-              reserve.tokenAddress
+              reserve
             ),
           ]).then(([daiPricePerToken, decimals]) => ({
             ...reserve,

@@ -1,21 +1,22 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { ReserveOrNativeTokenDefinition } from "./allReserveTokens";
 import { useProtocolReserveData } from "./protocolReserveData";
 
 export const useAvailableLiquidity =
   buildQueryHookWhenParamsDefinedChainAddrs<
     BigNumber,
-    [_p1: "asset", assetAddress: string | undefined, _p2: "availableLiquidity"],
-    [assetAddress: string]
+    [_p1: "asset", asset: ReserveOrNativeTokenDefinition | undefined, _p2: "availableLiquidity"],
+    [asset: ReserveOrNativeTokenDefinition]
   >(
-    async (params, assetAddress) => {
+    async (params, asset) => {
       const reserveData = await useProtocolReserveData.fetchQueryDefined(
         params,
-        assetAddress
+        asset
       );
       return reserveData.availableLiquidity;
     },
-    assetAddress => ["asset", assetAddress, "availableLiquidity"],
+    asset => ["asset", asset, "availableLiquidity"],
     () => undefined,
     {
       staleTime: 5 * 1000,

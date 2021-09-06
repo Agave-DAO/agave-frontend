@@ -3,6 +3,7 @@ import { AgaveLendingABI, AgaveLendingABI__factory } from "../contracts";
 import { divIfNotZeroUnsafe } from "../utils/fixedPoint";
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { ReserveOrNativeTokenDefinition } from "./allReserveTokens";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken, weiPerToken } from "./decimalsForToken";
 
@@ -86,9 +87,9 @@ export const useAvailableToBorrowAssetWei =
       _p2: "userAccountData",
       accountAddress: string | undefined,
       _p3: "availableToBorrow",
-      assetAddress: string | undefined
+      assetAddress: ReserveOrNativeTokenDefinition | undefined
     ],
-    [accountAddress: string, assetAddress: string]
+    [accountAddress: string, assetAddress: ReserveOrNativeTokenDefinition]
   >(
     async (params, accountAddress, assetAddress) => {
       const [accountData, assetPrice, assetDecimals] = await Promise.all([

@@ -2,7 +2,7 @@ import React from "react";
 import { withRouter, useHistory, useRouteMatch } from "react-router-dom";
 import ReserveInfo from "./ReserveInfo";
 import UserInfo from "./UserInfo";
-import { useAllReserveTokens } from "../../queries/allReserveTokens";
+import { isReserveTokenDefinition, useAllReserveTokens, useTokenDefinitionBySymbol } from "../../queries/allReserveTokens";
 import ColoredText from "../../components/ColoredText";
 import { Button } from "@chakra-ui/button";
 import { Center, Container, Flex } from "@chakra-ui/react";
@@ -26,18 +26,8 @@ const ReserveOverview: React.FC = () => {
 
   const history = useHistory();
   const assetName = match.params.assetName;
-  const allReserves = useAllReserveTokens();
-  const asset = React.useMemo(() => {
-    const aseetSymbol = assetName === "XDAI" ? "WXDAI" : assetName;
-    const asset =
-      assetName === undefined
-        ? undefined
-        : allReserves?.data?.find(
-            asset => asset.symbol.toLowerCase() === aseetSymbol?.toLowerCase()
-          );
-    return asset?.symbol === "WXDAI" ? { ...asset, symbol: "XDAI" } : asset;
-  }, [allReserves, assetName]);
-
+  const asset = useTokenDefinitionBySymbol(assetName)
+  const reserve = isReserveTokenDefinition(asset.token)? asset.token: asset.wrappedNativeToken
   return (
     <Container maxWidth="100%" p="0">
       <React.Fragment>
@@ -67,10 +57,10 @@ const ReserveOverview: React.FC = () => {
         )}
       </React.Fragment>
       <React.Fragment>
-        {asset && (
+        {asset && asset.token && reserve &&(
           <Flex flexDirection={{ base: "column", lg: "row" }}>
-            <ReserveInfo asset={asset} />
-            <UserInfo asset={asset} history={history} />
+            <ReserveInfo asset={reserve} />
+            <UserInfo asset={reserve} history={history} />
           </Flex>
         )}
       </React.Fragment>

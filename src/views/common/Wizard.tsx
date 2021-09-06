@@ -31,7 +31,7 @@ export const WizardOverviewWrapper: React.FC<{
     userAccountAddress ?? undefined
   )?.data?.healthFactor;
 
-  const { data: decimals } = useDecimalCountForToken(asset.tokenAddress);
+  const { data: decimals } = useDecimalCountForToken(asset);
   // TODO: Switch to use `useWrappedNativeDefinition` when PR is in
   const { data: wrappedNativeAddress } = useWrappedNativeAddress();
 

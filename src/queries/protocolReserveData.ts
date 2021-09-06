@@ -6,6 +6,9 @@ import {
 import { PromisedType } from "../utils/promisedType";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
 import { FixedFromRay } from "../utils/fixedPoint";
+import { isReserveTokenDefinition, ReserveOrNativeTokenDefinition } from "./allReserveTokens";
+import { useWrappedNativeAddress } from "./wrappedNativeAddress";
+import { constants } from "ethers";
 
 export interface ProtocolReserveData {
   // ERC20(LendingPoolReserveData.aTokenAddress).balanceOf(reserve.aTokenAddress)
@@ -65,20 +68,21 @@ export const useProtocolReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
   [
     _p1: "AaveProtocolDataProvider",
     _p2: "reserveData",
-    assetAddress: string | undefined
+    asset: ReserveOrNativeTokenDefinition | undefined
   ],
-  [assetAddress: string]
+  [asset: ReserveOrNativeTokenDefinition]
 >(
-  async (params, assetAddress) => {
+  async (params, asset) => {
     const contract = AaveProtocolDataProvider__factory.connect(
       params.chainAddrs.aaveProtocolDataProvider,
       params.library
     );
+    const assetAddress = isReserveTokenDefinition(asset) ? asset.tokenAddress : useWrappedNativeAddress().data  ?? constants.AddressZero;
     return await contract
       .getReserveData(assetAddress)
       .then(reserveData => reserveDataFromWeb3Result(reserveData));
   },
-  assetAddress => ["AaveProtocolDataProvider", "reserveData", assetAddress],
+  asset => ["AaveProtocolDataProvider", "reserveData", asset],
   () => undefined,
   {
     cacheTime: 60 * 15 * 1000,

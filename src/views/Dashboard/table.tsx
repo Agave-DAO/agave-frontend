@@ -1,10 +1,10 @@
 import { Box, Text } from "@chakra-ui/layout";
-import { Button, Flex, Switch, Tooltip, useMediaQuery } from "@chakra-ui/react";
+import { Button, Flex, Switch, Tooltip } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import React from "react";
-import { isMobile, isDesktop } from "react-device-detect";
+import {  isDesktop } from "react-device-detect";
 import { Link, useHistory } from "react-router-dom";
-import { CellProps, Column, Renderer, useRowSelect } from "react-table";
+import { CellProps, Column, Renderer } from "react-table";
 import { AssetData } from ".";
 import ColoredText from "../../components/ColoredText";
 import { useCollateralModeMutation } from "../../mutations/collateralMode";
@@ -136,7 +136,7 @@ export const DashboardTable: React.FC<{
       {
         Header:
           mode === DashboardTableType.Borrow ? "My Borrows" : "My Deposits",
-        accessor: row => row.symbol, // We use row.original instead of just record here so we can sort by symbol
+        accessor: row => row.symbol, // We use row.original instead of just row here so we can sort by symbol
         Cell: (({ value, row }) => (
           <Link
             to={`/reserve-overview/${
@@ -167,7 +167,7 @@ export const DashboardTable: React.FC<{
         Cell: (({ row }) => (
           <BalanceView
             balanceBN={row.original.balance}
-            tokenAddress={row.original.tokenAddress}
+            asset={row.original}
           />
         )) as Renderer<CellProps<AssetData, BigNumber>>,
       },
@@ -297,7 +297,7 @@ export const DashboardTable: React.FC<{
           }}
         />
       ),
-    [mode, isDesktop]
+    [mode]
   );
 
   return (

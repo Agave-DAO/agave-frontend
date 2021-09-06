@@ -1,6 +1,7 @@
 import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { divIfNotZeroUnsafe } from "../utils/fixedPoint";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
+import { ReserveOrNativeTokenDefinition } from "./allReserveTokens";
 import { useProtocolReserveData } from "./protocolReserveData";
 
 export interface AssetUtilizationRateData {
@@ -14,13 +15,13 @@ export interface AssetUtilizationRateData {
 export const useAssetUtilizationRate =
   buildQueryHookWhenParamsDefinedChainAddrs<
     AssetUtilizationRateData,
-    [_p1: "asset", assetAddress: string | undefined, _p2: "utilizationRate"],
-    [assetAddress: string]
+    [_p1: "asset", asset: ReserveOrNativeTokenDefinition | undefined, _p2: "utilizationRate"],
+    [asset: ReserveOrNativeTokenDefinition]
   >(
-    async (params, assetAddress) => {
+    async (params, asset) => {
       const reserveData = await useProtocolReserveData.fetchQueryDefined(
         params,
-        assetAddress
+        asset
       );
       const totalDebt = reserveData.totalStableDebt.add(
         reserveData.totalVariableDebt
@@ -36,7 +37,7 @@ export const useAssetUtilizationRate =
         ),
       };
     },
-    assetAddress => ["asset", assetAddress, "utilizationRate"],
+    asset => ["asset", asset, "utilizationRate"],
     () => undefined,
     {
       staleTime: 5 * 1000,

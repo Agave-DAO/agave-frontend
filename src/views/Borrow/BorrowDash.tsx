@@ -12,7 +12,6 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import {
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
-  ReserveTokenDefinition,
 } from "../../queries/allReserveTokens";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
@@ -53,19 +52,15 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
       ),
     [reserves, asset?.tokenAddress]
   );
-  const { data: reserveProtocolData } = useProtocolReserveData(
-    reserve?.tokenAddress
-  );
+  const { data: reserveProtocolData } = useProtocolReserveData(reserve);
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
   );
   // const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
   // const { data: tokenBalance } = useUserAssetBalance(token.tokenAddress);
   // const { data: aTokenBalance } = useUserAssetBalance(reserve?.aTokenAddress);
-  const { data: utilizationData } = useAssetUtilizationRate(
-    asset?.tokenAddress
-  );
-  const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
+  const { data: utilizationData } = useAssetUtilizationRate(asset);
+  const { data: assetPriceInDai } = useAssetPriceInDai(reserve);
   const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
 
   const utilizationRate = utilizationData?.utilizationRate;

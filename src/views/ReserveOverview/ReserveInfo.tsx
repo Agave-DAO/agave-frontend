@@ -12,7 +12,11 @@ import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { useTotalBorrowedForAsset } from "../../queries/totalBorrowedForAsset";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import {
+  isReserveTokenDefinition,
+  ReserveOrNativeTokenDefinition,
+  ReserveTokenDefinition,
+} from "../../queries/allReserveTokens";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
@@ -32,22 +36,26 @@ import {
 import { round2Fixed } from "../../utils/helpers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon } from "../../utils/icons";
-import { BigNumber } from "ethers";
+import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
 
-const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
+const ReserveInfo: React.FC<{ asset: ReserveOrNativeTokenDefinition }> = ({
   asset,
 }) => {
   // ** Query data
-  const reserveData = useProtocolReserveConfiguration(asset.tokenAddress)?.data;
-  const reserveProtocolData = useProtocolReserveData(asset?.tokenAddress)?.data;
-  const assetPrice = useAssetPriceInDai(asset.tokenAddress)?.data;
-  const totalBorrowedForAsset = useTotalBorrowedForAsset(
-    asset.tokenAddress
-  )?.data;
-  const assetUtilization = useAssetUtilizationRate(asset.tokenAddress)?.data;
-  const depositAPR = useDepositAPY(asset.tokenAddress)?.data?._value;
-  const stableBorrowAPR = useStableBorrowAPR(asset.tokenAddress)?.data?._value;
-  const variableAPR = useVariableBorrowAPR(asset.tokenAddress)?.data?._value;
+  const wnative = useWrappedNativeAddress().data
+  const reserveData = useProtocolReserveConfiguration(
+    isReserveTokenDefinition(asset)
+      ? asset.tokenAddress
+      : wnative
+  ).data;
+
+  const reserveProtocolData = useProtocolReserveData(asset)?.data;
+  const assetPrice = useAssetPriceInDai(asset)?.data;
+  const totalBorrowedForAsset = useTotalBorrowedForAsset(asset)?.data;
+  const assetUtilization = useAssetUtilizationRate(asset)?.data;
+  const depositAPR = useDepositAPY(asset)?.data?._value;
+  const stableBorrowAPR = useStableBorrowAPR(asset)?.data?._value;
+  const variableAPR = useVariableBorrowAPR(asset)?.data?._value;
 
   // ** Check data for undefined and convert to usable front end data
   // const decimals = reserveData ? reserveData?.decimals.toNumber() : 18;
@@ -132,6 +140,8 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
     : "-";
   const collateral = reserveData?.usageAsCollateralEnabled ? "Yes" : "No";
   const stable = reserveData?.stableBorrowRateEnabled ? "Yes" : "No";
+
+  const assetSymbol = asset&& asset.symbol ? asset.symbol : "";
 
   // ** Media Quieries
   const [isLargeTab] = useMediaQuery("(max-width: 1200px)");
@@ -222,7 +232,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                   </Text>
                   <Box>
                     <Text fontSize="lg" color="white" align="right">
-                      {liqudityNative} {asset.symbol}
+                      {liqudityNative} {assetSymbol}
                     </Text>
                   </Box>
                 </Flex>
@@ -236,7 +246,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                   >
                     <CircularProgressLabel>
                       <Center>
-                        <TokenIcon symbol={asset.symbol} height="100%" />
+                        <TokenIcon symbol={assetSymbol} height="100%" />
                       </Center>
                     </CircularProgressLabel>
                   </CircularProgress>
@@ -258,7 +268,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                   </Text>
                   <Box>
                     <Text fontSize="lg" color="white" align="left">
-                      {totalBorrowedNative} {asset.symbol}
+                      {totalBorrowedNative} {assetSymbol}
                     </Text>
                   </Box>
                 </Flex>

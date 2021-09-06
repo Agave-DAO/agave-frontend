@@ -5,11 +5,9 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { WithdrawDash } from "./WithdrawDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
-  isNativeTokenDefinition,
   isReserveTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
-  ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
 import { Box, Center, Text } from "@chakra-ui/react";
@@ -152,7 +150,7 @@ const AmountSelectedComp: React.FC<{
         ? chainAddresses?.lendingPool
         : chainAddresses?.wrappedNativeGateway,
     }),
-    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+    [state, reserve, chainAddresses]
   );
   const {
     approvalMutation: { mutateAsync },
@@ -210,7 +208,7 @@ const WithdrawTxComp: React.FC<{
         ? chainAddresses?.lendingPool
         : chainAddresses?.wrappedNativeGateway,
     }),
-    [state, account]
+    [state, account, chainAddresses]
   );
   const {
     withdrawMutation: { mutateAsync },
@@ -339,15 +337,15 @@ const WithdrawDetailForAsset: React.FC<{
 };
 
 export const WithdrawDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const {
     allReserves,
     token: asset,
-    wrappedNativeToken,
   } = useTokenDefinitionBySymbol(assetName);
   if (!asset) {
     return (

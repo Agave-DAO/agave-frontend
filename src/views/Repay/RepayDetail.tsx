@@ -5,10 +5,8 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { RepayDash } from "./RepayDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
-  isReserveTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
-  ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
 import { Box, Center } from "@chakra-ui/react";
@@ -305,9 +303,10 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
   };
 
 export const RepayDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
