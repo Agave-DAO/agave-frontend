@@ -33,7 +33,7 @@ export const Dashboard: React.FC<{}> = () => {
       borrows?.data?.filter(asset => !asset.balance.isZero()) ?? [];
 
     return assets.map(asset => {
-      return asset.symbol === "XDAI"
+      return asset.symbol === "WXDAI"
         ? {
             ...asset,
             symbol: "XDAI",

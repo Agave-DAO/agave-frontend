@@ -8,7 +8,6 @@ import {
   isReserveTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
-  ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
 import { Box, Center, Text } from "@chakra-ui/react";
@@ -24,8 +23,17 @@ import {
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useAvailableToBorrowAssetWei } from "../../queries/userAccountData";
-import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import {
+  useWrappedNativeAddress,
+  useWrappedNativeDefinition,
+} from "../../queries/wrappedNativeAddress";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
+import { useChainAddresses } from "../../utils/chainAddresses";
+import {
+  useApproveDelegationMutation,
+  UseApproveDelegationMutationProps,
+} from "../../mutations/approveDelegation";
+import { useLendingReserveData } from "../../queries/lendingReserveData";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -45,6 +53,7 @@ interface BorrowedTXState extends BorrowTXState {
 
 type BorrowState = OneTaggedPropertyOf<{
   init: InitialState;
+  amountSelected: AmountSelectedState;
   borrowTx: BorrowTXState;
   borrowedTx: BorrowedTXState;
 }>;
@@ -62,11 +71,13 @@ function createState<SelectedState extends PossibleTags<BorrowState>>(
 // THIS BorrowState IS ALL WRONG AND NEEDS FIXING WHEN THE QUERIES ARE DONE
 const stateNames: Record<PossibleTags<BorrowState>, string> = {
   init: "Token",
+  amountSelected: "Delegate",
   borrowTx: "Borrow",
   borrowedTx: "Borrowed",
 };
 
 const visibleStateNames: ReadonlyArray<PossibleTags<BorrowState>> = [
+  "amountSelected",
   "borrowTx",
   "borrowedTx",
 ] as const;
@@ -113,8 +124,11 @@ const InitialComp: React.FC<{
       ? liquidityAvailable
       : userAssetMaxAvailable;
   const onSubmit = React.useCallback(
-    amountToBorrow =>
-      dispatch(createState("borrowTx", { amountToBorrow, ...state })),
+    amountToBorrow => {
+      isReserveTokenDefinition(state.token)
+        ? dispatch(createState("borrowTx", { amountToBorrow, ...state }))
+        : dispatch(createState("amountSelected", { amountToBorrow, ...state }));
+    },
     [state, dispatch]
   );
   return (
@@ -126,6 +140,62 @@ const InitialComp: React.FC<{
       onSubmit={onSubmit}
       balance={maxToBorrow}
     />
+  );
+};
+
+const AmountSelectedComp: React.FC<{
+  state: AmountSelectedState;
+  dispatch: (nextState: BorrowState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const wrappedNativeAddress = useWrappedNativeAddress().data;
+  const reserveData = useLendingReserveData(wrappedNativeAddress).data;
+  const approvalArgs = React.useMemo<UseApproveDelegationMutationProps>(
+    () => ({
+      asset: reserveData?.variableDebtTokenAddress,
+      amount: state.amountToBorrow,
+      spender: chainAddresses?.wrappedNativeGateway,
+    }),
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+  );
+  const {
+    approvalMutation: { mutateAsync },
+  } = useApproveDelegationMutation(approvalArgs);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() => dispatch(createState("borrowTx", { ...state })))
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<BorrowState> = "amountSelected";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={BorrowTitle}
+      amount={state.amountToBorrow}
+      asset={state.token}
+      collateral={true}
+      increase={true}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={1}
+        stepName="Delegate"
+        stepDesc="Submit to delegate approval to WETHGateway"
+        actionName="Approve"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
   );
 };
 
@@ -235,6 +305,10 @@ const BorrowStateMachine: React.FC<{
   switch (state.type) {
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
+    case "amountSelected":
+      return (
+        <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
+      );
     case "borrowTx":
       return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;
     case "borrowedTx":
@@ -271,9 +345,10 @@ const BorrowDetailForAsset: React.FC<{
 };
 
 export const BorrowDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);

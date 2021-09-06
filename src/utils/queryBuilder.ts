@@ -60,16 +60,23 @@ function baseWeb3RetryHandler(failureCount: number, err: unknown): boolean {
   if (failureCount > 3) {
     return false;
   }
-  const code = (err as Error & { code?: ErrorCode }).code;
-  if (code !== undefined) {
-    switch (code) {
+  const e = err as Error & {
+    code?: ErrorCode;
+    reason?: string | null | undefined;
+  };
+  if (e?.code !== undefined) {
+    switch (e.code) {
       case ErrorCode.NETWORK_ERROR:
       case ErrorCode.TIMEOUT:
         return true;
       case ErrorCode.NUMERIC_FAULT:
       case ErrorCode.CALL_EXCEPTION:
-      default:
+      default: {
+        if (e.reason && console.error) {
+          console.error("Web3 Exception:", e.code, e.reason);
+        }
         return false;
+      }
     }
   }
   return true;
@@ -103,7 +110,11 @@ export function buildQueryHook<
         [
           chainId ?? undefined,
           account ?? undefined,
-          ...(buildKey(...params).map(item => typeof item === "symbol" ? `__GLOBAL_SYMBOL_TABLE|${Symbol.keyFor(item)}` : item) as any as ReturnType<typeof buildKey>),
+          ...(buildKey(...params).map(item =>
+            typeof item === "symbol"
+              ? `__GLOBAL_SYMBOL_TABLE|${Symbol.keyFor(item)}`
+              : item
+          ) as any as ReturnType<typeof buildKey>),
         ] as const,
       // eslint-disable-next-line
       [chainId, account, library, ...params]
@@ -122,7 +133,7 @@ export function buildQueryHook<
           library !== undefined,
         initialData: buildInitialData?.(),
         staleTime: optionOverrides?.staleTime ?? 1 * 60 * 1000,
-        retry: (optionOverrides?.retry ?? baseWeb3RetryHandler),
+        retry: optionOverrides?.retry ?? baseWeb3RetryHandler,
         ...(optionOverrides ?? {}),
       }),
       [chainId, account, library] // buildInitialData is provided when declaring the hook type, not per call
@@ -178,7 +189,11 @@ export function buildQueryHook<
   ): [ChainId | undefined, string | undefined, ...TKey] => [
     chainId,
     address,
-    ...(buildKey(...args).map(item => typeof item === "symbol" ? `__GLOBAL_SYMBOL_TABLE|${Symbol.keyFor(item)}` : item) as any as ReturnType<typeof buildKey>),
+    ...(buildKey(...args).map(item =>
+      typeof item === "symbol"
+        ? `__GLOBAL_SYMBOL_TABLE|${Symbol.keyFor(item)}`
+        : item
+    ) as any as ReturnType<typeof buildKey>),
   ];
   useBuiltQueryHook.invoke = invoke;
   useBuiltQueryHook.fetchQuery = (async (hookParams, ...args) => {
@@ -195,7 +210,7 @@ export function buildQueryHook<
       typeof key
     >(
       key,
-      async (ctx) => {
+      async ctx => {
         try {
           return await useBuiltQueryHook.invoke(
             {
@@ -215,7 +230,7 @@ export function buildQueryHook<
         queryKey: undefined,
         initialData: buildInitialData?.(),
         staleTime: optionOverrides?.staleTime ?? 1 * 60 * 1000,
-        retry: (optionOverrides?.retry ?? baseWeb3RetryHandler),
+        retry: optionOverrides?.retry ?? baseWeb3RetryHandler,
         ...optionOverrides,
       } as QueryOptions<TData | undefined, unknown, TData, typeof key>
     );
@@ -352,7 +367,11 @@ export function buildQueryHookWhenParamsDefinedChainAddrs<
   mapper?: ((input: TData) => TResult) | undefined
 ): DefinedParamContractQueryHook<TData, TKey, TArgs, TResult> {
   const newHook = buildQueryHook<TData, TKey, AllOrUndefined<TArgs>, TResult>(
-    async function hookInvocationContext(this: void, hookParams: QueryHookParams<TKey>, ...args: AllOrUndefined<TArgs>) {
+    async function hookInvocationContext(
+      this: void,
+      hookParams: QueryHookParams<TKey>,
+      ...args: AllOrUndefined<TArgs>
+    ) {
       const chainAddrs =
         hookParams.chainId !== undefined
           ? getChainAddresses(hookParams.chainId)
