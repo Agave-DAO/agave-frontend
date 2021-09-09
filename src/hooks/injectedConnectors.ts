@@ -17,10 +17,9 @@ export const frameConnector = new FrameConnector({
 });
 
 export const walletConnectConnector = new WalletConnectConnector({
-  supportedChainIds: Object.values(ValidNetworkIds),
   bridge: "https://bridge.walletconnect.org",
   rpc: {
-    0x64: "https://rpc.xdaichain.com/",
+    100: "https://rpc.xdaichain.com/",
   },
 });
 
