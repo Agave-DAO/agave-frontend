@@ -16,11 +16,18 @@ import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { isMobile } from "react-device-detect";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
+import { NATIVE_TOKEN } from "../../queries/allReserveTokens";
 
-const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
+const BalanceView: React.FC<{ tokenAddress: string; symbol: string }> = ({
+  tokenAddress,
+  symbol,
+}) => {
   const price = useAssetPriceInDai(tokenAddress);
-  const balance = useUserAssetBalance(tokenAddress);
-  const decimals = useDecimalCountForToken(tokenAddress).data;
+  const nativeSymbols = useNativeSymbols();
+  const addressOrNative =
+    symbol === nativeSymbols.native ? NATIVE_TOKEN : tokenAddress;
+  const balance = useUserAssetBalance(addressOrNative);
+  const decimals = useDecimalCountForToken(addressOrNative).data;
   const balanceNumber = Number(bigNumberToString(balance.data, 4, decimals));
   const balanceUSD = balanceNumber
     ? (Number(price.data) * balanceNumber).toFixed(2)
@@ -97,9 +104,12 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
       {
         Header: isMobile ? "Your wallet" : "Your wallet balance",
         accessor: row => row.tokenAddress,
-        Cell: (({ value }) => <BalanceView tokenAddress={value} />) as Renderer<
-          CellProps<AssetRecord, string>
-        >,
+        Cell: (({ row }) => (
+          <BalanceView
+            tokenAddress={row.original.tokenAddress}
+            symbol={row.original.symbol}
+          />
+        )) as Renderer<CellProps<AssetRecord, string>>,
       },
       {
         Header: isMobile ? "APY" : "Deposit APY",
