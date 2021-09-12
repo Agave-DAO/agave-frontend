@@ -28,6 +28,7 @@ import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import { MINIMUM_NATIVE_RESERVE } from "../../utils/constants";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -96,7 +97,11 @@ const InitialComp: React.FC<{
     }
 
     // availableToRepay = min(debt, balance)
-    return userBalance.gt(debtForAsset) ? debtForAsset : userBalance;
+    // 10% gap to make sure the interest accrued during the time between fetching and repaying
+    // is accounted for ->  (difference gets minted as agToken)
+    return userBalance.gt(debtForAsset.mul(11).div(10))
+      ? debtForAsset.mul(10).div(9).add(MINIMUM_NATIVE_RESERVE)
+      : userBalance;
   }, [debtForAsset, userBalance]);
 
   const onSubmit = React.useCallback(
@@ -305,9 +310,10 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
   };
 
 export const RepayDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
