@@ -16,17 +16,17 @@ import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
 import { useCollateralComposition } from "../../hooks/collateralComposition";
 import { bigNumberToString } from "../../utils/fixedPoint";
+import { wrappedNativeSymbolSwitcher } from "../../utils/icons";
 
 export const CollateralComposition: React.FC = () => {
   const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
 
   const reserves = allUserReservesBalances?.map(asset => {
-    return asset.symbol === "WXDAI"
-      ? {
-          ...asset,
-          symbol: "XDAI",
-        }
-      : asset;
+    const newSymbol = wrappedNativeSymbolSwitcher(asset.symbol);
+    return {
+      ...asset,
+      symbol: newSymbol,
+    };
   });
 
   const collateralComposition = useCollateralComposition();

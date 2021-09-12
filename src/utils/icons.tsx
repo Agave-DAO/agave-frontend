@@ -9,6 +9,11 @@ import UsdtLogo from "../assets/image/coins/usdt.svg";
 import WbtcLogo from "../assets/image/coins/wbtc.svg";
 import React, { MouseEventHandler } from "react";
 import { SquareProps, Circle, Center } from "@chakra-ui/react";
+import { AssetRecord } from "../views/Markets";
+import { useAppWeb3 } from "../hooks/appWeb3";
+import { getChainAddresses, useChainAddresses } from "./chainAddresses";
+import { internalAddressesPerNetworkId } from "./contracts/contractAddresses/internalAddresses";
+import { BorrowAsset } from "../views/Borrow";
 
 export function imageForTokenSymbol(symbol: string): string | null {
   switch (symbol) {
@@ -52,6 +57,20 @@ export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
     return <Image src={svg} width="14" height="14" alt="?" {...imageProps} />;
   }, [symbol, imageProps]);
 };
+
+export function wrappedNativeSymbolSwitcher(symbol: string): string {
+  const w3 = useAppWeb3();
+  console.log(w3);
+  const chainAddresses = w3.library
+    ? useChainAddresses(w3.library.network.name)
+    : undefined;
+  if (!chainAddresses) {
+    return symbol;
+  }
+  const nativeSymbol = chainAddresses.symbol;
+  const wrappedNativeSymbol = "W" + nativeSymbol;
+  return symbol === wrappedNativeSymbol ? nativeSymbol : symbol;
+}
 
 export const ModalIcon: React.FC<{ onOpen: MouseEventHandler } & SquareProps> =
   ({ onOpen, ...props }) => {

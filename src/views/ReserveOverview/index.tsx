@@ -6,6 +6,8 @@ import { useAllReserveTokens } from "../../queries/allReserveTokens";
 import ColoredText from "../../components/ColoredText";
 import { Button } from "@chakra-ui/button";
 import { Center, Container, Flex } from "@chakra-ui/react";
+import { wrappedNativeSymbolSwitcher } from "../../utils/icons";
+import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 /*
 Agave Asset Page Notes | React Template Edited by Pauly Sun 🌞 July 15th, 2021 
 ✔ Completed Seperated & Rebuilt Component Tree | July 7th, 2021
@@ -20,22 +22,22 @@ Todos...
 */
 
 const ReserveOverview: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string;
+    }>();
 
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
   const asset = React.useMemo(() => {
-    const aseetSymbol = assetName === "XDAI" ? "WXDAI" : assetName;
-    const asset =
-      assetName === undefined
-        ? undefined
-        : allReserves?.data?.find(
-            asset => asset.symbol.toLowerCase() === aseetSymbol?.toLowerCase()
-          );
-    return asset?.symbol === "WXDAI" ? { ...asset, symbol: "XDAI" } : asset;
+    const newSymbol = wrappedNativeSymbolSwitcher(assetName);
+    const asset = allReserves.data?.find(
+      asset => asset.symbol.toLowerCase() === newSymbol?.toLowerCase()
+    );
+    return asset && newSymbol === asset.symbol
+      ? { ...asset, symbol: newSymbol }
+      : asset;
   }, [allReserves, assetName]);
 
   return (

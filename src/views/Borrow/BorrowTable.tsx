@@ -11,7 +11,7 @@ import {
 } from "../../utils/htmlTable";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
-import { TokenIcon } from "../../utils/icons";
+import { TokenIcon, wrappedNativeSymbolSwitcher } from "../../utils/icons";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
@@ -77,12 +77,11 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
         })
       ) ?? [];
     return assets.map(asset => {
-      return asset.symbol === "WXDAI"
-        ? {
-            ...asset,
-            symbol: "XDAI",
-          }
-        : asset;
+      const newSymbol = wrappedNativeSymbolSwitcher(asset.symbol);
+      return {
+        ...asset,
+        symbol: newSymbol,
+      };
     });
   }, [reserves]);
 

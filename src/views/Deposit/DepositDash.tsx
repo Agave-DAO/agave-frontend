@@ -32,7 +32,7 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { fontSizes, spacings } from "../../utils/constants";
-import { ModalIcon } from "../../utils/icons";
+import { ModalIcon, wrappedNativeSymbolSwitcher } from "../../utils/icons";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { BigNumber } from "ethers";
@@ -85,26 +85,19 @@ const DepositDashNative: React.FC<DepositDashNativeProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
   const { data: tokenBalance } = useUserAssetBalance(token);
   const { data: wnative } = useWrappedNativeDefinition();
-  const reserve = React.useMemo(
-    () =>
-      reserves?.find(
-        reserve => reserve.tokenAddress === wnative?.tokenAddress
-      ) ??
-      reserves?.find(
-        reserve =>
-          reserve.tokenAddress.toLowerCase() ===
-          wnative?.tokenAddress.toLowerCase()
-      ),
-    [reserves, wnative?.tokenAddress]
-  );
-  const modReserve =
-    reserve && reserve.symbol === "WXDAI"
-      ? {
-          ...reserve,
-          symbol: "XDAI",
-        }
-      : reserve;
-  return <DepositDashLayout reserve={modReserve} tokenBalance={tokenBalance} />;
+  const reserve = React.useMemo(() => {
+    const newSymbol = wrappedNativeSymbolSwitcher(token.symbol);
+    const asset = reserves?.find(
+      reserve =>
+        reserve.tokenAddress.toLowerCase() ===
+        wnative?.tokenAddress.toLowerCase()
+    );
+    return asset && newSymbol === asset.symbol
+      ? { ...asset, symbol: newSymbol }
+      : asset;
+  }, [reserves, wnative?.tokenAddress]);
+
+  return <DepositDashLayout reserve={reserve} tokenBalance={tokenBalance} />;
 };
 
 const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({

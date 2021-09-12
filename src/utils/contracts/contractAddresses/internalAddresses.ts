@@ -1,6 +1,10 @@
-export interface StrongTypedChainAddresses<Id extends ValidNetworkIdTypes, Name extends ValidNetworkNameTypes> {
+export interface StrongTypedChainAddresses<
+  Id extends ValidNetworkIdTypes,
+  Name extends ValidNetworkNameTypes
+> {
   readonly chainId: Id;
   readonly chainName: Name;
+  readonly symbol: string;
   readonly lendingPool: string;
   readonly staking: string;
 
@@ -16,15 +20,12 @@ export interface ChainAddresses extends StrongTypedChainAddresses<any, any> {
   readonly chainName: string;
 }
 
-export const ValidNetworkNames = [
-  "rinkeby",
-  "xdai",
-] as const;
+export const ValidNetworkNames = ["rinkeby", "xdai"] as const;
 export type ValidNetworkNameTypes = typeof ValidNetworkNames[number];
 
 export const ValidNetworkIds = {
-  "rinkeby": 4,
-  "xdai": 100,
+  rinkeby: 4,
+  xdai: 100,
 } as const;
 export type ValidNetworkIdTypes = typeof ValidNetworkIds[ValidNetworkNameTypes];
 
@@ -35,6 +36,8 @@ export const internalAddressesPerNetwork: Record<
   rinkeby: {
     chainName: "rinkeby",
     chainId: 4,
+    symbol: "ETH",
+
     lendingPool: "0x1E6A0Ae721ee7598B7FA53Ea91A93313b729e2A9",
     staking: "0xdefd31e8c8e5e7db1d2e2204c99d006e1607554b",
 
@@ -47,6 +50,8 @@ export const internalAddressesPerNetwork: Record<
   xdai: {
     chainName: "xdai",
     chainId: 100,
+    symbol: "XDAI",
+
     lendingPool: "0x207E9def17B4bd1045F5Af2C651c081F9FDb0842",
     staking: "0x610525b415c1BFAeAB1a3fc3d85D87b92f048221",
 
@@ -58,5 +63,11 @@ export const internalAddressesPerNetwork: Record<
   },
 } as const;
 
-export const internalAddressesPerNetworkId: Record<ValidNetworkIdTypes, StrongTypedChainAddresses<ValidNetworkIdTypes, ValidNetworkNameTypes>> =
-  Object.fromEntries(Object.entries(internalAddressesPerNetwork).map(([_k, v]) => [v.chainId, v] as const)) as any;
+export const internalAddressesPerNetworkId: Record<
+  ValidNetworkIdTypes,
+  StrongTypedChainAddresses<ValidNetworkIdTypes, ValidNetworkNameTypes>
+> = Object.fromEntries(
+  Object.entries(internalAddressesPerNetwork).map(
+    ([_k, v]) => [v.chainId, v] as const
+  )
+) as any;

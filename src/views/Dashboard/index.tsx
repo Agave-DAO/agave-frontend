@@ -8,6 +8,7 @@ import { BigNumber } from "ethers";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
+import { wrappedNativeSymbolSwitcher } from "../../utils/icons";
 
 export interface AssetData {
   tokenAddress: string;
@@ -33,12 +34,11 @@ export const Dashboard: React.FC<{}> = () => {
       borrows?.data?.filter(asset => !asset.balance.isZero()) ?? [];
 
     return assets.map(asset => {
-      return asset.symbol === "WXDAI"
-        ? {
-            ...asset,
-            symbol: "XDAI",
-          }
-        : asset;
+      const newSymbol = wrappedNativeSymbolSwitcher(asset.symbol);
+      return {
+        ...asset,
+        symbol: newSymbol,
+      };
     });
   }, [borrows]);
 
@@ -49,12 +49,13 @@ export const Dashboard: React.FC<{}> = () => {
       balances?.data?.filter(asset => !asset.balance.isZero()) ?? []
     ).map(a => ({ ...a, backingReserve: a.reserve }));
     return assets.map(asset => {
-      return asset.backingReserve && asset.backingReserve.symbol === "WXDAI"
-        ? {
-            ...asset,
-            backingReserve: { ...asset.backingReserve, symbol: "XDAI" },
-          }
-        : asset;
+      const newSymbol = wrappedNativeSymbolSwitcher(
+        asset.backingReserve.symbol
+      );
+      return {
+        ...asset,
+        backingReserve: { ...asset.backingReserve, symbol: newSymbol },
+      };
     });
   }, [balances]);
 
