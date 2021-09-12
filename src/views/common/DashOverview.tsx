@@ -74,7 +74,7 @@ export const DashOverviewIntro: React.FC<{
         healthFactor={newHealthFactor}
         mode={mode}
         balance={
-          // If NATIVE don't allow to deposit the full balance in a wallet! LeInfoWeiBoxe 0.1
+          // If NATIVE don't allow to deposit the full balance in a wallet! Leave 0.1
           asset.tokenAddress === NATIVE_TOKEN &&
           (mode === "deposit" || mode === "repay")
             ? limitAmount?.sub(MINIMUM_NATIVE_RESERVE)
