@@ -36,7 +36,7 @@ export const internalAddressesPerNetwork: Record<
   rinkeby: {
     chainName: "rinkeby",
     chainId: 4,
-    symbol: "ETH",
+    symbol: "XDAI", // Specific to our deployment!
 
     lendingPool: "0x1E6A0Ae721ee7598B7FA53Ea91A93313b729e2A9",
     staking: "0xdefd31e8c8e5e7db1d2e2204c99d006e1607554b",

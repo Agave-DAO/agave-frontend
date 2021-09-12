@@ -15,7 +15,7 @@ import { BorrowTable } from "./BorrowTable";
 import { BorrowAsset } from ".";
 import { MyBorrowsTable } from "./MyBorrows";
 import { useHistory } from "react-router-dom";
-import { wrappedNativeSymbolSwitcher } from "../../utils/icons";
+import { useNativeSymbols } from "../../utils/icons";
 
 export interface BorrowBannerProps {}
 
@@ -49,14 +49,16 @@ export const BorrowBanner: React.FC<{}> = () => {
 };
 
 export const BorrowLayout: React.FC<BorrowLayoutProps> = props => {
+  const nativeSymbols = useNativeSymbols();
   const borrows: BorrowAsset[] = React.useMemo(() => {
     const assets = props.borrowedList ?? [];
     return assets.map(asset => {
-      const newSymbol = wrappedNativeSymbolSwitcher(asset.symbol);
-      return {
-        ...asset,
-        symbol: newSymbol,
-      };
+      return asset.symbol === nativeSymbols.wrappednative
+        ? {
+            ...asset,
+            symbol: nativeSymbols?.native,
+          }
+        : asset;
     });
   }, [props.borrowedList]);
   const borrowTable = React.useMemo(() => <BorrowTable activeType="All" />, []);

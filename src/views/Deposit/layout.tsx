@@ -15,7 +15,7 @@ import { DepositTable } from "./DepositTable";
 import { DepositAsset } from ".";
 import { MyDepositsTable } from "./MyDeposits";
 import { useHistory } from "react-router-dom";
-import { wrappedNativeSymbolSwitcher } from "../../utils/icons";
+import { useNativeSymbols } from "../../utils/icons";
 
 export interface DepositBannerProps {}
 
@@ -49,14 +49,16 @@ export const DepositBanner: React.FC<{}> = () => {
 };
 
 export const DepositLayout: React.FC<DepositLayoutProps> = props => {
+  const nativeSymbols = useNativeSymbols();
   const deposits: DepositAsset[] = React.useMemo(() => {
     const assets = props.depositedList ?? [];
     return assets.map(asset => {
-      const newSymbol = wrappedNativeSymbolSwitcher(asset.symbol);
-      return {
-        ...asset,
-        symbol: newSymbol,
-      };
+      return asset.symbol === nativeSymbols.wrappednative
+        ? {
+            ...asset,
+            symbol: nativeSymbols?.native,
+          }
+        : asset;
     });
   }, [props.depositedList]);
   const depositTable = React.useMemo(

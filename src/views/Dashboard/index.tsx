@@ -8,7 +8,7 @@ import { BigNumber } from "ethers";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
-import { wrappedNativeSymbolSwitcher } from "../../utils/icons";
+import { useNativeSymbols } from "../../utils/icons";
 
 export interface AssetData {
   tokenAddress: string;
@@ -29,16 +29,18 @@ export const Dashboard: React.FC<{}> = () => {
 
   // Borrow list
   const borrows = useUserVariableDebtTokenBalances();
+  const nativeSymbols = useNativeSymbols();
   const borrowedList: AssetData[] = React.useMemo(() => {
     const assets =
       borrows?.data?.filter(asset => !asset.balance.isZero()) ?? [];
 
     return assets.map(asset => {
-      const newSymbol = wrappedNativeSymbolSwitcher(asset.symbol);
-      return {
-        ...asset,
-        symbol: newSymbol,
-      };
+      return asset.symbol === nativeSymbols.wrappednative
+        ? {
+            ...asset,
+            symbol: nativeSymbols?.native,
+          }
+        : asset;
     });
   }, [borrows]);
 
@@ -49,13 +51,15 @@ export const Dashboard: React.FC<{}> = () => {
       balances?.data?.filter(asset => !asset.balance.isZero()) ?? []
     ).map(a => ({ ...a, backingReserve: a.reserve }));
     return assets.map(asset => {
-      const newSymbol = wrappedNativeSymbolSwitcher(
-        asset.backingReserve.symbol
-      );
-      return {
-        ...asset,
-        backingReserve: { ...asset.backingReserve, symbol: newSymbol },
-      };
+      return asset.backingReserve.symbol === nativeSymbols.wrappednative
+        ? {
+            ...asset,
+            backingReserve: {
+              ...asset.backingReserve,
+              symbol: nativeSymbols?.native,
+            },
+          }
+        : asset;
     });
   }, [balances]);
 

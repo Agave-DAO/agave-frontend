@@ -11,7 +11,7 @@ import {
 } from "../../utils/htmlTable";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
-import { TokenIcon, wrappedNativeSymbolSwitcher } from "../../utils/icons";
+import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
@@ -67,6 +67,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
+  const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
     const assets =
       reserves.data?.map(
@@ -77,11 +78,12 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
         })
       ) ?? [];
     return assets.map(asset => {
-      const newSymbol = wrappedNativeSymbolSwitcher(asset.symbol);
-      return {
-        ...asset,
-        symbol: newSymbol,
-      };
+      return asset.symbol === nativeSymbols.wrappednative
+        ? {
+            ...asset,
+            symbol: nativeSymbols?.native,
+          }
+        : asset;
     });
   }, [reserves]);
 

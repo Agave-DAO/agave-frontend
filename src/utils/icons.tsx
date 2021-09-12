@@ -58,18 +58,20 @@ export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
   }, [symbol, imageProps]);
 };
 
-export function wrappedNativeSymbolSwitcher(symbol: string): string {
+export function useNativeSymbols(): {
+  native: string;
+  wrappednative: string;
+} {
   const w3 = useAppWeb3();
-  console.log(w3);
-  const chainAddresses = w3.library
-    ? useChainAddresses(w3.library.network.name)
-    : undefined;
+  const chainId = w3.chainId ?? 10;
+  const chainAddresses = getChainAddresses(chainId);
+  console.log(chainAddresses);
   if (!chainAddresses) {
-    return symbol;
+    return { native: "ETH", wrappednative: "WETH" }; //hardcoded until better solution to avoid undefined as output
   }
   const nativeSymbol = chainAddresses.symbol;
   const wrappedNativeSymbol = "W" + nativeSymbol;
-  return symbol === wrappedNativeSymbol ? nativeSymbol : symbol;
+  return { native: nativeSymbol, wrappednative: wrappedNativeSymbol };
 }
 
 export const ModalIcon: React.FC<{ onOpen: MouseEventHandler } & SquareProps> =

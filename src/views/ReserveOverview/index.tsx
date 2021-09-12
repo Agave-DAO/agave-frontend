@@ -6,7 +6,7 @@ import { useAllReserveTokens } from "../../queries/allReserveTokens";
 import ColoredText from "../../components/ColoredText";
 import { Button } from "@chakra-ui/button";
 import { Center, Container, Flex } from "@chakra-ui/react";
-import { wrappedNativeSymbolSwitcher } from "../../utils/icons";
+import { useNativeSymbols } from "../../utils/icons";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 /*
 Agave Asset Page Notes | React Template Edited by Pauly Sun 🌞 July 15th, 2021 
@@ -30,13 +30,15 @@ const ReserveOverview: React.FC = () => {
   const history = useHistory();
   const assetName = match.params.assetName;
   const allReserves = useAllReserveTokens();
+  const nativeSymbols = useNativeSymbols();
   const asset = React.useMemo(() => {
-    const newSymbol = wrappedNativeSymbolSwitcher(assetName);
     const asset = allReserves.data?.find(
-      asset => asset.symbol.toLowerCase() === newSymbol?.toLowerCase()
+      asset =>
+        asset.symbol.toLowerCase() ===
+        nativeSymbols.wrappednative?.toLowerCase()
     );
-    return asset && newSymbol === asset.symbol
-      ? { ...asset, symbol: newSymbol }
+    return asset && nativeSymbols.wrappednative === asset.symbol
+      ? { ...asset, symbol: nativeSymbols.native }
       : asset;
   }, [allReserves, assetName]);
 

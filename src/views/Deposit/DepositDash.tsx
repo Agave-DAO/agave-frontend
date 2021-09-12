@@ -32,7 +32,7 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { fontSizes, spacings } from "../../utils/constants";
-import { ModalIcon, wrappedNativeSymbolSwitcher } from "../../utils/icons";
+import { ModalIcon, useNativeSymbols } from "../../utils/icons";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { BigNumber } from "ethers";
@@ -85,15 +85,15 @@ const DepositDashNative: React.FC<DepositDashNativeProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
   const { data: tokenBalance } = useUserAssetBalance(token);
   const { data: wnative } = useWrappedNativeDefinition();
+  const nativeSymbols = useNativeSymbols();
   const reserve = React.useMemo(() => {
-    const newSymbol = wrappedNativeSymbolSwitcher(token.symbol);
     const asset = reserves?.find(
       reserve =>
         reserve.tokenAddress.toLowerCase() ===
         wnative?.tokenAddress.toLowerCase()
     );
-    return asset && newSymbol === asset.symbol
-      ? { ...asset, symbol: newSymbol }
+    return asset && nativeSymbols.wrappednative === asset.symbol
+      ? { ...asset, symbol: nativeSymbols.native }
       : asset;
   }, [reserves, wnative?.tokenAddress]);
 
