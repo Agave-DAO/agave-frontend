@@ -51,12 +51,12 @@ export const Dashboard: React.FC<{}> = () => {
       balances?.data?.filter(asset => !asset.balance.isZero()) ?? []
     ).map(a => ({ ...a, backingReserve: a.reserve }));
     return assets.map(asset => {
-      return asset.backingReserve.symbol === nativeSymbols.wrappednative
+      return asset.backingReserve?.symbol === nativeSymbols.wrappednative
         ? {
             ...asset,
             backingReserve: {
               ...asset.backingReserve,
-              symbol: nativeSymbols?.native,
+              symbol: nativeSymbols.native,
             },
           }
         : asset;

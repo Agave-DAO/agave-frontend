@@ -63,7 +63,7 @@ export function useNativeSymbols(): {
   wrappednative: string;
 } {
   const w3 = useAppWeb3();
-  const chainId = w3.chainId ?? 10;
+  const chainId = w3.chainId ?? 100;
   const chainAddresses = getChainAddresses(chainId);
   console.log(chainAddresses);
   if (!chainAddresses) {

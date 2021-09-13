@@ -87,11 +87,15 @@ const DepositDashNative: React.FC<DepositDashNativeProps> = ({ token }) => {
   const { data: wnative } = useWrappedNativeDefinition();
   const nativeSymbols = useNativeSymbols();
   const reserve = React.useMemo(() => {
-    const asset = reserves?.find(
-      reserve =>
-        reserve.tokenAddress.toLowerCase() ===
-        wnative?.tokenAddress.toLowerCase()
-    );
+    const asset =
+      reserves?.find(
+        reserve => reserve.tokenAddress === wnative?.tokenAddress
+      ) ??
+      reserves?.find(
+        reserve =>
+          reserve.tokenAddress.toLowerCase() ===
+          wnative?.tokenAddress.toLowerCase()
+      );
     return asset && nativeSymbols.wrappednative === asset.symbol
       ? { ...asset, symbol: nativeSymbols.native }
       : asset;
