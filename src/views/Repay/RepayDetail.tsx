@@ -97,10 +97,12 @@ const InitialComp: React.FC<{
     }
 
     // availableToRepay = min(debt, balance)
-    // 10% gap to make sure the interest accrued during the time between fetching and repaying
+    // 5% gap to make sure the interest accrued during the time between fetching and repaying
     // is accounted for ->  (difference gets minted as agToken)
-    return userBalance.gt(debtForAsset.mul(11).div(10))
-      ? debtForAsset.mul(10).div(9).add(MINIMUM_NATIVE_RESERVE)
+    return userBalance.gt(
+      debtForAsset.mul(21).div(20).add(MINIMUM_NATIVE_RESERVE)
+    )
+      ? debtForAsset.mul(21).div(20)
       : userBalance;
   }, [debtForAsset, userBalance]);
 
