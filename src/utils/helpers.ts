@@ -114,9 +114,8 @@ export function bnMaxish(a: BigNumber, b: BigNumberish): BigNumber {
 }
 
 // Take the greater of A and B, preferring A if both are equal; Requires that both are BigNumber
-export function bnMax(a: BigNumber, b: BigNumberish): BigNumber {
-  const bbn = BigNumber.isBigNumber(b) ? b : BigNumber.from(b);
-  return a.gte(bbn) ? a : bbn;
+export function bnMax(a: BigNumber, b: BigNumber): BigNumber {
+  return a.gte(b) ? a : b;
 }
 
 // Take the greater of A and B, preferring A if both are equal
