@@ -5,15 +5,13 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { RepayDash } from "./RepayDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
-  isReserveTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
-  ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
 import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import {
   useUserAssetBalance,
@@ -28,6 +26,8 @@ import { useChainAddresses } from "../../utils/chainAddresses";
 import { ControllerItem } from "../../components/ControllerItem";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import { MINIMUM_NATIVE_RESERVE } from "../../utils/constants";
+import { bnMax, bnMin } from "../../utils/helpers";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -83,6 +83,7 @@ const InitialComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
   const { data: wNative } = useWrappedNativeDefinition();
+  const paymentAssetIsNative = state.token.tokenAddress === NATIVE_TOKEN;
   const asset =
     state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
 
@@ -90,14 +91,28 @@ const InitialComp: React.FC<{
   const { data: debtForAsset } = useUserVariableDebtForAsset(
     asset?.tokenAddress
   );
-  const availableToRepay = React.useMemo(() => {
-    if (!userBalance || !debtForAsset) {
-      return BigNumber.from(0);
+  const availableToRepay: BigNumber | undefined = React.useMemo(() => {
+    // If either are null, we can't provide anything useful
+    // Propagating undefined lets the DashOverviewIntro know we're still loading the value
+    if (userBalance === undefined || debtForAsset === undefined) {
+      return undefined;
     }
-
-    // availableToRepay = min(debt, balance)
-    return userBalance.gt(debtForAsset) ? debtForAsset : userBalance;
-  }, [debtForAsset, userBalance]);
+    // Start with the user's debt
+    let maxRepaymentAmount = debtForAsset;
+    // 5% extra to ensure sufficient coverage for interest accrued during the time between fetching and repaying
+    // (difference gets minted as agToken)
+    // TODO: Change this to a time-based multiplier of APR, for example, 10 minutes worth of interest
+    maxRepaymentAmount = maxRepaymentAmount.mul(21).div(20);
+    // The user can only pay as much as their actual balance
+    // If the payment asset is native, ensure a surplus remaining of at least the minimum native balance
+    const usefulBalance = paymentAssetIsNative
+      ? userBalance.sub(MINIMUM_NATIVE_RESERVE)
+      : userBalance;
+    maxRepaymentAmount = bnMin(maxRepaymentAmount, usefulBalance);
+    // Max repayment amount cannot be negative
+    maxRepaymentAmount = bnMax(maxRepaymentAmount, constants.Zero);
+    return maxRepaymentAmount;
+  }, [debtForAsset, userBalance, paymentAssetIsNative]);
 
   const onSubmit = React.useCallback(
     amountToRepay =>
@@ -305,9 +320,10 @@ const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
   };
 
 export const RepayDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
