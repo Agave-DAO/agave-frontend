@@ -52,12 +52,13 @@ export const DashOverviewIntro: React.FC<{
   );
 
   const limitAmount =
-    balance && maxAmount?.lt(balance)
+    (mode === "withdraw" || mode === "borrow") &&
+    balance &&
+    maxAmount?.lt(balance)
       ? maxAmount.gt(constants.Zero)
         ? maxAmount
         : constants.Zero
       : balance;
-
   return (
     <VStack w={{ base: "90%", sm: "75%", md: "60%", lg: "50%" }} spacing="0">
       <ColoredText fontSize="1.8rem" textTransform="capitalize" pb="1rem">
