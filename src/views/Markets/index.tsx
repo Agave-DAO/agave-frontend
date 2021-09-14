@@ -20,7 +20,7 @@ import {
   useVariableBorrowAPR,
 } from "../../queries/depositAPY";
 import { PercentageView } from "../common/PercentageView";
-import { TokenIcon } from "../../utils/icons";
+import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import {
   BasicTableRenderer,
   SortedHtmlTable,
@@ -184,6 +184,7 @@ const AssetTable: React.FC<{
   }
 
   const reserves = useAllReserveTokensWithData();
+  const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
     const assets =
       reserves.data?.map(
@@ -194,10 +195,10 @@ const AssetTable: React.FC<{
         })
       ) ?? [];
     return assets.map(asset => {
-      return asset.symbol === "WXDAI"
+      return asset.symbol === nativeSymbols.wrappednative
         ? {
             ...asset,
-            symbol: "XDAI",
+            symbol: nativeSymbols?.native,
           }
         : asset;
     });

@@ -15,6 +15,7 @@ import { DepositTable } from "./DepositTable";
 import { DepositAsset } from ".";
 import { MyDepositsTable } from "./MyDeposits";
 import { useHistory } from "react-router-dom";
+import { useNativeSymbols } from "../../utils/icons";
 
 export interface DepositBannerProps {}
 
@@ -48,13 +49,14 @@ export const DepositBanner: React.FC<{}> = () => {
 };
 
 export const DepositLayout: React.FC<DepositLayoutProps> = props => {
+  const nativeSymbols = useNativeSymbols();
   const deposits: DepositAsset[] = React.useMemo(() => {
     const assets = props.depositedList ?? [];
     return assets.map(asset => {
-      return asset.symbol === "WXDAI"
+      return asset.symbol === nativeSymbols.wrappednative
         ? {
             ...asset,
-            symbol: "XDAI",
+            symbol: nativeSymbols?.native,
           }
         : asset;
     });

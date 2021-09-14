@@ -12,7 +12,7 @@ import {
 import { DepositAPYView } from "../common/RatesView";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
-import { TokenIcon } from "../../utils/icons";
+import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { isMobile } from "react-device-detect";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
@@ -51,6 +51,7 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
+  const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
     const assets =
       reserves.data?.map(
@@ -61,10 +62,10 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
         })
       ) ?? [];
     return assets.map(asset => {
-      return asset.symbol === "WXDAI"
+      return asset.symbol === nativeSymbols.wrappednative
         ? {
             ...asset,
-            symbol: "XDAI",
+            symbol: nativeSymbols?.native,
           }
         : asset;
     });
