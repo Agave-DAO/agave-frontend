@@ -4,7 +4,10 @@ import { Text, Flex, Container, Box, Button } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+import {
+  NATIVE_TOKEN,
+  ReserveTokenDefinition,
+} from "../../queries/allReserveTokens";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
@@ -17,6 +20,7 @@ import {
   bigNumberToString,
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
+import { useNativeSymbols } from "../../utils/icons";
 
 const UserInfo: React.FC<{
   asset: ReserveTokenDefinition;
@@ -35,8 +39,11 @@ const UserInfo: React.FC<{
       ),
     [reserves, asset.tokenAddress]
   );
+  const nativeSymbols = useNativeSymbols();
+  const addressOrNative =
+    asset.symbol === nativeSymbols.native ? NATIVE_TOKEN : asset.tokenAddress;
   const aTokenBalance = useUserAssetBalance(reserve?.aTokenAddress)?.data;
-  const tokenBalance = useUserAssetBalance(asset.tokenAddress)?.data;
+  const tokenBalance = useUserAssetBalance(addressOrNative)?.data;
   const userAccountData = useUserAccountData(
     userAccountAddress ?? undefined
   )?.data;

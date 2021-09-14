@@ -24,7 +24,7 @@ Todos...
 const ReserveOverview: React.FC = () => {
   const match =
     useRouteMatch<{
-      assetName: string;
+      assetName: string | undefined;
     }>();
 
   const history = useHistory();

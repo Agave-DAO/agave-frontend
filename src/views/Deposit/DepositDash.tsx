@@ -83,9 +83,9 @@ const DepositDashReserve: React.FC<DepositDashReserveProps> = ({ token }) => {
 
 const DepositDashNative: React.FC<DepositDashNativeProps> = ({ token }) => {
   const { data: reserves } = useAllReserveTokensWithData();
+  const nativeSymbols = useNativeSymbols();
   const { data: tokenBalance } = useUserAssetBalance(token);
   const { data: wnative } = useWrappedNativeDefinition();
-  const nativeSymbols = useNativeSymbols();
   const reserve = React.useMemo(() => {
     const asset =
       reserves?.find(

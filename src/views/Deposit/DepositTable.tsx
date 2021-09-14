@@ -16,11 +16,16 @@ import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { isMobile } from "react-device-detect";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
+import { NATIVE_TOKEN } from "../../queries/allReserveTokens";
+import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
 
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
-  const balance = useUserAssetBalance(tokenAddress);
-  const decimals = useDecimalCountForToken(tokenAddress).data;
+  const wnative = useWrappedNativeAddress().data;
+  const addressOrNative =
+    tokenAddress === wnative ? NATIVE_TOKEN : tokenAddress;
+  const balance = useUserAssetBalance(addressOrNative);
+  const decimals = useDecimalCountForToken(addressOrNative).data;
   const balanceNumber = Number(bigNumberToString(balance.data, 4, decimals));
   const balanceUSD = balanceNumber
     ? (Number(price.data) * balanceNumber).toFixed(2)
