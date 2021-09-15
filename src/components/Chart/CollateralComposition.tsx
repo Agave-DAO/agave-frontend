@@ -31,13 +31,13 @@ export const CollateralComposition: React.FC = () => {
   });
 
   const collateralComposition = useCollateralComposition();
-
   const collateralData = collateralComposition.map(x => {
     if (x !== null) {
-      return bigNumberToString(x, 2);
+      return bigNumberToString(x, 3);
     }
     return null;
   });
+  const displayCollateralComposition = collateralData.length > 0 ? true : false;
 
   const isSmallerThan900 = useMediaQuery("(max-width: 900px)");
 
@@ -55,66 +55,70 @@ export const CollateralComposition: React.FC = () => {
           {isSmallerThan900 ? "Collateral" : "Collateral Composition"}
         </Text>
       </HStack>
-      <Popover trigger="hover">
-        <PopoverTrigger>
-          <Grid
-            role="button"
-            w="100%"
-            templateColumns={
-              collateralData.filter(x => x != undefined).join("% ") + "%"
-            }
-            h="2rem"
-            borderRadius="8px"
-            borderColor="#444"
-            borderStyle="solid"
-            borderWidth="3px"
-            overflow="hidden"
-          >
-            {reserves?.map((token, index) => (
-              <Box
-                key={"comp_" + index}
-                bg={assetColor[token.symbol]}
-                w="100%"
-                h="100%"
-                borderRadius="0"
-                _hover={{ bg: assetColor[token.symbol], boxShadow: "xl" }}
-                _active={{ bg: assetColor[token.symbol] }}
-                _focus={{ boxShadow: "xl" }}
-                d={collateralComposition[index] !== null ? "block" : "none"}
-              />
-            ))}
-          </Grid>
-        </PopoverTrigger>
-        <PopoverContent bg="primary.300" border="2px solid">
-          <PopoverBody bg="gray.700">
-            <VStack m="auto" py="2rem" w="90%">
-              {reserves?.map((token, index) =>
-                collateralComposition[index] !== null ? (
-                  <Flex
-                    key={"flex-collateralComposition_" + index}
-                    alignItems="center"
-                    justifyContent="space-between"
-                    w="100%"
-                  >
-                    <Box
-                      bg={assetColor[token.symbol]}
-                      boxSize="1em"
-                      minW="1em"
-                      minH="1em"
-                      borderRadius="1em"
-                    />
-                    <Text ml="1em" width="50%">
-                      {" "}
-                      {token.symbol}
-                    </Text>
-                    <Text ml="1em"> {collateralData[index] + "%"}</Text>
-                  </Flex>
-                ) : null
-              )}
-            </VStack>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
+      {displayCollateralComposition ? (
+        <Popover trigger="hover">
+          <PopoverTrigger>
+            <Grid
+              role="button"
+              w="100%"
+              templateColumns={
+                collateralData.filter(x => x != undefined).join("% ") + "%"
+              }
+              h="2rem"
+              borderRadius="8px"
+              borderColor="#444"
+              borderStyle="solid"
+              borderWidth="3px"
+              overflow="hidden"
+            >
+              {reserves?.map((token, index) => (
+                <Box
+                  key={"comp_" + index}
+                  bg={assetColor[token.symbol]}
+                  w="100%"
+                  h="100%"
+                  borderRadius="0"
+                  _hover={{ bg: assetColor[token.symbol], boxShadow: "xl" }}
+                  _active={{ bg: assetColor[token.symbol] }}
+                  _focus={{ boxShadow: "xl" }}
+                  d={collateralComposition[index] !== null ? "block" : "none"}
+                />
+              ))}
+            </Grid>
+          </PopoverTrigger>
+          <PopoverContent bg="primary.300" border="2px solid">
+            <PopoverBody bg="gray.700">
+              <VStack m="auto" py="2rem" w="90%">
+                {reserves?.map((token, index) =>
+                  collateralComposition[index] !== null ? (
+                    <Flex
+                      key={"flex-collateralComposition_" + index}
+                      alignItems="center"
+                      justifyContent="space-between"
+                      w="100%"
+                    >
+                      <Box
+                        bg={assetColor[token.symbol]}
+                        boxSize="1em"
+                        minW="1em"
+                        minH="1em"
+                        borderRadius="1em"
+                      />
+                      <Text ml="1em" width="50%">
+                        {" "}
+                        {token.symbol}
+                      </Text>
+                      <Text ml="1em"> {collateralData[index] + "%"}</Text>
+                    </Flex>
+                  ) : null
+                )}
+              </VStack>
+            </PopoverBody>
+          </PopoverContent>
+        </Popover>
+      ) : (
+        "-"
+      )}
     </Flex>
   );
 };
