@@ -29,6 +29,16 @@ export const UserProfile: React.FC<{}> = () => {
   // Agve button functions
   const { data: agaveBalance } = useAmountAvailableToStake(address);
   const userBal = agaveBalance ? bigNumberToString(agaveBalance, 3) : "0";
+  let chainId;
+
+  switch(useAppWeb3().chainId){
+    case 4:
+      chainId = "Rinkeby";
+      break;
+    case 100:
+      chainId = "xDai";
+      break;
+  }
 
   return (
     <>
@@ -57,18 +67,33 @@ export const UserProfile: React.FC<{}> = () => {
         bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
         rounded="lg"
         px="5px"
+        mr="2px"
       >
         <Text mr="5px">{userBal}</Text>
         <Text fontWeight="400">AGVE</Text>
       </Center>
 
       <Center
+        minWidth="14rem"
+        height={{ base: "4rem", md: "3rem" }}
+        fontSize={{ base: "4xl", md: "2xl" }}
+        mx="1.5rem"
+        px="1.5rem"
+        color="white"
+        bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
+        rounded="lg"
+      >
+        {useAppWeb3().chainId ? <Text fontWeight="400">Chain: {chainId}</Text> : <Text fontWeight="400">Invalid Chain</Text>}
+        
+      </Center>
+      
+      <Center
         background={mode(
           { base: "secondary.800", md: "primary.500" },
           "primary.500"
         )}
         rounded="lg"
-        minWidth="10rem"
+        minWidth="14rem"
         height={{ base: "4rem", md: "3rem" }}
         color="white"
         p="10px"
