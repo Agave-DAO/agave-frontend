@@ -16,9 +16,7 @@ import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
 import { useChainAddresses } from "../../../utils/chainAddresses";
-import {
-  internalAddressesPerNetworkId,
-} from "../../../utils/contracts/contractAddresses/internalAddresses";
+import { internalAddressesPerNetworkId, } from "../../../utils/contracts/contractAddresses/internalAddresses";
 
 declare let window: any;
 
@@ -56,7 +54,7 @@ export const UserProfile: React.FC<{}> = () => {
         bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
         colorScheme="teal"
         size="lg"
-        onClick={() => changeId(4)}
+        onClick={() => changeId(chains[val].chainId)}
       >
         {chains[val].chainName}
       </Button>
@@ -64,10 +62,12 @@ export const UserProfile: React.FC<{}> = () => {
 
   const currChainName : String = chains[chainAddresses?.chainId || 0]?.chainName
 
-  // WIP: Request wallet provider to change chain
+  // Request wallet provider to change chain
   function changeId(chainId : Number) {
+    const chain = chains[chainId.toString()]
     try {
       switch(chainId){
+        // If the chain is default to Metamask if will use wallet_switchEthereumChain
         case 4:
           window.ethereum.request({
             id: 1,
@@ -80,26 +80,22 @@ export const UserProfile: React.FC<{}> = () => {
             ],
           })
           break;
-        case 100:
+        default:
           window.ethereum.request({
             id: 1,
             jsonrpc: '2.0',
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: '0x64',
-                chainName: 'xDAI Chain',
-                rpcUrls: ['https://dai.poa.network'],
-                iconUrls: [
-                  'https://xdaichain.com/fake/example/url/xdai.svg',
-                  'https://xdaichain.com/fake/example/url/xdai.png',
-                ],
+                chainId: "0x" + chain.chainId.toString(16),
+                chainName: chain.chainName,
+                rpcUrls: [chain.rpcUrl],
                 nativeCurrency: {
-                  name: 'xDAI',
-                  symbol: 'xDAI',
+                  name: chain.symbol,
+                  symbol: chain.symbol,
                   decimals: 18,
                 },
-                blockExplorerUrls: ['https://blockscout.com/poa/xdai/'],
+                blockExplorerUrls: [chain.explorer],
               },
             ],
           })

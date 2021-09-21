@@ -13,6 +13,7 @@ export interface StrongTypedChainAddresses<
   readonly wrappedNativeGateway: string;
 
   readonly explorer?: string | undefined;
+  readonly rpcUrl?: string | undefined;
 }
 
 export interface ChainAddresses extends StrongTypedChainAddresses<any, any> {
@@ -60,6 +61,7 @@ export const internalAddressesPerNetwork: Record<
     wrappedNativeGateway: "0x0bb31c42D0692369Ba681A925C254fEB605c327b",
 
     explorer: "https://blockscout.com/xdai/mainnet",
+    rpcUrl: "https://rpc.xdaichain.com/",
   },
 } as const;
 
