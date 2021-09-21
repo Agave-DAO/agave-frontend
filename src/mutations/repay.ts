@@ -7,11 +7,18 @@ import { useAppWeb3 } from "../hooks/appWeb3";
 import {
   useUserAssetAllowance,
   useUserAssetBalance,
+  useUserDepositAssetBalances,
+  useUserDepositAssetBalancesDaiWei,
+  useUserReserveAssetBalances,
+  useUserReserveAssetBalancesDaiWei,
   useUserVariableDebtForAsset,
+  useUserVariableDebtTokenBalances,
+  useUserVariableDebtTokenBalancesDaiWei,
 } from "../queries/userAssets";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { NATIVE_TOKEN } from "../queries/allReserveTokens";
 import { useWrappedNativeDefinition } from "../queries/wrappedNativeAddress";
+import { useLendingReserveData } from "../queries/lendingReserveData";
 
 export interface UseRepayMutationProps {
   asset: string | NATIVE_TOKEN | undefined;
@@ -57,10 +64,9 @@ export const useRepayMutation = ({
     asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
     "0x00"
   );
-  const variableDebtQueryKey = useUserVariableDebtForAsset.buildKey(
+  const variableDebtQueryKey = useUserVariableDebtTokenBalances.buildKey(
     chainId ?? undefined,
-    account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
+    account ?? undefined
   );
 
   const debtQueryKey = ["user", "allReserves", "debt"] as const;
@@ -114,11 +120,27 @@ export const useRepayMutation = ({
     },
     {
       onSuccess: async (unitAmountResult, vars, context) => {
+        const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
         await Promise.allSettled([
           queryClient.invalidateQueries(variableDebtQueryKey),
           queryClient.invalidateQueries(allowanceQueryKey),
           queryClient.invalidateQueries(userAccountDataQueryKey),
           queryClient.invalidateQueries(assetBalanceQueryKey),
+          chainId && account
+            ? Promise.allSettled(
+                [
+                  useUserDepositAssetBalances.buildKey(chainId, account),
+                  useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserReserveAssetBalances.buildKey(chainId, account),
+                  useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                  useUserVariableDebtTokenBalances.buildKey(chainId, account),
+                  useUserVariableDebtTokenBalancesDaiWei.buildKey(
+                    chainId,
+                    account
+                  ),
+                ].map(k => queryClient.invalidateQueries(k))
+              )
+            : Promise.resolve(),
         ]);
       },
     }

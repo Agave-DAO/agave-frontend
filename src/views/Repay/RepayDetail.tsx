@@ -105,12 +105,6 @@ const InitialComp: React.FC<{
     maxRepaymentAmount = maxRepaymentAmount.gt(0)
       ? maxRepaymentAmount.mul(2001).div(2000)
       : maxRepaymentAmount;
-    // The user can only pay as much as their actual balance
-    // If the payment asset is native, ensure a surplus remaining of at least the minimum native balance
-    const usefulBalance = paymentAssetIsNative
-      ? userBalance.sub(MINIMUM_NATIVE_RESERVE)
-      : userBalance;
-    maxRepaymentAmount = bnMin(maxRepaymentAmount, usefulBalance);
     // Max repayment amount cannot be negative
     maxRepaymentAmount = bnMax(maxRepaymentAmount, constants.Zero);
     return maxRepaymentAmount;
