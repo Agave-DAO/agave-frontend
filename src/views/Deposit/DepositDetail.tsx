@@ -8,6 +8,7 @@ import {
   ReserveOrNativeTokenDefinition,
   isReserveTokenDefinition,
   useTokenDefinitionBySymbol,
+  NATIVE_TOKEN,
 } from "../../queries/allReserveTokens";
 import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
@@ -83,9 +84,10 @@ const InitialComp: React.FC<{
   const [amount, setAmount] = React.useState<BigNumber>();
   const { data: userBalance } = useUserAssetBalance(state.token);
 
-  const usefulBalance = userBalance
-    ? userBalance.sub(MINIMUM_NATIVE_RESERVE)
-    : userBalance;
+  const usefulBalance =
+    userBalance && state.token.tokenAddress === NATIVE_TOKEN
+      ? userBalance.sub(MINIMUM_NATIVE_RESERVE)
+      : userBalance;
 
   const onSubmit = React.useCallback(
     amountToDeposit =>
