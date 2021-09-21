@@ -47,6 +47,10 @@ export const DashOverviewIntro: React.FC<{
     mode === "deposit" || mode === "borrow"
   );
 
+  const newHealthFactorAsBigNumber = newHealthFactor
+    ? BigNumber.from((1000 * newHealthFactor.toUnsafeFloat()).toFixed(0))
+    : undefined;
+
   const maxAmount = useMaxChangeGivenHealthFactor(
     balance,
     tokenAddress,
@@ -66,17 +70,16 @@ export const DashOverviewIntro: React.FC<{
       : balance;
 
   // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
+
   const infiniteAmount =
-    mode === "withdraw" && amount && limitAmount && limitAmount.eq(amount)
+    mode === "withdraw" &&
+    amount &&
+    limitAmount &&
+    newHealthFactor &&
+    limitAmount.eq(amount) &&
+    newHealthFactorAsBigNumber?.gt(MIN_SAFE_HEALTH_FACTOR)
       ? MAX_UINT256
       : undefined;
-
-  console.log(
-    mode === "withdraw" || mode === "repay",
-    limitAmount,
-    amount,
-    infiniteAmount
-  );
 
   return (
     <VStack w={{ base: "90%", sm: "75%", md: "60%", lg: "50%" }} spacing="0">
