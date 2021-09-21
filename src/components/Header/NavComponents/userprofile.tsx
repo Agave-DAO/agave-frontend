@@ -161,7 +161,13 @@ export const UserProfile: React.FC<{}> = () => {
           color="white"
           borderColor={mode({ base: "primary.50", md: "primary.50" }, "primary.50")}
         >
-          <PopoverArrow />
+          <PopoverArrow 
+            bg="#007c6e"
+            color="white"
+            border="0px"
+            boxShadow="-1px -1px 1px 0px #36cfa2 !important"
+            borderColor={mode({ base: "primary.50", md: "primary.50" }, "primary.50")}
+          />
           <PopoverBody>
           <Stack spacing={4} direction="column">
             {buttons}
