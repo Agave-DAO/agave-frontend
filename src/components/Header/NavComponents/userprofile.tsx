@@ -8,7 +8,6 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverHeader,
   PopoverBody,
   Stack,
   PopoverArrow,
@@ -16,7 +15,10 @@ import {
 import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
-import {  } from "@web3-react/injected-connector";
+import { useChainAddresses } from "../../../utils/chainAddresses";
+import {
+  internalAddressesPerNetworkId,
+} from "../../../utils/contracts/contractAddresses/internalAddresses";
 
 declare let window: any;
 
@@ -40,17 +42,29 @@ export const UserProfile: React.FC<{}> = () => {
   // Agve button functions
   const { data: agaveBalance } = useAmountAvailableToStake(address);
   const userBal = agaveBalance ? bigNumberToString(agaveBalance, 3) : "0";
-  let chainName;
 
-  switch(useAppWeb3().chainId){
-    case 4:
-      chainName = "Rinkeby";
-      break;
-    case 100:
-      chainName = "xDai";
-      break;
-  }
+  const chainAddresses = useChainAddresses();
 
+  // internalAddressesPerNetworkId cannot be indexed for each chain, strigified and parsed back to index
+  var chains =  JSON.parse(JSON.stringify(internalAddressesPerNetworkId))
+
+  // Buttons to change to every available chain
+  let buttons : any[] = [];
+  Object.keys(chains).forEach((val : any, index : any) => {
+    buttons.push(
+      <Button 
+        bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
+        colorScheme="teal"
+        size="lg"
+        onClick={() => changeId(4)}
+      >
+        {chains[val].chainName}
+      </Button>
+  )})
+
+  const currChainName : String = chains[chainAddresses?.chainId || 0]?.chainName
+
+  // WIP: Request wallet provider to change chain
   function changeId(chainId : Number) {
     try {
       switch(chainId){
@@ -143,8 +157,7 @@ export const UserProfile: React.FC<{}> = () => {
             bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
             rounded="lg"
           >
-            {useAppWeb3().chainId ? <Text fontWeight="400">Chain: {chainName}</Text> : <Text fontWeight="400">Invalid Chain</Text>}
-            
+            {useAppWeb3().chainId ? <Text fontWeight="400">Chain: {currChainName}</Text> : <Text fontWeight="400">Invalid Chain</Text>}
           </Button>
         </PopoverTrigger>
         <PopoverContent 
@@ -153,30 +166,9 @@ export const UserProfile: React.FC<{}> = () => {
           borderColor={mode({ base: "primary.50", md: "primary.50" }, "primary.50")}
         >
           <PopoverArrow />
-          <PopoverHeader
-            borderColor={mode({ base: "primary.50", md: "primary.50" }, "primary.50")}
-          >
-            Current Chain: {chainName}
-          </PopoverHeader>
-
           <PopoverBody>
           <Stack spacing={4} direction="column">
-            <Button 
-              bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
-              colorScheme="teal"
-              size="lg"
-              onClick={() => changeId(100)}
-            >
-              xDai
-            </Button>
-            <Button
-              bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
-              colorScheme="teal"
-              size="lg"
-              onClick={() => changeId(4)}
-            >
-              Rinkeby
-            </Button>
+            {buttons}
           </Stack>
           </PopoverBody>
         </PopoverContent>
