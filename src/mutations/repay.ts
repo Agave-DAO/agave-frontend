@@ -7,6 +7,7 @@ import { useAppWeb3 } from "../hooks/appWeb3";
 import {
   useUserAssetAllowance,
   useUserAssetBalance,
+  useUserVariableDebtForAsset,
 } from "../queries/userAssets";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { NATIVE_TOKEN } from "../queries/allReserveTokens";
@@ -55,6 +56,11 @@ export const useRepayMutation = ({
     account ?? undefined,
     asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
     "0x00"
+  );
+  const variableDebtQueryKey = useUserVariableDebtForAsset.buildKey(
+    chainId ?? undefined,
+    account ?? undefined,
+    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
   );
 
   const debtQueryKey = ["user", "allReserves", "debt"] as const;
@@ -109,6 +115,7 @@ export const useRepayMutation = ({
     {
       onSuccess: async (unitAmountResult, vars, context) => {
         await Promise.allSettled([
+          queryClient.invalidateQueries(variableDebtQueryKey),
           queryClient.invalidateQueries(allowanceQueryKey),
           queryClient.invalidateQueries(userAccountDataQueryKey),
           queryClient.invalidateQueries(assetBalanceQueryKey),

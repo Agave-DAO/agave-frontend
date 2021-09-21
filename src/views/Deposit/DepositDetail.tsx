@@ -26,6 +26,7 @@ import {
   UseDepositMutationProps,
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
+import { MINIMUM_NATIVE_RESERVE } from "../../utils/constants";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -81,6 +82,11 @@ const InitialComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const [amount, setAmount] = React.useState<BigNumber>();
   const { data: userBalance } = useUserAssetBalance(state.token);
+
+  const usefulBalance = userBalance
+    ? userBalance.sub(MINIMUM_NATIVE_RESERVE)
+    : userBalance;
+
   const onSubmit = React.useCallback(
     amountToDeposit =>
       dispatch(createState("amountSelected", { amountToDeposit, ...state })),
@@ -93,7 +99,7 @@ const InitialComp: React.FC<{
       setAmount={setAmount}
       mode="deposit"
       onSubmit={onSubmit}
-      balance={userBalance}
+      balance={usefulBalance}
     />
   );
 };
@@ -293,9 +299,10 @@ const DepositDetailForAsset: React.FC<{
 };
 
 export const DepositDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
