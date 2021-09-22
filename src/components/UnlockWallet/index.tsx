@@ -13,14 +13,15 @@ import {
   Center,
   Text,
   Button,
-  List,
-  ListItem,
+  useColorModeValue as mode,
   Stack,
   HStack,
 } from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
 import { URI_AVAILABLE } from "@web3-react/walletconnect-connector";
 import ColoredText from "../ColoredText";
+
+declare let window: any;
 
 function warnUser(title: string, message?: string | undefined): void {
   NotificationManager.addNotification({
@@ -29,6 +30,49 @@ function warnUser(title: string, message?: string | undefined): void {
     title,
     message,
   });
+}
+function changeId(chainName : any) {
+  var chains =  JSON.parse(JSON.stringify(internalAddressesPerNetwork))
+  const chain = chains[chainName]
+  try {
+    switch(chain.chainId){
+      // If the chain is default to Metamask if will use wallet_switchEthereumChain
+      case 4:
+        window.ethereum.request({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'wallet_switchEthereumChain',
+          params: [
+            {
+              chainId: '0x4',
+            },
+          ],
+        })
+        break;
+      default:
+        window.ethereum.request({
+          id: 1,
+          jsonrpc: '2.0',
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: "0x" + chain.chainId.toString(16),
+              chainName: chain.chainName,
+              rpcUrls: [chain.rpcUrl],
+              nativeCurrency: {
+                name: chain.symbol,
+                symbol: chain.symbol,
+                decimals: 18,
+              },
+              blockExplorerUrls: [chain.explorer],
+            },
+          ],
+        })
+        break;
+    }
+  } catch {
+    console.error("Chain ID change failed")
+  }
 }
 
 const PrivacySection = (
@@ -106,14 +150,20 @@ export const UnlockWallet: React.FC<{}> = props => {
         ) : null}
         <Box>
           <Text color="white">Supported chains:</Text>
-          <List spacing={3}>
+          <Stack spacing={4} direction="column">
             {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) => (
-                <ListItem key={name} color="white">
-                  {name}: {addrs.chainId}
-                </ListItem>
+                <Button 
+                bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
+                colorScheme="teal"
+                size="xl"
+                h="40px"
+                onClick={() => changeId(addrs.chainName)}
+              >
+                {addrs.chainName}
+              </Button>
               )
             )}
-          </List>
+          </Stack>
           {PrivacySection}
         </Box>
       </Center>
