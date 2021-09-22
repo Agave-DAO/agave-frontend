@@ -48,21 +48,23 @@ export const UserProfile: React.FC<{}> = () => {
 
   // Buttons to change to every available chain
   let buttons : any[] = [];
-  Object.keys(chains).forEach((val : any, index : any) => {
+  Object.entries(internalAddressesPerNetworkId).forEach(([name, chain]) => {
     buttons.push(
       <Button 
         bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
         colorScheme="teal"
-        size="lg"
-        onClick={() => changeId(chains[val].chainId)}
+        size="xl"
+        h="40px"
+        onClick={() => changeId(chain.chainId)}
       >
-        {chains[val].chainName}
+        {chain.chainName}
       </Button>
   )})
 
   const currChainName : String = chains[chainAddresses?.chainId || 0]?.chainName
 
   // Request wallet provider to change chain
+  // TODO: change it to enother file
   function changeId(chainId : Number) {
     const chain = chains[chainId.toString()]
     try {
@@ -143,7 +145,7 @@ export const UserProfile: React.FC<{}> = () => {
       <Popover>
         <PopoverTrigger>
           <Button
-            minWidth="14rem"
+            minWidth="9rem"
             height={{ base: "4rem", md: "3rem" }}
             fontSize={{ base: "4xl", md: "2xl" }}
             mx="1.5rem"
@@ -194,7 +196,7 @@ export const UserProfile: React.FC<{}> = () => {
           height={{ base: "1.3rem", md: "1rem" }}
           mr="5px"
         />
-        <Text fontSize={{ base: "4xl", md: "2xl" }}>{addressPretty}</Text>
+        <Text fontSize={{ base: "2xl", md: "2xl" }}>{addressPretty}</Text>
       </Center>
     </>
   );
