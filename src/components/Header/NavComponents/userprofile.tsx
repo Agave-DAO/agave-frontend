@@ -150,7 +150,7 @@ export const UserProfile: React.FC<{}> = () => {
             fontSize={{ base: "4xl", md: "2xl" }}
             mx="1.5rem"
             px="1.5rem"
-            pt="4px"
+            pt={{ base: "0px", md: "4px" }}
             color="white"
             bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
             rounded="lg"
