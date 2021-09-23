@@ -7,7 +7,7 @@ import {
   injectedConnector,
   walletConnectConnector,
 } from "../../hooks/injectedConnectors";
-import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { internalAddressesPerNetwork, ValidNetworkNameTypes } from "../../utils/contracts/contractAddresses/internalAddresses";
 import {
   Box,
   Center,
@@ -31,9 +31,8 @@ function warnUser(title: string, message?: string | undefined): void {
     message,
   });
 }
-function changeId(chainName : any) {
-  var chains =  JSON.parse(JSON.stringify(internalAddressesPerNetwork))
-  const chain = chains[chainName]
+function changeChain(chainName :  ValidNetworkNameTypes) {
+  const chain = internalAddressesPerNetwork[chainName]
   try {
     switch(chain.chainId){
       // If the chain is default to Metamask if will use wallet_switchEthereumChain
@@ -157,7 +156,7 @@ export const UnlockWallet: React.FC<{}> = props => {
                 colorScheme="teal"
                 size="xl"
                 h="40px"
-                onClick={() => changeId(addrs.chainName)}
+                onClick={() => changeChain(addrs.chainName)}
               >
                 {addrs.chainName}
               </Button>

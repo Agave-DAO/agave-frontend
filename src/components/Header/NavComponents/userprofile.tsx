@@ -16,7 +16,7 @@ import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
 import { useChainAddresses } from "../../../utils/chainAddresses";
-import { internalAddressesPerNetworkId, } from "../../../utils/contracts/contractAddresses/internalAddresses";
+import { internalAddressesPerNetworkId, internalAddressesPerNetwork, ValidNetworkNameTypes } from "../../../utils/contracts/contractAddresses/internalAddresses";
 
 declare let window: any;
 
@@ -43,9 +43,6 @@ export const UserProfile: React.FC<{}> = () => {
 
   const chainAddresses = useChainAddresses();
 
-  // internalAddressesPerNetworkId cannot be indexed for each chain, strigified and parsed back to index
-  var chains =  JSON.parse(JSON.stringify(internalAddressesPerNetworkId))
-
   // Buttons to change to every available chain
   let buttons : any[] = [];
   Object.entries(internalAddressesPerNetworkId).forEach(([name, chain]) => {
@@ -55,20 +52,20 @@ export const UserProfile: React.FC<{}> = () => {
         colorScheme="teal"
         size="xl"
         h="40px"
-        onClick={() => changeId(chain.chainId)}
+        onClick={() => changeChain(chain.chainName)}
       >
         {chain.chainName}
       </Button>
   )})
 
-  const currChainName : String = chains[chainAddresses?.chainId || 0]?.chainName
+  const currChainName = chainAddresses?.chainName
 
   // Request wallet provider to change chain
   // TODO: change it to enother file
-  function changeId(chainId: number) {
-    const chain = chains[chainId.toString()]
+  function changeChain(chainName : ValidNetworkNameTypes) {
+    const chain = internalAddressesPerNetwork[chainName]
     try {
-      switch(chainId){
+      switch(chain.chainId){
         // If the chain is default to Metamask if will use wallet_switchEthereumChain
         case 4:
           window.ethereum.request({
