@@ -65,7 +65,7 @@ export const UserProfile: React.FC<{}> = () => {
 
   // Request wallet provider to change chain
   // TODO: change it to enother file
-  function changeId(chainId : Number) {
+  function changeId(chainId: number) {
     const chain = chains[chainId.toString()]
     try {
       switch(chainId){
