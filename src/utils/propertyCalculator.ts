@@ -12,6 +12,7 @@ import {
 import { FixedFromRay } from "../utils/fixedPoint";
 import { weiPerToken } from "../queries/decimalsForToken";
 import { truncateSync } from "fs";
+import { bnMax } from "./helpers";
 
 interface AssetsData {
   tokenConfig: ReserveTokensConfiguration;
@@ -251,6 +252,7 @@ export function useMaxChangeGivenHealthFactor(
                 )
               )
           : amount;
+      maxAmountLimit = bnMax(maxAmountLimit, constants.Zero);
     }
     return maxAmountLimit;
   }

@@ -7,9 +7,12 @@ import {
 import { Box, Center, HStack, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
-// import { TransactionLog } from "../common/TransactionLog";
 import { ModalIcon, TokenIcon } from "../../utils/icons";
-import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
+import {
+  fontSizes,
+  LINEAR_GRADIENT_BG,
+  MAX_UINT256,
+} from "../../utils/constants";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
@@ -18,6 +21,7 @@ import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
+import { constants } from "ethers";
 
 export const WizardOverviewWrapper: React.FC<{
   title: string;
@@ -35,8 +39,10 @@ export const WizardOverviewWrapper: React.FC<{
   // TODO: Switch to use `useWrappedNativeDefinition` when PR is in
   const { data: wrappedNativeAddress } = useWrappedNativeAddress();
 
+  const wizardAmount = amount !== MAX_UINT256 ? amount : constants.Zero;
+
   const newHealthFactor = useNewHealthFactorCalculator(
-    amount,
+    wizardAmount,
     asset.tokenAddress !== NATIVE_TOKEN
       ? asset.tokenAddress
       : wrappedNativeAddress,
@@ -110,7 +116,7 @@ export const WizardOverviewWrapper: React.FC<{
             New health factor
           </Text>
           <ColoredText fontSize="1.2rem">
-            {newHealthFactor ? newHealthFactor.round(2).toString() : ""}
+            {newHealthFactor ? newHealthFactor.round(2).toString() : "-"}
           </ColoredText>
         </HStack>
       </VStack>

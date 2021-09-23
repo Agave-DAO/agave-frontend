@@ -43,18 +43,22 @@ function collateralCompositionCalculator(
       !totalCollateralValue.eq(constants.Zero) &&
       withCollateralEnabled
     ) {
-      const decimalPower = BigNumber.from(10).pow(next.decimals);
-      return next.daiWeiPriceTotal.mul(decimalPower).div(totalCollateralValue);
+      const decimalPower = BigNumber.from(10).pow(18);
+      return next.daiWeiPriceTotal
+        .mul(decimalPower)
+        .mul(100)
+        .div(totalCollateralValue);
     } else return constants.Zero;
   });
 
   const collateralComposition = compositionArray
     ? compositionArray.map(ratio => {
         if (ratio.gt(0)) {
-          return ratio.mul(100);
+          return ratio;
         } else return null;
       })
     : [];
+
   return collateralComposition;
 }
 
@@ -66,7 +70,6 @@ export const useCollateralComposition = () => {
   });
 
   const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
-
   const collateralComposition = React.useMemo(
     () =>
       collateralCompositionCalculator(
