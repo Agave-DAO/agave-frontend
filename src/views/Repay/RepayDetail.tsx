@@ -106,6 +106,7 @@ const InitialComp: React.FC<{
       ? maxRepaymentAmount.mul(2001).div(2000)
       : maxRepaymentAmount;
     // Max repayment amount cannot be negative
+    maxRepaymentAmount = bnMin(maxRepaymentAmount, userBalance);
     maxRepaymentAmount = bnMax(maxRepaymentAmount, constants.Zero);
     return maxRepaymentAmount;
   }, [debtForAsset, userBalance, paymentAssetIsNative]);

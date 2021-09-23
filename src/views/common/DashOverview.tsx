@@ -65,7 +65,8 @@ export const DashOverviewIntro: React.FC<{
       ? maxAmount.gt(constants.Zero)
         ? maxAmount
         : constants.Zero
-      : asset.tokenAddress === NATIVE_TOKEN
+      : (mode === "deposit" || mode === "repay") &&
+        asset.tokenAddress === NATIVE_TOKEN
       ? balance?.sub(MINIMUM_NATIVE_RESERVE)
       : balance;
 
