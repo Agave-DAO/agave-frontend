@@ -5,6 +5,7 @@ import { constants } from "ethers";
 import { useUserAssetAllowance } from "../queries/userAssets";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
+import { MAX_UINT256 } from "../utils/constants";
 
 export interface UseApprovalMutationProps {
   asset: string | undefined;
@@ -55,7 +56,8 @@ export const useApprovalMutation = ({
       );
       const priorAllowance = await tokenContract.allowance(account, spender);
       if (priorAllowance.lt(amount)) {
-        if (!priorAllowance.isZero()) {
+        // is the allowance is zero or unlimited skip the allowance reset
+        if (!priorAllowance.isZero() && !priorAllowance.eq(MAX_UINT256)) {
           const approvalReset = tokenContract.approve(spender, constants.Zero);
           const approvalResetConfirmation = await usingProgressNotification(
             "Awaiting approval reset",
