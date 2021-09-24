@@ -19,6 +19,7 @@ export const frameConnector = new FrameConnector({
 export const walletConnectConnector = new WalletConnectConnector({
   bridge: "https://bridge.walletconnect.org",
   rpc: {
+    4: "https://rinkeby-light.eth.linkpool.io/",
     100: "https://rpc.xdaichain.com/",
   },
 });
