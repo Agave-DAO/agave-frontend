@@ -22,7 +22,7 @@ const InfoWeiBox: React.FC<
     currency: string;
     mode: "repay" | "deposit" | "withdraw" | "borrow" | "stake";
     balance: BigNumber | undefined;
-    healthFactor?: FixedNumber | undefined;
+    healthFactor?: BigNumber | undefined;
     amount: BigNumber | undefined;
     decimals: number;
     setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
@@ -75,7 +75,7 @@ const InfoWeiBox: React.FC<
             fontSize="inherit"
             textTransform="capitalize"
           >
-            {healthFactor.toUnsafeFloat().toFixed(2)}
+            {bigNumberToString(healthFactor, 2, 3)}
           </ColoredText>
         </HStack>
       ) : null}

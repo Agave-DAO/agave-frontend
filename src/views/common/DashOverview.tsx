@@ -23,6 +23,7 @@ import {
   useNewHealthFactorCalculator,
 } from "../../utils/propertyCalculator";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import { bigNumberToString } from "../../utils/fixedPoint";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
@@ -49,6 +50,8 @@ export const DashOverviewIntro: React.FC<{
 
   const newHealthFactorAsBigNumber = newHealthFactor
     ? BigNumber.from((1000 * newHealthFactor.toUnsafeFloat()).toFixed(0))
+    : newHealthFactor === null
+    ? MAX_UINT256
     : undefined;
 
   const maxAmount = useMaxChangeGivenHealthFactor(
@@ -69,14 +72,13 @@ export const DashOverviewIntro: React.FC<{
         asset.tokenAddress === NATIVE_TOKEN
       ? balance?.sub(MINIMUM_NATIVE_RESERVE)
       : balance;
-
   // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
 
   const infiniteAmount =
     mode === "withdraw" &&
     amount &&
     limitAmount &&
-    newHealthFactor &&
+    newHealthFactorAsBigNumber &&
     limitAmount.eq(amount) &&
     newHealthFactorAsBigNumber?.gt(MIN_SAFE_HEALTH_FACTOR)
       ? MAX_UINT256
@@ -94,7 +96,7 @@ export const DashOverviewIntro: React.FC<{
         currency={asset.symbol}
         amount={amount}
         setAmount={setAmount}
-        healthFactor={newHealthFactor}
+        healthFactor={newHealthFactorAsBigNumber}
         mode={mode}
         balance={limitAmount}
         decimals={decimals ? decimals : 18}

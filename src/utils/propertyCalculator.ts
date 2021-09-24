@@ -158,6 +158,8 @@ function newHealthFactorGivenAssetsData(
             .mul(BigNumber.from(10).pow(27))
             .div(newTotalBorrowsvalue)
         )
+      : newTotalBorrowsvalue?.isZero()
+      ? null
       : undefined;
 
   return newHealthFactor;
