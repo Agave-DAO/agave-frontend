@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Text,
   Center,
@@ -11,16 +11,43 @@ import {
   PopoverBody,
   Stack,
   PopoverArrow,
+  Heading,
 } from "@chakra-ui/react";
 import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
 import { useChainAddresses } from "../../../utils/chainAddresses";
-import { internalAddressesPerNetworkId, internalAddressesPerNetwork, ValidNetworkNameTypes } from "../../../utils/contracts/contractAddresses/internalAddresses";
+import { changeChain } from "../../../utils/changeChain";
+import { internalAddressesPerNetworkId } from "../../../utils/contracts/contractAddresses/internalAddresses";
+import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
 
-declare let window: any;
+import {
+  frameConnector,
+  injectedConnector,
+  walletConnectConnector,
+} from "../../../hooks/injectedConnectors";
 
 export const UserProfile: React.FC<{}> = () => {
+  const [connector, setConnector] = useState("");
+
+  injectedConnector
+    .getAccount()
+    .then((res: any) => {
+      setConnector("metamask");
+    })
+    .catch((err: any) => {});
+  walletConnectConnector
+    .getAccount()
+    .then((res: any) => {
+      setConnector("walletconnect");
+    })
+    .catch((err: any) => {});
+  frameConnector
+    .getAccount()
+    .then((res: any) => {
+      setConnector("frame");
+    })
+    .catch((err: any) => {});
   // Light/Dark button functions
   // const { colorMode, toggleColorMode } = useColorMode();
 
@@ -42,68 +69,36 @@ export const UserProfile: React.FC<{}> = () => {
   const userBal = agaveBalance ? bigNumberToString(agaveBalance, 3) : "0";
 
   const chainAddresses = useChainAddresses();
+  const { error } = useWeb3React();
 
   // Buttons to change to every available chain
-  let buttons : any[] = [];
+  let popoverData: any[] = [];
   Object.entries(internalAddressesPerNetworkId).forEach(([name, chain]) => {
-    buttons.push(
-      <Button 
-        bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
-        colorScheme="teal"
-        size="xl"
-        h="40px"
-        onClick={() => changeChain(chain.chainName)}
-      >
-        {chain.chainName}
-      </Button>
-  )})
-
-  const currChainName = chainAddresses?.chainName
-
-  // Request wallet provider to change chain
-  // TODO: change it to enother file
-  function changeChain(chainName : ValidNetworkNameTypes) {
-    const chain = internalAddressesPerNetwork[chainName]
-    try {
-      switch(chain.chainId){
-        // If the chain is default to Metamask if will use wallet_switchEthereumChain
-        case 4:
-          window.ethereum.request({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'wallet_switchEthereumChain',
-            params: [
-              {
-                chainId: '0x4',
-              },
-            ],
-          })
-          break;
-        default:
-          window.ethereum.request({
-            id: 1,
-            jsonrpc: '2.0',
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: "0x" + chain.chainId.toString(16),
-                chainName: chain.chainName,
-                rpcUrls: [chain.rpcUrl],
-                nativeCurrency: {
-                  name: chain.symbol,
-                  symbol: chain.symbol,
-                  decimals: 18,
-                },
-                blockExplorerUrls: [chain.explorer],
-              },
-            ],
-          })
-          break;
-      }
-    } catch {
-      console.error("Chain ID change failed")
+    var entry: any;
+    if (connector === "metamask") {
+      entry = (
+        <Button
+          bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
+          colorScheme="teal"
+          size="xl"
+          h="40px"
+          onClick={() => changeChain(chain.chainName)}
+        >
+          {chain.chainName}
+        </Button>
+      );
+      popoverData.push(entry);
+    } else if (connector !== "") {
+      entry = (
+        <Heading as="h5" size="lg" h="40px" py="4%" px="10%">
+          {chain.chainName + ": " + chain.chainId}
+        </Heading>
+      );
+      popoverData.push(entry);
     }
-  }
+  });
+
+  const currChainName = chainAddresses?.chainName;
 
   return (
     <>
@@ -137,44 +132,84 @@ export const UserProfile: React.FC<{}> = () => {
         <Text mr="5px">{userBal}</Text>
         <Text fontWeight="400">AGVE</Text>
       </Center>
-
-      
-      <Popover>
-        <PopoverTrigger>
-          <Button
-            minWidth="9rem"
+      {connector !== "" ? (
+        connector === "metamask" ? (
+          <Popover>
+            <PopoverTrigger>
+              <Button
+                minWidth="9rem"
+                height={{ base: "4rem", md: "3rem" }}
+                fontSize={{ base: "4xl", md: "2xl" }}
+                mx="1.5rem"
+                px="1.5rem"
+                pt={{ base: "0px", md: "4px" }}
+                color="white"
+                bg={mode(
+                  { base: "secondary.800", md: "primary.500" },
+                  "primary.500"
+                )}
+                rounded="lg"
+              >
+                {error && error instanceof UnsupportedChainIdError ? (
+                  <Text fontWeight="400">Invalid Chain</Text>
+                ) : (
+                  <Text fontWeight="400">Chain: {currChainName}</Text>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              bg={mode(
+                { base: "primary.900", md: "primary.900" },
+                "primary.900"
+              )}
+              color="white"
+              borderColor={mode(
+                { base: "primary.50", md: "primary.50" },
+                "primary.50"
+              )}
+            >
+              <PopoverArrow
+                bg="#007c6e"
+                color="white"
+                border="0px"
+                boxShadow="-1px -1px 1px 0px #36cfa2 !important"
+                borderColor={mode(
+                  { base: "primary.50", md: "primary.50" },
+                  "primary.50"
+                )}
+              />
+              <PopoverBody>
+                <Stack spacing={4} direction="column">
+                  {popoverData}
+                </Stack>
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
+        ) : (
+          <Center
+            minWidth="12rem"
             height={{ base: "4rem", md: "3rem" }}
             fontSize={{ base: "4xl", md: "2xl" }}
             mx="1.5rem"
-            px="1.5rem"
-            pt={{ base: "0px", md: "4px" }}
+            px="1rem"
             color="white"
-            bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
+            bg={mode(
+              { base: "secondary.800", md: "primary.500" },
+              "primary.500"
+            )}
             rounded="lg"
           >
-            {useAppWeb3().chainId ? <Text fontWeight="400">Chain: {currChainName}</Text> : <Text fontWeight="400">Invalid Chain</Text>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent 
-          bg={mode({ base: "primary.900", md: "primary.900" }, "primary.900")}
-          color="white"
-          borderColor={mode({ base: "primary.50", md: "primary.50" }, "primary.50")}
-        >
-          <PopoverArrow 
-            bg="#007c6e"
-            color="white"
-            border="0px"
-            boxShadow="-1px -1px 1px 0px #36cfa2 !important"
-            borderColor={mode({ base: "primary.50", md: "primary.50" }, "primary.50")}
-          />
-          <PopoverBody>
-          <Stack spacing={4} direction="column">
-            {buttons}
-          </Stack>
-          </PopoverBody>
-        </PopoverContent>
-      </Popover>
-      
+            {error && error instanceof UnsupportedChainIdError ? (
+              <Text fontWeight="400">Invalid Chain</Text>
+            ) : (
+              <Text fontWeight="400">Chain: {currChainName}</Text>
+            )}
+          </Center>
+        )
+      ) : (
+        <></>
+      )}
+
       <Center
         background={mode(
           { base: "secondary.800", md: "primary.500" },

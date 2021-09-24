@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { store as NotificationManager } from "react-notifications-component";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
@@ -7,7 +7,7 @@ import {
   injectedConnector,
   walletConnectConnector,
 } from "../../hooks/injectedConnectors";
-import { internalAddressesPerNetwork, ValidNetworkNameTypes } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
 import {
   Box,
   Center,
@@ -18,10 +18,9 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
+import { changeChain } from "../../utils/changeChain";
 import { URI_AVAILABLE } from "@web3-react/walletconnect-connector";
 import ColoredText from "../ColoredText";
-
-declare let window: any;
 
 function warnUser(title: string, message?: string | undefined): void {
   NotificationManager.addNotification({
@@ -30,48 +29,6 @@ function warnUser(title: string, message?: string | undefined): void {
     title,
     message,
   });
-}
-function changeChain(chainName :  ValidNetworkNameTypes) {
-  const chain = internalAddressesPerNetwork[chainName]
-  try {
-    switch(chain.chainId){
-      // If the chain is default to Metamask if will use wallet_switchEthereumChain
-      case 4:
-        window.ethereum.request({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'wallet_switchEthereumChain',
-          params: [
-            {
-              chainId: '0x4',
-            },
-          ],
-        })
-        break;
-      default:
-        window.ethereum.request({
-          id: 1,
-          jsonrpc: '2.0',
-          method: 'wallet_addEthereumChain',
-          params: [
-            {
-              chainId: "0x" + chain.chainId.toString(16),
-              chainName: chain.chainName,
-              rpcUrls: [chain.rpcUrl],
-              nativeCurrency: {
-                name: chain.symbol,
-                symbol: chain.symbol,
-                decimals: 18,
-              },
-              blockExplorerUrls: [chain.explorer],
-            },
-          ],
-        })
-        break;
-    }
-  } catch {
-    console.error("Chain ID change failed")
-  }
 }
 
 const PrivacySection = (
@@ -111,6 +68,14 @@ const PrivacySection = (
 
 export const UnlockWallet: React.FC<{}> = props => {
   const { activate, error } = useWeb3React();
+  const [connector, setConnector] = useState("");
+
+  injectedConnector
+    .getAccount()
+    .then((res: any) => {
+      setConnector("metamask");
+    })
+    .catch((err: any) => {});
 
   let detail = null;
   if (error && error instanceof UnsupportedChainIdError) {
@@ -150,16 +115,24 @@ export const UnlockWallet: React.FC<{}> = props => {
         <Box>
           <Text color="white">Supported chains:</Text>
           <Stack spacing={4} direction="column">
-            {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) => (
-                <Button 
-                bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
-                colorScheme="teal"
-                size="xl"
-                h="40px"
-                onClick={() => changeChain(addrs.chainName)}
-              >
-                {addrs.chainName}
-              </Button>
+            {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
+              connector === "metamask" ? (
+                <Button
+                  bg={mode(
+                    { base: "primary.500", md: "primary.500" },
+                    "primary.500"
+                  )}
+                  colorScheme="teal"
+                  size="xl"
+                  h="40px"
+                  onClick={() => changeChain(addrs.chainName)}
+                >
+                  {addrs.chainName}
+                </Button>
+              ) : (
+                <Text color="white">
+                  {name}: {addrs.chainId}
+                </Text>
               )
             )}
           </Stack>
