@@ -26,28 +26,26 @@ function createRequestArguments(
   method: string;
   params: RequestParameters[];
 } {
-  var params : RequestParameters[];
-  if (method === "wallet_switchEthereumChain") {
-    params = [
-      {
-        chainId: `0x${chain.chainId.toString(16)}`,
-      },
-    ];
-  } else {
-    params = [
-      {
-        chainId: `0x${chain.chainId.toString(16)}`,
-        chainName: chain.chainName,
-        rpcUrls: [chain.rpcUrl],
-        nativeCurrency: {
-          name: chain.symbol,
-          symbol: chain.symbol,
-          decimals: 18,
-        },
-        blockExplorerUrls: [chain.explorer],
-      },
-    ];
-  }
+  const params: RequestParameters[] =
+    method === "wallet_switchEthereumChain"
+      ? [
+          {
+            chainId: `0x${chain.chainId.toString(16)}`,
+          },
+        ]
+      : [
+          {
+            chainId: `0x${chain.chainId.toString(16)}`,
+            chainName: chain.chainName,
+            rpcUrls: [chain.rpcUrl],
+            nativeCurrency: {
+              name: chain.symbol,
+              symbol: chain.symbol,
+              decimals: 18,
+            },
+            blockExplorerUrls: [chain.explorer],
+          },
+        ];
   return {
     id: 1,
     jsonrpc: "2.0",
