@@ -24,7 +24,7 @@ function createRequestArguments(
   } else {
     params = [
       {
-        chainId: "0x" + chain.chainId.toString(16),
+        chainId: `0x${chain.chainId.toString(16)}`,
         chainName: chain.chainName,
         rpcUrls: [chain.rpcUrl],
         nativeCurrency: {
