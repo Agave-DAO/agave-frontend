@@ -90,7 +90,7 @@ export const UnlockWallet: React.FC<{}> = props => {
           </Text>
         )
       ),
-    [connector]
+    [isMetamask]
   );
 
   let detail = null;
