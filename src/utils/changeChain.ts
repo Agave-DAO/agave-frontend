@@ -47,16 +47,13 @@ function createRequestArguments(
 // Only supported with Metamask
 export function changeChain(chainName: ValidNetworkNameTypes) {
   const chain = internalAddressesPerNetwork[chainName];
-
   injectedConnector.getProvider().then(async (provider: any) => {
-    try {
-      await provider.request(
-        createRequestArguments("wallet_switchEthereumChain", chain)
+    await provider
+      .request(createRequestArguments("wallet_switchEthereumChain", chain))
+      .catch(
+        await provider.request(
+          createRequestArguments("wallet_addEthereumChain", chain)
+        )
       );
-    } catch {
-      await provider.request(
-        createRequestArguments("wallet_addEthereumChain", chain)
-      );
-    }
   });
 }
