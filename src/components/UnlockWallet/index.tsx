@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { store as NotificationManager } from "react-notifications-component";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
