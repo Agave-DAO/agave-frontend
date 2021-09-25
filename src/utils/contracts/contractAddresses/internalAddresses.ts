@@ -47,6 +47,7 @@ export const internalAddressesPerNetwork: Record<
     wrappedNativeGateway: "0x8149c8E0F3561A89E343853a7f20A985374dca62",
 
     explorer: "https://rinkeby.etherscan.io",
+    rpcUrl: "https://rinkeby-light.eth.linkpool.io/",
   },
   xdai: {
     chainName: "xdai",
