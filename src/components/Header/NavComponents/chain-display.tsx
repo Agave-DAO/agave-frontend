@@ -53,11 +53,11 @@ export const ChainSelector: React.FC<{}> = () => {
           bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
           rounded="lg"
         >
-          {error && error instanceof UnsupportedChainIdError ? (
-            <Text fontWeight="400">Invalid Chain</Text>
-          ) : (
-            <Text fontWeight="400">Chain: {chainAddresses?.chainName}</Text>
-          )}
+          <Text fontWeight="400">
+            {error && error instanceof UnsupportedChainIdError
+              ? `Invalid Chain`
+              : `Chain: ${chainAddresses?.chainName}`}
+          </Text>
         </Button>
       </PopoverTrigger>
       <PopoverContent
