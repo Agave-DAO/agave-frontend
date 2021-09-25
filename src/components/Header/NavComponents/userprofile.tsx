@@ -21,33 +21,7 @@ import { changeChain } from "../../../utils/changeChain";
 import { internalAddressesPerNetworkId } from "../../../utils/contracts/contractAddresses/internalAddresses";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
 
-import {
-  frameConnector,
-  injectedConnector,
-  walletConnectConnector,
-} from "../../../hooks/injectedConnectors";
-
 export const UserProfile: React.FC<{}> = () => {
-  const [connector, setConnector] = useState("");
-
-  injectedConnector
-    .getAccount()
-    .then((res: any) => {
-      setConnector("metamask");
-    })
-    .catch((err: any) => {});
-  walletConnectConnector
-    .getAccount()
-    .then((res: any) => {
-      setConnector("walletconnect");
-    })
-    .catch((err: any) => {});
-  frameConnector
-    .getAccount()
-    .then((res: any) => {
-      setConnector("frame");
-    })
-    .catch((err: any) => {});
   // Light/Dark button functions
   // const { colorMode, toggleColorMode } = useColorMode();
 
@@ -69,7 +43,13 @@ export const UserProfile: React.FC<{}> = () => {
   const userBal = agaveBalance ? bigNumberToString(agaveBalance, 3) : "0";
 
   const chainAddresses = useChainAddresses();
-  const { error } = useWeb3React();
+  const { library, error } = useWeb3React();
+
+  var connector: string = "";
+
+  if (library) {
+    connector = library.connection?.url;
+  }
 
   // Buttons to change to every available chain
   let popoverData: any[] = [];
@@ -187,7 +167,7 @@ export const UserProfile: React.FC<{}> = () => {
           </Popover>
         ) : (
           <Center
-            minWidth="12rem"
+            minWidth="12.5rem"
             height={{ base: "4rem", md: "3rem" }}
             fontSize={{ base: "4xl", md: "2xl" }}
             mx="1.5rem"
