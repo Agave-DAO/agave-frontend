@@ -5,6 +5,18 @@ import {
 } from "../utils/contracts/contractAddresses/internalAddresses";
 import { injectedConnector } from "../hooks/injectedConnectors";
 
+declare class RequestParameters {
+  chainId: string;
+  chainName?: string | null;
+  rpcUrls?: (string | undefined)[];
+  blockExplorerUrls?: (string | undefined)[];
+  nativeCurrency?: {
+    name: string;
+    symbol: string;
+    decimals: number;
+  };
+}
+
 function createRequestArguments(
   method: string,
   chain: ChainAddresses
@@ -12,9 +24,9 @@ function createRequestArguments(
   id: number;
   jsonrpc: string;
   method: string;
-  params: any[];
+  params: RequestParameters[];
 } {
-  var params;
+  var params : RequestParameters[];
   if (method === "wallet_switchEthereumChain") {
     params = [
       {
