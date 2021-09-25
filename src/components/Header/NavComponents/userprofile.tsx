@@ -10,7 +10,6 @@ import { InjectedConnector } from "@web3-react/injected-connector";
 import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
-import { useChainAddresses } from "../../../utils/chainAddresses";
 import { useWeb3React } from "@web3-react/core";
 import { ChainSelector, CurrentChainBox } from "./chain-display";
 
