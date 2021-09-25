@@ -11,8 +11,8 @@ import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
 import { useChainAddresses } from "../../../utils/chainAddresses";
-import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
-import { ChainSelector } from "./chain-selector";
+import { useWeb3React } from "@web3-react/core";
+import { ChainSelector, CurrentChainBox } from "./chain-display";
 
 export const UserProfile: React.FC<{}> = () => {
   // Light/Dark button functions
@@ -35,9 +35,8 @@ export const UserProfile: React.FC<{}> = () => {
   const { data: agaveBalance } = useAmountAvailableToStake(address);
   const userBal = agaveBalance ? bigNumberToString(agaveBalance, 3) : "0";
 
-  const chainAddresses = useChainAddresses();
-  const { connector, error } = useWeb3React();
-
+  // Chain button functions
+  const { connector } = useWeb3React();
   const isMetamask = connector instanceof InjectedConnector;
 
   return (
@@ -72,33 +71,8 @@ export const UserProfile: React.FC<{}> = () => {
         <Text mr="5px">{userBal}</Text>
         <Text fontWeight="400">AGVE</Text>
       </Center>
-      {connector ? (
-        isMetamask ? (
-          <ChainSelector />
-        ) : (
-          <Center
-            minWidth="12.5rem"
-            height={{ base: "4rem", md: "3rem" }}
-            fontSize={{ base: "4xl", md: "2xl" }}
-            mx="1.5rem"
-            px="1rem"
-            color="white"
-            bg={mode(
-              { base: "secondary.800", md: "primary.500" },
-              "primary.500"
-            )}
-            rounded="lg"
-          >
-            {error && error instanceof UnsupportedChainIdError ? (
-              <Text fontWeight="400">Invalid Chain</Text>
-            ) : (
-              <Text fontWeight="400">Chain: {chainAddresses?.chainName}</Text>
-            )}
-          </Center>
-        )
-      ) : (
-        <></>
-      )}
+
+      {connector ? isMetamask ? <ChainSelector /> : <CurrentChainBox /> : <></>}
 
       <Center
         background={mode(

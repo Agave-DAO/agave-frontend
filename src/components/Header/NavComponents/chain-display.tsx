@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   Text,
   useColorModeValue as mode,
@@ -9,6 +9,7 @@ import {
   PopoverBody,
   Stack,
   PopoverArrow,
+  Center,
 } from "@chakra-ui/react";
 import { useChainAddresses } from "../../../utils/chainAddresses";
 import { changeChain } from "../../../utils/changeChain";
@@ -84,5 +85,28 @@ export const ChainSelector: React.FC<{}> = () => {
         </PopoverBody>
       </PopoverContent>
     </Popover>
+  );
+};
+
+export const CurrentChainBox: React.FC<{}> = () => {
+  const chainAddresses = useChainAddresses();
+  const { error } = useWeb3React();
+  return (
+    <Center
+      minWidth="12.5rem"
+      height={{ base: "4rem", md: "3rem" }}
+      fontSize={{ base: "4xl", md: "2xl" }}
+      mx="1.5rem"
+      px="1rem"
+      color="white"
+      bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
+      rounded="lg"
+    >
+      <Text fontWeight="400">
+        {error && error instanceof UnsupportedChainIdError
+          ? `Invalid Chain`
+          : `Chain: ${chainAddresses?.chainName}`}
+      </Text>
+    </Center>
   );
 };
