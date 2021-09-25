@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import { InjectedConnector } from "@web3-react/injected-connector";
 import { store as NotificationManager } from "react-notifications-component";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
@@ -67,15 +68,30 @@ const PrivacySection = (
 );
 
 export const UnlockWallet: React.FC<{}> = props => {
-  const { activate, error } = useWeb3React();
-  const [connector, setConnector] = useState("");
+  const { connector, activate, error } = useWeb3React();
 
-  injectedConnector
-    .getAccount()
-    .then((res: any) => {
-      setConnector("metamask");
-    })
-    .catch((err: any) => {});
+  const isMetamask = connector instanceof InjectedConnector;
+  const availableChains = useMemo(
+    () =>
+      Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
+        isMetamask ? (
+          <Button
+            bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
+            colorScheme="teal"
+            size="xl"
+            h="40px"
+            onClick={() => changeChain(addrs.chainName)}
+          >
+            {addrs.chainName}
+          </Button>
+        ) : (
+          <Text color="white">
+            {name}: {addrs.chainId}
+          </Text>
+        )
+      ),
+    [connector]
+  );
 
   let detail = null;
   if (error && error instanceof UnsupportedChainIdError) {
@@ -115,26 +131,7 @@ export const UnlockWallet: React.FC<{}> = props => {
         <Box>
           <Text color="white">Supported chains:</Text>
           <Stack spacing={4} direction="column">
-            {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
-              connector === "metamask" ? (
-                <Button
-                  bg={mode(
-                    { base: "primary.500", md: "primary.500" },
-                    "primary.500"
-                  )}
-                  colorScheme="teal"
-                  size="xl"
-                  h="40px"
-                  onClick={() => changeChain(addrs.chainName)}
-                >
-                  {addrs.chainName}
-                </Button>
-              ) : (
-                <Text color="white">
-                  {name}: {addrs.chainId}
-                </Text>
-              )
-            )}
+            {availableChains}
           </Stack>
           {PrivacySection}
         </Box>
