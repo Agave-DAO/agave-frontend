@@ -3,9 +3,10 @@ import {
   ValidNetworkNameTypes,
 } from "../utils/contracts/contractAddresses/internalAddresses";
 import { injectedConnector } from "../hooks/injectedConnectors";
+import { InjectedConnector } from "@web3-react/injected-connector";
 
-function switchEthereumChain(connector: any, chainId: number) {
-  connector.request({
+async function switchEthereumChain(provider: any, chainId: number) {
+  await provider.request({
     id: 1,
     jsonrpc: "2.0",
     method: "wallet_switchEthereumChain",
@@ -16,8 +17,8 @@ function switchEthereumChain(connector: any, chainId: number) {
     ],
   });
 }
-function addEthereumChain(connector: any, chain: any) {
-  connector.request({
+async function addEthereumChain(provider: any, chain: any) {
+  await provider.request({
     id: 1,
     jsonrpc: "2.0",
     method: "wallet_addEthereumChain",
@@ -41,11 +42,11 @@ function addEthereumChain(connector: any, chain: any) {
 export function changeChain(chainName: ValidNetworkNameTypes) {
   const chain = internalAddressesPerNetwork[chainName];
 
-  injectedConnector.getProvider().then((connector: any) => {
-    if (chain.chainId === 4) {
-      switchEthereumChain(connector, chain.chainId);
-    } else {
-      addEthereumChain(connector, chain);
+  injectedConnector.getProvider().then(async (provider: any) => {
+    try {
+      await switchEthereumChain(provider, chain.chainId);
+    } catch {
+      await addEthereumChain(provider, chain);
     }
   });
 }
