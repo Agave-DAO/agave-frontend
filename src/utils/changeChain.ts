@@ -1,28 +1,28 @@
 import {
   internalAddressesPerNetwork,
   ValidNetworkNameTypes,
+  ChainAddresses,
 } from "../utils/contracts/contractAddresses/internalAddresses";
 import { injectedConnector } from "../hooks/injectedConnectors";
-import { InjectedConnector } from "@web3-react/injected-connector";
 
-async function switchEthereumChain(provider: any, chainId: number) {
-  await provider.request({
-    id: 1,
-    jsonrpc: "2.0",
-    method: "wallet_switchEthereumChain",
-    params: [
+function createRequestArguments(
+  method: string,
+  chain: ChainAddresses
+): {
+  id: number;
+  jsonrpc: string;
+  method: string;
+  params: any[];
+} {
+  var params;
+  if (method === "wallet_switchEthereumChain") {
+    params = [
       {
-        chainId: "0x" + chainId.toString(16),
+        chainId: `0x${chain.chainId.toString(16)}`,
       },
-    ],
-  });
-}
-async function addEthereumChain(provider: any, chain: any) {
-  await provider.request({
-    id: 1,
-    jsonrpc: "2.0",
-    method: "wallet_addEthereumChain",
-    params: [
+    ];
+  } else {
+    params = [
       {
         chainId: "0x" + chain.chainId.toString(16),
         chainName: chain.chainName,
@@ -34,8 +34,14 @@ async function addEthereumChain(provider: any, chain: any) {
         },
         blockExplorerUrls: [chain.explorer],
       },
-    ],
-  });
+    ];
+  }
+  return {
+    id: 1,
+    jsonrpc: "2.0",
+    method: method,
+    params: params,
+  };
 }
 
 // Only supported with Metamask
@@ -44,9 +50,13 @@ export function changeChain(chainName: ValidNetworkNameTypes) {
 
   injectedConnector.getProvider().then(async (provider: any) => {
     try {
-      await switchEthereumChain(provider, chain.chainId);
+      await provider.request(
+        createRequestArguments("wallet_switchEthereumChain", chain)
+      );
     } catch {
-      await addEthereumChain(provider, chain);
+      await provider.request(
+        createRequestArguments("wallet_addEthereumChain", chain)
+      );
     }
   });
 }
