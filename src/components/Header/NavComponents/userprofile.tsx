@@ -37,6 +37,11 @@ export const UserProfile: React.FC<{}> = () => {
   // Chain button functions
   const { connector } = useWeb3React();
   const isMetamask = connector instanceof InjectedConnector;
+  const chainSelector = React.useMemo(
+    () =>
+      connector ? isMetamask ? <ChainSelector /> : <CurrentChainBox /> : null,
+    [connector, isMetamask]
+  );
 
   return (
     <>
@@ -71,7 +76,7 @@ export const UserProfile: React.FC<{}> = () => {
         <Text fontWeight="400">AGVE</Text>
       </Center>
 
-      {connector ? isMetamask ? <ChainSelector /> : <CurrentChainBox /> : <></>}
+      {chainSelector}
 
       <Center
         background={mode(
