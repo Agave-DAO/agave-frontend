@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { store as NotificationManager } from "react-notifications-component";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
-import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
+import { UnsupportedChainIdError } from "@web3-react/core";
 import {
   frameConnector,
   injectedConnector,
@@ -22,6 +22,7 @@ import { fontSizes, spacings } from "../../utils/constants";
 import { changeChain } from "../../utils/changeChain";
 import { URI_AVAILABLE } from "@web3-react/walletconnect-connector";
 import ColoredText from "../ColoredText";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 function warnUser(title: string, message?: string | undefined): void {
   NotificationManager.addNotification({
@@ -68,7 +69,7 @@ const PrivacySection = (
 );
 
 export const UnlockWallet: React.FC<{}> = props => {
-  const { connector, activate, error } = useWeb3React();
+  const { connector, activate, error } = useAppWeb3();
 
   const isMetamask = connector instanceof InjectedConnector;
   const availableChains = useMemo(
@@ -76,16 +77,17 @@ export const UnlockWallet: React.FC<{}> = props => {
       Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
         isMetamask ? (
           <Button
+            key={name}
             bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
             colorScheme="teal"
             size="xl"
             h="40px"
-            onClick={() => changeChain(addrs.chainName)}
+            onClick={() => connector ? changeChain(connector, addrs.chainName) : null}
           >
             {addrs.chainName}
           </Button>
         ) : (
-          <Text color="white">
+          <Text key={name} color="white">
             {name}: {addrs.chainId}
           </Text>
         )
