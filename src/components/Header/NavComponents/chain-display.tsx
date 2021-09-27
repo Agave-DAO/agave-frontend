@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import {
-  Text,
   useColorModeValue as mode,
   Button,
   Popover,
@@ -21,7 +20,6 @@ export const ChainSelector: React.FC<{}> = () => {
   const chainAddresses = useChainAddresses();
   const { connector, error } = useAppWeb3();
 
-
   // Buttons to change to every available chain
   const popoverData = useMemo(
     () =>
@@ -33,7 +31,9 @@ export const ChainSelector: React.FC<{}> = () => {
             colorScheme="teal"
             size="xl"
             h="40px"
-            onClick={() => connector ? changeChain(connector, chain.chainName) : null}
+            onClick={() =>
+              connector ? changeChain(connector, chain.chainName) : null
+            }
           >
             {chain.chainName}
           </Button>
@@ -48,19 +48,17 @@ export const ChainSelector: React.FC<{}> = () => {
         <Button
           minWidth="9rem"
           height={{ base: "4rem", md: "3rem" }}
-          fontSize={{ base: "4xl", md: "2xl" }}
+          fontSize={{ base: "3xl", md: "2xl" }}
           mx="1.5rem"
           px="1.5rem"
-          pt={{ base: "0px", md: "4px" }}
           color="white"
           bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
           rounded="lg"
+          fontWeight="400"
         >
-          <Text fontWeight="400">
-            {error && error instanceof UnsupportedChainIdError
-              ? `Invalid Chain`
-              : `Chain: ${chainAddresses?.chainName}`}
-          </Text>
+          {error && error instanceof UnsupportedChainIdError
+            ? `Invalid Chain`
+            : `Chain: ${chainAddresses?.chainName}`}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -98,18 +96,17 @@ export const CurrentChainBox: React.FC<{}> = () => {
     <Center
       minWidth="12.5rem"
       height={{ base: "4rem", md: "3rem" }}
-      fontSize={{ base: "4xl", md: "2xl" }}
-      mx="1.5rem"
-      px="1rem"
+      fontSize="2xl"
+      mx="0.5rem"
+      px="0.5rem"
       color="white"
       bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
       rounded="lg"
+      fontWeight="400"
     >
-      <Text fontWeight="400">
-        {error && error instanceof UnsupportedChainIdError
-          ? `Invalid Chain`
-          : `Chain: ${chainAddresses?.chainName}`}
-      </Text>
+      {error && error instanceof UnsupportedChainIdError
+        ? `Invalid Chain`
+        : `Chain: ${chainAddresses?.chainName}`}
     </Center>
   );
 };
