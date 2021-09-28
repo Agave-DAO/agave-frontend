@@ -5,9 +5,13 @@ import {
   Badge,
   useColorModeValue as mode,
 } from "@chakra-ui/react";
+import { InjectedConnector } from "@web3-react/injected-connector";
+
 import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
+import { useWeb3React } from "@web3-react/core";
+import { ChainSelector, CurrentChainBox } from "./chain-display";
 
 export const UserProfile: React.FC<{}> = () => {
   // Light/Dark button functions
@@ -29,6 +33,15 @@ export const UserProfile: React.FC<{}> = () => {
   // Agve button functions
   const { data: agaveBalance } = useAmountAvailableToStake(address);
   const userBal = agaveBalance ? bigNumberToString(agaveBalance, 3) : "0";
+
+  // Chain button functions
+  const { connector } = useWeb3React();
+  const isMetamask = connector instanceof InjectedConnector;
+  const chainSelector = React.useMemo(
+    () =>
+      connector ? isMetamask ? <ChainSelector /> : <CurrentChainBox /> : null,
+    [connector, isMetamask]
+  );
 
   return (
     <>
@@ -57,10 +70,13 @@ export const UserProfile: React.FC<{}> = () => {
         bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
         rounded="lg"
         px="5px"
+        mr="2px"
       >
         <Text mr="5px">{userBal}</Text>
         <Text fontWeight="400">AGVE</Text>
       </Center>
+
+      {chainSelector}
 
       <Center
         background={mode(
@@ -68,7 +84,7 @@ export const UserProfile: React.FC<{}> = () => {
           "primary.500"
         )}
         rounded="lg"
-        minWidth="10rem"
+        minWidth="14rem"
         height={{ base: "4rem", md: "3rem" }}
         color="white"
         p="10px"
@@ -80,7 +96,7 @@ export const UserProfile: React.FC<{}> = () => {
           height={{ base: "1.3rem", md: "1rem" }}
           mr="5px"
         />
-        <Text fontSize={{ base: "4xl", md: "2xl" }}>{addressPretty}</Text>
+        <Text fontSize={{ base: "2xl", md: "2xl" }}>{addressPretty}</Text>
       </Center>
     </>
   );
