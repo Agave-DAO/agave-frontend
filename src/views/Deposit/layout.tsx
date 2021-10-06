@@ -40,8 +40,10 @@ export const DepositBanner: React.FC<{}> = () => {
       </Text>
       {isSmallerThan900 ? null : (
         <Text>
-          Need your Polygon (Matic) or BSC assets on xDai? Please visit{" "}
-          <Link fontWeight="bold">xpollinate.io</Link>
+          Need to bridge assets to xDai from other chains? Please visit{" "}
+          <Link fontWeight="bold" href="https://xpollinate.io" target="_blank">
+            xpollinate.io
+          </Link>
         </Text>
       )}
     </Center>
