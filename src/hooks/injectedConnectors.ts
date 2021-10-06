@@ -5,7 +5,10 @@ import {
   WalletConnectConnectorArguments,
 } from "@web3-react/walletconnect-connector";
 import React, { useEffect, useMemo, useState } from "react";
-import { ValidNetworkIds } from "../utils/contracts/contractAddresses/internalAddresses";
+import {
+  ValidNetworkIds,
+  internalAddressesPerNetworkId,
+} from "../utils/contracts/contractAddresses/internalAddresses";
 import { useAppWeb3 } from "./appWeb3";
 
 export const injectedConnector = new InjectedConnector({
@@ -18,9 +21,17 @@ export const frameConnector = new FrameConnector({
 
 export const walletConnectConnector = new WalletConnectConnector({
   bridge: "https://bridge.walletconnect.org",
-  rpc: {
-    100: "https://rpc.xdaichain.com/",
-  },
+  // Generate an RPC table such that each chain we have RPCs for is present
+  rpc: Object.fromEntries(
+    Object.values(internalAddressesPerNetworkId)
+      // Filter to chains which have an rpcUrl set
+      // This filter-guard syntax is a result of .filter not propagating content information on its own
+      .filter(
+        (addr): addr is typeof addr & Required<Pick<typeof addr, "rpcUrl">> =>
+          !!addr.rpcUrl
+      )
+      .map(addr => [addr.chainId, addr.rpcUrl] as const)
+  ),
 });
 
 export interface AmbientConnectionState {

@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { InjectedConnector } from "@web3-react/injected-connector";
 import { store as NotificationManager } from "react-notifications-component";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
-import { UnsupportedChainIdError, useWeb3React } from "@web3-react/core";
+import { UnsupportedChainIdError } from "@web3-react/core";
 import {
   frameConnector,
   injectedConnector,
@@ -13,14 +14,15 @@ import {
   Center,
   Text,
   Button,
-  List,
-  ListItem,
+  useColorModeValue as mode,
   Stack,
   HStack,
 } from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
+import { changeChain } from "../../utils/changeChain";
 import { URI_AVAILABLE } from "@web3-react/walletconnect-connector";
 import ColoredText from "../ColoredText";
+import { useAppWeb3 } from "../../hooks/appWeb3";
 
 function warnUser(title: string, message?: string | undefined): void {
   NotificationManager.addNotification({
@@ -67,7 +69,31 @@ const PrivacySection = (
 );
 
 export const UnlockWallet: React.FC<{}> = props => {
-  const { activate, error } = useWeb3React();
+  const { connector, activate, error } = useAppWeb3();
+
+  const isMetamask = connector instanceof InjectedConnector;
+  const availableChains = useMemo(
+    () =>
+      Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
+        isMetamask ? (
+          <Button
+            key={name}
+            bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
+            colorScheme="teal"
+            size="xl"
+            h="40px"
+            onClick={() => connector ? changeChain(connector, addrs.chainName) : null}
+          >
+            {addrs.chainName}
+          </Button>
+        ) : (
+          <Text key={name} color="white">
+            {name}: {addrs.chainId}
+          </Text>
+        )
+      ),
+    [isMetamask]
+  );
 
   let detail = null;
   if (error && error instanceof UnsupportedChainIdError) {
@@ -106,14 +132,9 @@ export const UnlockWallet: React.FC<{}> = props => {
         ) : null}
         <Box>
           <Text color="white">Supported chains:</Text>
-          <List spacing={3}>
-            {Object.entries(internalAddressesPerNetwork).map(([name, addrs]) => (
-                <ListItem key={name} color="white">
-                  {name}: {addrs.chainId}
-                </ListItem>
-              )
-            )}
-          </List>
+          <Stack spacing={4} direction="column">
+            {availableChains}
+          </Stack>
           {PrivacySection}
         </Box>
       </Center>

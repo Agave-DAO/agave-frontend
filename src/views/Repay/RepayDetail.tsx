@@ -103,9 +103,10 @@ const InitialComp: React.FC<{
     // (difference gets minted as agToken)
     // TODO: Change this to a time-based multiplier of APR, for example, 10 minutes worth of interest
     maxRepaymentAmount = maxRepaymentAmount.gt(0)
-      ? maxRepaymentAmount.mul(2001).div(2000)
+      ? maxRepaymentAmount.add(MINIMUM_NATIVE_RESERVE).mul(2001).div(2000)
       : maxRepaymentAmount;
     // Max repayment amount cannot be negative
+    maxRepaymentAmount = bnMin(maxRepaymentAmount, userBalance);
     maxRepaymentAmount = bnMax(maxRepaymentAmount, constants.Zero);
     return maxRepaymentAmount;
   }, [debtForAsset, userBalance, paymentAssetIsNative]);

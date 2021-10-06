@@ -13,6 +13,7 @@ export interface StrongTypedChainAddresses<
   readonly wrappedNativeGateway: string;
 
   readonly explorer?: string | undefined;
+  readonly rpcUrl?: string | undefined;
 }
 
 export interface ChainAddresses extends StrongTypedChainAddresses<any, any> {
@@ -46,6 +47,7 @@ export const internalAddressesPerNetwork: Record<
     wrappedNativeGateway: "0x8149c8E0F3561A89E343853a7f20A985374dca62",
 
     explorer: "https://rinkeby.etherscan.io",
+    rpcUrl: "https://rinkeby-light.eth.linkpool.io/",
   },
   xdai: {
     chainName: "xdai",
@@ -60,6 +62,7 @@ export const internalAddressesPerNetwork: Record<
     wrappedNativeGateway: "0x0bb31c42D0692369Ba681A925C254fEB605c327b",
 
     explorer: "https://blockscout.com/xdai/mainnet",
+    rpcUrl: "https://rpc.xdaichain.com/",
   },
 } as const;
 
