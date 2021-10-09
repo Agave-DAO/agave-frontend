@@ -9,7 +9,10 @@ import {
   ReserveTokenDefinition,
 } from "../../queries/allReserveTokens";
 import { useUserAccountData } from "../../queries/userAccountData";
-import { useUserAssetBalance } from "../../queries/userAssets";
+import {
+  useUserAssetBalance,
+  useUserVariableDebtForAsset,
+} from "../../queries/userAssets";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { useAssetPricesInDaiWei } from "../../queries/assetPriceInDai";
 //Modals
@@ -21,6 +24,7 @@ import {
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
 import { useNativeSymbols } from "../../utils/icons";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 const UserInfo: React.FC<{
   asset: ReserveTokenDefinition;
@@ -43,19 +47,29 @@ const UserInfo: React.FC<{
   const addressOrNative =
     asset.symbol === nativeSymbols.native ? NATIVE_TOKEN : asset.tokenAddress;
   const aTokenBalance = useUserAssetBalance(reserve?.aTokenAddress)?.data;
+  const variableDebtTokenBalance = useUserVariableDebtForAsset(
+    reserve?.tokenAddress
+  ).data;
   const tokenBalance = useUserAssetBalance(addressOrNative)?.data;
   const userAccountData = useUserAccountData(
     userAccountAddress ?? undefined
   )?.data;
+  const decimals = useDecimalCountForToken(reserve?.tokenAddress).data;
   // const healthFactor = userAccountData?.healthFactor;
 
   // ** Check data for undefined and convert to usable front end data
   // TODO text size of asset will likly need to be controlled by helper function
   const symbol = asset.symbol ? asset.symbol : "Asset";
-  const userBal = tokenBalance ? bigNumberToString(tokenBalance) : "0";
-  const userAtokens = aTokenBalance ? bigNumberToString(aTokenBalance) : "0";
-
-  const userBorrow = aTokenBalance ? bigNumberToString(aTokenBalance) : "0";
+  const userBal = tokenBalance
+    ? bigNumberToString(tokenBalance, 3, decimals)
+    : "0";
+  const userAtokens = aTokenBalance
+    ? bigNumberToString(aTokenBalance, 3, decimals)
+    : "0";
+  console.log(decimals);
+  const userBorrow = variableDebtTokenBalance
+    ? bigNumberToString(variableDebtTokenBalance, 3, decimals)
+    : "0";
   const health = userAccountData?.healthFactor
     ? bigNumberToString(userAccountData.healthFactor)
     : "0";
