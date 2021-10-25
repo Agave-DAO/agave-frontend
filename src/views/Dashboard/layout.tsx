@@ -7,6 +7,9 @@ import {
   Text,
   VStack,
   useMediaQuery,
+  useColorModeValue as mode,
+  Button,
+  Image,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
@@ -25,6 +28,7 @@ import { BigNumber, constants } from "ethers";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
+import agaveLogo from "../../assets/image/agave-logo.svg";
 
 interface DashboardProps {
   borrowed: BigNumber | undefined;
@@ -46,6 +50,32 @@ export const DashboardBanner: React.FC<{}> = () => {
           >
             Dashboard
           </Text>
+          <Center borderColor="white" borderWidth="1px" padding="10px" borderRadius="5px">
+            <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="20px">
+              Available reward
+            </Text>
+
+            <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="4px">
+              &lt; 0.01
+            </Text>
+            <Image src={agaveLogo} alt="AGAVE ALT" width={{ base: "22px" }} pb="3.5px" />
+            <Button
+              minWidth="9rem"
+              height={{ base: "4rem", md: "3rem" }}
+              fontSize={{ base: "3xl", md: "2xl" }}
+              ml="1.5rem"
+              px="1.5rem"
+              color="white"
+              bg={mode(
+                { base: "secondary.800", md: "primary.500" },
+                "primary.500"
+              )}
+              rounded="lg"
+              fontWeight="400"
+            >
+              Claim
+            </Button>
+          </Center>
         </Center>
       )}
     </Box>
