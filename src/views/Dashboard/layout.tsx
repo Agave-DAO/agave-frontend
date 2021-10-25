@@ -38,6 +38,45 @@ interface DashboardProps {
   healthFactor: BigNumber | undefined;
 }
 
+const ClaimRewardsBox: React.FC<{}> = () => {
+  const rewardsBalance = 1;
+  return (
+    <Center
+      borderColor="white"
+      borderWidth="1px"
+      padding="10px"
+      borderRadius="5px"
+    >
+      <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="20px">
+        Available reward
+      </Text>
+
+      <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="4px">
+        {rewardsBalance}
+      </Text>
+      <Image
+        src={agaveLogo}
+        alt="AGAVE ALT"
+        width={{ base: "22px" }}
+        pb="3.5px"
+      />
+      <Button
+        minWidth="9rem"
+        height={{ base: "4rem", md: "3rem" }}
+        fontSize={{ base: "3xl", md: "2xl" }}
+        ml="1.5rem"
+        px="1.5rem"
+        color="white"
+        bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
+        rounded="lg"
+        fontWeight="400"
+      >
+        Claim
+      </Button>
+    </Center>
+  );
+};
+
 export const DashboardBanner: React.FC<{}> = () => {
   return (
     <Box w="100%">
@@ -50,32 +89,7 @@ export const DashboardBanner: React.FC<{}> = () => {
           >
             Dashboard
           </Text>
-          <Center borderColor="white" borderWidth="1px" padding="10px" borderRadius="5px">
-            <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="20px">
-              Available reward
-            </Text>
-
-            <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="4px">
-              &lt; 0.01
-            </Text>
-            <Image src={agaveLogo} alt="AGAVE ALT" width={{ base: "22px" }} pb="3.5px" />
-            <Button
-              minWidth="9rem"
-              height={{ base: "4rem", md: "3rem" }}
-              fontSize={{ base: "3xl", md: "2xl" }}
-              ml="1.5rem"
-              px="1.5rem"
-              color="white"
-              bg={mode(
-                { base: "secondary.800", md: "primary.500" },
-                "primary.500"
-              )}
-              rounded="lg"
-              fontWeight="400"
-            >
-              Claim
-            </Button>
-          </Center>
+          <ClaimRewardsBox />
         </Center>
       )}
     </Box>
