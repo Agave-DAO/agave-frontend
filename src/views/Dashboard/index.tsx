@@ -9,6 +9,7 @@ import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useNativeSymbols } from "../../utils/icons";
+import { useUserRewards } from "../../queries/rewardTokens";
 
 export interface AssetData {
   tokenAddress: string;
@@ -62,6 +63,9 @@ export const Dashboard: React.FC<{}> = () => {
         : asset;
     });
   }, [balances]);
+
+  // Rewards information
+  const userRewards = useUserRewards();
 
   return (
     <DashboardLayout
