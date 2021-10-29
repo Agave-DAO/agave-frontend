@@ -12,6 +12,8 @@ export interface StrongTypedChainAddresses<
   readonly aaveProtocolDataProvider: string;
   readonly wrappedNativeGateway: string;
 
+  readonly incentivesController: string;
+
   readonly explorer?: string | undefined;
   readonly rpcUrl?: string | undefined;
 }
@@ -46,6 +48,8 @@ export const internalAddressesPerNetwork: Record<
     aaveProtocolDataProvider: "0xb423A3A2b52E60e3e34968Dad6ed788e2575cd71",
     wrappedNativeGateway: "0x8149c8E0F3561A89E343853a7f20A985374dca62",
 
+    incentivesController: "",
+
     explorer: "https://rinkeby.etherscan.io",
     rpcUrl: "https://rinkeby-light.eth.linkpool.io/",
   },
@@ -60,6 +64,8 @@ export const internalAddressesPerNetwork: Record<
     agaveOracle: "0x80E08A2042F4135f6cA72BA2fd0e7cAEb2Ee30ef",
     aaveProtocolDataProvider: "0xa874f66342a04c24b213BF0715dFf18818D24014",
     wrappedNativeGateway: "0x0bb31c42D0692369Ba681A925C254fEB605c327b",
+
+    incentivesController: "0xfa255f5104f129B78f477e9a6D050a02f31A5D86",
 
     explorer: "https://blockscout.com/xdai/mainnet",
     rpcUrl: "https://rpc.xdaichain.com/",

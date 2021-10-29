@@ -11,7 +11,6 @@ import {
 } from "../queries/allReserveTokens";
 import { FixedFromRay } from "../utils/fixedPoint";
 import { weiPerToken } from "../queries/decimalsForToken";
-import { truncateSync } from "fs";
 import { bnMax } from "./helpers";
 
 interface AssetsData {
