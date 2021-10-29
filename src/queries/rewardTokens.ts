@@ -1,13 +1,93 @@
-import { BigNumber } from "ethers";
+import { constants, BigNumber } from "ethers";
 import { BaseIncentivesController__factory } from "../contracts";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../utils/queryBuilder";
-import {
-  useUserDepositAssetBalances,
-  useUserVariableDebtTokenBalances,
-} from "./userAssets";
+import { useAllProtocolTokens } from "./allATokens";
+import { createClient, gql } from "urql";
+import { useProtocolReserveData } from "./protocolReserveData";
+import { useAllReserveTokensWithData } from "./lendingReserveData";
+import { useAssetPriceInDaiWei } from "./assetPriceInDai";
+import { useDecimalCountForToken } from "./decimalsForToken";
+import { bigNumberToString } from "../utils/fixedPoint";
+
+export interface RewardTokenData {
+  id: string;
+  liquidity: string;
+  totalShares: string;
+  __typename: string;
+}
+
+export interface TargetedTokenData {
+  symbol: string;
+  address: string;
+  index: BigNumber;
+  emissionPerSecond: BigNumber;
+  emissionPerDay?: BigNumber;
+  emissionPerMonth?: BigNumber;
+  emissionPerYear?: BigNumber;
+  tokenAPYperDay?: BigNumber;
+  tokenAPYperMonth?: BigNumber;
+  tokenAPYperYear?: BigNumber;
+  lastUpdateTimestamp: BigNumber;
+  tokenSupply: BigNumber;
+}
+
+export const useAllIncentivedAddresses =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    string[],
+    [_p1: "useAllProtocolTokens", _p2: "incentivesController"],
+    []
+  >(
+    async params => {
+      let queriedAssets: string[] = [];
+      const tokens = await useAllProtocolTokens.fetchQueryDefined(params);
+
+      for (let i = 0; i < tokens.length; i++) {
+        queriedAssets = [
+          ...queriedAssets,
+          (await tokens[i]).aTokenAddress,
+          (await tokens[i]).variableDebtTokenAddress,
+        ];
+      }
+      return queriedAssets;
+    },
+    () => ["useAllProtocolTokens", "incentivesController"],
+    () => undefined,
+    {
+      cacheTime: Infinity,
+      staleTime: Infinity,
+    }
+  );
+
+// Retrieve accumulated rewards from the IncentivesController
 
 export const useUserRewards = buildQueryHookWhenParamsDefinedChainAddrs<
   BigNumber,
+  [_p1: "user", _p2: "incentivesController"],
+  []
+>(
+  async params => {
+    const contract = BaseIncentivesController__factory.connect(
+      params.chainAddrs.incentivesController,
+      params.library
+    );
+
+    const tokens = await useAllIncentivedAddresses.fetchQueryDefined(params);
+
+    const rewards = await contract.getRewardsBalance(tokens, params.account);
+    return rewards;
+  },
+  () => ["user", "incentivesController"],
+  () => undefined,
+  {
+    staleTime: 1 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+  }
+);
+
+// Retrieve assets data from the IncentivesController
+
+export const useRewardTokensData = buildQueryHookWhenParamsDefinedChainAddrs<
+  TargetedTokenData[],
   [_p1: "user", _p2: "asset"],
   []
 >(
@@ -16,24 +96,163 @@ export const useUserRewards = buildQueryHookWhenParamsDefinedChainAddrs<
       params.chainAddrs.incentivesController,
       params.library
     );
-    console.log(params.chainAddrs.incentivesController);
-    const aTokens = await (
-      await useUserDepositAssetBalances.fetchQueryDefined(params)
-    ).map(tk => tk.tokenAddress);
-    const variableDebtTokens = await (
-      await useUserVariableDebtTokenBalances.fetchQueryDefined(params)
-    ).map(tk => tk.tokenAddress);
-    const queriedAssets = [...aTokens, ...variableDebtTokens];
-    const rewards = await contract.getRewardsBalance(
-      queriedAssets,
-      params.account
+    const reserveTokens = await useAllReserveTokensWithData.fetchQueryDefined(
+      params
     );
-    return rewards;
+
+    const tokens = await useAllIncentivedAddresses.fetchQueryDefined(params);
+    let assetsData: TargetedTokenData[] = [];
+
+    for (let j = 0; j < tokens.length; j++) {
+      const underlying = reserveTokens.find(
+        x =>
+          x.variableDebtTokenAddress === tokens[j] ||
+          x.aTokenAddress === tokens[j]
+      );
+      if (!underlying) {
+        break;
+      }
+      const reserveData = await useProtocolReserveData.fetchQueryDefined(
+        params,
+        underlying.tokenAddress
+      );
+
+      const tokenSupply = reserveData
+        ? underlying.aTokenAddress === tokens[j]
+          ? reserveData.availableLiquidity.add(reserveData.totalVariableDebt)
+          : reserveData.totalVariableDebt
+        : constants.Zero;
+
+      const reservePrice =
+        (await useAssetPriceInDaiWei.fetchQueryDefined(
+          params,
+          underlying.tokenAddress
+        )) ?? constants.Zero;
+
+      const decimals = await useDecimalCountForToken.fetchQueryDefined(
+        params,
+        underlying.tokenAddress
+      );
+
+      const tokenSupplyInDaiWei = tokenSupply
+        .mul(reservePrice)
+        .div(BigNumber.from(10).pow(decimals));
+      const assetData = await contract.getAssetData(tokens[j]);
+      let dataStruct = {
+        symbol: underlying.symbol,
+        reserveAddress: underlying.tokenAddress,
+        address: tokens[j],
+        index: assetData[0],
+        emissionPerSecond: assetData[1],
+        lastUpdateTimestamp: assetData[2],
+        tokenSupply: tokenSupplyInDaiWei,
+      };
+
+      assetsData[j] = dataStruct;
+    }
+
+    return assetsData;
   },
   () => ["user", "asset"],
   () => undefined,
   {
-    cacheTime: 60 * 1000,
-    staleTime: 30 * 1000,
+    staleTime: 3 * 60 * 1000,
+    cacheTime: 30 * 60 * 1000,
+  }
+);
+
+// Retrieve reward token value per unit
+
+const client = createClient({
+  url: "https://api.thegraph.com/subgraphs/name/centfinance/cent-swap-xdai",
+});
+
+export const fetchSubgraphData = async () => {
+  const subgraphQuery = gql`
+    query {
+      pools(where: { id: "0x65b0e9418e102a880c92790f001a9c5810b0ef32" }) {
+        id
+        liquidity
+        totalShares
+      }
+    }
+  `;
+
+  const rewardTokenData = await client
+    .query(subgraphQuery)
+    .toPromise()
+    .then(props => {
+      return props.data.pools[0];
+    });
+
+  return rewardTokenData;
+};
+
+export const useRewardPricePerShare = buildQueryHookWhenParamsDefinedChainAddrs<
+  BigNumber,
+  [_p1: "user", _p2: "rewardTokenData"],
+  []
+>(
+  async params => {
+    const data: RewardTokenData = await fetchSubgraphData();
+
+    const liquidity = parseFloat(data.liquidity);
+    const totalShares = parseFloat(data.totalShares);
+    const pricePerShare = liquidity / totalShares;
+
+    // hardcoded to convert into bigNumber - better solution would be nice
+    return BigNumber.from(pricePerShare * 10e15);
+  },
+  () => ["user", "rewardTokenData"],
+  () => undefined,
+  {
+    staleTime: 1 * 60 * 1000,
+    cacheTime: 60 * 60 * 1000,
+  }
+);
+
+// APY is represented in 1e16 and is simply the ratio. To get the accurate APY you need divide by 1e16 and then sum by 1.
+
+export const useTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
+  TargetedTokenData[],
+  [_p1: "user", _p2: "rewardTokenData", _p3: "useRewardPricePerShare"],
+  []
+>(
+  async params => {
+    const tokensData = await useRewardTokensData.fetchQueryDefined(params);
+    const priceShares = await useRewardPricePerShare.fetchQueryDefined(params);
+
+    for (let i = 0; i < tokensData.length; i++) {
+      const totalSupply = tokensData[i].tokenSupply;
+      const emissionPerSecond = tokensData[i].emissionPerSecond;
+      tokensData[i].emissionPerDay = emissionPerSecond.mul(60 * 60 * 24);
+      tokensData[i].emissionPerMonth = emissionPerSecond.mul(60 * 60 * 24 * 30);
+      tokensData[i].emissionPerYear = emissionPerSecond.mul(60 * 60 * 24 * 365);
+      tokensData[i].tokenAPYperDay = tokensData[i].emissionPerDay
+        ?.mul(priceShares)
+        .div(totalSupply);
+      tokensData[i].tokenAPYperMonth = tokensData[i].emissionPerMonth
+        ?.mul(priceShares)
+        .div(totalSupply);
+      tokensData[i].tokenAPYperYear = tokensData[i].emissionPerYear
+        ?.mul(priceShares)
+        .div(totalSupply);
+
+      console.log(
+        "|  " + tokensData[i].symbol,
+        i % 2 === 1 ? "Variable Debt" : "Deposit",
+        "\n|  Current APY: " +
+          bigNumberToString(tokensData[i].tokenAPYperYear, 8, 14) +
+          "%"
+      );
+    }
+
+    return tokensData;
+  },
+  () => ["user", "rewardTokenData", "useRewardPricePerShare"],
+  () => undefined,
+  {
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 60 * 60 * 1000,
   }
 );

@@ -1,5 +1,5 @@
 import React from "react";
-import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
+import { BigNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
 import {
   useUserDepositAssetBalancesDaiWei,
@@ -11,7 +11,6 @@ import {
 } from "../queries/allReserveTokens";
 import { FixedFromRay } from "../utils/fixedPoint";
 import { weiPerToken } from "../queries/decimalsForToken";
-import { truncateSync } from "fs";
 
 interface AssetsData {
   tokenConfig: ReserveTokensConfiguration;

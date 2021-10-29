@@ -14,7 +14,7 @@ import { useStakingCooldown } from "../../queries/stakingCooldown";
 import { useStakingEvents } from "../../queries/stakingEvents";
 import { useStakingPerSecondPerAgaveYield } from "../../queries/stakingPerSecondPerAgaveYield";
 
-import { useClaimMutation } from "../../mutations/claim";
+import { useClaimMutation } from "../../mutations/claimStake";
 import { useCooldownMutation } from "../../mutations/cooldown";
 import { useRedeemMutation } from "../../mutations/redeem";
 import { useStakeMutation } from "../../mutations/stake";
