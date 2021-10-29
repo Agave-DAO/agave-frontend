@@ -27,6 +27,7 @@ export const MODAL_TYPES = {
   HEALTH_FACTOR: "HEALTH_FACTOR",
   LIQUIDITY_PENALTY: "LIQUIDITY_PENALTY",
   LIQUIDITY_THRESHOLD: "LIQUIDITY_THRESHOLD",
+  REWARDS_APY: "REWARDS_APY",
 };
 
 const ModalLiqThreshold: React.FC<{}> = () => {
@@ -188,8 +189,9 @@ const ModalLTV: React.FC<{
 const ModalComponent: React.FC<{
   isOpen: boolean;
   mtype: string;
+  rewardToken?: string | undefined;
   onClose(): void;
-}> = ({ children: modalChildren, mtype, isOpen, onClose }) => {
+}> = ({ children: modalChildren, mtype, isOpen, onClose, rewardToken }) => {
   return (
     <>
       {isOpen ? (
@@ -221,6 +223,7 @@ const ModalComponent: React.FC<{
               {mtype === MODAL_TYPES.MAXIMUM_LTV && <ModalMaxLTV />}
               {mtype === MODAL_TYPES.HEALTH_FACTOR && <ModalHFactor />}
               {mtype === MODAL_TYPES.LIQUIDITY_PENALTY && <ModalLiqPenalty />}
+              {mtype === MODAL_TYPES.REWARDS_APY && <Text>{rewardToken}</Text>}
               {mtype === MODAL_TYPES.LIQUIDITY_THRESHOLD && (
                 <ModalLiqThreshold />
               )}
