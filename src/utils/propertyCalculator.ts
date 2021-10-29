@@ -11,7 +11,7 @@ import {
 } from "../queries/allReserveTokens";
 import { FixedFromRay } from "../utils/fixedPoint";
 import { weiPerToken } from "../queries/decimalsForToken";
-import { truncateSync } from "fs";
+import { bnMax } from "./helpers";
 
 interface AssetsData {
   tokenConfig: ReserveTokensConfiguration;
@@ -123,7 +123,7 @@ function newHealthFactorGivenAssetsData(
     ? assetsData?.reduce((acc, next) => {
         return next.borrowsValue ? acc.add(next.borrowsValue) : acc;
       }, constants.Zero)
-    : null;
+    : undefined;
 
   const changeTotalBorrowsvalue =
     amount &&
@@ -137,12 +137,16 @@ function newHealthFactorGivenAssetsData(
       : constants.Zero;
 
   const newTotalBorrowsvalue =
-    changeTotalBorrowsvalue && oldTotalBorrowsvalue
+    changeTotalBorrowsvalue &&
+    oldTotalBorrowsvalue &&
+    tokenData &&
+    tokenData.borrowsValue
       ? increase
         ? oldTotalBorrowsvalue.add(changeTotalBorrowsvalue)
-        : oldTotalBorrowsvalue.sub(changeTotalBorrowsvalue)
+        : oldTotalBorrowsvalue.gte(changeTotalBorrowsvalue)
+        ? oldTotalBorrowsvalue.sub(changeTotalBorrowsvalue)
+        : oldTotalBorrowsvalue.sub(tokenData.borrowsValue)
       : undefined;
-
   // Multiply by 10^27 to be compatible with the Ray format and then converted into FixedNumber
   const newHealthFactor =
     newTotalBorrowsvalue &&
@@ -153,6 +157,8 @@ function newHealthFactorGivenAssetsData(
             .mul(BigNumber.from(10).pow(27))
             .div(newTotalBorrowsvalue)
         )
+      : newTotalBorrowsvalue?.isZero()
+      ? null
       : undefined;
 
   return newHealthFactor;
@@ -251,6 +257,7 @@ export function useMaxChangeGivenHealthFactor(
                 )
               )
           : amount;
+      maxAmountLimit = bnMax(maxAmountLimit, constants.Zero);
     }
     return maxAmountLimit;
   }

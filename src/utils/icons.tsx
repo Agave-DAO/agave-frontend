@@ -7,13 +7,11 @@ import HoneyLogo from "../assets/image/coins/honey.webp";
 import UsdcLogo from "../assets/image/coins/usdc.svg";
 import UsdtLogo from "../assets/image/coins/usdt.svg";
 import WbtcLogo from "../assets/image/coins/wbtc.svg";
+import StakeLogo from "../assets/image/coins/xdai-stake.svg";
 import React, { MouseEventHandler } from "react";
 import { SquareProps, Circle, Center } from "@chakra-ui/react";
-import { AssetRecord } from "../views/Markets";
 import { useAppWeb3 } from "../hooks/appWeb3";
-import { getChainAddresses, useChainAddresses } from "./chainAddresses";
-import { internalAddressesPerNetworkId } from "./contracts/contractAddresses/internalAddresses";
-import { BorrowAsset } from "../views/Borrow";
+import { getChainAddresses } from "./chainAddresses";
 
 export function imageForTokenSymbol(symbol: string): string | null {
   switch (symbol) {
@@ -34,6 +32,9 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "USDC":
     case "agUSDC":
       return UsdcLogo;
+    case "STAKE":
+    case "agSTAKE":
+      return StakeLogo;
     case "USDT":
       return UsdtLogo;
     case "BTC":

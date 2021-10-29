@@ -32,14 +32,18 @@ const ReserveOverview: React.FC = () => {
   const allReserves = useAllReserveTokens();
   const nativeSymbols = useNativeSymbols();
   const asset = React.useMemo(() => {
-    const asset = allReserves.data?.find(
-      asset =>
-        asset.symbol.toLowerCase() ===
-        nativeSymbols.wrappednative?.toLowerCase()
+    const nativeAsset = allReserves.data?.find(
+      asset => asset.symbol === nativeSymbols.wrappednative
     );
-    return asset && nativeSymbols.wrappednative === asset.symbol
-      ? { ...asset, symbol: nativeSymbols.native }
-      : asset;
+    const commonAsset = allReserves.data?.find(
+      asset => asset.symbol === assetName
+    );
+    console.log(allReserves.data, nativeSymbols.wrappednative, assetName);
+    return nativeAsset &&
+      (nativeSymbols.wrappednative === assetName ||
+        nativeSymbols.native === assetName)
+      ? { ...nativeAsset, symbol: nativeSymbols.native }
+      : commonAsset;
   }, [allReserves, assetName]);
 
   return (

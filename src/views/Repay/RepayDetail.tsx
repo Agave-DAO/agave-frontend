@@ -99,17 +99,14 @@ const InitialComp: React.FC<{
     }
     // Start with the user's debt
     let maxRepaymentAmount = debtForAsset;
-    // 5% extra to ensure sufficient coverage for interest accrued during the time between fetching and repaying
+    // 0.05% extra to ensure sufficient coverage for interest accrued during the time between fetching and repaying
     // (difference gets minted as agToken)
     // TODO: Change this to a time-based multiplier of APR, for example, 10 minutes worth of interest
-    maxRepaymentAmount = maxRepaymentAmount.mul(21).div(20);
-    // The user can only pay as much as their actual balance
-    // If the payment asset is native, ensure a surplus remaining of at least the minimum native balance
-    const usefulBalance = paymentAssetIsNative
-      ? userBalance.sub(MINIMUM_NATIVE_RESERVE)
-      : userBalance;
-    maxRepaymentAmount = bnMin(maxRepaymentAmount, usefulBalance);
+    maxRepaymentAmount = maxRepaymentAmount.gt(0)
+      ? maxRepaymentAmount.add(MINIMUM_NATIVE_RESERVE).mul(2001).div(2000)
+      : maxRepaymentAmount;
     // Max repayment amount cannot be negative
+    maxRepaymentAmount = bnMin(maxRepaymentAmount, userBalance);
     maxRepaymentAmount = bnMax(maxRepaymentAmount, constants.Zero);
     return maxRepaymentAmount;
   }, [debtForAsset, userBalance, paymentAssetIsNative]);

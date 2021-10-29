@@ -24,11 +24,14 @@ import { DashboardEmptyState } from "./emptyState";
 import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
-import { BigNumber, constants } from "ethers";
+import { BigNumber, constants, ethers } from "ethers";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
-import agaveLogo from "../../assets/image/agave-logo.svg";
+import stakeagave from "../../assets/image/stakeagave.png";
+import { useClaimRewardsMutation } from "../../mutations/claimRewards";
+import { useAllProtocolTokens } from "../../queries/allATokens";
+import { useUserRewards } from "../../queries/rewardTokens";
 
 interface DashboardProps {
   borrowed: BigNumber | undefined;
@@ -39,7 +42,39 @@ interface DashboardProps {
 }
 
 const ClaimRewardsBox: React.FC<{}> = () => {
-  const rewardsBalance = 1;
+  const w3 = useAppWeb3();
+
+  let queriedAssets: string[] = [];
+  const tokens = useAllProtocolTokens().data;
+  tokens?.map(asset => {
+    asset.then(arr => {
+      queriedAssets = [
+        ...queriedAssets,
+        arr.aTokenAddress,
+        arr.variableDebtTokenAddress,
+      ];
+      return;
+    });
+  });
+
+  const claimRewardsMutation = useClaimRewardsMutation({
+    chainId: w3.chainId ?? undefined,
+    address: w3.account ?? undefined,
+  });
+
+  const claimRewardsMutationCall = React.useMemo(
+    () => (assets: string[], amount: BigNumber) =>
+      w3.library
+        ? claimRewardsMutation.mutate({
+            assets,
+            amount,
+            library: w3.library,
+          })
+        : undefined,
+    [claimRewardsMutation, w3.library]
+  );
+
+  const rewardsBalance = useUserRewards().data;
   return (
     <Center
       borderColor="white"
@@ -48,18 +83,15 @@ const ClaimRewardsBox: React.FC<{}> = () => {
       borderRadius="5px"
     >
       <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="20px">
-        Available reward
+        Claimable Rewards
       </Text>
 
       <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="4px">
-        {rewardsBalance}
+        {rewardsBalance && rewardsBalance._isBigNumber
+          ? bigNumberToString(rewardsBalance, 5, 18)
+          : ""}
       </Text>
-      <Image
-        src={agaveLogo}
-        alt="AGAVE ALT"
-        width={{ base: "22px" }}
-        pb="3.5px"
-      />
+      <Image src={stakeagave} alt="AGAVE ALT" width={{ base: "5rem" }} />
       <Button
         minWidth="9rem"
         height={{ base: "4rem", md: "3rem" }}
@@ -70,6 +102,9 @@ const ClaimRewardsBox: React.FC<{}> = () => {
         bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
         rounded="lg"
         fontWeight="400"
+        onClick={() => {
+          claimRewardsMutationCall(queriedAssets, ethers.constants.MaxUint256);
+        }}
       >
         Claim
       </Button>
