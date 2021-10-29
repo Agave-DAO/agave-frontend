@@ -274,14 +274,6 @@ const AssetTable: React.FC<{
       Cell: (({ value }) => (
         <Center>
           <DepositAPYView tokenAddress={value} />
-          <ModalIcon
-            position="relative"
-            top="0"
-            right="0"
-            ml="0.5rem"
-            transform="scale(0.75)"
-            onOpen={() => onOpenRewards(value)}
-          />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
