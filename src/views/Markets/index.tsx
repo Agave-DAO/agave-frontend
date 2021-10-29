@@ -1,5 +1,6 @@
-import React from "react";
+import React, { MouseEventHandler, useState } from "react";
 import ColoredText from "../../components/ColoredText";
+import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { Box, Text } from "@chakra-ui/layout";
 import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
 import {
@@ -27,6 +28,9 @@ import {
   TableRenderer,
   MobileTableRenderer,
 } from "../../utils/htmlTable";
+
+import { ModalIcon } from "../../utils/icons";
+import { useDisclosure } from "@chakra-ui/hooks";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -204,6 +208,14 @@ const AssetTable: React.FC<{
     });
   }, [reserves]);
 
+  const [rewardToken, setRewardToken] = useState<string | undefined>();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  function onOpenRewards(value: string) : void {
+    setRewardToken(value)
+    onOpen()
+  }
+
   const columns: Column<AssetRecord>[] = [
     {
       id: "symbol",
@@ -262,6 +274,14 @@ const AssetTable: React.FC<{
       Cell: (({ value }) => (
         <Center>
           <DepositAPYView tokenAddress={value} />
+          <ModalIcon
+            position="relative"
+            top="0"
+            right="0"
+            ml="0.5rem"
+            transform="scale(0.75)"
+            onOpen={() => onOpenRewards(value)}
+          />
         </Center>
       )) as Renderer<CellProps<AssetRecord, string>>,
       disableSortBy: true,
@@ -294,7 +314,8 @@ const AssetTable: React.FC<{
     () => table =>
       (
         <BasicTableRenderer
-          linkpage="reserve-overview"
+          // TODO: Fix clicking on the modal icon opens the reserve overview
+          // linkpage="reserve-overview"    
           table={table}
           tableProps={{
             style: {
@@ -364,9 +385,17 @@ const AssetTable: React.FC<{
   const [ismaxWidth] = useMediaQuery("(max-width: 50em)");
 
   return (
-    <SortedHtmlTable columns={columns} data={assetRecords}>
-      {ismaxWidth ? mobileRenderer : renderer}
-    </SortedHtmlTable>
+    <>
+      <SortedHtmlTable columns={columns} data={assetRecords}>
+        {ismaxWidth ? mobileRenderer : renderer}
+      </SortedHtmlTable>
+      <ModalComponent
+        isOpen={isOpen}
+        mtype={MODAL_TYPES.REWARDS_APY}
+        onClose={onClose}
+        rewardToken={rewardToken}
+      />
+    </>
   );
 };
 

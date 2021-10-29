@@ -1,10 +1,7 @@
 import { InjectedConnector } from "@web3-react/injected-connector";
 import { FrameConnector } from "@web3-react/frame-connector";
-import {
-  WalletConnectConnector,
-  WalletConnectConnectorArguments,
-} from "@web3-react/walletconnect-connector";
-import React, { useEffect, useMemo, useState } from "react";
+import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
+import React, { useEffect, useMemo } from "react";
 import {
   ValidNetworkIds,
   internalAddressesPerNetworkId,
