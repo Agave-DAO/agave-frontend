@@ -7,6 +7,7 @@ import HoneyLogo from "../assets/image/coins/honey.webp";
 import UsdcLogo from "../assets/image/coins/usdc.svg";
 import UsdtLogo from "../assets/image/coins/usdt.svg";
 import WbtcLogo from "../assets/image/coins/wbtc.svg";
+import StakeLogo from "../assets/image/coins/xdai-stake.svg";
 import React, { MouseEventHandler } from "react";
 import { SquareProps, Circle, Center } from "@chakra-ui/react";
 import { useAppWeb3 } from "../hooks/appWeb3";
@@ -31,6 +32,9 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "USDC":
     case "agUSDC":
       return UsdcLogo;
+    case "STAKE":
+    case "agSTAKE":
+      return StakeLogo;
     case "USDT":
       return UsdtLogo;
     case "BTC":
