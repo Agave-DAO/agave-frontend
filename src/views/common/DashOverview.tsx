@@ -5,7 +5,14 @@ import InfoWeiBox from "./InfoWeiBox";
 import { BigNumber, constants } from "ethers";
 import { Button } from "@chakra-ui/button";
 
-import { fontSizes, LINEAR_GRADIENT_BG } from "../../utils/constants";
+import {
+  fontSizes,
+  LINEAR_GRADIENT_BG,
+  MIN_SAFE_HEALTH_FACTOR,
+  MINIMUM_NATIVE_RESERVE,
+  MAX_INT256,
+  MAX_UINT256,
+} from "../../utils/constants";
 import {
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
@@ -16,10 +23,7 @@ import {
   useNewHealthFactorCalculator,
 } from "../../utils/propertyCalculator";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
-import {
-  MIN_SAFE_HEALTH_FACTOR,
-  MINIMUM_NATIVE_RESERVE,
-} from "../../utils/constants";
+import { bigNumberToString } from "../../utils/fixedPoint";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
@@ -44,6 +48,12 @@ export const DashOverviewIntro: React.FC<{
     mode === "deposit" || mode === "borrow"
   );
 
+  const newHealthFactorAsBigNumber = newHealthFactor
+    ? BigNumber.from((1000 * newHealthFactor.toUnsafeFloat()).toFixed(0))
+    : newHealthFactor === null
+    ? MAX_UINT256
+    : undefined;
+
   const maxAmount = useMaxChangeGivenHealthFactor(
     balance,
     tokenAddress,
@@ -58,7 +68,22 @@ export const DashOverviewIntro: React.FC<{
       ? maxAmount.gt(constants.Zero)
         ? maxAmount
         : constants.Zero
+      : (mode === "deposit" || mode === "repay") &&
+        asset.tokenAddress === NATIVE_TOKEN
+      ? balance?.sub(MINIMUM_NATIVE_RESERVE)
       : balance;
+  // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
+
+  const infiniteAmount =
+    mode === "withdraw" &&
+    amount &&
+    limitAmount &&
+    newHealthFactorAsBigNumber &&
+    limitAmount.eq(amount) &&
+    newHealthFactorAsBigNumber?.gt(MIN_SAFE_HEALTH_FACTOR)
+      ? MAX_UINT256
+      : undefined;
+
   return (
     <VStack w={{ base: "90%", sm: "75%", md: "60%", lg: "50%" }} spacing="0">
       <ColoredText fontSize="1.8rem" textTransform="capitalize" pb="1rem">
@@ -71,15 +96,9 @@ export const DashOverviewIntro: React.FC<{
         currency={asset.symbol}
         amount={amount}
         setAmount={setAmount}
-        healthFactor={newHealthFactor}
+        healthFactor={newHealthFactorAsBigNumber}
         mode={mode}
-        balance={
-          // If NATIVE don't allow to deposit the full balance in a wallet! Leave 0.1
-          asset.tokenAddress === NATIVE_TOKEN &&
-          (mode === "deposit" || mode === "repay")
-            ? limitAmount?.sub(MINIMUM_NATIVE_RESERVE)
-            : limitAmount
-        }
+        balance={limitAmount}
         decimals={decimals ? decimals : 18}
       />
       <Box h="4.3rem" />
@@ -97,7 +116,7 @@ export const DashOverviewIntro: React.FC<{
         fontSize={fontSizes.md}
         px="7.5rem"
         py=".8rem"
-        onClick={() => onSubmit(amount || BigNumber.from(0))}
+        onClick={() => onSubmit(infiniteAmount || amount || BigNumber.from(0))}
       >
         {balance && amount?.gt(balance)
           ? "Not enough Balance"

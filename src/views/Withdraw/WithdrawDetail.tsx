@@ -14,7 +14,7 @@ import {
 } from "../../queries/allReserveTokens";
 import { Box, Center, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
-import { BigNumber } from "ethers";
+import { BigNumber, constants } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { bigNumberToString } from "../../utils/fixedPoint";
@@ -109,6 +109,19 @@ const InitialComp: React.FC<{
     state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
   const { data: reserve } = useLendingReserveData(asset?.tokenAddress);
   const { data: userAgBalance } = useUserAssetBalance(reserve?.aTokenAddress);
+
+  const availableToWithdraw: BigNumber | undefined = React.useMemo(() => {
+    if (userAgBalance === undefined) {
+      return undefined;
+    }
+    // Start with the user's deposits
+    let maxWithdrawalAmount = userAgBalance;
+    // 0.05% extra to ensure sufficient coverage for interest accrued during the time between fetching and withdrawing
+    // TODO: Change this to a time-based multiplier of APR, for example, 10 minutes worth of interest
+    //maxWithdrawalAmount = maxWithdrawalAmount.gt(constants.Zero)      ? maxWithdrawalAmount.mul(2001).div(2000)      : maxWithdrawalAmount;
+    return maxWithdrawalAmount;
+  }, [userAgBalance]);
+
   const onSubmit = React.useCallback(
     amountToWithdraw =>
       dispatch(
@@ -128,7 +141,7 @@ const InitialComp: React.FC<{
       setAmount={setAmount}
       mode="withdraw"
       onSubmit={onSubmit}
-      balance={userAgBalance}
+      balance={availableToWithdraw}
     />
   );
 };
@@ -339,9 +352,10 @@ const WithdrawDetailForAsset: React.FC<{
 };
 
 export const WithdrawDetail: React.FC = () => {
-  const match = useRouteMatch<{
-    assetName: string | undefined;
-  }>();
+  const match =
+    useRouteMatch<{
+      assetName: string | undefined;
+    }>();
   const history = useHistory();
   const assetName = match.params.assetName;
   const {

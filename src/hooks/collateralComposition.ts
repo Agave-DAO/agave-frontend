@@ -4,6 +4,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import {
   useUserReserveAssetBalancesDaiWei,
   ReserveAssetBalancesDaiWei,
+  useUserDepositAssetBalancesDaiWei,
 } from "../queries/userAssets";
 import {
   useUserReservesData,
@@ -63,9 +64,9 @@ function collateralCompositionCalculator(
 }
 
 export const useCollateralComposition = () => {
-  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
+  const { data: allUserATokenBalances } = useUserDepositAssetBalancesDaiWei();
 
-  const tokenAddresses = allUserReservesBalances?.map(token => {
+  const tokenAddresses = allUserATokenBalances?.map(token => {
     return token.tokenAddress;
   });
 
@@ -74,10 +75,10 @@ export const useCollateralComposition = () => {
     () =>
       collateralCompositionCalculator(
         tokenAddresses,
-        allUserReservesBalances,
+        allUserATokenBalances,
         allUserReservesData
       ),
-    [tokenAddresses, allUserReservesBalances, allUserReservesData]
+    [tokenAddresses, allUserATokenBalances, allUserReservesData]
   );
 
   return collateralComposition;

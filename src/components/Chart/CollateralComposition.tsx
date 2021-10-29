@@ -13,15 +13,15 @@ import {
   useMediaQuery,
 } from "@chakra-ui/react";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
-import { useUserReserveAssetBalancesDaiWei } from "../../queries/userAssets";
+import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { useCollateralComposition } from "../../hooks/collateralComposition";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useNativeSymbols } from "../../utils/icons";
 
 export const CollateralComposition: React.FC = () => {
-  const { data: allUserReservesBalances } = useUserReserveAssetBalancesDaiWei();
+  const { data: allUserATokenBalances } = useUserDepositAssetBalancesDaiWei();
   const nativeSymbols = useNativeSymbols();
-  const reserves = allUserReservesBalances?.map(asset => {
+  const reserves = allUserATokenBalances?.map(asset => {
     return asset.symbol === nativeSymbols.wrappednative
       ? {
           ...asset,

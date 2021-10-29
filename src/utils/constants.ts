@@ -15,6 +15,8 @@ export const spacings = {
 
 export const MIN_SAFE_HEALTH_FACTOR = BigNumber.from(1200);
 export const MINIMUM_NATIVE_RESERVE = constants.WeiPerEther.div(50);
+export const MAX_UINT256 = BigNumber.from(2).pow(256).sub(1);
+export const MAX_INT256 = BigNumber.from(2).pow(255).sub(1);
 
 export const assetColor: { [key: string]: string } = {
   USDC: theme.colors.blue[400],
