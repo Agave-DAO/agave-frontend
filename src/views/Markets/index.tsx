@@ -1,14 +1,27 @@
-import React, { MouseEventHandler, useState } from "react";
+import React, { useState } from "react";
 import ColoredText from "../../components/ColoredText";
-import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
+import {
+  Center,
+  Flex,
+  useMediaQuery,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverBody,
+  PopoverArrow,
+  useColorModeValue as mode,
+} from "@chakra-ui/react";
 import {
   useMarketSizeInDai,
   useTotalMarketSize,
 } from "../../queries/marketSize";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../../utils/queryBuilder";
-import { fixedNumberToPercentage } from "../../utils/fixedPoint";
+import {
+  fixedNumberToPercentage,
+  bigNumberToString,
+} from "../../utils/fixedPoint";
 import { FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
@@ -31,6 +44,7 @@ import {
 
 import { ModalIcon } from "../../utils/icons";
 import { useDisclosure } from "@chakra-ui/hooks";
+import { useTokensAPY } from "../../queries/rewardTokens";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -180,6 +194,25 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
   }, [query.data]);
 };
 
+const PopoverRewardsAPY: React.FC<{
+  tokenAddress: string;
+}> = tokenAddress => {
+  const tokensAPY = useTokensAPY().data;
+  const tokenData = tokensAPY?.filter(
+    token => (token as any).reserveAddress === tokenAddress.tokenAddress
+  );
+  const variableDebtApy =
+    bigNumberToString((tokenData as any)[0].tokenAPYperYear, 4, 14) + "%";
+  const depositApy =
+    bigNumberToString((tokenData as any)[1].tokenAPYperYear, 4, 14) + "%";
+  return (
+    <>
+      <Text fontSize="xl" pt="5px">Current Variable Debt APY: {variableDebtApy}</Text>
+      <Text fontSize="xl" pt="5px">Current Deposit APY: {depositApy}</Text>
+    </>
+  );
+};
+
 const AssetTable: React.FC<{
   viewMode: "native" | "usd";
 }> = ({ viewMode }) => {
@@ -208,13 +241,7 @@ const AssetTable: React.FC<{
     });
   }, [reserves]);
 
-  const [rewardToken, setRewardToken] = useState<string | undefined>();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  function onOpenRewards(value: string) : void {
-    setRewardToken(value)
-    onOpen()
-  }
+  const { onOpen } = useDisclosure();
 
   const columns: Column<AssetRecord>[] = [
     {
@@ -270,20 +297,46 @@ const AssetTable: React.FC<{
     {
       id: "depositAPY",
       Header: "Deposit APY",
-      accessor: row => row.tokenAddress,
+      accessor: row => row,
       Cell: (({ value }) => (
         <Center>
-          <DepositAPYView tokenAddress={value} />
-          <ModalIcon
-            position="relative"
-            top="0"
-            right="0"
-            ml="0.5rem"
-            transform="scale(0.75)"
-            onOpen={() => onOpenRewards(value)}
-          />
+          <DepositAPYView tokenAddress={value.tokenAddress} />
+          <Popover trigger="hover" placement="top">
+            <PopoverTrigger>
+              <ModalIcon
+                position="relative"
+                top="0"
+                right="0"
+                ml="0.5rem"
+                transform="scale(0.75)"
+                onOpen={onOpen}
+              />
+            </PopoverTrigger>
+            <PopoverContent
+              bg={mode(
+                { base: "primary.900", md: "primary.900" },
+                "primary.900"
+              )}
+              color="white"
+              borderColor={mode(
+                { base: "primary.50", md: "primary.50" },
+                "primary.50"
+              )}
+              w="auto"
+              h="auto"
+              p="5px"
+            >
+              <PopoverHeader fontWeight="semibold">
+                {value.symbol} Rewards
+              </PopoverHeader>
+              <PopoverArrow />
+              <PopoverBody>
+                <PopoverRewardsAPY tokenAddress={value.tokenAddress} />
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Center>
-      )) as Renderer<CellProps<AssetRecord, string>>,
+      )) as Renderer<CellProps<AssetRecord, AssetRecord>>,
       disableSortBy: true,
     },
     {
@@ -314,8 +367,7 @@ const AssetTable: React.FC<{
     () => table =>
       (
         <BasicTableRenderer
-          // TODO: Fix clicking on the modal icon opens the reserve overview
-          // linkpage="reserve-overview"    
+          linkpage="reserve-overview"
           table={table}
           tableProps={{
             style: {
@@ -389,12 +441,6 @@ const AssetTable: React.FC<{
       <SortedHtmlTable columns={columns} data={assetRecords}>
         {ismaxWidth ? mobileRenderer : renderer}
       </SortedHtmlTable>
-      <ModalComponent
-        isOpen={isOpen}
-        mtype={MODAL_TYPES.REWARDS_APY}
-        onClose={onClose}
-        rewardToken={rewardToken}
-      />
     </>
   );
 };
