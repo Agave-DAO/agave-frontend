@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { Box, Text } from "@chakra-ui/layout";
 import {
@@ -207,8 +207,12 @@ const PopoverRewardsAPY: React.FC<{
     bigNumberToString((tokenData as any)[1].tokenAPYperYear, 4, 14) + "%";
   return (
     <>
-      <Text fontSize="xl" pt="5px">Current Variable Debt APY: {variableDebtApy}</Text>
-      <Text fontSize="xl" pt="5px">Current Deposit APY: {depositApy}</Text>
+      <Text fontSize="xl" pt="5px">
+        Current Variable Debt APY: {variableDebtApy}
+      </Text>
+      <Text fontSize="xl" pt="5px">
+        Current Deposit APY: {depositApy}
+      </Text>
     </>
   );
 };
@@ -437,11 +441,9 @@ const AssetTable: React.FC<{
   const [ismaxWidth] = useMediaQuery("(max-width: 50em)");
 
   return (
-    <>
-      <SortedHtmlTable columns={columns} data={assetRecords}>
-        {ismaxWidth ? mobileRenderer : renderer}
-      </SortedHtmlTable>
-    </>
+    <SortedHtmlTable columns={columns} data={assetRecords}>
+      {ismaxWidth ? mobileRenderer : renderer}
+    </SortedHtmlTable>
   );
 };
 
