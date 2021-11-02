@@ -213,7 +213,7 @@ export const useRewardPricePerShare = buildQueryHookWhenParamsDefinedChainAddrs<
 
 // APY is represented in 1e16 and is simply the ratio. To get the accurate APY you need divide by 1e16 and then sum by 1.
 
-export const useTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
+export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
   TargetedTokenData[],
   [_p1: "user", _p2: "rewardTokenData", _p3: "useRewardPricePerShare"],
   []
@@ -237,14 +237,6 @@ export const useTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
       tokensData[i].tokenAPYperYear = tokensData[i].emissionPerYear
         ?.mul(priceShares)
         .div(totalSupply);
-
-      console.log(
-        "|  " + tokensData[i].symbol,
-        i % 2 === 1 ? "Variable Debt" : "Deposit",
-        "\n|  Current APY: " +
-          bigNumberToString(tokensData[i].tokenAPYperYear, 8, 14) +
-          "%"
-      );
     }
 
     return tokensData;

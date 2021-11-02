@@ -22,7 +22,7 @@ import {
   fixedNumberToPercentage,
   bigNumberToString,
 } from "../../utils/fixedPoint";
-import { FixedNumber } from "ethers";
+import { BigNumber, FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { CellProps, Column, Renderer } from "react-table";
@@ -44,7 +44,10 @@ import {
 
 import { ModalIcon } from "../../utils/icons";
 import { useDisclosure } from "@chakra-ui/hooks";
-import { useTokensAPY } from "../../queries/rewardTokens";
+import {
+  TargetedTokenData,
+  useRewardTokensAPY,
+} from "../../queries/rewardTokens";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -152,31 +155,54 @@ const TotalBorrowedView: React.FC<{
 const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
-  const query = useDepositAPY(tokenAddress);
+  const protocolDepositAPY = useDepositAPY(tokenAddress);
+  const rewardsAPY = useRewardTokensAPY().data;
+  const tokenData = rewardsAPY?.filter(
+    token => (token as any).reserveAddress === tokenAddress
+  );
+
   return React.useMemo(() => {
-    if (query.data === undefined) {
+    if (
+      protocolDepositAPY.data === undefined ||
+      rewardsAPY === undefined ||
+      !tokenData ||
+      tokenData[0] === undefined ||
+      !tokenData[0].tokenAPYperYear
+    ) {
       return <>-</>;
     }
-    const depositAPY = query.data;
-    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3, 2)} />;
-  }, [query.data]);
+    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 11);
+    const depositAPY = BigNumber.from(protocolDepositAPY.data);
+    const aggregateAPY = rewardsAPYAsFixed.add(depositAPY);
+    return <PercentageView ratio={bigNumberToString(aggregateAPY, 5, 25)} />;
+  }, [protocolDepositAPY.data, rewardsAPY]);
 };
 
 const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
-  const query = useVariableBorrowAPR(tokenAddress);
+  const protocolVariableAPR = useVariableBorrowAPR(tokenAddress);
+  const rewardsAPY = useRewardTokensAPY().data;
+  const tokenData = rewardsAPY?.filter(
+    token => (token as any).reserveAddress === tokenAddress
+  );
   return React.useMemo(() => {
-    if (query.data === undefined) {
+    if (
+      protocolVariableAPR.data === undefined ||
+      rewardsAPY === undefined ||
+      !tokenData ||
+      tokenData[1] === undefined ||
+      !tokenData[1].tokenAPYperYear
+    ) {
       return <>-</>;
     }
-    const variableBorrowAPR = query.data;
-    return (
-      <PercentageView
-        ratio={fixedNumberToPercentage(variableBorrowAPR, 3, 2)}
-      />
-    );
-  }, [query.data]);
+    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 11);
+
+    const protocolVariableBorrowAPR = BigNumber.from(protocolVariableAPR.data);
+    const aggregateAPY = protocolVariableBorrowAPR.sub(rewardsAPYAsFixed);
+
+    return <PercentageView ratio={bigNumberToString(aggregateAPY, 3, 25)} />;
+  }, [protocolVariableAPR, rewardsAPY]);
 };
 
 const StableAPRView: React.FC<{ tokenAddress: string }> = ({
@@ -196,23 +222,59 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
 
 const PopoverRewardsAPY: React.FC<{
   tokenAddress: string;
-}> = tokenAddress => {
-  const tokensAPY = useTokensAPY().data;
-  const tokenData = tokensAPY?.filter(
-    token => (token as any).reserveAddress === tokenAddress.tokenAddress
+  deposit: boolean;
+}> = ({ tokenAddress, deposit }) => {
+  const protocolDepositAPY = useDepositAPY(tokenAddress).data;
+  const protocolVariableAPR = useVariableBorrowAPR(tokenAddress).data;
+  const rewardsAPY = useRewardTokensAPY().data;
+  const tokenData = rewardsAPY?.filter(
+    token => (token as any).reserveAddress === tokenAddress
   );
-  const variableDebtApy =
-    bigNumberToString((tokenData as any)[0].tokenAPYperYear, 4, 14) + "%";
-  const depositApy =
-    bigNumberToString((tokenData as any)[1].tokenAPYperYear, 4, 14) + "%";
+  if (
+    protocolVariableAPR === undefined ||
+    rewardsAPY === undefined ||
+    !tokenData ||
+    !tokenData[0].tokenAPYperYear ||
+    !tokenData[1].tokenAPYperYear
+  ) {
+    return <>-</>;
+  }
+  const rewardsDepositApy =
+    bigNumberToString(
+      (tokenData as TargetedTokenData[])[0].tokenAPYperYear,
+      3,
+      14
+    ) + "%";
+  const rewardsVariableDebtApy =
+    bigNumberToString(
+      (tokenData as TargetedTokenData[])[1].tokenAPYperYear,
+      3,
+      14
+    ) + "%";
+
+  const protocolDepositAPYString =
+    fixedNumberToPercentage(protocolDepositAPY, 3, 3) + "%";
+  const protocolVariableAPRString =
+    fixedNumberToPercentage(protocolVariableAPR, 3, 3) + "%";
+
   return (
     <>
-      <Text fontSize="xl" pt="5px">
-        Current Variable Debt APY: {variableDebtApy}
-      </Text>
-      <Text fontSize="xl" pt="5px">
-        Current Deposit APY: {depositApy}
-      </Text>
+      <Flex justifyContent="space-between" paddingTop="1rem">
+        <Text fontSize="xxl" pt="5px">
+          Base Rate
+        </Text>
+        <Text fontSize="xxl" pt="5px" fontWeight="bold">
+          {deposit ? protocolDepositAPYString : protocolVariableAPRString}
+        </Text>
+      </Flex>
+      <Flex justifyContent="space-between" paddingTop="1rem">
+        <Text fontSize="xxl" pt="5px">
+          Incentives Rate
+        </Text>
+        <Text fontSize="xxl" pt="5px" fontWeight="bold">
+          {deposit ? rewardsDepositApy : rewardsVariableDebtApy}
+        </Text>
+      </Flex>
     </>
   );
 };
@@ -305,7 +367,7 @@ const AssetTable: React.FC<{
       Cell: (({ value }) => (
         <Center>
           <DepositAPYView tokenAddress={value.tokenAddress} />
-          <Popover trigger="hover" placement="top">
+          <Popover trigger="hover" placement="right-start">
             <PopoverTrigger>
               <ModalIcon
                 position="relative"
@@ -317,25 +379,26 @@ const AssetTable: React.FC<{
               />
             </PopoverTrigger>
             <PopoverContent
-              bg={mode(
-                { base: "primary.900", md: "primary.900" },
-                "primary.900"
-              )}
+              bg="blue.800"
               color="white"
               borderColor={mode(
                 { base: "primary.50", md: "primary.50" },
                 "primary.50"
               )}
               w="auto"
+              minW="12vw"
               h="auto"
-              p="5px"
+              p="1rem"
             >
-              <PopoverHeader fontWeight="semibold">
-                {value.symbol} Rewards
+              <PopoverHeader fontWeight="semibold" marginY="1rem">
+                {value.symbol} - APY Breakdown
               </PopoverHeader>
               <PopoverArrow />
               <PopoverBody>
-                <PopoverRewardsAPY tokenAddress={value.tokenAddress} />
+                <PopoverRewardsAPY
+                  tokenAddress={value.tokenAddress}
+                  deposit={true}
+                />
               </PopoverBody>
             </PopoverContent>
           </Popover>
@@ -346,12 +409,47 @@ const AssetTable: React.FC<{
     {
       id: "variableBorrowAPR",
       Header: "Variable Borrow APR",
-      accessor: row => row.tokenAddress,
+      accessor: row => row,
       Cell: (({ value }) => (
         <Center>
-          <VariableAPRView tokenAddress={value} />
+          <VariableAPRView tokenAddress={value.tokenAddress} />
+          <Popover trigger="hover" placement="right-start">
+            <PopoverTrigger>
+              <ModalIcon
+                position="relative"
+                top="0"
+                right="0"
+                ml="0.5rem"
+                transform="scale(0.75)"
+                onOpen={onOpen}
+              />
+            </PopoverTrigger>
+            <PopoverContent
+              bg="blue.800"
+              color="white"
+              borderColor={mode(
+                { base: "primary.50", md: "primary.50" },
+                "primary.50"
+              )}
+              w="auto"
+              minW="12vw"
+              h="auto"
+              p="1rem"
+            >
+              <PopoverHeader fontWeight="semibold" marginY="1rem">
+                {value.symbol} APR Breakdown
+              </PopoverHeader>
+              <PopoverArrow />
+              <PopoverBody>
+                <PopoverRewardsAPY
+                  tokenAddress={value.tokenAddress}
+                  deposit={false}
+                />
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Center>
-      )) as Renderer<CellProps<AssetRecord, string>>,
+      )) as Renderer<CellProps<AssetRecord, AssetRecord>>,
       disableSortBy: true,
     },
     {
