@@ -174,7 +174,7 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 11);
     const depositAPY = BigNumber.from(protocolDepositAPY.data);
     const aggregateAPY = rewardsAPYAsFixed.add(depositAPY);
-    return <PercentageView ratio={bigNumberToString(aggregateAPY, 5, 25)} />;
+    return <PercentageView ratio={bigNumberToString(aggregateAPY, 3, 25)} />;
   }, [protocolDepositAPY.data, rewardsAPY]);
 };
 
