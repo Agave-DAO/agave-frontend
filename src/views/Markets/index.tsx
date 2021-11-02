@@ -1,15 +1,28 @@
-import React, { MouseEventHandler, useState } from "react";
+import React from "react";
 import ColoredText from "../../components/ColoredText";
-import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
+import {
+  Center,
+  Flex,
+  useMediaQuery,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverBody,
+  PopoverArrow,
+  useColorModeValue as mode,
+} from "@chakra-ui/react";
 import {
   useMarketSizeInDai,
   useTotalMarketSize,
 } from "../../queries/marketSize";
 import { buildQueryHookWhenParamsDefinedChainAddrs } from "../../utils/queryBuilder";
-import { fixedNumberToPercentage } from "../../utils/fixedPoint";
-import { FixedNumber } from "ethers";
+import {
+  fixedNumberToPercentage,
+  bigNumberToString,
+} from "../../utils/fixedPoint";
+import { BigNumber, FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { CellProps, Column, Renderer } from "react-table";
@@ -31,6 +44,10 @@ import {
 
 import { ModalIcon } from "../../utils/icons";
 import { useDisclosure } from "@chakra-ui/hooks";
+import {
+  TargetedTokenData,
+  useRewardTokensAPY,
+} from "../../queries/rewardTokens";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -138,31 +155,54 @@ const TotalBorrowedView: React.FC<{
 const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
-  const query = useDepositAPY(tokenAddress);
+  const protocolDepositAPY = useDepositAPY(tokenAddress);
+  const rewardsAPY = useRewardTokensAPY().data;
+  const tokenData = rewardsAPY?.filter(
+    token => (token as any).reserveAddress === tokenAddress
+  );
+
   return React.useMemo(() => {
-    if (query.data === undefined) {
+    if (
+      protocolDepositAPY.data === undefined ||
+      rewardsAPY === undefined ||
+      !tokenData ||
+      tokenData[0] === undefined ||
+      !tokenData[0].tokenAPYperYear
+    ) {
       return <>-</>;
     }
-    const depositAPY = query.data;
-    return <PercentageView ratio={fixedNumberToPercentage(depositAPY, 3, 2)} />;
-  }, [query.data]);
+    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 11);
+    const depositAPY = BigNumber.from(protocolDepositAPY.data);
+    const aggregateAPY = rewardsAPYAsFixed.add(depositAPY);
+    return <PercentageView ratio={bigNumberToString(aggregateAPY, 5, 25)} />;
+  }, [protocolDepositAPY.data, rewardsAPY]);
 };
 
 const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
-  const query = useVariableBorrowAPR(tokenAddress);
+  const protocolVariableAPR = useVariableBorrowAPR(tokenAddress);
+  const rewardsAPY = useRewardTokensAPY().data;
+  const tokenData = rewardsAPY?.filter(
+    token => (token as any).reserveAddress === tokenAddress
+  );
   return React.useMemo(() => {
-    if (query.data === undefined) {
+    if (
+      protocolVariableAPR.data === undefined ||
+      rewardsAPY === undefined ||
+      !tokenData ||
+      tokenData[1] === undefined ||
+      !tokenData[1].tokenAPYperYear
+    ) {
       return <>-</>;
     }
-    const variableBorrowAPR = query.data;
-    return (
-      <PercentageView
-        ratio={fixedNumberToPercentage(variableBorrowAPR, 3, 2)}
-      />
-    );
-  }, [query.data]);
+    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 11);
+
+    const protocolVariableBorrowAPR = BigNumber.from(protocolVariableAPR.data);
+    const aggregateAPY = protocolVariableBorrowAPR.sub(rewardsAPYAsFixed);
+
+    return <PercentageView ratio={bigNumberToString(aggregateAPY, 3, 25)} />;
+  }, [protocolVariableAPR, rewardsAPY]);
 };
 
 const StableAPRView: React.FC<{ tokenAddress: string }> = ({
@@ -178,6 +218,65 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
       <PercentageView ratio={fixedNumberToPercentage(stableBorrowAPR, 3, 2)} />
     );
   }, [query.data]);
+};
+
+const PopoverRewardsAPY: React.FC<{
+  tokenAddress: string;
+  deposit: boolean;
+}> = ({ tokenAddress, deposit }) => {
+  const protocolDepositAPY = useDepositAPY(tokenAddress).data;
+  const protocolVariableAPR = useVariableBorrowAPR(tokenAddress).data;
+  const rewardsAPY = useRewardTokensAPY().data;
+  const tokenData = rewardsAPY?.filter(
+    token => (token as any).reserveAddress === tokenAddress
+  );
+  if (
+    protocolVariableAPR === undefined ||
+    rewardsAPY === undefined ||
+    !tokenData ||
+    !tokenData[0].tokenAPYperYear ||
+    !tokenData[1].tokenAPYperYear
+  ) {
+    return <>-</>;
+  }
+  const rewardsDepositApy =
+    bigNumberToString(
+      (tokenData as TargetedTokenData[])[0].tokenAPYperYear,
+      3,
+      14
+    ) + "%";
+  const rewardsVariableDebtApy =
+    bigNumberToString(
+      (tokenData as TargetedTokenData[])[1].tokenAPYperYear,
+      3,
+      14
+    ) + "%";
+
+  const protocolDepositAPYString =
+    fixedNumberToPercentage(protocolDepositAPY, 3, 3) + "%";
+  const protocolVariableAPRString =
+    fixedNumberToPercentage(protocolVariableAPR, 3, 3) + "%";
+
+  return (
+    <>
+      <Flex justifyContent="space-between" paddingTop="1rem">
+        <Text fontSize="xxl" pt="5px">
+          Base Rate
+        </Text>
+        <Text fontSize="xxl" pt="5px" fontWeight="bold">
+          {deposit ? protocolDepositAPYString : protocolVariableAPRString}
+        </Text>
+      </Flex>
+      <Flex justifyContent="space-between" paddingTop="1rem">
+        <Text fontSize="xxl" pt="5px">
+          Incentives Rate
+        </Text>
+        <Text fontSize="xxl" pt="5px" fontWeight="bold">
+          {deposit ? rewardsDepositApy : rewardsVariableDebtApy}
+        </Text>
+      </Flex>
+    </>
+  );
 };
 
 const AssetTable: React.FC<{
@@ -208,13 +307,7 @@ const AssetTable: React.FC<{
     });
   }, [reserves]);
 
-  const [rewardToken, setRewardToken] = useState<string | undefined>();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  function onOpenRewards(value: string) : void {
-    setRewardToken(value)
-    onOpen()
-  }
+  const { onOpen } = useDisclosure();
 
   const columns: Column<AssetRecord>[] = [
     {
@@ -270,31 +363,93 @@ const AssetTable: React.FC<{
     {
       id: "depositAPY",
       Header: "Deposit APY",
-      accessor: row => row.tokenAddress,
+      accessor: row => row,
       Cell: (({ value }) => (
         <Center>
-          <DepositAPYView tokenAddress={value} />
-          <ModalIcon
-            position="relative"
-            top="0"
-            right="0"
-            ml="0.5rem"
-            transform="scale(0.75)"
-            onOpen={() => onOpenRewards(value)}
-          />
+          <DepositAPYView tokenAddress={value.tokenAddress} />
+          <Popover trigger="hover" placement="right-start">
+            <PopoverTrigger>
+              <ModalIcon
+                position="relative"
+                top="0"
+                right="0"
+                ml="0.5rem"
+                transform="scale(0.75)"
+                onOpen={onOpen}
+              />
+            </PopoverTrigger>
+            <PopoverContent
+              bg="blue.800"
+              color="white"
+              borderColor={mode(
+                { base: "primary.50", md: "primary.50" },
+                "primary.50"
+              )}
+              w="auto"
+              minW="12vw"
+              h="auto"
+              p="1rem"
+            >
+              <PopoverHeader fontWeight="semibold" marginY="1rem">
+                {value.symbol} - APY Breakdown
+              </PopoverHeader>
+              <PopoverArrow />
+              <PopoverBody>
+                <PopoverRewardsAPY
+                  tokenAddress={value.tokenAddress}
+                  deposit={true}
+                />
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Center>
-      )) as Renderer<CellProps<AssetRecord, string>>,
+      )) as Renderer<CellProps<AssetRecord, AssetRecord>>,
       disableSortBy: true,
     },
     {
       id: "variableBorrowAPR",
       Header: "Variable Borrow APR",
-      accessor: row => row.tokenAddress,
+      accessor: row => row,
       Cell: (({ value }) => (
         <Center>
-          <VariableAPRView tokenAddress={value} />
+          <VariableAPRView tokenAddress={value.tokenAddress} />
+          <Popover trigger="hover" placement="right-start">
+            <PopoverTrigger>
+              <ModalIcon
+                position="relative"
+                top="0"
+                right="0"
+                ml="0.5rem"
+                transform="scale(0.75)"
+                onOpen={onOpen}
+              />
+            </PopoverTrigger>
+            <PopoverContent
+              bg="blue.800"
+              color="white"
+              borderColor={mode(
+                { base: "primary.50", md: "primary.50" },
+                "primary.50"
+              )}
+              w="auto"
+              minW="12vw"
+              h="auto"
+              p="1rem"
+            >
+              <PopoverHeader fontWeight="semibold" marginY="1rem">
+                {value.symbol} APR Breakdown
+              </PopoverHeader>
+              <PopoverArrow />
+              <PopoverBody>
+                <PopoverRewardsAPY
+                  tokenAddress={value.tokenAddress}
+                  deposit={false}
+                />
+              </PopoverBody>
+            </PopoverContent>
+          </Popover>
         </Center>
-      )) as Renderer<CellProps<AssetRecord, string>>,
+      )) as Renderer<CellProps<AssetRecord, AssetRecord>>,
       disableSortBy: true,
     },
     {
@@ -314,8 +469,7 @@ const AssetTable: React.FC<{
     () => table =>
       (
         <BasicTableRenderer
-          // TODO: Fix clicking on the modal icon opens the reserve overview
-          // linkpage="reserve-overview"    
+          linkpage="reserve-overview"
           table={table}
           tableProps={{
             style: {
@@ -385,17 +539,9 @@ const AssetTable: React.FC<{
   const [ismaxWidth] = useMediaQuery("(max-width: 50em)");
 
   return (
-    <>
-      <SortedHtmlTable columns={columns} data={assetRecords}>
-        {ismaxWidth ? mobileRenderer : renderer}
-      </SortedHtmlTable>
-      <ModalComponent
-        isOpen={isOpen}
-        mtype={MODAL_TYPES.REWARDS_APY}
-        onClose={onClose}
-        rewardToken={rewardToken}
-      />
-    </>
+    <SortedHtmlTable columns={columns} data={assetRecords}>
+      {ismaxWidth ? mobileRenderer : renderer}
+    </SortedHtmlTable>
   );
 };
 
