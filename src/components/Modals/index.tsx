@@ -189,9 +189,8 @@ const ModalLTV: React.FC<{
 const ModalComponent: React.FC<{
   isOpen: boolean;
   mtype: string;
-  rewardToken?: string | undefined;
   onClose(): void;
-}> = ({ children: modalChildren, mtype, isOpen, onClose, rewardToken }) => {
+}> = ({ children: modalChildren, mtype, isOpen, onClose }) => {
   return (
     <>
       {isOpen ? (
@@ -223,7 +222,6 @@ const ModalComponent: React.FC<{
               {mtype === MODAL_TYPES.MAXIMUM_LTV && <ModalMaxLTV />}
               {mtype === MODAL_TYPES.HEALTH_FACTOR && <ModalHFactor />}
               {mtype === MODAL_TYPES.LIQUIDITY_PENALTY && <ModalLiqPenalty />}
-              {mtype === MODAL_TYPES.REWARDS_APY && <Text>{rewardToken}</Text>}
               {mtype === MODAL_TYPES.LIQUIDITY_THRESHOLD && (
                 <ModalLiqThreshold />
               )}
