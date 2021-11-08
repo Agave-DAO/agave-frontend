@@ -201,7 +201,11 @@ export const useRewardPricePerShare = buildQueryHookWhenParamsDefinedChainAddrs<
     const pricePerShare = liquidity / totalShares;
 
     // hardcoded to convert into bigNumber - better solution would be nice
-    return BigNumber.from(pricePerShare * 10e15);
+    try {
+      return BigNumber.from(pricePerShare * 10e15);
+    } catch (error) {
+      return BigNumber.from((pricePerShare * 10e15).toFixed());
+    }
   },
   () => ["user", "rewardTokenData"],
   () => undefined,
