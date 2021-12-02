@@ -28,6 +28,7 @@ import {
 } from "../../mutations/deposit";
 import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { MINIMUM_NATIVE_RESERVE } from "../../utils/constants";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -226,6 +227,7 @@ const DepositedTxComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const history = useHistory();
   const currentStep: PossibleTags<DepositState> = "depositedTx";
+  const decimals = useDecimalCountForToken(state.token.tokenAddress).data;
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -248,9 +250,11 @@ const DepositedTxComp: React.FC<{
       <ControllerItem
         stepNumber={3}
         stepName="Deposited"
-        stepDesc={`Deposit of ${bigNumberToString(state.amountToDeposit)} ${
-          state.token.symbol
-        } successful`}
+        stepDesc={`Deposit of ${bigNumberToString(
+          state.amountToDeposit,
+          4,
+          decimals
+        )} ${state.token.symbol} successful`}
         actionName="Finish"
         onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}

@@ -29,6 +29,7 @@ import {
 } from "../../utils/fixedPoint";
 import { CollateralComposition } from "../../components/Chart/CollateralComposition";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 type BorrowDashProps = {
   token: ReserveOrNativeTokenDefinition;
@@ -64,6 +65,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   const { data: utilizationData } = useAssetUtilizationRate(
     asset?.tokenAddress
   );
+  const decimals = useDecimalCountForToken(asset?.tokenAddress).data;
   const { data: assetPriceInDai } = useAssetPriceInDai(reserve?.tokenAddress);
   const { data: allUserReservesData } = useUserReservesData(tokenAddresses);
 
@@ -158,7 +160,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {bigNumberToString(liquidityAvailable)}
+              {bigNumberToString(liquidityAvailable, 2, decimals)}
             </Text>
           </Box>
         </Flex>
@@ -227,7 +229,8 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
                 userStableDebt
                   ? userVariableDebt?.add(userStableDebt)
                   : userVariableDebt,
-                3
+                4,
+                decimals
               )}
             </Text>
             {isSmallerThan400 ? null : " " + token.symbol}
