@@ -34,6 +34,8 @@ import {
   UseApproveDelegationMutationProps,
 } from "../../mutations/approveDelegation";
 import { useLendingReserveData } from "../../queries/lendingReserveData";
+import { bigNumberToString } from "../../utils/fixedPoint";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -265,6 +267,7 @@ const BorrowedTxComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const history = useHistory();
   const currentStep: PossibleTags<BorrowState> = "borrowedTx";
+  const decimals = useDecimalCountForToken(state.token.tokenAddress).data;
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -287,9 +290,11 @@ const BorrowedTxComp: React.FC<{
       <ControllerItem
         stepNumber={2}
         stepName="Borrowed"
-        stepDesc={`Borrow of ${formatEther(state.amountToBorrow)} ${
-          state.token.symbol
-        } successful`}
+        stepDesc={`Borrow of ${bigNumberToString(
+          state.amountToBorrow,
+          4,
+          decimals
+        )} ${state.token.symbol} successful`}
         actionName="Finish"
         onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}

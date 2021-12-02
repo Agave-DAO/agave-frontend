@@ -118,7 +118,7 @@ export const DashOverviewIntro: React.FC<{
         py=".8rem"
         onClick={() => onSubmit(infiniteAmount || amount || BigNumber.from(0))}
       >
-        {balance && amount?.gt(balance)
+        {balance === BigNumber.from(0) && amount?.gt(balance)
           ? "Not enough Balance"
           : limitAmount && amount?.gt(limitAmount)
           ? "Insufficient collateral to cover risk"

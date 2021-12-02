@@ -32,6 +32,7 @@ import {
   useApprovalMutation,
   UseApprovalMutationProps,
 } from "../../mutations/approval";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -272,6 +273,7 @@ const WithdrawnTxComp: React.FC<{
 }> = ({ state, dispatch }) => {
   const history = useHistory();
   const currentStep: PossibleTags<WithdrawState> = "withdrawnTx";
+  const decimals = useDecimalCountForToken(state.token.tokenAddress).data;
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -294,9 +296,11 @@ const WithdrawnTxComp: React.FC<{
       <ControllerItem
         stepNumber={2}
         stepName="Withdrawn"
-        stepDesc={`Withdraw of ${bigNumberToString(state.amountToWithdraw)} ${
-          state.token.symbol
-        } successful`}
+        stepDesc={`Withdraw of ${bigNumberToString(
+          state.amountToWithdraw,
+          4,
+          decimals
+        )} ${state.token.symbol} successful`}
         actionName="Finish"
         onActionClick={() => history.push("/dashboard")}
         totalSteps={visibleStateNames.length}
