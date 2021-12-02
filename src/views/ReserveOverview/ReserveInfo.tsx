@@ -26,6 +26,7 @@ import {
   Container,
   Box,
   Center,
+  Spinner,
 } from "@chakra-ui/react";
 
 // ** conversions and helpers
@@ -123,13 +124,21 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   // const variableOverTotal;
 
   // ** Bottom Stat Cards
-  const ltv = reserveData?.rawltv ? reserveData?.rawltv.toNumber() / 100 : "-";
-  const liqThrsh = reserveData?.rawliquidationThreshold
-    ? reserveData?.rawliquidationThreshold.toNumber() / 100
-    : "-";
-  const liqPen = reserveData?.rawliquidationBonus
-    ? reserveData?.rawliquidationBonus.toNumber() / 100 - 100
-    : "-";
+  const ltv = reserveData?.rawltv ? (
+    reserveData?.rawltv.toNumber() / 100
+  ) : (
+    <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+  );
+  const liqThrsh = reserveData?.rawliquidationThreshold ? (
+    reserveData?.rawliquidationThreshold.toNumber() / 100
+  ) : (
+    <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+  );
+  const liqPen = reserveData?.rawliquidationBonus ? (
+    reserveData?.rawliquidationBonus.toNumber() / 100 - 100
+  ) : (
+    <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+  );
   const collateral = reserveData?.usageAsCollateralEnabled ? "Yes" : "No";
   const stable = reserveData?.stableBorrowRateEnabled ? "Yes" : "No";
 

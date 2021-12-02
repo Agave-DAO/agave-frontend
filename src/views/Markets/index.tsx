@@ -12,6 +12,7 @@ import {
   PopoverBody,
   PopoverArrow,
   useColorModeValue as mode,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   useMarketSizeInDai,
@@ -76,7 +77,9 @@ export const MarketsBanner: React.FC<{}> = () => {
       </Text>
       <ColoredText fontSize="5xl">
         ${" "}
-        {totalMarketSize.data?.round(2).toUnsafeFloat().toLocaleString() ?? "-"}
+        {totalMarketSize.data?.round(2).toUnsafeFloat().toLocaleString() ?? (
+          <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+        )}
       </ColoredText>
     </Flex>
   );
@@ -94,7 +97,10 @@ const PriceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   return React.useMemo(() => {
     return (
       <Text>
-        $ {price.data?.round(2).toUnsafeFloat().toLocaleString() ?? "-"}
+        ${" "}
+        {price.data?.round(2).toUnsafeFloat().toLocaleString() ?? (
+          <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+        )}
       </Text>
     );
   }, [price.data]);
@@ -169,7 +175,7 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
       tokenData[0] === undefined ||
       !tokenData[0].tokenAPYperYear
     ) {
-      return <>-</>;
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
     const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 11);
     const depositAPY = BigNumber.from(protocolDepositAPY.data);
@@ -194,7 +200,7 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
       tokenData[1] === undefined ||
       !tokenData[1].tokenAPYperYear
     ) {
-      return <>-</>;
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
     const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 11);
 
@@ -211,7 +217,7 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
   const query = useStableBorrowAPR(tokenAddress);
   return React.useMemo(() => {
     if (query.data === undefined) {
-      return <>-</>;
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
     const stableBorrowAPR = query.data;
     return (
@@ -237,7 +243,7 @@ const PopoverRewardsAPY: React.FC<{
     !tokenData[0].tokenAPYperYear ||
     !tokenData[1].tokenAPYperYear
   ) {
-    return <>-</>;
+    return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
   }
   const rewardsDepositApy =
     bigNumberToString(

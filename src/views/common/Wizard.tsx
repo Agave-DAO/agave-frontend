@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { VStack } from "@chakra-ui/layout";
 import {
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
 } from "../../queries/allReserveTokens";
-import { Box, Center, HStack, Text } from "@chakra-ui/react";
+import { Box, Center, HStack, VStack, Spinner, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { ModalIcon, TokenIcon } from "../../utils/icons";
@@ -116,7 +115,11 @@ export const WizardOverviewWrapper: React.FC<{
             New health factor
           </Text>
           <ColoredText fontSize="1.2rem">
-            {newHealthFactor ? newHealthFactor.round(2).toString() : "-"}
+            {newHealthFactor ? (
+              newHealthFactor.round(2).toString()
+            ) : (
+              <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+            )}
           </ColoredText>
         </HStack>
       </VStack>

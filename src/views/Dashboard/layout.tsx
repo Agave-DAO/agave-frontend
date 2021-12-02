@@ -10,6 +10,7 @@ import {
   useColorModeValue as mode,
   Button,
   Image,
+  Spinner,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
@@ -21,7 +22,7 @@ import { isMobileOnly } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
 import { DashboardTable, DashboardTableType } from "./table";
 import { DashboardEmptyState } from "./emptyState";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { AssetData } from ".";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { BigNumber, constants, ethers } from "ethers";
@@ -91,7 +92,12 @@ const ClaimRewardsBox: React.FC<{}> = () => {
           ? bigNumberToString(rewardsBalance, 5, 18)
           : ""}
       </Text>
-      <Image src={stakeagave} alt="AGAVE ALT" width={{ base: "5rem" }} />
+      <a
+        href="https://xdai-pools.symmetric.exchange/#/pool/0x65b0e9418e102a880c92790f001a9c5810b0ef32"
+        target="_blank"
+      >
+        <Image src={stakeagave} alt="AGAVE ALT" width={{ base: "5rem" }} />
+      </a>
       <Button
         minWidth="9rem"
         height={{ base: "4rem", md: "3rem" }}
@@ -292,13 +298,29 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
             <Box h="7rem" mt="0.5rem">
               <Text>Borrowed</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {borrowed ? `$ ${bigNumberToString(borrowed)}` : "-"}
+                {borrowed ? (
+                  `$ ${bigNumberToString(borrowed)}`
+                ) : (
+                  <Spinner
+                    speed="0.5s"
+                    emptyColor="gray.200"
+                    color="yellow.500"
+                  />
+                )}
               </Text>
             </Box>
             <Box h="7rem" mt="0.5rem" ml={{ base: "1rem", md: "3rem" }}>
               <Text>Collateral</Text>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {collateral ? `$ ${bigNumberToString(collateral)}` : "-"}
+                {collateral ? (
+                  `$ ${bigNumberToString(collateral)}`
+                ) : (
+                  <Spinner
+                    speed="0.5s"
+                    emptyColor="gray.200"
+                    color="yellow.500"
+                  />
+                )}
               </Text>
             </Box>
             <VStack

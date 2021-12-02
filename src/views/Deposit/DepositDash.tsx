@@ -6,6 +6,7 @@ import {
   VStack,
   useMediaQuery,
   Flex,
+  Spinner,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import {
@@ -229,9 +230,11 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
             }}
             fontWeight="bold"
           >
-            {utilizationRate
-              ? (utilizationRate.toUnsafeFloat() * 100).toLocaleString()
-              : "-"}{" "}
+            {utilizationRate ? (
+              (utilizationRate.toUnsafeFloat() * 100).toLocaleString()
+            ) : (
+              <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+            )}{" "}
             %
           </Text>
         </Stack>
@@ -286,11 +289,15 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
             fontWeight="bold"
             color="yellow.100"
           >
-            {isCollateralized !== undefined
-              ? isCollateralized
-                ? "Yes"
-                : "No"
-              : "-"}
+            {isCollateralized !== undefined ? (
+              isCollateralized ? (
+                "Yes"
+              ) : (
+                "No"
+              )
+            ) : (
+              <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+            )}
           </Text>
         </Stack>
         <Stack
@@ -312,9 +319,15 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
               }}
               fontWeight="bold"
             >
-              {maximumLtv
-                ? (maximumLtv.toUnsafeFloat() * 100).toLocaleString()
-                : "-"}{" "}
+              {maximumLtv ? (
+                (maximumLtv.toUnsafeFloat() * 100).toLocaleString()
+              ) : (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}{" "}
               %
             </Text>
             <ModalIcon
@@ -345,7 +358,13 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
               {assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 4,
-              }) ?? "-"}
+              }) ?? (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}
             </Text>
           </Stack>
         )}
