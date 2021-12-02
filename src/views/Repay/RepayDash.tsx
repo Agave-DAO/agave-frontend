@@ -6,6 +6,7 @@ import {
   VStack,
   useMediaQuery,
   Flex,
+  Spinner,
 } from "@chakra-ui/react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
@@ -247,9 +248,15 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
               }}
               fontWeight="bold"
             >
-              {currentLtv
-                ? (currentLtv.toUnsafeFloat() * 100).toLocaleString()
-                : "-"}{" "}
+              {currentLtv ? (
+                (currentLtv.toUnsafeFloat() * 100).toLocaleString()
+              ) : (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}{" "}
               %
             </Text>
           </HStack>

@@ -12,6 +12,7 @@ import {
   ModalFooter,
   Box,
   Flex,
+  Spinner,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
@@ -245,14 +246,14 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
 
   const cooldownPeriod = React.useMemo(() => {
     if (cooldownInfo?.cooldownPeriodSeconds === undefined) {
-      return "-";
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
     return secondsToString(cooldownInfo?.cooldownPeriodSeconds);
   }, [cooldownInfo?.cooldownPeriodSeconds]);
 
   const unstakeWindow = React.useMemo(() => {
     if (cooldownInfo?.unstakeWindowSeconds === undefined) {
-      return "-";
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
     return secondsToString(cooldownInfo?.unstakeWindowSeconds);
   }, [cooldownInfo?.unstakeWindowSeconds]);
@@ -305,7 +306,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
   );
   const stakingAPY = React.useMemo(() => {
     if (!yieldPerAgavePerSecond?.gt(0)) {
-      return "-";
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
     if (amountStaked?.gt(0) && yieldPerYear?.gt(0)) {
       return FixedNumber.fromValue(
@@ -320,17 +321,19 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
         .toUnsafeFloat()
         .toLocaleString();
     } else {
-      return yieldPerAgavePerSecond !== undefined
-        ? FixedNumber.fromValue(
-            yieldPerAgavePerSecond
-              .mul(60 * 60 * 24 * 365) // per year
-              .mul(100),
-            18
-          )
-            .round(2)
-            .toUnsafeFloat()
-            .toLocaleString()
-        : "-";
+      return yieldPerAgavePerSecond !== undefined ? (
+        FixedNumber.fromValue(
+          yieldPerAgavePerSecond
+            .mul(60 * 60 * 24 * 365) // per year
+            .mul(100),
+          18
+        )
+          .round(2)
+          .toUnsafeFloat()
+          .toLocaleString()
+      ) : (
+        <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+      );
     }
   }, [amountStaked, yieldPerYear, yieldPerAgavePerSecond]);
   return (
@@ -551,12 +554,18 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           <Flex width="100%" justifyContent="space-between">
             <Text>Agave per month</Text>
             <Text fontWeight="bold">
-              {yieldPerMonth
-                ? FixedNumber.fromValue(yieldPerMonth, 18)
-                    .round(2)
-                    .toUnsafeFloat()
-                    .toLocaleString()
-                : "-"}
+              {yieldPerMonth ? (
+                FixedNumber.fromValue(yieldPerMonth, 18)
+                  .round(2)
+                  .toUnsafeFloat()
+                  .toLocaleString()
+              ) : (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}
             </Text>
           </Flex>
           <Flex width="100%" justifyContent="space-between">

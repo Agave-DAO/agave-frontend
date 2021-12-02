@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
   PopoverContent,
   PopoverBody,
+  Spinner,
 } from "@chakra-ui/react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
@@ -209,11 +210,15 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
               fontWeight="bold"
               minW={{ base: "30px", md: "100%" }}
             >
-              {currentLtv
-                ? (currentLtv.toUnsafeFloat() * 100)
-                    .toLocaleString()
-                    .slice(0, 6)
-                : "-"}{" "}
+              {currentLtv ? (
+                (currentLtv.toUnsafeFloat() * 100).toLocaleString().slice(0, 6)
+              ) : (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}{" "}
               %
             </Text>
           </HStack>
