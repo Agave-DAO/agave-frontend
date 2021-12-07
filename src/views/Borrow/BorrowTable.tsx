@@ -10,7 +10,7 @@ import {
   TableRenderer,
 } from "../../utils/htmlTable";
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
+import { Center, Flex, useMediaQuery, Spinner } from "@chakra-ui/react";
 import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { bigNumberToString } from "../../utils/fixedPoint";
@@ -47,7 +47,11 @@ const BorrowAvailability: React.FC<{
           whiteSpace="nowrap"
         >
           <Text p={3} fontWeight="bold">
-            {balanceAsset ? balanceAsset.toNumber() / 1000 : "-"}
+            {balanceAsset ? (
+              balanceAsset.toNumber() / 1000
+            ) : (
+              <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+            )}
           </Text>
 
           {isMobile ? null : <Text p={3}>$ {balanceNative ?? "-"}</Text>}

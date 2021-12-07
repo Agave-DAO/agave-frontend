@@ -12,6 +12,7 @@ import {
   ModalOverlay,
   ModalContent,
   Button,
+  Spinner,
 } from "@chakra-ui/react";
 
 import { useUserAccountData } from "../../queries/userAccountData";
@@ -163,13 +164,25 @@ const ModalLTV: React.FC<{
           <HStack pb="0.5rem" px="1em" justifyContent="space-between">
             <Text fontSize="1.4rem">Current LTV</Text>
             <Text fontSize="1.4rem">
-              {fixedNumberToPercentage(userAccountData?.currentLtv) ?? "-"}
+              {fixedNumberToPercentage(userAccountData?.currentLtv) ?? (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}
             </Text>
           </HStack>
           <HStack pb="0.5rem" px="1em" justifyContent="space-between">
             <Text fontSize="1.4rem">Maximum LTV</Text>
             <Text fontSize="1.4rem">
-              {fixedNumberToPercentage(userAccountData?.maximumLtv) ?? "-"}
+              {fixedNumberToPercentage(userAccountData?.maximumLtv) ?? (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}
             </Text>
           </HStack>
           <HStack px="1em" justifyContent="space-between">
@@ -177,7 +190,13 @@ const ModalLTV: React.FC<{
             <Text fontSize="1.4rem">
               {fixedNumberToPercentage(
                 userAccountData?.currentLiquidationThreshold
-              ) ?? "-"}
+              ) ?? (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}
             </Text>
           </HStack>
         </Box>

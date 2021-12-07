@@ -12,6 +12,7 @@ import {
   PopoverBody,
   PopoverArrow,
   useColorModeValue as mode,
+  Spinner,
 } from "@chakra-ui/react";
 import {
   useMarketSizeInDai,
@@ -44,10 +45,7 @@ import {
 
 import { ModalIcon } from "../../utils/icons";
 import { useDisclosure } from "@chakra-ui/hooks";
-import {
-  TargetedTokenData,
-  useRewardTokensAPY,
-} from "../../queries/rewardTokens";
+import { TargetedTokenData, useKpiTokensAPY } from "../../queries/rewardTokens";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -76,7 +74,9 @@ export const MarketsBanner: React.FC<{}> = () => {
       </Text>
       <ColoredText fontSize="5xl">
         ${" "}
-        {totalMarketSize.data?.round(2).toUnsafeFloat().toLocaleString() ?? "-"}
+        {totalMarketSize.data?.round(2).toUnsafeFloat().toLocaleString() ?? (
+          <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+        )}
       </ColoredText>
     </Flex>
   );
@@ -94,7 +94,10 @@ const PriceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   return React.useMemo(() => {
     return (
       <Text>
-        $ {price.data?.round(2).toUnsafeFloat().toLocaleString() ?? "-"}
+        ${" "}
+        {price.data?.round(2).toUnsafeFloat().toLocaleString() ?? (
+          <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+        )}
       </Text>
     );
   }, [price.data]);
@@ -156,7 +159,7 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
   const protocolDepositAPY = useDepositAPY(tokenAddress);
-  const rewardsAPY = useRewardTokensAPY().data;
+  const rewardsAPY = useKpiTokensAPY().data;
   const tokenData = rewardsAPY?.filter(
     token => (token as any).reserveAddress === tokenAddress
   );
@@ -169,9 +172,10 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
       tokenData[0] === undefined ||
       !tokenData[0].tokenAPYperYear
     ) {
-      return <>-</>;
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
-    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 11);
+    console.log(tokenData[0].tokenAPYperYear.toString());
+    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 7);
     const depositAPY = BigNumber.from(protocolDepositAPY.data);
     const aggregateAPY = rewardsAPYAsFixed.add(depositAPY);
     return <PercentageView ratio={bigNumberToString(aggregateAPY, 3, 25)} />;
@@ -182,7 +186,7 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
   const protocolVariableAPR = useVariableBorrowAPR(tokenAddress);
-  const rewardsAPY = useRewardTokensAPY().data;
+  const rewardsAPY = useKpiTokensAPY().data;
   const tokenData = rewardsAPY?.filter(
     token => (token as any).reserveAddress === tokenAddress
   );
@@ -194,9 +198,9 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
       tokenData[1] === undefined ||
       !tokenData[1].tokenAPYperYear
     ) {
-      return <>-</>;
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
-    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 11);
+    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 7);
 
     const protocolVariableBorrowAPR = BigNumber.from(protocolVariableAPR.data);
     const aggregateAPY = protocolVariableBorrowAPR.sub(rewardsAPYAsFixed);
@@ -211,7 +215,7 @@ const StableAPRView: React.FC<{ tokenAddress: string }> = ({
   const query = useStableBorrowAPR(tokenAddress);
   return React.useMemo(() => {
     if (query.data === undefined) {
-      return <>-</>;
+      return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
     const stableBorrowAPR = query.data;
     return (
@@ -226,7 +230,7 @@ const PopoverRewardsAPY: React.FC<{
 }> = ({ tokenAddress, deposit }) => {
   const protocolDepositAPY = useDepositAPY(tokenAddress).data;
   const protocolVariableAPR = useVariableBorrowAPR(tokenAddress).data;
-  const rewardsAPY = useRewardTokensAPY().data;
+  const rewardsAPY = useKpiTokensAPY().data;
   const tokenData = rewardsAPY?.filter(
     token => (token as any).reserveAddress === tokenAddress
   );
@@ -237,19 +241,19 @@ const PopoverRewardsAPY: React.FC<{
     !tokenData[0].tokenAPYperYear ||
     !tokenData[1].tokenAPYperYear
   ) {
-    return <>-</>;
+    return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
   }
   const rewardsDepositApy =
     bigNumberToString(
       (tokenData as TargetedTokenData[])[0].tokenAPYperYear,
       3,
-      14
+      18
     ) + "%";
   const rewardsVariableDebtApy =
     bigNumberToString(
       (tokenData as TargetedTokenData[])[1].tokenAPYperYear,
       3,
-      14
+      18
     ) + "%";
 
   const protocolDepositAPYString =

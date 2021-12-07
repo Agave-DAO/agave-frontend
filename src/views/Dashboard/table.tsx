@@ -1,5 +1,12 @@
 import { Box, Text } from "@chakra-ui/layout";
-import { Button, Flex, Switch, Tooltip, useMediaQuery } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  Spinner,
+  Switch,
+  Tooltip,
+  useMediaQuery,
+} from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import React from "react";
 import { isMobile, isDesktop } from "react-device-detect";
@@ -42,7 +49,13 @@ const ThreeStateSwitch: React.FC<{
             state === null ? "grey.300" : state ? "green.300" : "orange.300"
           }
         >
-          {state === null ? "-" : state ? "Yes" : "No"}
+          {state === null ? (
+            <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+          ) : state ? (
+            "Yes"
+          ) : (
+            "No"
+          )}
         </Text>
 
         <Switch

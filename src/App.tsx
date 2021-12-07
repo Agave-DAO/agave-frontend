@@ -33,7 +33,7 @@ import "react-notifications-component/dist/theme.css";
 import ReactNotification from "react-notifications-component";
 
 import BaseTheme from "./theme";
-import { useRewardTokensAPY } from "./queries/rewardTokens";
+import { useKpiTokensAPY } from "./queries/rewardTokens";
 
 const theme = extendTheme({
   colors: {
@@ -100,7 +100,7 @@ interface IAppProps {}
 
 const App: React.FC<IAppProps> = props => {
   const notifications = React.useMemo(() => <ReactNotification />, []);
-  useRewardTokensAPY();
+  // useKpiTokensAPY();
 
   return (
     <ChakraProvider theme={theme}>

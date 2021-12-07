@@ -6,6 +6,7 @@ import {
   VStack,
   useMediaQuery,
   Flex,
+  Spinner,
 } from "@chakra-ui/react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
@@ -31,6 +32,7 @@ import {
   useAllReserveTokensWithData,
 } from "../../queries/lendingReserveData";
 import { BigNumber } from "ethers";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 export type RepayDashProps = {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -124,6 +126,8 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
   const currentLtv = userAccountData?.currentLtv;
   const healthFactor = userAccountData?.healthFactor;
 
+  const decimals = useDecimalCountForToken(token?.tokenAddress).data;
+
   const [isSmallerThan400, isSmallerThan900] = useMediaQuery([
     "(max-width: 400px)",
     "(max-width: 900px)",
@@ -154,7 +158,7 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {bigNumberToString(debt)}
+              {bigNumberToString(debt, 4, decimals)}
             </Text>
             {isSmallerThan400 ? null : " " + symbol}
           </Box>
@@ -172,7 +176,7 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {bigNumberToString(tokenBalance)}
+              {bigNumberToString(tokenBalance, 4, decimals)}
             </Text>
             {isSmallerThan400 ? null : " " + symbol}
           </Box>
@@ -244,9 +248,15 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
               }}
               fontWeight="bold"
             >
-              {currentLtv
-                ? (currentLtv.toUnsafeFloat() * 100).toLocaleString()
-                : "-"}{" "}
+              {currentLtv ? (
+                (currentLtv.toUnsafeFloat() * 100).toLocaleString()
+              ) : (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}{" "}
               %
             </Text>
           </HStack>

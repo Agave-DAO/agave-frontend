@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
   PopoverContent,
   PopoverBody,
+  Spinner,
 } from "@chakra-ui/react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import React from "react";
@@ -32,6 +33,7 @@ import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { CollateralComposition } from "../../components/Chart/CollateralComposition";
+import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 type WithdrawDashProps = {
   token: ReserveOrNativeTokenDefinition;
@@ -75,6 +77,8 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
   const currentLtv = userAccountData?.currentLtv;
   // const variableDepositAPY = reserveProtocolData?.variableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
+
+  const decimals = useDecimalCountForToken(reserve?.tokenAddress).data;
 
   const totalCollateralValue = React.useMemo(() => {
     return allReservesData?.reduce(
@@ -157,7 +161,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
           </Text>
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
-              {bigNumberToString(aTokenBalance)}
+              {bigNumberToString(aTokenBalance, 4, decimals)}
             </Text>
             {isSmallerThan400 ? null : " " + token.symbol}
           </Box>
@@ -206,11 +210,15 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
               fontWeight="bold"
               minW={{ base: "30px", md: "100%" }}
             >
-              {currentLtv
-                ? (currentLtv.toUnsafeFloat() * 100)
-                    .toLocaleString()
-                    .slice(0, 6)
-                : "-"}{" "}
+              {currentLtv ? (
+                (currentLtv.toUnsafeFloat() * 100).toLocaleString().slice(0, 6)
+              ) : (
+                <Spinner
+                  speed="0.5s"
+                  emptyColor="gray.200"
+                  color="yellow.500"
+                />
+              )}{" "}
               %
             </Text>
           </HStack>

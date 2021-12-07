@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverBody,
   useMediaQuery,
+  Spinner,
 } from "@chakra-ui/react";
 import { fontSizes, spacings, assetColor } from "../../utils/constants";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
@@ -117,7 +118,7 @@ export const CollateralComposition: React.FC = () => {
           </PopoverContent>
         </Popover>
       ) : (
-        "-"
+        <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
       )}
     </Flex>
   );

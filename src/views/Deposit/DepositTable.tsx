@@ -11,7 +11,7 @@ import {
 } from "../../utils/htmlTable";
 import { DepositAPYView } from "../common/RatesView";
 import { Box, Text } from "@chakra-ui/layout";
-import { Center, Flex, useMediaQuery } from "@chakra-ui/react";
+import { Center, Flex, useMediaQuery, Spinner } from "@chakra-ui/react";
 import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { isMobile } from "react-device-detect";
@@ -35,7 +35,9 @@ const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
       <Flex direction="column" minH={30} ml={2}>
         <Box textAlign={{ base: "end", md: "center" }} whiteSpace="nowrap">
           <Text p={3} fontWeight="bold">
-            {balanceNumber?.toFixed(3) ?? "-"}
+            {balanceNumber?.toFixed(3) ?? (
+              <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+            )}
           </Text>
 
           {isMobile ? null : <Text p={3}>$ {balanceUSD ?? "-"}</Text>}

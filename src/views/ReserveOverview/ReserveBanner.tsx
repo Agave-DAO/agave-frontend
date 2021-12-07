@@ -1,6 +1,6 @@
 import React from "react";
 import ColoredText from "../../components/ColoredText";
-import { Flex } from "@chakra-ui/react";
+import { Flex, Spinner } from "@chakra-ui/react";
 import { Text } from "@chakra-ui/layout";
 import { withRouter } from "react-router-dom";
 
@@ -20,7 +20,9 @@ const ReserveBanner: React.FC<{}> = (props: any) => {
         {title}
       </Text>
       <ColoredText fontSize="4xl" textTransform="capitalize">
-        {props.match.params.assetName ?? "-"}
+        {props.match.params.assetName ?? (
+          <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+        )}
       </ColoredText>
       {/*}
       <Text align="left" fontSize="3xl">
