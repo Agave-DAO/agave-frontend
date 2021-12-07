@@ -45,10 +45,7 @@ import {
 
 import { ModalIcon } from "../../utils/icons";
 import { useDisclosure } from "@chakra-ui/hooks";
-import {
-  TargetedTokenData,
-  useRewardTokensAPY,
-} from "../../queries/rewardTokens";
+import { TargetedTokenData, useKpiTokensAPY } from "../../queries/rewardTokens";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -162,7 +159,7 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
   const protocolDepositAPY = useDepositAPY(tokenAddress);
-  const rewardsAPY = useRewardTokensAPY().data;
+  const rewardsAPY = useKpiTokensAPY().data;
   const tokenData = rewardsAPY?.filter(
     token => (token as any).reserveAddress === tokenAddress
   );
@@ -177,7 +174,8 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
     ) {
       return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
-    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 11);
+    console.log(tokenData[0].tokenAPYperYear.toString());
+    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 7);
     const depositAPY = BigNumber.from(protocolDepositAPY.data);
     const aggregateAPY = rewardsAPYAsFixed.add(depositAPY);
     return <PercentageView ratio={bigNumberToString(aggregateAPY, 3, 25)} />;
@@ -188,7 +186,7 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
   tokenAddress,
 }) => {
   const protocolVariableAPR = useVariableBorrowAPR(tokenAddress);
-  const rewardsAPY = useRewardTokensAPY().data;
+  const rewardsAPY = useKpiTokensAPY().data;
   const tokenData = rewardsAPY?.filter(
     token => (token as any).reserveAddress === tokenAddress
   );
@@ -202,7 +200,7 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
     ) {
       return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
-    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 11);
+    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 7);
 
     const protocolVariableBorrowAPR = BigNumber.from(protocolVariableAPR.data);
     const aggregateAPY = protocolVariableBorrowAPR.sub(rewardsAPYAsFixed);
@@ -232,7 +230,7 @@ const PopoverRewardsAPY: React.FC<{
 }> = ({ tokenAddress, deposit }) => {
   const protocolDepositAPY = useDepositAPY(tokenAddress).data;
   const protocolVariableAPR = useVariableBorrowAPR(tokenAddress).data;
-  const rewardsAPY = useRewardTokensAPY().data;
+  const rewardsAPY = useKpiTokensAPY().data;
   const tokenData = rewardsAPY?.filter(
     token => (token as any).reserveAddress === tokenAddress
   );
@@ -249,13 +247,13 @@ const PopoverRewardsAPY: React.FC<{
     bigNumberToString(
       (tokenData as TargetedTokenData[])[0].tokenAPYperYear,
       3,
-      14
+      18
     ) + "%";
   const rewardsVariableDebtApy =
     bigNumberToString(
       (tokenData as TargetedTokenData[])[1].tokenAPYperYear,
       3,
-      14
+      18
     ) + "%";
 
   const protocolDepositAPYString =

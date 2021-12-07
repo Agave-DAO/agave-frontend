@@ -8,6 +8,7 @@ import { useAllReserveTokensWithData } from "./lendingReserveData";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken } from "./decimalsForToken";
 import { bigNumberToString } from "../utils/fixedPoint";
+import { useTotalMarketSize } from "./marketSize";
 
 export interface RewardTokenData {
   id: string;
@@ -240,6 +241,67 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
         .div(totalSupply);
       tokensData[i].tokenAPYperYear = tokensData[i].emissionPerYear
         ?.mul(priceShares)
+        .div(totalSupply);
+    }
+
+    return tokensData;
+  },
+  () => ["user", "rewardTokenData", "useRewardPricePerShare"],
+  () => undefined,
+  {
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 60 * 60 * 1000,
+  }
+);
+
+export const useKpiTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
+  TargetedTokenData[],
+  [_p1: "user", _p2: "rewardTokenData", _p3: "useRewardPricePerShare"],
+  []
+>(
+  async params => {
+    // KPI metrics
+    const floorTVL = BigNumber.from(300000000); //3,000,000.00);
+    const ceilingTVL = BigNumber.from(1200000000); //12,000,000.00);
+
+    const tokensData = await useRewardTokensData.fetchQueryDefined(params);
+    const marketsizeWei = await useTotalMarketSize.fetchQueryDefined(params);
+    const marketsize = marketsizeWei.div(BigNumber.from("10000000000000000")); // converting into the same base as the floor and ceiling div() by 1e16
+
+    if (marketsize.lte(floorTVL)) {
+      return tokensData;
+    }
+    let multiplier;
+
+    // 12000 because 120k CPT tokens got locked and 100k KPI tokens were minted - Then it's caculating the position of the current TVL within the range
+    if (marketsize.gte(ceilingTVL)) {
+      multiplier = BigNumber.from(12000);
+    } else {
+      multiplier = BigNumber.from(12000)
+        .mul(marketsize.sub(floorTVL))
+        .div(ceilingTVL.sub(floorTVL));
+    }
+
+    const priceShares = await useRewardPricePerShare.fetchQueryDefined(params);
+
+    for (let i = 0; i < tokensData.length; i++) {
+      const totalSupply = tokensData[i].tokenSupply;
+      const emissionPerSecond = tokensData[i].emissionPerSecond;
+      tokensData[i].emissionPerDay = emissionPerSecond.mul(60 * 60 * 24);
+      tokensData[i].emissionPerMonth = emissionPerSecond.mul(60 * 60 * 24 * 30);
+      tokensData[i].emissionPerYear = emissionPerSecond.mul(60 * 60 * 24 * 365);
+
+      tokensData[i].tokenAPYperDay = tokensData[i].emissionPerDay
+        ?.mul(multiplier)
+        .mul(priceShares)
+        .div(totalSupply);
+      tokensData[i].tokenAPYperMonth = tokensData[i].emissionPerMonth
+        ?.mul(multiplier)
+        .mul(priceShares)
+        .div(totalSupply);
+      tokensData[i].tokenAPYperYear = tokensData[i].emissionPerYear
+        ?.mul(multiplier)
+        .mul(priceShares)
         .div(totalSupply);
     }
 
