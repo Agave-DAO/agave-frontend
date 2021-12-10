@@ -11,6 +11,7 @@ import {
   Button,
   Image,
   Spinner,
+  keyframes,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
@@ -30,9 +31,11 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import stakeagave from "../../assets/image/stakeagave.png";
+import carrot from "../../assets/image/carrot.png";
 import { useClaimRewardsMutation } from "../../mutations/claimRewards";
 import { useAllProtocolTokens } from "../../queries/allATokens";
 import { useUserRewards } from "../../queries/rewardTokens";
+import ColoredText from "../../components/ColoredText";
 
 interface DashboardProps {
   borrowed: BigNumber | undefined;
@@ -75,29 +78,43 @@ const ClaimRewardsBox: React.FC<{}> = () => {
     [claimRewardsMutation, w3.library]
   );
 
+  const spin = keyframes`
+  0% {transform: rotate(0deg);}
+  50% {transform: rotate(40deg);}
+  100% {transform: rotate(0deg)}
+`;
+  const spinAnimation = `${spin} infinite 2.5s linear`;
+
   const rewardsBalance = useUserRewards().data;
-  return (
+  return rewardsBalance && !rewardsBalance.isZero() ? (
     <Center
       borderColor="white"
       borderWidth="1px"
       padding="10px"
       borderRadius="5px"
+      bg="secondary.500"
     >
-      <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="20px">
-        Claimable Rewards
-      </Text>
-
-      <Text color="white" fontSize={{ base: "1rem", md: "2rem" }} pr="4px">
-        {rewardsBalance && rewardsBalance._isBigNumber
-          ? bigNumberToString(rewardsBalance, 5, 18)
-          : ""}
-      </Text>
       <a
-        href="https://xdai-pools.symmetric.exchange/#/pool/0x65b0e9418e102a880c92790f001a9c5810b0ef32"
+        href="https://carrot.eth.limo/#/campaigns/0xa196c0e33df7a4b7729a2b3d3d3083d00510f05f932bfadabaa56bf8a8253c55?chainId=100"
         target="_blank"
       >
-        <Image src={stakeagave} alt="AGAVE ALT" width={{ base: "5rem" }} />
+        <Image
+          src={carrot}
+          alt="carrot.eth"
+          width={{ base: "4rem" }}
+          animation={spinAnimation}
+          //transform="rotate(0.3turn)"
+        />
       </a>
+      <ColoredText
+        color="white"
+        fontSize={{ base: "1rem", md: "2rem" }}
+        pr="4px"
+      >
+        {rewardsBalance && rewardsBalance._isBigNumber
+          ? bigNumberToString(rewardsBalance, 6, 18)
+          : ""}
+      </ColoredText>
       <Button
         minWidth="9rem"
         height={{ base: "4rem", md: "3rem" }}
@@ -115,7 +132,7 @@ const ClaimRewardsBox: React.FC<{}> = () => {
         Claim
       </Button>
     </Center>
-  );
+  ) : null;
 };
 
 export const DashboardBanner: React.FC<{}> = () => {

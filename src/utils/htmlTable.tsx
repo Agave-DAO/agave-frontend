@@ -164,12 +164,20 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
 };
 
 export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
+  linkpage,
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
   tableProps: tableStyle,
   rowProps: rowStyle,
   cellProps: cellStyle,
 }) => {
   const headerGroup = headerGroups[0];
+  const reactHistory = useHistory();
+  const handleRowClick = React.useCallback(
+    (row: { original: { symbol: string } }) => {
+      linkpage && reactHistory.push(`/${linkpage}/${row.original?.symbol}`);
+    },
+    [linkpage, reactHistory]
+  );
 
   return React.useMemo(
     () => (
@@ -178,7 +186,12 @@ export const MobileTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           {rows.map(row => {
             prepareRow(row);
             return (
-              <Box as="tr" {...row.getRowProps()} {...rowStyle}>
+              <Box
+                as="tr"
+                {...row.getRowProps()}
+                {...rowStyle}
+                onClick={() => handleRowClick(row)}
+              >
                 {row.cells.map((cell, index) => {
                   const reactRow =
                     index !== 0 ? (
