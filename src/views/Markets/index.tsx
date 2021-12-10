@@ -507,6 +507,7 @@ const AssetTable: React.FC<{
   const mobileRenderer = React.useCallback<TableRenderer<AssetRecord>>(
     table => (
       <MobileTableRenderer
+        linkpage="reserve-overview"
         table={table}
         tableProps={{
           textAlign: "center",
