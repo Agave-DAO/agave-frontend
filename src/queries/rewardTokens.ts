@@ -225,7 +225,7 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
 >(
   async params => {
     const tokensData = await useRewardTokensData.fetchQueryDefined(params);
-    const priceShares = await useRewardPricePerShare.fetchQueryDefined(params);
+    const priceShares = 0 // await useRewardPricePerShare.fetchQueryDefined(params);
 
     for (let i = 0; i < tokensData.length; i++) {
       const totalSupply = tokensData[i].tokenSupply;
