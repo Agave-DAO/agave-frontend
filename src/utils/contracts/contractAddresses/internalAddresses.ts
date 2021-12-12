@@ -51,7 +51,6 @@ export const internalAddressesPerNetwork: Record<
     incentivesController: "",
 
     explorer: "https://rinkeby.etherscan.io",
-    //rpcUrl: "https://rinkeby-light.eth.linkpool.io/",
   },
   xdai: {
     chainName: "xdai",
