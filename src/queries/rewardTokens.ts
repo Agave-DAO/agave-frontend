@@ -225,7 +225,7 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
 >(
   async params => {
     const tokensData = await useRewardTokensData.fetchQueryDefined(params);
-    const priceShares = 0 // await useRewardPricePerShare.fetchQueryDefined(params);
+    const priceShares = 0; // await useRewardPricePerShare.fetchQueryDefined(params);
 
     for (let i = 0; i < tokensData.length; i++) {
       const totalSupply = tokensData[i].tokenSupply;
@@ -267,10 +267,6 @@ export const useKpiTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
     const tokensData = await useRewardTokensData.fetchQueryDefined(params);
     const marketsizeWei = await useTotalMarketSize.fetchQueryDefined(params);
     const marketsize = marketsizeWei.div(BigNumber.from("10000000000000000")); // converting into the same base as the floor and ceiling div() by 1e16
-
-    if (marketsize.lte(floorTVL)) {
-      return tokensData;
-    }
     let multiplier;
 
     // 12000 because 120k CPT tokens got locked and 100k KPI tokens were minted - Then it's caculating the position of the current TVL within the range
@@ -282,7 +278,11 @@ export const useKpiTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
         .div(ceilingTVL.sub(floorTVL));
     }
 
-    const priceShares = await useRewardPricePerShare.fetchQueryDefined(params);
+    let priceShares = await useRewardPricePerShare.fetchQueryDefined(params);
+
+    if (marketsize.lte(floorTVL)) {
+      priceShares = constants.Zero;
+    }
 
     for (let i = 0; i < tokensData.length; i++) {
       const totalSupply = tokensData[i].tokenSupply;
