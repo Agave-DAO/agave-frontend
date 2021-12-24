@@ -34,13 +34,7 @@ export const useAllATokens = buildQueryHookWhenParamsDefinedChainAddrs<
 );
 
 export const useAllProtocolTokens = buildQueryHookWhenParamsDefinedChainAddrs<
-  Promise<
-    [string, string, string] & {
-      aTokenAddress: string;
-      stableDebtTokenAddress: string;
-      variableDebtTokenAddress: string;
-    }
-  >[],
+  ReadonlyArray<ProtocolAddresses>,
   [_p1: "AaveProtocolDataProvider", _p2: "getAllProtocolTokens"],
   []
 >(
@@ -51,10 +45,13 @@ export const useAllProtocolTokens = buildQueryHookWhenParamsDefinedChainAddrs<
     );
     const reserves = await useAllReserveTokens.fetchQueryDefined(params);
 
-    const protocolAddresses = await reserves.map(async tk => {
-      let x = await contract.getReserveTokensAddresses(tk.tokenAddress);
-      return x;
-    });
+    let protocolAddresses: ProtocolAddresses[] = [];
+
+    for (let i = 0; i < reserves.length; i++) {
+      protocolAddresses.push(
+        await contract.getReserveTokensAddresses(reserves[i].tokenAddress)
+      );
+    }
     return protocolAddresses;
   },
   () => ["AaveProtocolDataProvider", "getAllProtocolTokens"],

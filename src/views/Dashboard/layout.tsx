@@ -49,16 +49,14 @@ const ClaimRewardsBox: React.FC<{}> = () => {
   const w3 = useAppWeb3();
 
   let queriedAssets: string[] = [];
-  const tokens = useAllProtocolTokens().data;
+  const { data: tokens } = useAllProtocolTokens();
   tokens?.map(asset => {
-    asset.then(arr => {
-      queriedAssets = [
-        ...queriedAssets,
-        arr.aTokenAddress,
-        arr.variableDebtTokenAddress,
-      ];
-      return;
-    });
+    queriedAssets = [
+      ...queriedAssets,
+      asset.aTokenAddress,
+      asset.variableDebtTokenAddress,
+    ];
+    return;
   });
 
   const claimRewardsMutation = useClaimRewardsMutation({
