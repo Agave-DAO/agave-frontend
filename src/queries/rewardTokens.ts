@@ -196,7 +196,6 @@ export const useRewardPricePerShare = buildQueryHookWhenParamsDefinedChainAddrs<
 >(
   async params => {
     const data: RewardTokenData = await fetchSubgraphData();
-
     const liquidity = parseFloat(data.liquidity);
     const totalShares = parseFloat(data.totalShares);
     const pricePerShare = liquidity / totalShares;
@@ -286,6 +285,17 @@ export const useKpiTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
 
     for (let i = 0; i < tokensData.length; i++) {
       const totalSupply = tokensData[i].tokenSupply;
+      if (totalSupply.eq(constants.Zero)) {
+        [
+          tokensData[i].emissionPerDay,
+          tokensData[i].emissionPerMonth,
+          tokensData[i].emissionPerYear,
+          tokensData[i].tokenAPYperDay,
+          tokensData[i].tokenAPYperMonth,
+          tokensData[i].tokenAPYperYear,
+        ] = Array(6).fill(constants.Zero);
+        return tokensData;
+      }
       const emissionPerSecond = tokensData[i].emissionPerSecond;
       tokensData[i].emissionPerDay = emissionPerSecond.mul(60 * 60 * 24);
       tokensData[i].emissionPerMonth = emissionPerSecond.mul(60 * 60 * 24 * 30);
