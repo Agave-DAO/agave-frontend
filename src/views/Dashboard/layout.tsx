@@ -110,7 +110,7 @@ const ClaimRewardsBox: React.FC<{}> = () => {
         pr="4px"
       >
         {rewardsBalance && rewardsBalance._isBigNumber
-          ? bigNumberToString(rewardsBalance, 6, 18)
+          ? bigNumberToString(BigNumber.from(0), 6, 18)
           : ""}
       </ColoredText>
       <Button
