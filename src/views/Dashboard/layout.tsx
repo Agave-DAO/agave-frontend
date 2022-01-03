@@ -30,7 +30,7 @@ import { BigNumber, constants, ethers } from "ethers";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
-import stakeagave from "../../assets/image/stakeagave.png";
+import gnoagave from "../../assets/image/gnoagave.png";
 import carrot from "../../assets/image/carrot.png";
 import { useClaimRewardsMutation } from "../../mutations/claimRewards";
 import { useAllProtocolTokens } from "../../queries/allATokens";
@@ -81,7 +81,14 @@ const ClaimRewardsBox: React.FC<{}> = () => {
   50% {transform: rotate(40deg);}
   100% {transform: rotate(0deg)}
 `;
+  const bounce = keyframes`
+0%, 20%, 40%, 60%, 80%, 100% {transform: translateX(0);}
+20% {transform: translateY(3px);}
+80% {transform: translateY(-3px);}
+`;
+
   const spinAnimation = `${spin} infinite 2.5s linear`;
+  const bounceAnimation = `${bounce} infinite 2.5s linear`;
 
   const rewardsBalance = useUserRewards().data;
   return rewardsBalance && !rewardsBalance.isZero() ? (
@@ -93,24 +100,24 @@ const ClaimRewardsBox: React.FC<{}> = () => {
       bg="secondary.500"
     >
       <a
-        href="https://carrot.eth.limo/#/campaigns/0xa196c0e33df7a4b7729a2b3d3d3083d00510f05f932bfadabaa56bf8a8253c55?chainId=100"
+        href="https://xdai-pools.symmetric.exchange/#/pool/0x34fa946a20e65cb1ac466275949ba382973fde2b"
         target="_blank"
       >
         <Image
-          src={carrot}
-          alt="carrot.eth"
-          width={{ base: "4rem" }}
-          animation={spinAnimation}
+          src={gnoagave}
+          alt="gnoagave"
+          width={{ base: "6rem" }}
+          animation={bounceAnimation}
           //transform="rotate(0.3turn)"
         />
       </a>
       <ColoredText
         color="white"
         fontSize={{ base: "1rem", md: "2rem" }}
-        pr="4px"
+        px="6px"
       >
         {rewardsBalance && rewardsBalance._isBigNumber
-          ? bigNumberToString(BigNumber.from(0), 6, 18)
+          ? bigNumberToString(rewardsBalance, 6, 18)
           : ""}
       </ColoredText>
       <Button
