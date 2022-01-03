@@ -66,7 +66,6 @@ const UserInfo: React.FC<{
   const userAtokens = aTokenBalance
     ? bigNumberToString(aTokenBalance, 3, decimals)
     : "0";
-  console.log(decimals);
   const userBorrow = variableDebtTokenBalance
     ? bigNumberToString(variableDebtTokenBalance, 3, decimals)
     : "0";

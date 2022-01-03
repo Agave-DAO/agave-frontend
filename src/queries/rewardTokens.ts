@@ -171,7 +171,7 @@ const client = createClient({
 export const fetchSubgraphData = async () => {
   const subgraphQuery = gql`
     query {
-      pools(where: { id: "0x65b0e9418e102a880c92790f001a9c5810b0ef32" }) {
+      pools(where: { id: "0x34fa946a20e65cb1ac466275949ba382973fde2b" }) {
         id
         liquidity
         totalShares
@@ -199,7 +199,6 @@ export const useRewardPricePerShare = buildQueryHookWhenParamsDefinedChainAddrs<
     const liquidity = parseFloat(data.liquidity);
     const totalShares = parseFloat(data.totalShares);
     const pricePerShare = liquidity / totalShares;
-
     // hardcoded to convert into bigNumber - better solution would be nice
     try {
       return BigNumber.from(pricePerShare * 10e15);
@@ -224,8 +223,7 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
 >(
   async params => {
     const tokensData = await useRewardTokensData.fetchQueryDefined(params);
-    const priceShares = 0; // await useRewardPricePerShare.fetchQueryDefined(params);
-
+    const priceShares = await useRewardPricePerShare.fetchQueryDefined(params);
     for (let i = 0; i < tokensData.length; i++) {
       const totalSupply = tokensData[i].tokenSupply;
       const emissionPerSecond = tokensData[i].emissionPerSecond;
@@ -241,6 +239,13 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
       tokensData[i].tokenAPYperYear = tokensData[i].emissionPerYear
         ?.mul(priceShares)
         .div(totalSupply);
+      console.log(
+        tokensData[i]?.address,
+        tokensData[i].tokenAPYperYear?.toString(),
+        tokensData[i].emissionPerYear?.toString(),
+        priceShares.toString(),
+        totalSupply.toString()
+      );
     }
 
     return tokensData;
