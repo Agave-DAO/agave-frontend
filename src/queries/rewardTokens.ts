@@ -226,6 +226,17 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
     const priceShares = await useRewardPricePerShare.fetchQueryDefined(params);
     for (let i = 0; i < tokensData.length; i++) {
       const totalSupply = tokensData[i].tokenSupply;
+      if (totalSupply.eq(constants.Zero)) {
+        [
+          tokensData[i].emissionPerDay,
+          tokensData[i].emissionPerMonth,
+          tokensData[i].emissionPerYear,
+          tokensData[i].tokenAPYperDay,
+          tokensData[i].tokenAPYperMonth,
+          tokensData[i].tokenAPYperYear,
+        ] = Array(6).fill(constants.Zero);
+        return tokensData;
+      }
       const emissionPerSecond = tokensData[i].emissionPerSecond;
       tokensData[i].emissionPerDay = emissionPerSecond.mul(60 * 60 * 24);
       tokensData[i].emissionPerMonth = emissionPerSecond.mul(60 * 60 * 24 * 30);
@@ -239,13 +250,13 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
       tokensData[i].tokenAPYperYear = tokensData[i].emissionPerYear
         ?.mul(priceShares)
         .div(totalSupply);
-      console.log(
-        tokensData[i]?.address,
-        tokensData[i].tokenAPYperYear?.toString(),
-        tokensData[i].emissionPerYear?.toString(),
-        priceShares.toString(),
-        totalSupply.toString()
-      );
+      console.log({
+        address: tokensData[i]?.address,
+        tokenAPYperYear: tokensData[i].tokenAPYperYear?.toString(),
+        rewardEmissionPerYear: tokensData[i].emissionPerYear?.toString(),
+        valueRewardToken: priceShares.toString(),
+        tokenSupply: totalSupply.toString(),
+      });
     }
 
     return tokensData;
@@ -267,10 +278,8 @@ export const useKpiTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
     // KPI metrics
     const floorTVL = BigNumber.from(300000000); //3,000,000.00);
     const ceilingTVL = BigNumber.from(1200000000); //12,000,000.00);
-
     const tokensData = await useRewardTokensData.fetchQueryDefined(params);
     const marketsizeWei = await useTotalMarketSize.fetchQueryDefined(params);
-    console.log(tokensData, marketsizeWei);
     const marketsize = marketsizeWei.div(BigNumber.from("10000000000000000")); // converting into the same base as the floor and ceiling div() by 1e16
     let multiplier;
 
