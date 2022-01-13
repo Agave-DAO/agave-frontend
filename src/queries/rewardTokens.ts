@@ -270,6 +270,7 @@ export const useKpiTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
 
     const tokensData = await useRewardTokensData.fetchQueryDefined(params);
     const marketsizeWei = await useTotalMarketSize.fetchQueryDefined(params);
+    console.log(tokensData, marketsizeWei);
     const marketsize = marketsizeWei.div(BigNumber.from("10000000000000000")); // converting into the same base as the floor and ceiling div() by 1e16
     let multiplier;
 

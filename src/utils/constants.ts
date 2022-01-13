@@ -4,6 +4,7 @@ import agaveImg from "../assets/image/coins/agave.webp";
 import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
 import usdcImg from "../assets/image/coins/usdc.svg";
+import gnoImg from "../assets/image/coins/gno.webp";
 import { theme } from "@chakra-ui/theme";
 import { BigNumber, constants } from "ethers";
 export const LINEAR_GRADIENT_BG =
@@ -28,7 +29,8 @@ export const assetColor: { [key: string]: string } = {
   WBTC: theme.colors.orange[500],
   STAKE: theme.colors.teal[400],
   USDT: theme.colors.green[700],
-  LINK: theme.colors.pink[400],
+  LINK: theme.colors.blue[700],
+  GNO: theme.colors.gray[700],
 };
 
 export const fontSizes = {

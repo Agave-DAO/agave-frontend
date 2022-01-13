@@ -9,6 +9,7 @@ import UsdtLogo from "../assets/image/coins/usdt.svg";
 import WbtcLogo from "../assets/image/coins/wbtc.svg";
 import LinkLogo from "../assets/image/coins/link.webp";
 import StakeLogo from "../assets/image/coins/xdai-stake.svg";
+import GnoLogo from "../assets/image/coins/gno.webp";
 import React, { MouseEventHandler } from "react";
 import { SquareProps, Circle, Center } from "@chakra-ui/react";
 import { useAppWeb3 } from "../hooks/appWeb3";
@@ -45,6 +46,9 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "LINK":
     case "agLINK":
       return LinkLogo;
+    case "GNO":
+    case "agGNO":
+      return GnoLogo;
     default:
       return null;
   }
