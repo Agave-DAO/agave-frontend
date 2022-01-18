@@ -40,12 +40,6 @@ const PrivacySection = (
     className="privacy"
     my="2rem"
   >
-    <Text fontSize={{ base: "1.2rem", md: fontSizes.md }}>
-      By unlocking Your wallet You agree to our{" "}
-      <strong style={{ fontSize: "inherit" }}>Terms of Service</strong>,{" "}
-      <strong style={{ fontSize: "inherit" }}>Privacy</strong> and{" "}
-      <strong style={{ fontSize: "inherit" }}>Cookie Policy</strong>.
-    </Text>
     <Text my="1.5rem" fontSize={{ base: "1.2rem", md: fontSizes.md }}>
       <strong style={{ fontSize: "inherit" }}>Disclaimer:</strong> Wallets are
       provided by External Providers and by selecting you agree to Terms of
@@ -82,7 +76,9 @@ export const UnlockWallet: React.FC<{}> = props => {
             colorScheme="teal"
             size="xl"
             h="40px"
-            onClick={() => connector ? changeChain(connector, addrs.chainName) : null}
+            onClick={() =>
+              connector ? changeChain(connector, addrs.chainName) : null
+            }
           >
             {addrs.chainName}
           </Button>
@@ -198,7 +194,7 @@ export const UnlockWallet: React.FC<{}> = props => {
             fontSize={{ base: fontSizes.md, md: "inherit" }}
           >
             To see your deposited / borrowed assets, you need to connect your
-            wallet to xDai network.
+            wallet to Gnosis Chain.
           </Text>
           <Stack>
             <Button

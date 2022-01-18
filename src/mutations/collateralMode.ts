@@ -1,9 +1,7 @@
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { AgaveLendingABI__factory } from "../contracts";
 import { useAppWeb3 } from "../hooks/appWeb3";
-import {
-  useUserReserveData
-} from "../queries/protocolReserveData";
+import { useUserReserveData } from "../queries/protocolReserveData";
 import { useUserAccountData } from "../queries/userAccountData";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { usingProgressNotification } from "../utils/progressNotification";
@@ -21,7 +19,9 @@ export interface UseCollateralModeMutationDto {
   ];
 }
 
-export const useCollateralModeMutation = (assetTokenAddress: string | undefined): UseCollateralModeMutationDto => {
+export const useCollateralModeMutation = (
+  assetTokenAddress: string | undefined
+): UseCollateralModeMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
 

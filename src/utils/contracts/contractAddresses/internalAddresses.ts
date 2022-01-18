@@ -23,12 +23,12 @@ export interface ChainAddresses extends StrongTypedChainAddresses<any, any> {
   readonly chainName: string;
 }
 
-export const ValidNetworkNames = ["rinkeby", "xdai"] as const;
+export const ValidNetworkNames = ["rinkeby", "Gnosis"] as const;
 export type ValidNetworkNameTypes = typeof ValidNetworkNames[number];
 
 export const ValidNetworkIds = {
   rinkeby: 4,
-  xdai: 100,
+  Gnosis: 100,
 } as const;
 export type ValidNetworkIdTypes = typeof ValidNetworkIds[ValidNetworkNameTypes];
 
@@ -52,8 +52,8 @@ export const internalAddressesPerNetwork: Record<
 
     explorer: "https://rinkeby.etherscan.io",
   },
-  xdai: {
-    chainName: "xdai",
+  Gnosis: {
+    chainName: "Gnosis",
     chainId: 100,
     symbol: "XDAI",
 

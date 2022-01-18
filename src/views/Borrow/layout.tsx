@@ -40,7 +40,7 @@ export const BorrowBanner: React.FC<{}> = () => {
       </Text>
       {isSmallerThan900 ? null : (
         <Text>
-          Need to bridge assets to xDai from other chains? Please visit{" "}
+          Need to bridge assets to Gnosis from other chains? Please visit{" "}
           <Link fontWeight="bold" href="https://xpollinate.io" target="_blank">
             xpollinate.io
           </Link>
