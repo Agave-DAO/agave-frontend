@@ -16,7 +16,10 @@ import { Box, Center, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber, constants } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
-import { useUserAssetBalance } from "../../queries/userAssets";
+import {
+  useUserAssetAllowance,
+  useUserAssetBalance,
+} from "../../queries/userAssets";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { ControllerItem } from "../../components/ControllerItem";
 import {
@@ -38,6 +41,10 @@ interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
 }
 
+interface RoutingState extends InitialState {
+  amountToWithdraw: BigNumber;
+}
+
 interface AmountSelectedState extends InitialState {
   amountToWithdraw: BigNumber;
 }
@@ -52,6 +59,7 @@ interface WithdrawnTXState extends WithdrawTXState {
 
 type WithdrawState = OneTaggedPropertyOf<{
   init: InitialState;
+  router: RoutingState;
   amountSelected: AmountSelectedState;
   withdrawTx: WithdrawTXState;
   withdrawnTx: WithdrawnTXState;
@@ -69,6 +77,7 @@ function createState<SelectedState extends PossibleTags<WithdrawState>>(
 
 const stateNames: Record<PossibleTags<WithdrawState>, string> = {
   init: "Token",
+  router: "Routing",
   amountSelected: "Approval",
   withdrawTx: "Withdraw",
   withdrawnTx: "Withdrawn",
@@ -144,6 +153,66 @@ const InitialComp: React.FC<{
       onSubmit={onSubmit}
       balance={availableToWithdraw}
     />
+  );
+};
+
+const StateRouterComp: React.FC<{
+  state: RoutingState;
+  dispatch: (nextState: WithdrawState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
+  const { data: reserve } = useLendingReserveData(asset?.tokenAddress);
+  const approvalArgs = React.useMemo<UseApprovalMutationProps>(
+    () => ({
+      asset: isReserveTokenDefinition(state.token)
+        ? state.token.tokenAddress
+        : reserve?.aTokenAddress,
+      amount: state.amountToWithdraw,
+      spender: isReserveTokenDefinition(state.token)
+        ? chainAddresses?.lendingPool
+        : chainAddresses?.wrappedNativeGateway,
+    }),
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+  );
+
+  const allowance = useUserAssetAllowance(
+    approvalArgs.asset,
+    approvalArgs.spender
+  ).data;
+  React.useEffect(() => {
+    if (!allowance && approvalArgs.asset) {
+      return;
+    }
+    if (allowance?.lt(state.amountToWithdraw)) {
+      dispatch(createState("amountSelected", { ...state }));
+    } else {
+      dispatch(createState("withdrawTx", { ...state }));
+    }
+  }, [state, dispatch, allowance]);
+  const currentStep: PossibleTags<WithdrawState> = "router";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={WithdrawTitle}
+      amount={state.amountToWithdraw}
+      asset={state.token}
+      collateral={true}
+      increase={true}
+    >
+      {stepperBar}
+    </WizardOverviewWrapper>
   );
 };
 
@@ -316,6 +385,8 @@ const WithdrawStateMachine: React.FC<{
   switch (state.type) {
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
+    case "router":
+      return <StateRouterComp state={state.router} dispatch={setState} />;
     case "amountSelected":
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />

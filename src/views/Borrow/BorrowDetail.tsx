@@ -36,9 +36,15 @@ import {
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
+import { useUserAssetAllowance } from "../../queries/userAssets";
+import { UseApprovalMutationProps } from "../../mutations/approval";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
+}
+
+interface RoutingState extends InitialState {
+  amountToBorrow: BigNumber;
 }
 
 interface AmountSelectedState extends InitialState {
@@ -55,6 +61,7 @@ interface BorrowedTXState extends BorrowTXState {
 
 type BorrowState = OneTaggedPropertyOf<{
   init: InitialState;
+  router: RoutingState;
   amountSelected: AmountSelectedState;
   borrowTx: BorrowTXState;
   borrowedTx: BorrowedTXState;
@@ -73,6 +80,7 @@ function createState<SelectedState extends PossibleTags<BorrowState>>(
 // THIS BorrowState IS ALL WRONG AND NEEDS FIXING WHEN THE QUERIES ARE DONE
 const stateNames: Record<PossibleTags<BorrowState>, string> = {
   init: "Token",
+  router: "Routing",
   amountSelected: "Delegate",
   borrowTx: "Borrow",
   borrowedTx: "Borrowed",
@@ -142,6 +150,60 @@ const InitialComp: React.FC<{
       onSubmit={onSubmit}
       balance={maxToBorrow}
     />
+  );
+};
+
+const StateRouterComp: React.FC<{
+  state: RoutingState;
+  dispatch: (nextState: BorrowState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const wrappedNativeAddress = useWrappedNativeAddress().data;
+  const reserveData = useLendingReserveData(wrappedNativeAddress).data;
+  const approvalArgs = React.useMemo<UseApproveDelegationMutationProps>(
+    () => ({
+      asset: reserveData?.variableDebtTokenAddress,
+      amount: state.amountToBorrow,
+      spender: chainAddresses?.wrappedNativeGateway,
+    }),
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+  );
+
+  const allowance = useUserAssetAllowance(
+    approvalArgs.asset,
+    approvalArgs.spender
+  ).data;
+  React.useEffect(() => {
+    if (!allowance && approvalArgs.asset) {
+      return;
+    }
+    if (allowance?.lt(state.amountToBorrow)) {
+      dispatch(createState("amountSelected", { ...state }));
+    } else {
+      dispatch(createState("borrowTx", { ...state }));
+    }
+  }, [state, dispatch, allowance]);
+  const currentStep: PossibleTags<BorrowState> = "router";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={BorrowTitle}
+      amount={state.amountToBorrow}
+      asset={state.token}
+      collateral={true}
+      increase={true}
+    >
+      {stepperBar}
+    </WizardOverviewWrapper>
   );
 };
 
@@ -310,6 +372,10 @@ const BorrowStateMachine: React.FC<{
   switch (state.type) {
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
+      case "router":
+      return (
+        <StateRouterComp state={state.router} dispatch={setState} />
+      );
     case "amountSelected":
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />

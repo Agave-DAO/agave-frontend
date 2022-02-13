@@ -5,6 +5,7 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { RepayDash } from "./RepayDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
+  isReserveTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
   useTokenDefinitionBySymbol,
@@ -14,6 +15,7 @@ import ColoredText from "../../components/ColoredText";
 import { BigNumber, constants } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import {
+  useUserAssetAllowance,
   useUserAssetBalance,
   useUserVariableDebtForAsset,
 } from "../../queries/userAssets";
@@ -33,6 +35,10 @@ interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
 }
 
+interface RoutingState extends InitialState{
+  amountToRepay: BigNumber;
+}
+
 interface AmountSelectedState extends InitialState {
   amountToRepay: BigNumber;
 }
@@ -47,6 +53,7 @@ interface RepaidTXState extends RepayTXState {
 
 type RepayState = OneTaggedPropertyOf<{
   init: InitialState;
+  router: RoutingState;
   amountSelected: AmountSelectedState;
   repayTx: RepayTXState;
   repaidTx: RepaidTXState;
@@ -64,6 +71,7 @@ function createState<SelectedState extends PossibleTags<RepayState>>(
 
 const stateNames: Record<PossibleTags<RepayState>, string> = {
   init: "Token",
+  router: "Routing",
   amountSelected: "Approval",
   repayTx: "Repayment",
   repaidTx: "Finished",
@@ -113,7 +121,7 @@ const InitialComp: React.FC<{
 
   const onSubmit = React.useCallback(
     amountToRepay =>
-      dispatch(createState("amountSelected", { amountToRepay, ...state })),
+      dispatch(createState("router", { amountToRepay, ...state })),
     [state, dispatch]
   );
   return (
@@ -125,6 +133,58 @@ const InitialComp: React.FC<{
       onSubmit={onSubmit}
       balance={availableToRepay}
     />
+  );
+};
+
+const StateRouterComp: React.FC<{
+  state: RoutingState;
+  dispatch: (nextState: RepayState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const approvalArgs = React.useMemo<UseApprovalMutationProps>(
+    () => ({
+      asset: isReserveTokenDefinition(state.token)
+        ? state.token.tokenAddress
+        : undefined,
+      amount: state.amountToRepay,
+      spender: chainAddresses?.lendingPool,
+    }),
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+  );
+
+  const allowance = useUserAssetAllowance(approvalArgs.asset, approvalArgs.spender).data;
+  React.useEffect(() => {  
+    if (!allowance && approvalArgs.asset){
+      return
+    }
+    if (allowance?.lt(state.amountToRepay)){
+      dispatch(createState("amountSelected", { ...state }))
+    }
+    else {
+      dispatch(createState("repayTx", { ...state }))
+    }
+  }, [state, dispatch, allowance]);
+  const currentStep: PossibleTags<RepayState> = "router";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+    title={RepayTitle}
+    amount={state.amountToRepay}
+    asset={state.token}
+    collateral={true}
+    increase={true}
+  >
+    {stepperBar}
+  </WizardOverviewWrapper>
   );
 };
 
@@ -281,6 +341,8 @@ const RepayStateMachine: React.FC<{
   switch (state.type) {
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
+    case "router":
+      return <StateRouterComp state={state.router} dispatch={setState} />
     case "amountSelected":
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />

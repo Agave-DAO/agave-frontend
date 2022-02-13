@@ -14,7 +14,7 @@ import { Box, Center } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
-import { useUserAssetBalance } from "../../queries/userAssets";
+import { useUserAssetAllowance, useUserAssetBalance } from "../../queries/userAssets";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import {
   useApprovalMutation,
@@ -34,6 +34,10 @@ interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
 }
 
+interface RoutingState extends InitialState{
+  amountToDeposit: BigNumber;
+}
+
 interface AmountSelectedState extends InitialState {
   amountToDeposit: BigNumber;
 }
@@ -48,6 +52,7 @@ interface DepositedTXState extends DepositTXState {
 
 type DepositState = OneTaggedPropertyOf<{
   init: InitialState;
+  router: RoutingState;
   amountSelected: AmountSelectedState;
   depositTx: DepositTXState;
   depositedTx: DepositedTXState;
@@ -66,6 +71,7 @@ function createState<SelectedState extends PossibleTags<DepositState>>(
 const stateNames: Record<PossibleTags<DepositState>, string> = {
   init: "Token",
   amountSelected: "Approval",
+  router:"Routing",
   depositTx: "Deposit",
   depositedTx: "Deposited",
 };
@@ -92,7 +98,7 @@ const InitialComp: React.FC<{
 
   const onSubmit = React.useCallback(
     amountToDeposit =>
-      dispatch(createState("amountSelected", { amountToDeposit, ...state })),
+      dispatch(createState("router", { amountToDeposit, ...state })),
     [state, dispatch]
   );
   return (
@@ -104,6 +110,58 @@ const InitialComp: React.FC<{
       onSubmit={onSubmit}
       balance={usefulBalance}
     />
+  );
+};
+
+const StateRouterComp: React.FC<{
+  state: RoutingState;
+  dispatch: (nextState: DepositState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const approvalArgs = React.useMemo<UseApprovalMutationProps>(
+    () => ({
+      asset: isReserveTokenDefinition(state.token)
+        ? state.token.tokenAddress
+        : undefined,
+      amount: state.amountToDeposit,
+      spender: chainAddresses?.lendingPool,
+    }),
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+  );
+
+  const allowance = useUserAssetAllowance(approvalArgs.asset, approvalArgs.spender).data;
+  React.useEffect(() => {  
+    if (!allowance && approvalArgs.asset){
+      return
+    }
+    if (allowance?.lt(state.amountToDeposit)){
+      dispatch(createState("amountSelected", { ...state }))
+    }
+    else {
+      dispatch(createState("depositTx", { ...state }))
+    }
+  }, [state, dispatch, allowance]);
+  const currentStep: PossibleTags<DepositState> = "router";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+    title={DepositTitle}
+    amount={state.amountToDeposit}
+    asset={state.token}
+    collateral={true}
+    increase={true}
+  >
+    {stepperBar}
+  </WizardOverviewWrapper>
   );
 };
 
@@ -270,6 +328,8 @@ const DepositStateMachine: React.FC<{
   switch (state.type) {
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
+    case "router":
+      return <StateRouterComp state={state.router} dispatch={setState} />;
     case "amountSelected":
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
