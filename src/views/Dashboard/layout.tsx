@@ -12,7 +12,7 @@ import {
   Image,
   Spinner,
   keyframes,
-  Tooltip
+  Tooltip,
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
@@ -20,7 +20,7 @@ import {
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
 import { CenterProps, HStack } from "@chakra-ui/layout";
-import { isMobileOnly } from "react-device-detect";
+import { isMobileOnly, isDesktop } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
 import { DashboardTable, DashboardTableType } from "./table";
 import { DashboardEmptyState } from "./emptyState";
@@ -94,57 +94,60 @@ const ClaimRewardsBox: React.FC<{}> = () => {
   const rewardsBalance = useUserRewards().data;
   return rewardsBalance ? (
     <Tooltip
-    placement="top-end"
-    bg="gray.700"
-    label="Rewards in CPT tokens. Click icon for more info"
-    fontSize="xl"
-    openDelay={400}
-  >
-    <Center
-      borderColor="white"
-      borderWidth="1px"
-      padding="10px"
-      borderRadius="5px"
-      bg="secondary.500"
+      placement="top-end"
+      bg="gray.700"
+      label="Rewards in CPT tokens. Click icon for more info"
+      fontSize="xl"
+      openDelay={400}
     >
-      <a
-        href="https://xdai-pools.symmetric.exchange/#/pool/0x34fa946a20e65cb1ac466275949ba382973fde2b"
-        target="_blank"
+      <Center
+        borderColor="white"
+        borderWidth="1px"
+        padding="10px"
+        borderRadius="5px"
+        bg="secondary.500"
       >
-        <Image
-          src={gnoagave}
-          alt="gnoagave"
-          width={{ base: "6rem" }}
-          animation={bounceAnimation}
-          //transform="rotate(0.3turn)"
-        />
-      </a>
-      <ColoredText
-        color="white"
-        fontSize={{ base: "1rem", md: "2rem" }}
-        px="6px"
-      >
-        {rewardsBalance && rewardsBalance._isBigNumber
-          ? bigNumberToString(rewardsBalance, 6, 18)
-          : ""}
-      </ColoredText>
-      <Button
-        minWidth="9rem"
-        height={{ base: "4rem", md: "3rem" }}
-        fontSize={{ base: "3xl", md: "2xl" }}
-        ml="1.5rem"
-        px="1.5rem"
-        color="white"
-        bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
-        rounded="lg"
-        fontWeight="400"
-        onClick={() => {
-          claimRewardsMutationCall(queriedAssets, ethers.constants.MaxUint256);
-        }}
-      >
-        Claim
-      </Button>
-    </Center>
+        <a
+          href="https://xdai-pools.symmetric.exchange/#/pool/0x34fa946a20e65cb1ac466275949ba382973fde2b"
+          target="_blank"
+        >
+          <Image
+            src={gnoagave}
+            alt="gnoagave"
+            width={{ base: "6rem" }}
+            animation={bounceAnimation}
+            //transform="rotate(0.3turn)"
+          />
+        </a>
+        <ColoredText
+          color="white"
+          fontSize={{ base: "1rem", md: "2rem" }}
+          px="6px"
+        >
+          {rewardsBalance && rewardsBalance._isBigNumber
+            ? bigNumberToString(rewardsBalance, 6, 18)
+            : ""}
+        </ColoredText>
+        <Button
+          minWidth="9rem"
+          height={{ base: "4rem", md: "3rem" }}
+          fontSize={{ base: "3xl", md: "2xl" }}
+          ml="1.5rem"
+          px="1.5rem"
+          color="white"
+          bg={mode({ base: "secondary.800", md: "primary.500" }, "primary.500")}
+          rounded="lg"
+          fontWeight="400"
+          onClick={() => {
+            claimRewardsMutationCall(
+              queriedAssets,
+              ethers.constants.MaxUint256
+            );
+          }}
+        >
+          Claim
+        </Button>
+      </Center>
     </Tooltip>
   ) : null;
 };
@@ -284,126 +287,147 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
   );
 
   return (
-    <Flex flexDirection="column">
+    <Flex flexDirection="row">
       <Flex
-        align="center"
-        flexBasis="auto"
-        spacing="1em"
-        w="100%"
-        flexDirection={{ base: "column", lg: "row" }}
-        m="auto"
-        color="white"
+        flexDirection="column"
+        minW="65%"
+        mr={{ base: "inherit", lg: "1.32%" }}
+        w={isDesktop ? "65%" : "100%"}
       >
-        <UpperBox
-          title="Deposit Information"
-          mr={{ base: "inherit", lg: "2%" }}
+        <Flex
+          align="center"
+          flexBasis="auto"
+          spacing="1em"
+          w="100%"
+          flexDirection={{ base: "column", lg: "row" }}
+          m="auto"
+          color="white"
         >
-          <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
-            <HStack d="flex" mt="0.5rem">
-              <Text>Approximate Balance</Text>
-              <ModalIcon
-                position="relative"
-                top="0"
-                right="0"
-                ml="0.5rem"
-                transform="scale(0.75)"
-                onOpen={onSubmitAP}
-              />
-            </HStack>
-            <Text fontWeight="bold" textAlign="left" mt="0.5em">
-              <DashboardApproximateBalanceDisplay />
-            </Text>
-          </VStack>
-        </UpperBox>
-        <UpperBox
-          title="Borrow Information"
-          mt={{ base: "2rem", lg: "inherit" }}
-        >
-          <Box
-            d="flex"
-            flexDirection="row"
-            justifyContent="space-between"
-            whiteSpace="nowrap"
-            h="7.5rem"
+          <UpperBox
+            title="Deposit Information"
+            w={isDesktop ? "49%" : "100%"}
+            mr={{ base: "inherit", lg: "2%" }}
           >
-            <Box h="7rem" mt="0.5rem">
-              <Text>Borrowed</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {borrowed ? (
-                  `$ ${bigNumberToString(borrowed)}`
-                ) : (
-                  <Spinner
-                    speed="0.5s"
-                    emptyColor="gray.200"
-                    color="yellow.500"
-                  />
-                )}
-              </Text>
-            </Box>
-            <Box h="7rem" mt="0.5rem" ml={{ base: "1rem", md: "3rem" }}>
-              <Text>Collateral</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {collateral ? (
-                  `$ ${bigNumberToString(collateral)}`
-                ) : (
-                  <Spinner
-                    speed="0.5s"
-                    emptyColor="gray.200"
-                    color="yellow.500"
-                  />
-                )}
-              </Text>
-            </Box>
-            <VStack
-              flexDirection="column"
-              h="7rem"
-              alignItems="center"
-              ml={{ base: "1rem", md: "3rem" }}
-            >
+            <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
               <HStack d="flex" mt="0.5rem">
-                <Text>{isMobile ? "HF" : "Health Factor"}</Text>
+                <Text>Approximate Balance</Text>
                 <ModalIcon
                   position="relative"
                   top="0"
                   right="0"
                   ml="0.5rem"
                   transform="scale(0.75)"
-                  onOpen={onSubmitHF}
-                />
-              </HStack>
-              <Text fontWeight="bold" textAlign="center" mt="0.5em">
-                {bigNumberToString(healthFactor)}
-              </Text>
-            </VStack>
-            <VStack
-              flexDirection="column"
-              h="7rem"
-              alignItems="center"
-              ml={{ base: "1rem", md: "3rem" }}
-            >
-              <HStack d="flex" mt="0.5rem">
-                <Text>{isMobile ? "LTV" : "Current LTV"}</Text>
-                <ModalIcon
-                  position="relative"
-                  top="0"
-                  right="0"
-                  ml="0.5rem"
-                  transform="scale(0.75)"
-                  onOpen={onSubmitLTV}
+                  onOpen={onSubmitAP}
                 />
               </HStack>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {fixedNumberToPercentage(userAccountData?.currentLtv)}
+                <DashboardApproximateBalanceDisplay />
               </Text>
             </VStack>
-          </Box>
-        </UpperBox>
+          </UpperBox>
+          <UpperBox
+            title="Borrow Information"
+            w={isDesktop ? "49%" : "100%"}
+            mt={{ base: "2rem", lg: "inherit" }}
+          >
+            <Box
+              d="flex"
+              flexDirection="row"
+              justifyContent="space-between"
+              whiteSpace="nowrap"
+              h="7.5rem"
+            >
+              <Box h="7rem" mt="0.5rem">
+                <Text>Borrowed</Text>
+                <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                  {borrowed ? (
+                    `$ ${bigNumberToString(borrowed)}`
+                  ) : (
+                    <Spinner
+                      speed="0.5s"
+                      emptyColor="gray.200"
+                      color="yellow.500"
+                    />
+                  )}
+                </Text>
+              </Box>
+              <Box h="7rem" mt="0.5rem" ml={{ base: "1rem", md: "3rem" }}>
+                <Text>Collateral</Text>
+                <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                  {collateral ? (
+                    `$ ${bigNumberToString(collateral)}`
+                  ) : (
+                    <Spinner
+                      speed="0.5s"
+                      emptyColor="gray.200"
+                      color="yellow.500"
+                    />
+                  )}
+                </Text>
+              </Box>
+              <VStack
+                flexDirection="column"
+                h="7rem"
+                alignItems="center"
+                ml={{ base: "1rem", md: "3rem" }}
+              >
+                <HStack d="flex" mt="0.5rem">
+                  <Text>{isMobile ? "HF" : "Health Factor"}</Text>
+                  <ModalIcon
+                    position="relative"
+                    top="0"
+                    right="0"
+                    ml="0.5rem"
+                    transform="scale(0.75)"
+                    onOpen={onSubmitHF}
+                  />
+                </HStack>
+                <Text fontWeight="bold" textAlign="center" mt="0.5em">
+                  {bigNumberToString(healthFactor)}
+                </Text>
+              </VStack>
+              <VStack
+                flexDirection="column"
+                h="7rem"
+                alignItems="center"
+                ml={{ base: "1rem", md: "3rem" }}
+              >
+                <HStack d="flex" mt="0.5rem">
+                  <Text>{isMobile ? "LTV" : "Current LTV"}</Text>
+                  <ModalIcon
+                    position="relative"
+                    top="0"
+                    right="0"
+                    ml="0.5rem"
+                    transform="scale(0.75)"
+                    onOpen={onSubmitLTV}
+                  />
+                </HStack>
+                <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                  {fixedNumberToPercentage(userAccountData?.currentLtv)}
+                </Text>
+              </VStack>
+            </Box>
+          </UpperBox>
+        </Flex>
+        <Box mt="2rem" overflowX="auto">
+          {depositsTable}
+          {borrowsTable}
+        </Box>
+        <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
       </Flex>
-      <Box mt="2rem" overflowX="auto">
-        {depositsTable}
-        {borrowsTable}
-      </Box>
-      <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
+      <Center
+        boxSizing="content-box"
+        flexDirection="column"
+        rounded="xl"
+        minH="10.6rem"
+        minW={{ base: "34%", xl: "auto" }}
+        flex={1}
+        bg="primary.900"
+        py="1rem"
+      >
+        d
+      </Center>
     </Flex>
   );
 };
