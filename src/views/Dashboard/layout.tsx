@@ -12,6 +12,10 @@ import {
   Image,
   Spinner,
   keyframes,
+  Select,
+  Tabs, 
+  TabList,  
+  Tab, 
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
@@ -20,10 +24,10 @@ import {
 } from "../../utils/fixedPoint";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly } from "react-device-detect";
-import { ModalIcon } from "../../utils/icons";
+import { ModalIcon, useNativeSymbols, TokenIcon } from "../../utils/icons";
 import { DashboardTable, DashboardTableType } from "./table";
 import { DashboardEmptyState } from "./emptyState";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { BigNumber, constants, ethers } from "ethers";
@@ -31,11 +35,12 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import gnoagave from "../../assets/image/gnoagave.png";
-import carrot from "../../assets/image/carrot.png";
 import { useClaimRewardsMutation } from "../../mutations/claimRewards";
 import { useAllProtocolTokens } from "../../queries/allATokens";
 import { useUserRewards } from "../../queries/rewardTokens";
 import ColoredText from "../../components/ColoredText";
+import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
+import { TabContent } from "./tabContent"
 
 interface DashboardProps {
   borrowed: BigNumber | undefined;
@@ -198,6 +203,45 @@ const UpperBox: React.FC<{ title: string } & CenterProps> = ({
   );
 };
 
+const LowerBox: React.FC<{ title: string } & CenterProps> = ({
+  title,
+  children,
+  ...props
+}) => {
+  return (
+    <Center
+      boxSizing="content-box"
+      flexDirection="column"
+      rounded="xl"
+      minH="10.6rem"
+      minW={{ base: "100%", lg: "auto" }}
+      flex={1}
+      bg="primary.900"
+      py="1rem"
+      {...props}
+    >
+      <VStack
+        divider={
+          <StackDivider
+            borderColor="#36CFA2"
+            h="0.188rem"
+            backgroundColor="#36CFA2"
+          />
+        }
+        spacing={4}
+        w="100%"
+        align="stretch"
+        flexDirection="column"
+      >
+        <Text px={{ base: "2rem", md: "3rem" }} h="25">
+          {title}
+        </Text>
+        <Box px={{ base: "2rem", md: "3rem" }}>{children}</Box>
+      </VStack>
+    </Center>
+  );
+};
+
 const DashboardApproximateBalanceDisplay: React.FC<{}> = () => {
   const balancesDaiWei = useUserDepositAssetBalancesDaiWei();
   const balance = React.useMemo(() => {
@@ -244,6 +288,43 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
 
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
+  interface AssetRecord {
+    symbol: string;
+    tokenAddress: string;
+    aTokenAddress: string;
+}
+
+const reserves = useAllReserveTokensWithData();
+const nativeSymbols = useNativeSymbols();
+const assetRecords = React.useMemo(() => {
+  const assets =
+    reserves.data?.map(
+      ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
+        symbol,
+        tokenAddress,
+        aTokenAddress,
+      })
+    ) ?? [];
+  return assets.map(asset => {
+    return asset.symbol === nativeSymbols.wrappednative
+      ? {
+          ...asset,
+          symbol: nativeSymbols?.native,
+        }
+      : asset;
+    });
+  }, [reserves]);
+
+  const coinOptions = React.useMemo(
+    () =>
+      assetRecords.map( currency => {
+        return (
+            <option value={currency.symbol}>{currency.symbol}</option>
+        )
+      })
+    , [assetRecords]
+  );
+
   const depositsTable = React.useMemo(
     () =>
       deposits?.length > 0 ? (
@@ -257,6 +338,70 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
         />
       ),
     [deposits, history]
+  );
+
+  const newDepositsTable = React.useMemo(
+    () =>
+      (
+        <LowerBox
+          title="Deposit Information"
+          mr={{ base: "inherit", lg: "2%" }}
+          color='white'
+          width='49%'
+          mb='1em'
+        >
+          {(!coinOptions.length) 
+            ? (
+              <>
+              <Center>
+                <Spinner 
+                  speed="0.5s" 
+                  emptyColor="gray.200" 
+                  color="yellow.500" 
+                  size='xl' />
+              </Center>
+              </>
+              )
+            : (
+              <>
+              <Select 
+              borderColor='#00A490'
+              bg='#00A490'
+              size='lg'
+              color='white'
+              mb='2em'
+              mt='1em'
+            >
+              {coinOptions}
+            </Select>
+            <Tabs 
+              isFitted 
+              variant='enclosed'
+              onChange={(index) => {
+                // setTab(index)
+              }}
+            >
+              <TabList>
+                <Tab
+                  fontSize='17'
+                  _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
+                >Deposit</Tab>
+                <Tab 
+                  fontSize='17'
+                  _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
+                >Withdraw</Tab>
+              </TabList>
+              <TabContent
+                type="Deposit"
+                coin="XDAI"
+              />
+            </Tabs>
+            </>
+            )
+          }
+        </LowerBox>
+      )
+    , [deposits, history, coinOptions]
   );
 
   const borrowsTable = React.useMemo(
@@ -391,7 +536,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
         </UpperBox>
       </Flex>
       <Box mt="2rem" overflowX="auto">
-        {depositsTable}
+        {newDepositsTable}
         {borrowsTable}
       </Box>
       <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
