@@ -1,20 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Center,
   Button,
   TabPanels, 
   TabPanel,
-  Table,
-  Tbody,
-  Tr,
-  Td,
-  Input,
-  InputGroup,
-  InputRightElement,
-  InputLeftElement,
 } from "@chakra-ui/react";
 import { CenterProps } from "@chakra-ui/layout";
-import { TokenIcon } from "../../utils/icons";
 import { fontSizes } from "../../utils/constants";
 import { TabTable } from "./tabTable";
 
