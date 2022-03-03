@@ -264,6 +264,10 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modal_type, setModal] = useState(MODAL_TYPES.APROXIMATE_BALANCE);
+  const [selectedCoin, setCoin] = useState("USDC"); // defaults to USDC since it's the first coin on the list
+  const handleCoinChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setCoin(event.target.value)
+  }
   const history = useHistory();
 
   const { account: userAccountAddress } = useAppWeb3();
@@ -292,11 +296,11 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
     symbol: string;
     tokenAddress: string;
     aTokenAddress: string;
-}
+  }
 
-const reserves = useAllReserveTokensWithData();
-const nativeSymbols = useNativeSymbols();
-const assetRecords = React.useMemo(() => {
+  const reserves = useAllReserveTokensWithData();
+  const nativeSymbols = useNativeSymbols();
+  const assetRecords = React.useMemo(() => {
   const assets =
     reserves.data?.map(
       ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
@@ -327,21 +331,6 @@ const assetRecords = React.useMemo(() => {
 
   const depositsTable = React.useMemo(
     () =>
-      deposits?.length > 0 ? (
-        <DashboardTable assets={deposits} mode={DashboardTableType.Deposit} />
-      ) : (
-        <DashboardEmptyState
-          onClick={() => {
-            history.push("/deposit");
-          }}
-          type="Deposit"
-        />
-      ),
-    [deposits, history]
-  );
-
-  const newDepositsTable = React.useMemo(
-    () =>
       (
         <LowerBox
           title="Deposit Information"
@@ -365,35 +354,36 @@ const assetRecords = React.useMemo(() => {
             : (
               <>
               <Select 
-              borderColor='#00A490'
-              bg='#00A490'
-              size='lg'
-              color='white'
-              mb='2em'
-              mt='1em'
-            >
-              {coinOptions}
-            </Select>
-            <Tabs 
-              isFitted 
-              variant='enclosed'
-              onChange={(index) => {
-                // setTab(index)
-              }}
-            >
-              <TabList>
-                <Tab
-                  fontSize='17'
-                  _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
-                >Deposit</Tab>
-                <Tab 
-                  fontSize='17'
-                  _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
-                >Withdraw</Tab>
-              </TabList>
+                borderColor='#00A490'
+                bg='#00A490'
+                size='lg'
+                color='white'
+                mb='2em'
+                mt='1em'
+                onChange={handleCoinChange}
+              >
+                {coinOptions}
+              </Select>
+              <Tabs 
+                isFitted 
+                variant='enclosed'
+                onChange={(index) => {
+                  // setTab(index)
+                }}
+              >
+                <TabList>
+                  <Tab
+                    fontSize='17'
+                    _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
+                  >Deposit</Tab>
+                  <Tab 
+                    fontSize='17'
+                    _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
+                  >Withdraw</Tab>
+                </TabList>
               <TabContent
                 type="Deposit"
-                coin="XDAI"
+                coin={selectedCoin}
               />
             </Tabs>
             </>
@@ -536,7 +526,7 @@ const assetRecords = React.useMemo(() => {
         </UpperBox>
       </Flex>
       <Box mt="2rem" overflowX="auto">
-        {newDepositsTable}
+        {depositsTable}
         {borrowsTable}
       </Box>
       <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />

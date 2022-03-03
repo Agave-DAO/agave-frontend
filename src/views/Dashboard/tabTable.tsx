@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Center,
   Table,
@@ -65,7 +65,7 @@ export const TabTable: React.FC<{
                 w='4.5rem' 
                 h='100%'
                 isReadOnly
-                pr='4.5rem'
+                pr='5.5rem'
                 fontSize='4xl'
             >{coin}</InputRightElement>
             </InputGroup>

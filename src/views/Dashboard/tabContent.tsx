@@ -25,13 +25,15 @@ export const TabContent: React.FC<{
             />
           </TabPanel>
           <TabPanel>
-          <TabTable 
+            <TabTable 
               type={type}
               coin={coin}
             />
           </TabPanel>
         </TabPanels>
-        <Center mb='1em'>
+        <Center 
+          mb='1em'
+        >
           <Button
             background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
             color="secondary.900"
