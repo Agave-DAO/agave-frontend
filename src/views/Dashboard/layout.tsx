@@ -39,8 +39,8 @@ import { useClaimRewardsMutation } from "../../mutations/claimRewards";
 import { useAllProtocolTokens } from "../../queries/allATokens";
 import { useUserRewards } from "../../queries/rewardTokens";
 import ColoredText from "../../components/ColoredText";
-import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { TabContent } from "./tabContent"
+import { InfoBlock } from "./infoBlock"
 
 interface DashboardProps {
   borrowed: BigNumber | undefined;
@@ -203,45 +203,6 @@ const UpperBox: React.FC<{ title: string } & CenterProps> = ({
   );
 };
 
-const LowerBox: React.FC<{ title: string } & CenterProps> = ({
-  title,
-  children,
-  ...props
-}) => {
-  return (
-    <Center
-      boxSizing="content-box"
-      flexDirection="column"
-      rounded="xl"
-      minH="10.6rem"
-      minW={{ base: "100%", lg: "auto" }}
-      flex={1}
-      bg="primary.900"
-      py="1rem"
-      {...props}
-    >
-      <VStack
-        divider={
-          <StackDivider
-            borderColor="#36CFA2"
-            h="0.188rem"
-            backgroundColor="#36CFA2"
-          />
-        }
-        spacing={4}
-        w="100%"
-        align="stretch"
-        flexDirection="column"
-      >
-        <Text px={{ base: "2rem", md: "3rem" }} h="25">
-          {title}
-        </Text>
-        <Box px={{ base: "2rem", md: "3rem" }}>{children}</Box>
-      </VStack>
-    </Center>
-  );
-};
-
 const DashboardApproximateBalanceDisplay: React.FC<{}> = () => {
   const balancesDaiWei = useUserDepositAssetBalancesDaiWei();
   const balance = React.useMemo(() => {
@@ -264,10 +225,6 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modal_type, setModal] = useState(MODAL_TYPES.APROXIMATE_BALANCE);
-  const [selectedCoin, setCoin] = useState("USDC"); // defaults to USDC since it's the first coin on the list
-  const handleCoinChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setCoin(event.target.value)
-  }
   const history = useHistory();
 
   const { account: userAccountAddress } = useAppWeb3();
@@ -292,107 +249,70 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
 
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
-  interface AssetRecord {
-    symbol: string;
-    tokenAddress: string;
-    aTokenAddress: string;
-  }
-
-  const reserves = useAllReserveTokensWithData();
-  const nativeSymbols = useNativeSymbols();
-  const assetRecords = React.useMemo(() => {
-  const assets =
-    reserves.data?.map(
-      ({ symbol, tokenAddress, aTokenAddress }): AssetRecord => ({
-        symbol,
-        tokenAddress,
-        aTokenAddress,
-      })
-    ) ?? [];
-  return assets.map(asset => {
-    return asset.symbol === nativeSymbols.wrappednative
-      ? {
-          ...asset,
-          symbol: nativeSymbols?.native,
-        }
-      : asset;
-    });
-  }, [reserves]);
-
-  const coinOptions = React.useMemo(
-    () =>
-      assetRecords.map( currency => {
-        return (
-            <option value={currency.symbol}>{currency.symbol}</option>
-        )
-      })
-    , [assetRecords]
-  );
-
-  const depositsTable = React.useMemo(
-    () =>
-      (
-        <LowerBox
-          title="Deposit Information"
-          mr={{ base: "inherit", lg: "2%" }}
-          color='white'
-          width='49%'
-          mb='1em'
-        >
-          {(!coinOptions.length) 
-            ? (
-              <>
-              <Center>
-                <Spinner 
-                  speed="0.5s" 
-                  emptyColor="gray.200" 
-                  color="yellow.500" 
-                  size='xl' />
-              </Center>
-              </>
-              )
-            : (
-              <>
-              <Select 
-                borderColor='#00A490'
-                bg='#00A490'
-                size='lg'
-                color='white'
-                mb='2em'
-                mt='1em'
-                onChange={handleCoinChange}
-              >
-                {coinOptions}
-              </Select>
-              <Tabs 
-                isFitted 
-                variant='enclosed'
-                onChange={(index) => {
-                  // setTab(index)
-                }}
-              >
-                <TabList>
-                  <Tab
-                    fontSize='17'
-                    _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
-                  >Deposit</Tab>
-                  <Tab 
-                    fontSize='17'
-                    _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
-                  >Withdraw</Tab>
-                </TabList>
-              <TabContent
-                type="Deposit"
-                coin={selectedCoin}
-              />
-            </Tabs>
-            </>
-            )
-          }
-        </LowerBox>
-      )
-    , [deposits, history, coinOptions]
-  );
+  // const depositsTable = React.useMemo(
+  //   () =>
+  //     (
+  //       <LowerBox
+  //         title="Deposit Information"
+  //         mr={{ base: "inherit", lg: "2%" }}
+  //         color='white'
+  //         width='49%'
+  //         mb='1em'
+  //       >
+  //         {(!coinOptions.length) 
+  //           ? (
+  //             <>
+  //             <Center>
+  //               <Spinner 
+  //                 speed="0.5s" 
+  //                 emptyColor="gray.200" 
+  //                 color="yellow.500" 
+  //                 size='xl' />
+  //             </Center>
+  //             </>
+  //             )
+  //           : (
+  //             <>
+  //             <Select 
+  //               borderColor='#00A490'
+  //               bg='#00A490'
+  //               size='lg'
+  //               color='white'
+  //               mb='2em'
+  //               mt='1em'
+  //               onChange={handleCoinChange}
+  //             >
+  //               {coinOptions}
+  //             </Select>
+  //             <Tabs 
+  //               isFitted 
+  //               variant='enclosed'
+  //               onChange={(index) => {
+  //                 // setTab(index)
+  //               }}
+  //             >
+  //               <TabList>
+  //                 <Tab
+  //                   fontSize='17'
+  //                   _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
+  //                 >Deposit</Tab>
+  //                 <Tab 
+  //                   fontSize='17'
+  //                   _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
+  //                 >Withdraw</Tab>
+  //               </TabList>
+  //             <TabContent
+  //               type="Deposit"
+  //               coin={selectedCoin}
+  //             />
+  //           </Tabs>
+  //           </>
+  //           )
+  //         }
+  //       </LowerBox>
+  //     )
+  //   , [deposits, history, coinOptions]
+  // );
 
   const borrowsTable = React.useMemo(
     () =>
@@ -525,10 +445,10 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
           </Box>
         </UpperBox>
       </Flex>
-      <Box mt="2rem" overflowX="auto">
-        {depositsTable}
-        {borrowsTable}
-      </Box>
+      <Flex mt="2rem" overflowX="auto">
+        <InfoBlock type="Deposit" />
+        <InfoBlock type="Borrow" />
+      </Flex>
       <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
     </Flex>
   );

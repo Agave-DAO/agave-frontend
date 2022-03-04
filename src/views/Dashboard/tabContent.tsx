@@ -11,6 +11,7 @@ import { TabTable } from "./tabTable";
 
 export const TabContent: React.FC<{
     type: string;
+    tab: number;
     coin: string;
     props?: CenterProps;
 
