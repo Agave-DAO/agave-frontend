@@ -11,23 +11,25 @@ import { TabTable } from "./tabTable";
 
 export const TabContent: React.FC<{
     type: string;
-    tab: number;
+    tab: string;
     coin: string;
     props?: CenterProps;
 
-  }> = ({ type, coin, ...props }) => {
+  }> = ({ type, tab, coin, ...props }) => {
     return (
         <>
         <TabPanels border='1px' borderColor='white'>
           <TabPanel>
             <TabTable 
               type={type}
+              tab={tab}
               coin={coin}
             />
           </TabPanel>
           <TabPanel>
             <TabTable 
               type={type}
+              tab={tab}
               coin={coin}
             />
           </TabPanel>
@@ -42,7 +44,8 @@ export const TabContent: React.FC<{
             py="1.5rem"
             fontSize={fontSizes.md}
             mt="2rem"
-          >{type}</Button>
+            w="30%"
+          >{tab}</Button>
         </Center>
         </>
     );

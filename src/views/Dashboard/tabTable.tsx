@@ -15,18 +15,21 @@ import { TokenIcon } from "../../utils/icons";
 
 export const TabTable: React.FC<{
     type: string;
+    tab: string;
     coin: string;
     props?: CenterProps;
 
-  }> = ({ type, coin, ...props }) => {
+  }> = ({ type, coin, tab, ...props }) => {
 
     return (
         <>
         <Table variant='unstyled'>
             <Tbody>
                 <Tr>
-                <Td>{type} Amount</Td>
-                <Td textAlign={'right'} fontWeight="bold">Wallet Balance: 0.00</Td>
+                <Td>{tab} Amount</Td>
+                <Td textAlign={'right'} fontWeight="bold">
+                    {type === "Deposit" ? "Wallet Balance: 0.00" : "Borrow Limit 0.00"}
+                </Td>
                 </Tr>
             </Tbody>
         </Table>
@@ -74,28 +77,53 @@ export const TabTable: React.FC<{
             <Tbody>
                 <Tr>
                     <Td>Utilization Rate</Td>
-                    <Td textAlign={'right'} fontWeight="bold">89%</Td>
+                    <Td textAlign={'right'} fontWeight="bold">{type === "Deposit" ? "89%" : "81.44%"}</Td>
                 </Tr>
                 <Tr>
                     <Td>Available Liquidity</Td>
-                    <Td textAlign={'right'} fontWeight="bold">0</Td>
+                    <Td textAlign={'right'} fontWeight="bold">{type === "Deposit" ? "0" : "194055.37"}</Td>
                 </Tr>
-                <Tr>
-                    <Td>{type} APY</Td>
-                    <Td textAlign={'right'} fontWeight="bold">3.1684%</Td>
-                </Tr>
-                <Tr>
-                    <Td>Collateralizable</Td>
-                    <Td textAlign={'right'} fontWeight="bold">Yes</Td>
-                </Tr>
-                <Tr>
-                    <Td>Maximum LTV</Td>
-                    <Td textAlign={'right'} fontWeight="bold">80%</Td>
-                </Tr>
-                <Tr>
-                    <Td>Asset Price</Td>
-                    <Td textAlign={'right'} fontWeight="bold">$0.9999</Td>
-                </Tr>
+                {type === "Deposit"
+                    ? (
+                        <>
+                        <Tr>
+                            <Td>Deposit APY</Td>
+                            <Td textAlign={'right'} fontWeight="bold">3.1684%</Td>
+                        </Tr>
+                        <Tr>
+                            <Td>Collateralizable</Td>
+                            <Td textAlign={'right'} fontWeight="bold">Yes</Td>
+                        </Tr>
+                        <Tr>
+                            <Td>Maximum LTV</Td>
+                            <Td textAlign={'right'} fontWeight="bold">80%</Td>
+                        </Tr>
+                        <Tr>
+                            <Td>Asset Price</Td>
+                            <Td textAlign={'right'} fontWeight="bold">$0.9999</Td>
+                        </Tr>
+                        </>
+                    ) : (
+                        <>
+                        <Tr>
+                            <Td>Variable APR</Td>
+                            <Td textAlign={'right'} fontWeight="bold">9.3865%</Td>
+                        </Tr>
+                        <Tr>
+                            <Td>You Borrowed</Td>
+                            <Td textAlign={'right'} fontWeight="bold">0</Td>
+                        </Tr>
+                        <Tr>
+                            <Td>Your Collateral</Td>
+                            <Td textAlign={'right'} fontWeight="bold">$0</Td>
+                        </Tr>
+                        <Tr>
+                            <Td>Collateral</Td>
+                            <Td textAlign={'right'} fontWeight="bold">- </Td>
+                        </Tr>
+                        </>
+                    )
+                }
                 <Tr>
                     <Td>Health Factor</Td>
                     <Td textAlign={'right'} fontWeight="bold">-</Td>
