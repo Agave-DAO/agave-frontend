@@ -104,8 +104,8 @@ export const InfoBlock: React.FC<{
   return (
     <LowerBox
       title={type}
-      mr={type === "Deposit" ? "1%" : "0"}
-      ml={type === "Deposit" ? "0" : "1%"}
+      mr={type === "Deposit" ? ({ base: "0", lg: "1%" }) : "0" }
+      ml={type === "Borrow" ? ({ base: "0", lg: "1%" }) : "0" }
       color='white'
       mb='1em'
       minW={{ base: "100%", lg: "49%" }}

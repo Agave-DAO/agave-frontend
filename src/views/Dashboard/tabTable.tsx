@@ -26,7 +26,7 @@ export const TabTable: React.FC<{
         <Table variant='unstyled'>
             <Tbody>
                 <Tr>
-                <Td>{tab} Amount</Td>
+                <Td fontSize="2xl">{tab} Amount</Td>
                 <Td textAlign={'right'} fontWeight="bold">
                     {type === "Deposit" ? "Wallet Balance: 0.00" : "Borrow Limit 0.00"}
                 </Td>
