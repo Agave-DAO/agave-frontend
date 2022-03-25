@@ -41,6 +41,7 @@ import { useUserRewards } from "../../queries/rewardTokens";
 import ColoredText from "../../components/ColoredText";
 import { TabContent } from "./tabContent"
 import { InfoBlock } from "./infoBlock"
+import { BalanceColumn } from "./balanceColumn";
 
 interface DashboardProps {
   borrowed: BigNumber | undefined;
