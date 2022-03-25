@@ -23,7 +23,7 @@ import {
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
 import { CenterProps, HStack } from "@chakra-ui/layout";
-import { isMobileOnly } from "react-device-detect";
+import { isMobileOnly, isDesktop } from "react-device-detect";
 import { ModalIcon, useNativeSymbols, TokenIcon } from "../../utils/icons";
 import { DashboardTable, DashboardTableType } from "./table";
 import { DashboardEmptyState } from "./emptyState";
@@ -175,7 +175,7 @@ const UpperBox: React.FC<{ title: string } & CenterProps> = ({
       flexDirection="column"
       rounded="xl"
       minH="10.6rem"
-      minW={{ base: "100%", lg: "auto" }}
+      minW={{ base: "100%", lg: "49%" }}
       flex={1}
       bg="primary.900"
       py="1rem"
@@ -249,70 +249,6 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
 
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
-  // const depositsTable = React.useMemo(
-  //   () =>
-  //     (
-  //       <LowerBox
-  //         title="Deposit Information"
-  //         mr={{ base: "inherit", lg: "2%" }}
-  //         color='white'
-  //         width='49%'
-  //         mb='1em'
-  //       >
-  //         {(!coinOptions.length) 
-  //           ? (
-  //             <>
-  //             <Center>
-  //               <Spinner 
-  //                 speed="0.5s" 
-  //                 emptyColor="gray.200" 
-  //                 color="yellow.500" 
-  //                 size='xl' />
-  //             </Center>
-  //             </>
-  //             )
-  //           : (
-  //             <>
-  //             <Select 
-  //               borderColor='#00A490'
-  //               bg='#00A490'
-  //               size='lg'
-  //               color='white'
-  //               mb='2em'
-  //               mt='1em'
-  //               onChange={handleCoinChange}
-  //             >
-  //               {coinOptions}
-  //             </Select>
-  //             <Tabs 
-  //               isFitted 
-  //               variant='enclosed'
-  //               onChange={(index) => {
-  //                 // setTab(index)
-  //               }}
-  //             >
-  //               <TabList>
-  //                 <Tab
-  //                   fontSize='17'
-  //                   _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
-  //                 >Deposit</Tab>
-  //                 <Tab 
-  //                   fontSize='17'
-  //                   _selected={{ color: '#044D44', background: "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);" }}
-  //                 >Withdraw</Tab>
-  //               </TabList>
-  //             <TabContent
-  //               type="Deposit"
-  //               coin={selectedCoin}
-  //             />
-  //           </Tabs>
-  //           </>
-  //           )
-  //         }
-  //       </LowerBox>
-  //     )
-  //   , [deposits, history, coinOptions]
-  // );
 
   const borrowsTable = React.useMemo(
     () =>
@@ -330,126 +266,142 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
   );
 
   return (
-    <Flex flexDirection="column">
-      <Flex
-        align="center"
-        flexBasis="auto"
-        spacing="1em"
-        w="100%"
-        flexDirection={{ base: "column", lg: "row" }}
-        m="auto"
-        color="white"
-      >
-        <UpperBox
-          title="Deposit Information"
-          mr={{ base: "inherit", lg: "2%" }}
+    <Flex flexDirection={{ base: "column", xl: "row" }}>
+      <Flex flexDirection="column"
+        mr={{ base: "inherit", lg: "1.32%" }}
+        w={{ base: "100%", xl: "65%" }}>
+        <Flex
+          align="center"
+          flexBasis="auto"
+          spacing="1em"
+          w="100%"
+          flexDirection={{ base: "column", lg: "row" }}
+          m="auto"
+          color="white"
         >
-          <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
-            <HStack d="flex" mt="0.5rem">
-              <Text>Approximate Balance</Text>
-              <ModalIcon
-                position="relative"
-                top="0"
-                right="0"
-                ml="0.5rem"
-                transform="scale(0.75)"
-                onOpen={onSubmitAP}
-              />
-            </HStack>
-            <Text fontWeight="bold" textAlign="left" mt="0.5em">
-              <DashboardApproximateBalanceDisplay />
-            </Text>
-          </VStack>
-        </UpperBox>
-        <UpperBox
-          title="Borrow Information"
-          mt={{ base: "2rem", lg: "inherit" }}
-        >
-          <Box
-            d="flex"
-            flexDirection="row"
-            justifyContent="space-between"
-            whiteSpace="nowrap"
-            h="7.5rem"
+          <UpperBox
+            title="Deposit Information"
+            mr={{ base: "inherit", lg: "2%" }}
           >
-            <Box h="7rem" mt="0.5rem">
-              <Text>Borrowed</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {borrowed ? (
-                  `$ ${bigNumberToString(borrowed)}`
-                ) : (
-                  <Spinner
-                    speed="0.5s"
-                    emptyColor="gray.200"
-                    color="yellow.500"
-                  />
-                )}
-              </Text>
-            </Box>
-            <Box h="7rem" mt="0.5rem" ml={{ base: "1rem", md: "3rem" }}>
-              <Text>Collateral</Text>
-              <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {collateral ? (
-                  `$ ${bigNumberToString(collateral)}`
-                ) : (
-                  <Spinner
-                    speed="0.5s"
-                    emptyColor="gray.200"
-                    color="yellow.500"
-                  />
-                )}
-              </Text>
-            </Box>
-            <VStack
-              flexDirection="column"
-              h="7rem"
-              alignItems="center"
-              ml={{ base: "1rem", md: "3rem" }}
-            >
+            <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
               <HStack d="flex" mt="0.5rem">
-                <Text>{isMobile ? "HF" : "Health Factor"}</Text>
+                <Text>Approximate Balance</Text>
                 <ModalIcon
                   position="relative"
                   top="0"
                   right="0"
                   ml="0.5rem"
                   transform="scale(0.75)"
-                  onOpen={onSubmitHF}
-                />
-              </HStack>
-              <Text fontWeight="bold" textAlign="center" mt="0.5em">
-                {bigNumberToString(healthFactor)}
-              </Text>
-            </VStack>
-            <VStack
-              flexDirection="column"
-              h="7rem"
-              alignItems="center"
-              ml={{ base: "1rem", md: "3rem" }}
-            >
-              <HStack d="flex" mt="0.5rem">
-                <Text>{isMobile ? "LTV" : "Current LTV"}</Text>
-                <ModalIcon
-                  position="relative"
-                  top="0"
-                  right="0"
-                  ml="0.5rem"
-                  transform="scale(0.75)"
-                  onOpen={onSubmitLTV}
+                  onOpen={onSubmitAP}
                 />
               </HStack>
               <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                {fixedNumberToPercentage(userAccountData?.currentLtv)}
+                <DashboardApproximateBalanceDisplay />
               </Text>
             </VStack>
-          </Box>
-        </UpperBox>
+          </UpperBox>
+          <UpperBox
+            title="Borrow Information"
+            mt={{ base: "2rem", lg: "inherit" }}
+          >
+            <Box
+              d="flex"
+              flexDirection="row"
+              justifyContent="space-between"
+              whiteSpace="nowrap"
+              h="7.5rem"
+            >
+              <Box h="7rem" mt="0.5rem">
+                <Text>Borrowed</Text>
+                <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                  {borrowed ? (
+                    `$ ${bigNumberToString(borrowed)}`
+                  ) : (
+                    <Spinner
+                      speed="0.5s"
+                      emptyColor="gray.200"
+                      color="yellow.500"
+                    />
+                  )}
+                </Text>
+              </Box>
+              <Box h="7rem" mt="0.5rem" ml={{ base: "1rem", md: "3rem" }}>
+                <Text>Collateral</Text>
+                <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                  {collateral ? (
+                    `$ ${bigNumberToString(collateral)}`
+                  ) : (
+                    <Spinner
+                      speed="0.5s"
+                      emptyColor="gray.200"
+                      color="yellow.500"
+                    />
+                  )}
+                </Text>
+              </Box>
+              <VStack
+                flexDirection="column"
+                h="7rem"
+                alignItems="center"
+                ml={{ base: "1rem", md: "3rem" }}
+              >
+                <HStack d="flex" mt="0.5rem">
+                  <Text>{isMobile ? "HF" : "Health Factor"}</Text>
+                  <ModalIcon
+                    position="relative"
+                    top="0"
+                    right="0"
+                    ml="0.5rem"
+                    transform="scale(0.75)"
+                    onOpen={onSubmitHF}
+                  />
+                </HStack>
+                <Text fontWeight="bold" textAlign="center" mt="0.5em">
+                  {bigNumberToString(healthFactor)}
+                </Text>
+              </VStack>
+              <VStack
+                flexDirection="column"
+                h="7rem"
+                alignItems="center"
+                ml={{ base: "1rem", md: "3rem" }}
+              >
+                <HStack d="flex" mt="0.5rem">
+                  <Text>{isMobile ? "LTV" : "Current LTV"}</Text>
+                  <ModalIcon
+                    position="relative"
+                    top="0"
+                    right="0"
+                    ml="0.5rem"
+                    transform="scale(0.75)"
+                    onOpen={onSubmitLTV}
+                  />
+                </HStack>
+                <Text fontWeight="bold" textAlign="left" mt="0.5em">
+                  {fixedNumberToPercentage(userAccountData?.currentLtv)}
+                </Text>
+              </VStack>
+            </Box>
+          </UpperBox>
+        </Flex>
+        <Flex mt="2rem" flexDirection={{ base: "column", lg: "row" }}>
+          <InfoBlock type="Deposit" />
+          <InfoBlock type="Borrow" />
+        </Flex>
+        <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
       </Flex>
-      <Flex mt="2rem" overflowX="auto">
-        <InfoBlock type="Deposit" />
-        <InfoBlock type="Borrow" />
-      </Flex>
-      <ModalComponent isOpen={isOpen} mtype={modal_type} onClose={onClose} />
+      <Center
+        boxSizing="content-box"
+        flexDirection="column"
+        rounded="xl"
+        minH="10.6rem"
+        minW={{ base: "34%", xl: "auto" }}
+        flex={1}
+        bg="primary.900"
+        py="1rem"
+      >
+        d
+      </Center>
     </Flex>
   );
 };

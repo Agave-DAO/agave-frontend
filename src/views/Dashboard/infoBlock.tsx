@@ -34,7 +34,6 @@ const LowerBox: React.FC<{ title: string } & CenterProps> = ({
         rounded="xl"
         minH="10.6rem"
         minW={{ base: "100%", lg: "auto" }}
-        flex={1}
         bg="primary.900"
         py="1rem"
         {...props}
@@ -104,16 +103,15 @@ export const InfoBlock: React.FC<{
   );
   return (
     <LowerBox
-      title={type.concat(" Information")}
+      title={type}
       mr={type === "Deposit" ? "1%" : "0"}
       ml={type === "Deposit" ? "0" : "1%"}
       color='white'
-      width='50%'
       mb='1em'
+      minW={{ base: "100%", lg: "49%" }}
     >
       {(!coinOptions.length) 
         ? (
-          <>
           <Center>
             <Spinner 
               speed="0.5s" 
@@ -121,7 +119,6 @@ export const InfoBlock: React.FC<{
               color="yellow.500" 
               size='xl' />
           </Center>
-          </>
           )
         : (
           <>
