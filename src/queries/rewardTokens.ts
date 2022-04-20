@@ -249,13 +249,6 @@ export const useRewardTokensAPY = buildQueryHookWhenParamsDefinedChainAddrs<
       tokensData[i].tokenAPYperYear = tokensData[i].emissionPerYear
         ?.mul(priceShares)
         .div(totalSupply);
-      console.log({
-        address: tokensData[i]?.address,
-        tokenAPYperYear: tokensData[i].tokenAPYperYear?.toString(),
-        rewardEmissionPerYear: tokensData[i].emissionPerYear?.toString(),
-        valueRewardToken: priceShares.toString(),
-        tokenSupply: totalSupply.toString(),
-      });
     }
 
     return tokensData;

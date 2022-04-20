@@ -34,9 +34,10 @@ const StatCard: React.FC<Props> = ({ ...props }) => {
           <Text fontSize="xl">{props.title}</Text>
           {props.enableModal && (
             <ModalIcon
+              borderWidth={{ base: "0"}}
               position="relative"
               top="0"
-              left={{ base: "0.5", md: "2" }}
+              left={{ base: "0.5", md: "1" }}
               onOpen={() => props.modalOpen(props.title)}
             />
           )}

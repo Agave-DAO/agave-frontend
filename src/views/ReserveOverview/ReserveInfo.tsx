@@ -134,6 +134,11 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   ) : (
     <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
   );
+  const resFactor = reserveData?.rawreserveFactor ? (
+    reserveData?.rawreserveFactor.toNumber() / 100
+  ) : (
+    <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
+  );
   const liqPen = reserveData?.rawliquidationBonus ? (
     reserveData?.rawliquidationBonus.toNumber() / 100 - 100
   ) : (
@@ -355,6 +360,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
                 enableModal={true}
                 modalOpen={setModalOpen}
               />
+              <StatCard title="Reserve Factor" value={resFactor} type="%" />
               <StatCard
                 title="Used As Collateral"
                 color={collateral === "Yes" ? "green" : "orange"}

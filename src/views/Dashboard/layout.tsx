@@ -12,6 +12,7 @@ import {
   Image,
   Spinner,
   keyframes,
+  Tooltip
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
@@ -91,7 +92,14 @@ const ClaimRewardsBox: React.FC<{}> = () => {
   const bounceAnimation = `${bounce} infinite 2.5s linear`;
 
   const rewardsBalance = useUserRewards().data;
-  return rewardsBalance && !rewardsBalance.isZero() ? (
+  return rewardsBalance ? (
+    <Tooltip
+    placement="top-end"
+    bg="gray.700"
+    label="Rewards in CPT tokens. Click icon for more info"
+    fontSize="xl"
+    openDelay={400}
+  >
     <Center
       borderColor="white"
       borderWidth="1px"
@@ -137,6 +145,7 @@ const ClaimRewardsBox: React.FC<{}> = () => {
         Claim
       </Button>
     </Center>
+    </Tooltip>
   ) : null;
 };
 

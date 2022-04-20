@@ -86,9 +86,9 @@ export const useApprovalMutation = ({
           "info",
           approvalConfirmation.wait()
         );
-        return receipt.status ? amount : undefined;
+        return receipt.status ?  amount : undefined;
       } else {
-        return amount;
+        return priorAllowance;
       }
     },
     {
