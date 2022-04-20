@@ -11,6 +11,7 @@ export interface StrongTypedChainAddresses<
   readonly agaveOracle: string;
   readonly aaveProtocolDataProvider: string;
   readonly wrappedNativeGateway: string;
+  readonly walletBalanceProvider: string;
 
   readonly incentivesController: string;
 
@@ -47,7 +48,7 @@ export const internalAddressesPerNetwork: Record<
     agaveOracle: "0xf1771FEcA72fbC347AD78f2B9D766EB7d97d4310",
     aaveProtocolDataProvider: "0xb423A3A2b52E60e3e34968Dad6ed788e2575cd71",
     wrappedNativeGateway: "0x8149c8E0F3561A89E343853a7f20A985374dca62",
-
+    walletBalanceProvider: "",
     incentivesController: "",
 
     explorer: "https://rinkeby.etherscan.io",
@@ -57,17 +58,18 @@ export const internalAddressesPerNetwork: Record<
     chainId: 100,
     symbol: "XDAI",
 
-    lendingPool: "0x207E9def17B4bd1045F5Af2C651c081F9FDb0842",
+    lendingPool: "0x5E15d5E33d318dCEd84Bfe3F4EACe07909bE6d9c",
     staking: "0x610525b415c1BFAeAB1a3fc3d85D87b92f048221",
 
-    agaveOracle: "0x80E08A2042F4135f6cA72BA2fd0e7cAEb2Ee30ef",
-    aaveProtocolDataProvider: "0xa874f66342a04c24b213BF0715dFf18818D24014",
-    wrappedNativeGateway: "0x0bb31c42D0692369Ba681A925C254fEB605c327b",
+    agaveOracle: "0x64cE22B5bA4175002AC5B6CCE3570432cA363c29",
+    aaveProtocolDataProvider: "0x24dCbd376Db23e4771375092344f5CbEA3541FC0",
+    walletBalanceProvider: "0xc83259C1A02d7105A400706c3e1aDc054C5A1B87",
+    wrappedNativeGateway: "0x36A644cC38Ae257136EEca5919800f364d73FeFC",
 
     incentivesController: "0xfa255f5104f129B78f477e9a6D050a02f31A5D86",
 
     explorer: "https://blockscout.com/xdai/mainnet",
-    rpcUrl: "https://rpc.xdaichain.com/",
+    rpcUrl: "https://rpc.gnosischain.com/",
   },
 } as const;
 

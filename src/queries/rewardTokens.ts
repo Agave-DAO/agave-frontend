@@ -41,7 +41,6 @@ export const useAllIncentivedAddresses =
     async params => {
       let queriedAssets: string[] = [];
       const tokens = await useAllProtocolTokens.fetchQueryDefined(params);
-
       for (let i = 0; i < tokens.length; i++) {
         queriedAssets = [
           ...queriedAssets,
