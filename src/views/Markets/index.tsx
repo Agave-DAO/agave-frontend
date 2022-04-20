@@ -23,7 +23,7 @@ import {
   fixedNumberToPercentage,
   bigNumberToString,
 } from "../../utils/fixedPoint";
-import { BigNumber, FixedNumber } from "ethers";
+import { BigNumber, constants, FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { CellProps, Column, Renderer } from "react-table";
@@ -173,13 +173,14 @@ const DepositAPYView: React.FC<{ tokenAddress: string }> = ({
       protocolDepositAPY.data === undefined ||
       rewardsAPY === undefined ||
       !tokenData ||
-      tokenData[0] === undefined ||
-      !tokenData[0].tokenAPYperYear
+      tokenData[0] === undefined
     ) {
       return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
 
-    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear.mul(10 ** 11);
+    const rewardsAPYAsFixed = tokenData[0].tokenAPYperYear
+      ? tokenData[0].tokenAPYperYear.mul(10 ** 11)
+      : BigNumber.from(0);
     const depositAPY = BigNumber.from(protocolDepositAPY.data);
     const aggregateAPY = rewardsAPYAsFixed.add(depositAPY);
     return <PercentageView ratio={bigNumberToString(aggregateAPY, 3, 25)} />;
@@ -199,12 +200,13 @@ const VariableAPRView: React.FC<{ tokenAddress: string }> = ({
       protocolVariableAPR.data === undefined ||
       rewardsAPY === undefined ||
       !tokenData ||
-      tokenData[1] === undefined ||
-      !tokenData[1].tokenAPYperYear
+      tokenData[1] === undefined
     ) {
       return <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />;
     }
-    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear.mul(10 ** 11);
+    const rewardsAPYAsFixed = tokenData[1].tokenAPYperYear
+      ? tokenData[1].tokenAPYperYear.mul(10 ** 11)
+      : BigNumber.from(0);
 
     const protocolVariableBorrowAPR = BigNumber.from(protocolVariableAPR.data);
     const aggregateAPY = protocolVariableBorrowAPR.sub(rewardsAPYAsFixed);
