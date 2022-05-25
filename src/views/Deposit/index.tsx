@@ -15,9 +15,8 @@ export interface DepositAsset {
 }
 
 export const Deposit: React.FC<{}> = () => {
-  const [activeValue, setActiveValue] = React.useState<"All" | "Stable Coins">(
-    "All"
-  );
+  const [activeValue, setActiveValue] =
+    React.useState<"All" | "Stable Coins">("All");
   const balances = useUserDepositAssetBalancesDaiWei();
   const depositedList: DepositAsset[] = React.useMemo(
     () => balances?.data?.filter(asset => !asset.balance.isZero()) ?? [],

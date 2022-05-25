@@ -20,8 +20,8 @@ export const RepayBanner: React.FC<{}> = () => {
       {isSmallerThan900 ? null : (
         <Text>
           Need to bridge assets to Gnosis from other chains? Please visit{" "}
-          <Link fontWeight="bold" href="https://xpollinate.io" target="_blank">
-            xpollinate.io
+          <Link fontWeight="bold" href="https://transferto.xyz" target="_blank">
+            li.fi
           </Link>
         </Text>
       )}
