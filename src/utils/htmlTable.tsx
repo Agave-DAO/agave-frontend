@@ -13,8 +13,16 @@ import {
 import { TriangleDownIcon, TriangleUpIcon } from "@chakra-ui/icons";
 import { Box } from "@chakra-ui/react";
 import React from "react";
-import { Column, useTable, useSortBy, TableInstance } from "react-table";
+import {
+  Column,
+  useTable,
+  useSortBy,
+  TableInstance,
+  Row,
+  RowPropGetter,
+} from "react-table";
 import { useHistory } from "react-router-dom";
+import { useProtocolReserveConfiguration } from "../queries/protocolAssetConfiguration";
 
 export type TableRenderingProps =
   | "getTableProps"
@@ -83,6 +91,34 @@ export interface BasicTableRendererProps<TRecord extends object> {
   cellProps?: TableCellProps;
 }
 
+const RowComponent: React.FC<{
+  row: Row<any>;
+  rowStyle?: TableRowProps;
+  cellStyle?: TableCellProps;
+  handleRowClick?: any;
+}> = ({ row, rowStyle, handleRowClick, cellStyle }) => {
+  const tokenConfig = useProtocolReserveConfiguration(
+    row.original.tokenAddress
+  );
+
+  if (!tokenConfig.data?.isActive || tokenConfig.data?.isFrozen) return <></>;
+  return (
+    <Tr
+      {...row.getRowProps()}
+      {...rowStyle}
+      onClick={() => handleRowClick(row)}
+    >
+      {row.cells.map((cell: any) => {
+        return (
+          <Td {...cell.getCellProps()} {...cellStyle}>
+            {cell.render("Cell")}
+          </Td>
+        );
+      })}
+    </Tr>
+  );
+};
+
 export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
   linkpage,
   table: { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow },
@@ -130,19 +166,12 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           {rows.map(row => {
             prepareRow(row);
             return (
-              <Tr
-                {...row.getRowProps()}
-                {...rowStyle}
-                onClick={() => handleRowClick(row)}
-              >
-                {row.cells.map(cell => {
-                  return (
-                    <Td {...cell.getCellProps()} {...cellStyle}>
-                      {cell.render("Cell")}
-                    </Td>
-                  );
-                })}
-              </Tr>
+              <RowComponent
+                row={row}
+                rowStyle={rowStyle}
+                handleRowClick={handleRowClick}
+                cellStyle={cellStyle}
+              />
             );
           })}
         </Tbody>
