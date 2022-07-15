@@ -98,12 +98,22 @@ export interface RowRendererProps {
   handleRowClick?: any;
 }
 
-export const RowRenderer: React.FC<RowRendererProps> = ({ row, rowStyle, handleRowClick, cellStyle }) => {
+export const RowRenderer: React.FC<RowRendererProps> = ({
+  row,
+  rowStyle,
+  handleRowClick,
+  cellStyle,
+}) => {
+  // Get the token config, if the token is a Agave Interest Bearing Token, then send the reserve token address as a parameter, else send the token address
   const tokenConfig = useProtocolReserveConfiguration(
-    row.original.tokenAddress
+    row.original.backingReserve
+      ? row.original.backingReserve.tokenAddress
+      : row.original.tokenAddress
   );
 
+  // If the token is frozen or inactive, then we return nothing
   if (!tokenConfig.data?.isActive || tokenConfig.data?.isFrozen) return <></>;
+
   return (
     <Tr
       {...row.getRowProps()}
