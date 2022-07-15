@@ -91,12 +91,14 @@ export interface BasicTableRendererProps<TRecord extends object> {
   cellProps?: TableCellProps;
 }
 
-const RowComponent: React.FC<{
+export interface RowRendererProps {
   row: Row<any>;
   rowStyle?: TableRowProps;
   cellStyle?: TableCellProps;
   handleRowClick?: any;
-}> = ({ row, rowStyle, handleRowClick, cellStyle }) => {
+}
+
+export const RowRenderer: React.FC<RowRendererProps> = ({ row, rowStyle, handleRowClick, cellStyle }) => {
   const tokenConfig = useProtocolReserveConfiguration(
     row.original.tokenAddress
   );
@@ -166,7 +168,7 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           {rows.map(row => {
             prepareRow(row);
             return (
-              <RowComponent
+              <RowRenderer
                 row={row}
                 rowStyle={rowStyle}
                 handleRowClick={handleRowClick}
