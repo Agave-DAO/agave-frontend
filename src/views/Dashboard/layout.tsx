@@ -108,7 +108,7 @@ const ClaimRewardsBox: React.FC<{}> = () => {
       bg="secondary.500"
     >
       <a
-        href="https://xdai-pools.symmetric.exchange/#/pool/0x34fa946a20e65cb1ac466275949ba382973fde2b"
+        href="https://gnosis.symm.fi/#/pool/0x870bb2c024513b5c9a69894dcc65fb5c47e422f3000200000000000000000014"
         target="_blank"
       >
         <Image
