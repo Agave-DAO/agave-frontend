@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
@@ -18,6 +18,10 @@ import { isMobile } from "react-device-detect";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { NATIVE_TOKEN } from "../../queries/allReserveTokens";
 import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
+import {
+  ReserveAssetConfiguration,
+  useMultipleProtocolReserveConfiguration,
+} from "../../queries/protocolAssetConfiguration";
 
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
@@ -55,9 +59,33 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
     tokenAddress: string;
     aTokenAddress: string;
   }
+  type AssetConfigurationWithAddress = ReserveAssetConfiguration & {
+    tokenAddress: string;
+  };
+  const [tokenConfigs, setTokenConfigs] = useState<
+    Array<AssetConfigurationWithAddress>
+  >([]);
+
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
+  const reserveAddresses = reserves.data?.map(
+    ({ tokenAddress }) => tokenAddress
+  );
+
+  const tokenReservesConfigs: Array<AssetConfigurationWithAddress> | undefined =
+    useMultipleProtocolReserveConfiguration(reserveAddresses)?.data;
+
+  useEffect(() => {
+    if (tokenReservesConfigs) {
+      Promise.all(tokenReservesConfigs).then(tokens => {
+        tokens.forEach(token => {
+          setTokenConfigs(tokenConfigs => [...tokenConfigs, token]);
+        });
+      });
+    }
+  }, [tokenReservesConfigs]);
+
   const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
     const assets =
@@ -68,14 +96,21 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
           aTokenAddress,
         })
       ) ?? [];
-    return assets.map(asset => {
-      return asset.symbol === nativeSymbols.wrappednative
-        ? {
-            ...asset,
-            symbol: nativeSymbols?.native,
-          }
-        : asset;
-    });
+    return assets
+      .map(asset => {
+        return asset.symbol === nativeSymbols.wrappednative
+          ? {
+              ...asset,
+              symbol: nativeSymbols?.native,
+            }
+          : asset;
+      })
+      .filter(asset => {
+        const config = tokenConfigs.find(
+          tokenConfig => tokenConfig.tokenAddress === asset.tokenAddress
+        );
+        return config?.isActive && !config?.isFrozen;
+      });
   }, [reserves]);
 
   const columns: Column<AssetRecord>[] = React.useMemo(
