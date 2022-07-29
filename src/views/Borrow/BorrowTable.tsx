@@ -72,7 +72,13 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
     aTokenAddress: string;
   }
 
-  const [tokenConfigs, setTokenConfigs] = useState<any[]>([]);
+  type AssetConfigurationWithAddress = ReserveAssetConfiguration & {
+    tokenAddress: string;
+  };
+
+  const [tokenConfigs, setTokenConfigs] = useState<
+    Array<AssetConfigurationWithAddress>
+  >([]);
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
@@ -80,15 +86,13 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
     ({ tokenAddress }) => tokenAddress
   );
 
-  const tokenReservesConfigs:
-    | Array<ReserveAssetConfiguration & { tokenAddress: string }>
-    | undefined =
+  const tokenReservesConfigs: Array<AssetConfigurationWithAddress> | undefined =
     useMultipleProtocolReserveConfiguration(reserveAddresses)?.data;
 
   useEffect(() => {
     if (tokenReservesConfigs) {
-      Promise.all(tokenReservesConfigs).then((tokens: any) => {
-        tokens.forEach((token: any) => {
+      Promise.all(tokenReservesConfigs).then(tokens => {
+        tokens.forEach(token => {
           setTokenConfigs(tokenConfigs => [...tokenConfigs, token]);
         });
       });
@@ -116,8 +120,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
       })
       .filter(asset => {
         const config = tokenConfigs.find(
-          (tokenConfig: ReserveAssetConfiguration & { tokenAddress: string }) =>
-            tokenConfig.tokenAddress === asset.tokenAddress
+          tokenConfig => tokenConfig.tokenAddress === asset.tokenAddress
         );
         return config?.isActive && !config?.isFrozen;
       });
