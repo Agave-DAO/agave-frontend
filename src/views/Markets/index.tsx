@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ColoredText from "../../components/ColoredText";
 import { Box, Text } from "@chakra-ui/layout";
 import {
@@ -50,6 +50,10 @@ import {
   useKpiTokensAPY,
   useRewardTokensAPY,
 } from "../../queries/rewardTokens";
+import {
+  ReserveAssetConfiguration,
+  useMultipleProtocolReserveConfiguration,
+} from "../../queries/protocolAssetConfiguration";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -296,7 +300,32 @@ const AssetTable: React.FC<{
     throw new Error("AssetTable native view mode not yet supported");
   }
 
+  type AssetConfigurationWithAddress = ReserveAssetConfiguration & {
+    tokenAddress: string;
+  };
+
+  const [tokenConfigs, setTokenConfigs] = useState<
+    Array<AssetConfigurationWithAddress>
+  >([]);
+
   const reserves = useAllReserveTokensWithData();
+  const reserveAddresses = reserves.data?.map(
+    ({ tokenAddress }) => tokenAddress
+  );
+
+  const tokenReservesConfigs: Array<AssetConfigurationWithAddress> | undefined =
+    useMultipleProtocolReserveConfiguration(reserveAddresses)?.data;
+
+  useEffect(() => {
+    if (tokenReservesConfigs) {
+      Promise.all(tokenReservesConfigs).then(tokens => {
+        tokens.forEach(token => {
+          setTokenConfigs(tokenConfigs => [...tokenConfigs, token]);
+        });
+      });
+    }
+  }, [tokenReservesConfigs]);
+
   const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
     const assets =
@@ -307,14 +336,21 @@ const AssetTable: React.FC<{
           aTokenAddress,
         })
       ) ?? [];
-    return assets.map(asset => {
-      return asset.symbol === nativeSymbols.wrappednative
-        ? {
-            ...asset,
-            symbol: nativeSymbols?.native,
-          }
-        : asset;
-    });
+    return assets
+      .map(asset => {
+        return asset.symbol === nativeSymbols.wrappednative
+          ? {
+              ...asset,
+              symbol: nativeSymbols?.native,
+            }
+          : asset;
+      })
+      .filter(asset => {
+        const config = tokenConfigs.find(
+          tokenConfig => tokenConfig.tokenAddress === asset.tokenAddress
+        );
+        return config?.isActive && !config?.isFrozen;
+      });
   }, [reserves]);
 
   const { onOpen } = useDisclosure();
