@@ -17,7 +17,10 @@ import { bigNumberToString } from "../../utils/fixedPoint";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { isMobile } from "react-device-detect";
 import { BorrowAPRView } from "../common/RatesView";
-import { useMultipleProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
+import {
+  ReserveAssetConfiguration,
+  useMultipleProtocolReserveConfiguration,
+} from "../../queries/protocolAssetConfiguration";
 
 const BorrowAvailability: React.FC<{
   tokenAddress: string;
@@ -73,16 +76,24 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
-  const configs = useMultipleProtocolReserveConfiguration(reserves.data);
-  const tokens: any = configs.data || [];
+  const reserveAddresses = reserves.data?.map(
+    ({ tokenAddress }) => tokenAddress
+  );
+
+  const tokenReservesConfigs:
+    | Array<ReserveAssetConfiguration & { tokenAddress: string }>
+    | undefined =
+    useMultipleProtocolReserveConfiguration(reserveAddresses)?.data;
 
   useEffect(() => {
-    Promise.all(tokens).then((tokens: any) => {
-      tokens.forEach((token: any) => {
-        setTokenConfigs(tokenConfigs => [...tokenConfigs, token]);
+    if (tokenReservesConfigs) {
+      Promise.all(tokenReservesConfigs).then((tokens: any) => {
+        tokens.forEach((token: any) => {
+          setTokenConfigs(tokenConfigs => [...tokenConfigs, token]);
+        });
       });
-    });
-  }, [tokens]);
+    }
+  }, [tokenReservesConfigs]);
 
   const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
@@ -105,7 +116,8 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
       })
       .filter(asset => {
         const config = tokenConfigs.find(
-          (res: any) => res.tokenAddress === asset.tokenAddress
+          (tokenConfig: ReserveAssetConfiguration & { tokenAddress: string }) =>
+            tokenConfig.tokenAddress === asset.tokenAddress
         );
         return config?.isActive && !config?.isFrozen;
       });
