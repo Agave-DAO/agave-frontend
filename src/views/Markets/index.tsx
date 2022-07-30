@@ -300,28 +300,35 @@ const AssetTable: React.FC<{
     throw new Error("AssetTable native view mode not yet supported");
   }
 
-  type AssetConfigurationWithAddress = ReserveAssetConfiguration & {
+  interface AssetConfigurationWithAddress extends ReserveAssetConfiguration {
     tokenAddress: string;
-  };
+  }
 
-  const [tokenConfigs, setTokenConfigs] = useState<
-    Array<AssetConfigurationWithAddress>
-  >([]);
+  const [tokenConfigs, setTokenConfigs] =
+    useState<{ [TokenAddress: string]: AssetConfigurationWithAddress }>();
 
   const reserves = useAllReserveTokensWithData();
   const reserveAddresses = reserves.data?.map(
     ({ tokenAddress }) => tokenAddress
   );
 
-  const tokenReservesConfigs: Array<AssetConfigurationWithAddress> | undefined =
+  const tokenReservesConfigs: AssetConfigurationWithAddress[] | undefined =
     useMultipleProtocolReserveConfiguration(reserveAddresses)?.data;
 
   useEffect(() => {
     if (tokenReservesConfigs) {
       Promise.all(tokenReservesConfigs).then(tokens => {
-        tokens.forEach(token => {
-          setTokenConfigs(tokenConfigs => [...tokenConfigs, token]);
-        });
+        const tokenConfig = Object.values(tokens).reduce(
+          (
+            acc: { [TokenAddress: string]: AssetConfigurationWithAddress },
+            token: AssetConfigurationWithAddress
+          ) => {
+            acc[token.tokenAddress] = token;
+            return acc;
+          },
+          {} as { [TokenAddress: string]: AssetConfigurationWithAddress }
+        );
+        setTokenConfigs(tokenConfig);
       });
     }
   }, [tokenReservesConfigs]);
@@ -346,10 +353,11 @@ const AssetTable: React.FC<{
           : asset;
       })
       .filter(asset => {
-        const config = tokenConfigs.find(
-          tokenConfig => tokenConfig.tokenAddress === asset.tokenAddress
-        );
-        return config?.isActive && !config?.isFrozen;
+        if (tokenConfigs) {
+          const config = tokenConfigs[asset.tokenAddress];
+          return config?.isActive && !config?.isFrozen;
+        }
+        return true;
       });
   }, [reserves]);
 

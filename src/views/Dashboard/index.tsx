@@ -24,9 +24,9 @@ export interface AssetData {
 }
 
 export const Dashboard: React.FC<{}> = () => {
-  type AssetConfigurationWithAddress = ReserveAssetConfiguration & {
+  interface AssetConfigurationWithAddress extends ReserveAssetConfiguration {
     tokenAddress: string;
-  };
+  }
 
   // Overall borrow information
   const { account: userAccountAddress } = useAppWeb3();
@@ -37,9 +37,8 @@ export const Dashboard: React.FC<{}> = () => {
   const collateral = userAccountData?.totalCollateralEth;
   const borrowed = userAccountData?.totalDebtEth;
 
-  const [tokenConfigs, setTokenConfigs] = useState<
-    Array<AssetConfigurationWithAddress>
-  >([]);
+  const [tokenConfigs, setTokenConfigs] =
+    useState<{ [TokenAddress: string]: AssetConfigurationWithAddress }>();
 
   // Borrow list
   const borrows = useUserVariableDebtTokenBalances();
@@ -57,15 +56,23 @@ export const Dashboard: React.FC<{}> = () => {
     ?.concat(backingBalancesAddress ?? [])
     .filter((v, i, a) => a.indexOf(v) === i);
 
-  const assetConfigs: Array<AssetConfigurationWithAddress> | undefined =
+  const assetConfigs: AssetConfigurationWithAddress[] | undefined =
     useMultipleProtocolReserveConfiguration(tokenAddresses)?.data;
 
   useEffect(() => {
     if (assetConfigs) {
       Promise.all(assetConfigs).then(tokens => {
-        tokens.forEach(token => {
-          setTokenConfigs(tokenConfigs => [...tokenConfigs, token]);
-        });
+        const tokenConfig = Object.values(tokens).reduce(
+          (
+            acc: { [TokenAddress: string]: AssetConfigurationWithAddress },
+            token: AssetConfigurationWithAddress
+          ) => {
+            acc[token.tokenAddress] = token;
+            return acc;
+          },
+          {} as { [TokenAddress: string]: AssetConfigurationWithAddress }
+        );
+        setTokenConfigs(tokenConfig);
       });
     }
   }, [assetConfigs]);
@@ -85,11 +92,11 @@ export const Dashboard: React.FC<{}> = () => {
           : asset;
       })
       .filter(asset => {
-        const config = tokenConfigs.find(
-          tokenConfig =>
-            tokenConfig.tokenAddress === asset.tokenAddress
-        );
-        return config?.isActive && !config?.isFrozen;
+        if (tokenConfigs) {
+          const config = tokenConfigs[asset.tokenAddress];
+          return config?.isActive && !config?.isFrozen;
+        }
+        return true;
       });
   }, [borrows]);
 
@@ -111,11 +118,11 @@ export const Dashboard: React.FC<{}> = () => {
           : asset;
       })
       .filter(asset => {
-        const config = tokenConfigs.find(
-          tokenConfig =>
-            tokenConfig.tokenAddress === asset.backingReserve.tokenAddress
-        );
-        return config?.isActive && !config?.isFrozen;
+        if (tokenConfigs) {
+          const config = tokenConfigs[asset.backingReserve.tokenAddress];
+          return config?.isActive && !config?.isFrozen;
+        }
+        return true;
       });
   }, [balances]);
 
