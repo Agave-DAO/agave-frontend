@@ -73,6 +73,44 @@ type Web3ProtocolReserveDataResult = PromisedType<
   >
 >;
 
+export const useMultipleProtocolReserveConfiguration =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    Array<ReserveAssetConfiguration & { tokenAddress: string }>,
+    [
+      _p1: "AaveProtocolDataProvider",
+      _p2: "assetConfiguration",
+      assetAddresses: any | undefined
+    ],
+    [assetAddresses: any]
+  >(
+    async (params, assetAddresses) => {
+      const contract = AaveProtocolDataProvider__factory.connect(
+        params.chainAddrs.aaveProtocolDataProvider,
+        params.library
+      );
+      return assetAddresses.map(async (tokenAddress: string) => {
+        return await contract
+          .getReserveConfigurationData(tokenAddress)
+          .then(reserveConfiguration => {
+            return {
+              ...reserveConfigurationFromWeb3Result(reserveConfiguration),
+              tokenAddress,
+            };
+          });
+      });
+    },
+    assetAddress => [
+      "AaveProtocolDataProvider",
+      "assetConfiguration",
+      assetAddress,
+    ],
+    () => undefined,
+    {
+      cacheTime: 60 * 15 * 1000,
+      staleTime: 60 * 5 * 1000,
+    }
+  );
+
 export const useProtocolReserveConfiguration =
   buildQueryHookWhenParamsDefinedChainAddrs<
     ReserveAssetConfiguration,

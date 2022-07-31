@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ColoredText from "../../components/ColoredText";
 import { Box, Text } from "@chakra-ui/layout";
 import {
@@ -50,6 +50,10 @@ import {
   useKpiTokensAPY,
   useRewardTokensAPY,
 } from "../../queries/rewardTokens";
+import {
+  ReserveAssetConfiguration,
+  useMultipleProtocolReserveConfiguration,
+} from "../../queries/protocolAssetConfiguration";
 
 const useTotalMarketSizeInDai = buildQueryHookWhenParamsDefinedChainAddrs<
   FixedNumber,
@@ -296,7 +300,39 @@ const AssetTable: React.FC<{
     throw new Error("AssetTable native view mode not yet supported");
   }
 
+  interface AssetConfigurationWithAddress extends ReserveAssetConfiguration {
+    tokenAddress: string;
+  }
+
+  const [tokenConfigs, setTokenConfigs] =
+    useState<{ [TokenAddress: string]: AssetConfigurationWithAddress }>();
+
   const reserves = useAllReserveTokensWithData();
+  const reserveAddresses = reserves.data?.map(
+    ({ tokenAddress }) => tokenAddress
+  );
+
+  const tokenReservesConfigs: AssetConfigurationWithAddress[] | undefined =
+    useMultipleProtocolReserveConfiguration(reserveAddresses)?.data;
+
+  useEffect(() => {
+    if (tokenReservesConfigs) {
+      Promise.all(tokenReservesConfigs).then(tokens => {
+        const tokenConfig = Object.values(tokens).reduce(
+          (
+            acc: { [TokenAddress: string]: AssetConfigurationWithAddress },
+            token: AssetConfigurationWithAddress
+          ) => {
+            acc[token.tokenAddress] = token;
+            return acc;
+          },
+          {} as { [TokenAddress: string]: AssetConfigurationWithAddress }
+        );
+        setTokenConfigs(tokenConfig);
+      });
+    }
+  }, [tokenReservesConfigs]);
+
   const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
     const assets =
@@ -307,14 +343,22 @@ const AssetTable: React.FC<{
           aTokenAddress,
         })
       ) ?? [];
-    return assets.map(asset => {
-      return asset.symbol === nativeSymbols.wrappednative
-        ? {
-            ...asset,
-            symbol: nativeSymbols?.native,
-          }
-        : asset;
-    });
+    return assets
+      .map(asset => {
+        return asset.symbol === nativeSymbols.wrappednative
+          ? {
+              ...asset,
+              symbol: nativeSymbols?.native,
+            }
+          : asset;
+      })
+      .filter(asset => {
+        if (tokenConfigs) {
+          const config = tokenConfigs[asset.tokenAddress];
+          return config?.isActive && !config?.isFrozen;
+        }
+        return true;
+      });
   }, [reserves]);
 
   const { onOpen } = useDisclosure();
