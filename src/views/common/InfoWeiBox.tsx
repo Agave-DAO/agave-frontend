@@ -40,12 +40,19 @@ const HealthFactorInput: React.FC<
     setMinSafeHF?: React.Dispatch<React.SetStateAction<BigNumber>>;
   } & StackProps
 > = ({ healthFactor, setMinSafeHF, ...props }) => {
-  // TODO: Make this never be less than 1001
   const handleChange = (event: any) => {
     const value = Math.ceil(parseFloat(event.target.value) * 1000);
+    localStorage.setItem("minSafeHF", value.toString());
     setMinSafeHF?.(BigNumber.from(value ? value : 1000));
   };
+
   const [isHovered, setIsHovered] = React.useState(false);
+
+  const initialValue =
+    localStorage.getItem("minSafeHF") !== "NaN" ||
+    localStorage.getItem("minSafeHF") !== null
+      ? (parseInt(localStorage.getItem("minSafeHF") || '0') / 1000).toString()
+      : "1.200";
 
   return (
     <Popover>
@@ -92,7 +99,7 @@ const HealthFactorInput: React.FC<
               type="number"
               min="1.000"
               max="10000000000"
-              defaultValue="1.200"
+              defaultValue={initialValue}
               step="0.001"
               onChange={handleChange}
               fontWeight="semibold"

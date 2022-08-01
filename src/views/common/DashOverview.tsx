@@ -41,7 +41,15 @@ export const DashOverviewIntro: React.FC<{
       ? wNative?.tokenAddress
       : asset.tokenAddress;
 
-  const [minSafeHF, setMinSafeHF] = useState<BigNumber>(MIN_SAFE_HEALTH_FACTOR);
+  if (
+    localStorage.getItem("minSafeHF") === "NaN" ||
+    localStorage.getItem("minSafeHF") === null
+  ) {
+    localStorage.setItem("minSafeHF", MIN_SAFE_HEALTH_FACTOR.toString());
+  }
+  const [minSafeHF, setMinSafeHF] = useState<BigNumber>(
+    BigNumber.from(localStorage.getItem("minSafeHF"))
+  );
 
   const newHealthFactor = useNewHealthFactorCalculator(
     amount,
