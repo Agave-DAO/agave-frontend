@@ -40,19 +40,23 @@ const HealthFactorInput: React.FC<
     setMinSafeHF?: React.Dispatch<React.SetStateAction<BigNumber>>;
   } & StackProps
 > = ({ healthFactor, setMinSafeHF, ...props }) => {
+  const textInput =
+    parseFloat(localStorage.getItem("minSafeHF") || "1200") / 1000;
+
   const handleChange = (event: any) => {
-    const value = Math.ceil(parseFloat(event.target.value) * 1000);
-    localStorage.setItem("minSafeHF", value.toString());
-    setMinSafeHF?.(BigNumber.from(value ? value : 1000));
+    // If input is empty, set to default value of 1000.
+    // The input is a string, so we need to parse it to a number.
+    // If the number is less than 1 and greater than 10000, set to boundaries.
+    const input =
+      event.target.value === ""
+        ? 1
+        : Math.max(1, Math.min(100000, parseFloat(event.target.value)));
+
+    const value = Math.ceil(input * 1000); // Take out the decimal point.
+    localStorage.setItem("minSafeHF", value.toString()); // Save the value to local storage.
+    setMinSafeHF?.(BigNumber.from(value ? value : 1000)); // Set the value to the state.
   };
-
   const [isHovered, setIsHovered] = React.useState(false);
-
-  const initialValue =
-    localStorage.getItem("minSafeHF") !== "NaN" ||
-    localStorage.getItem("minSafeHF") !== null
-      ? (parseInt(localStorage.getItem("minSafeHF") || '0') / 1000).toString()
-      : "1.200";
 
   return (
     <Popover>
@@ -99,7 +103,8 @@ const HealthFactorInput: React.FC<
               type="number"
               min="1.000"
               max="10000000000"
-              defaultValue={initialValue}
+              keyboardType="numeric"
+              defaultValue={textInput}
               step="0.001"
               onChange={handleChange}
               fontWeight="semibold"

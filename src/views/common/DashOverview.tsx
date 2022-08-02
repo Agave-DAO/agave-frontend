@@ -41,9 +41,14 @@ export const DashOverviewIntro: React.FC<{
       ? wNative?.tokenAddress
       : asset.tokenAddress;
 
+  const localStorageMinSafeHF = localStorage.getItem("minSafeHF");
+  // Check if localStorage has a valid value for minSafeHF,
+  // if the value is not valid, set it to the default value
   if (
-    localStorage.getItem("minSafeHF") === "NaN" ||
-    localStorage.getItem("minSafeHF") === null
+    localStorageMinSafeHF === "NaN" ||
+    localStorageMinSafeHF === null ||
+    localStorageMinSafeHF === "" ||
+    localStorageMinSafeHF === "0"
   ) {
     localStorage.setItem("minSafeHF", MIN_SAFE_HEALTH_FACTOR.toString());
   }
