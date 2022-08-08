@@ -48,7 +48,7 @@ interface AmountSelectedState extends InitialState {
 }
 
 interface RateSelectedState extends AmountSelectedState {
-  interestRateMode: number;
+  interestRateMode: BigNumber;
 }
 
 interface BorrowTXState extends RateSelectedState {
@@ -168,12 +168,24 @@ const AmountSelectedComp: React.FC<{
     asset?.tokenAddress
   )?.data;
   const { stableBorrowRateEnabled } = reserveData ?? {};
-  const [interestRateMode, setInterestRateMode] = React.useState<number>(stableBorrowRateEnabled ? 1 : 2);
+  const [interestRateMode, setInterestRateMode] = React.useState<number>(
+    stableBorrowRateEnabled ? 1 : 2
+  );
 
   const onSubmit = React.useCallback(() => {
     isReserveTokenDefinition(state.token)
-      ? dispatch(createState("borrowTx", { interestRateMode, ...state }))
-      : dispatch(createState("rateSelected", { interestRateMode, ...state }));
+      ? dispatch(
+          createState("borrowTx", {
+            interestRateMode: BigNumber.from(interestRateMode),
+            ...state,
+          })
+        )
+      : dispatch(
+          createState("rateSelected", {
+            interestRateMode: BigNumber.from(interestRateMode),
+            ...state,
+          })
+        );
   }, [state, dispatch, interestRateMode]);
   const currentStep: PossibleTags<BorrowState> = "amountSelected";
 
@@ -297,6 +309,7 @@ const BorrowTxComp: React.FC<{
       asset: state.token.tokenAddress,
       amount: state.amountToBorrow,
       onBehalfOf: account ?? undefined,
+      interestRateMode: state.interestRateMode,
     }),
     [state, account]
   );
