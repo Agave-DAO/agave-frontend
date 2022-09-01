@@ -1,5 +1,5 @@
 import { Box, Text, VStack } from "@chakra-ui/layout";
-import React from "react";
+import React, { useState } from "react";
 import ColoredText from "../../components/ColoredText";
 import InfoWeiBox from "./InfoWeiBox";
 import { BigNumber, constants } from "ethers";
@@ -42,6 +42,21 @@ export const DashOverviewIntro: React.FC<{
       ? wNative?.tokenAddress
       : asset.tokenAddress;
 
+  const localStorageMinSafeHF = localStorage.getItem("minSafeHF");
+  // Check if localStorage has a valid value for minSafeHF,
+  // if the value is not valid, set it to the default value
+  if (
+    localStorageMinSafeHF === "NaN" ||
+    localStorageMinSafeHF === null ||
+    localStorageMinSafeHF === "" ||
+    localStorageMinSafeHF === "0"
+  ) {
+    localStorage.setItem("minSafeHF", MIN_SAFE_HEALTH_FACTOR.toString());
+  }
+  const [minSafeHF, setMinSafeHF] = useState<BigNumber>(
+    BigNumber.from(localStorage.getItem("minSafeHF"))
+  );
+
   const newHealthFactor = useNewHealthFactorCalculator(
     amount,
     tokenAddress,
@@ -59,7 +74,7 @@ export const DashOverviewIntro: React.FC<{
     balance,
     tokenAddress,
     mode,
-    MIN_SAFE_HEALTH_FACTOR
+    minSafeHF
   );
 
   const borrowedAmount = useUserVariableDebtForAsset(tokenAddress).data;
@@ -88,7 +103,7 @@ export const DashOverviewIntro: React.FC<{
     limitAmount &&
     newHealthFactorAsBigNumber &&
     limitAmount.eq(amount) &&
-    newHealthFactorAsBigNumber?.gt(MIN_SAFE_HEALTH_FACTOR)
+    newHealthFactorAsBigNumber?.gt(minSafeHF)
       ? MAX_UINT256
       : undefined;
 
@@ -108,6 +123,7 @@ export const DashOverviewIntro: React.FC<{
         mode={mode}
         balance={limitAmount}
         decimals={decimals ? decimals : 18}
+        setMinSafeHF={setMinSafeHF}
       />
       <Box h="4.3rem" />
       <Button
