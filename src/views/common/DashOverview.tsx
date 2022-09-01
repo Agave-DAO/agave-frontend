@@ -24,6 +24,7 @@ import {
 } from "../../utils/propertyCalculator";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { bigNumberToString } from "../../utils/fixedPoint";
+import { useUserVariableDebtForAsset } from "../../queries/userAssets";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
@@ -61,19 +62,26 @@ export const DashOverviewIntro: React.FC<{
     MIN_SAFE_HEALTH_FACTOR
   );
 
-  const limitAmount =
-    (mode === "withdraw" || mode === "borrow") &&
-    balance &&
-    maxAmount?.lt(balance)
-      ? maxAmount.gt(constants.Zero)
-        ? maxAmount
-        : constants.Zero
-      : (mode === "deposit" || mode === "repay") &&
-        asset.tokenAddress === NATIVE_TOKEN
-      ? balance?.sub(MINIMUM_NATIVE_RESERVE)
-      : balance;
-  // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
+  const borrowedAmount = useUserVariableDebtForAsset(tokenAddress).data;
 
+  const limitAmount =
+    mode === "withdraw" || mode === "borrow"
+      ? balance && maxAmount?.lt(balance)
+        ? maxAmount.gt(constants.Zero)
+          ? maxAmount
+          : constants.Zero
+        : balance
+      : mode === "deposit"
+      ? asset.tokenAddress === NATIVE_TOKEN
+        ? balance?.sub(MINIMUM_NATIVE_RESERVE)
+        : balance
+      : balance && borrowedAmount?.gt(balance)
+      ? asset.tokenAddress === NATIVE_TOKEN
+        ? balance?.sub(MINIMUM_NATIVE_RESERVE)
+        : balance
+      : borrowedAmount?.mul(1000001).div(1000000);
+
+  // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
   const infiniteAmount =
     mode === "withdraw" &&
     amount &&
