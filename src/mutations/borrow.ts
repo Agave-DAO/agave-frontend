@@ -108,9 +108,10 @@ export const useBorrowMutation = ({
           chainAddresses.wrappedNativeGateway,
           library.getSigner()
         );
+        console.log(amount, interestRateMode, referralCode)
         borrow = gatewayContract.borrowETH(
           amount,
-          interestRateMode,
+          BigNumber.from(2),
           referralCode
         );
       } else {

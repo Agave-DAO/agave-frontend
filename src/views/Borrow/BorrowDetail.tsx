@@ -309,7 +309,7 @@ const BorrowTxComp: React.FC<{
       asset: state.token.tokenAddress,
       amount: state.amountToBorrow,
       onBehalfOf: account ?? undefined,
-      interestRateMode: state.interestRateMode,
+      interestRateMode: BigNumber.from(1),
     }),
     [state, account]
   );
@@ -317,10 +317,13 @@ const BorrowTxComp: React.FC<{
     borrowMutation: { mutateAsync },
   } = useBorrowMutation(borrowArgs);
   const onSubmit = React.useCallback(() => {
+    console.log(state.interestRateMode.toString())
     mutateAsync()
       .then(() => dispatch(createState("borrowedTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
+      .catch(e => {
+        dispatch(createState("init", state));
+      });
   }, [state, dispatch, mutateAsync]);
   const currentStep: PossibleTags<BorrowState> = "borrowTx";
   const stepperBar = React.useMemo(
