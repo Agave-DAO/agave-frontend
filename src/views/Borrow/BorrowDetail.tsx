@@ -45,7 +45,11 @@ interface AmountSelectedState extends InitialState {
   amountToBorrow: BigNumber;
 }
 
-interface BorrowTXState extends AmountSelectedState {
+interface ModeSelectedState extends AmountSelectedState {
+  interestRateMode: BigNumber;
+}
+
+interface BorrowTXState extends ModeSelectedState {
   // approvalTXHash: string | undefined;
 }
 
@@ -56,6 +60,7 @@ interface BorrowedTXState extends BorrowTXState {
 type BorrowState = OneTaggedPropertyOf<{
   init: InitialState;
   amountSelected: AmountSelectedState;
+  modeSelected: ModeSelectedState;
   borrowTx: BorrowTXState;
   borrowedTx: BorrowedTXState;
 }>;
@@ -74,12 +79,14 @@ function createState<SelectedState extends PossibleTags<BorrowState>>(
 const stateNames: Record<PossibleTags<BorrowState>, string> = {
   init: "Token",
   amountSelected: "Delegate",
+  modeSelected: "Mode",
   borrowTx: "Borrow",
   borrowedTx: "Borrowed",
 };
 
 const visibleStateNames: ReadonlyArray<PossibleTags<BorrowState>> = [
   "amountSelected",
+  "modeSelected",
   "borrowTx",
   "borrowedTx",
 ] as const;
@@ -127,9 +134,7 @@ const InitialComp: React.FC<{
       : userAssetMaxAvailable;
   const onSubmit = React.useCallback(
     amountToBorrow => {
-      isReserveTokenDefinition(state.token)
-        ? dispatch(createState("borrowTx", { amountToBorrow, ...state }))
-        : dispatch(createState("amountSelected", { amountToBorrow, ...state }));
+      dispatch(createState("amountSelected", { amountToBorrow, ...state }));
     },
     [state, dispatch]
   );
@@ -163,13 +168,76 @@ const AmountSelectedComp: React.FC<{
   const {
     approvalMutation: { mutateAsync },
   } = useApproveDelegationMutation(approvalArgs);
+  const interestRateMode = BigNumber.from(2);
+  const onSubmit = React.useCallback(() => {
+    mutateAsync()
+      .then(() =>
+        isReserveTokenDefinition(state.token)
+          ? dispatch(createState("borrowTx", { interestRateMode, ...state }))
+          : dispatch(
+              createState("modeSelected", { interestRateMode, ...state })
+            )
+      )
+      // TODO: Switch to an error-display state that returns to init
+      .catch(e => dispatch(createState("init", state)));
+  }, [state, dispatch, mutateAsync]);
+  const currentStep: PossibleTags<BorrowState> = "amountSelected";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={BorrowTitle}
+      amount={state.amountToBorrow}
+      asset={state.token}
+      collateral={true}
+      increase={true}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={1}
+        stepName="Mode"
+        stepDesc="Select your interest rate mode"
+        actionName="Approve"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+      />
+    </WizardOverviewWrapper>
+  );
+};
+
+const ModeSelectedComp: React.FC<{
+  state: ModeSelectedState;
+  dispatch: (nextState: BorrowState) => void;
+}> = ({ state, dispatch }) => {
+  const chainAddresses = useChainAddresses();
+  const wrappedNativeAddress = useWrappedNativeAddress().data;
+  const reserveData = useLendingReserveData(wrappedNativeAddress).data;
+  const approvalArgs = React.useMemo<UseApproveDelegationMutationProps>(
+    () => ({
+      asset: reserveData?.variableDebtTokenAddress,
+      amount: state.amountToBorrow,
+      spender: chainAddresses?.wrappedNativeGateway,
+    }),
+    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+  );
+  const {
+    approvalMutation: { mutateAsync },
+  } = useApproveDelegationMutation(approvalArgs);
   const onSubmit = React.useCallback(() => {
     mutateAsync()
       .then(() => dispatch(createState("borrowTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
       .catch(e => dispatch(createState("init", state)));
   }, [state, dispatch, mutateAsync]);
-  const currentStep: PossibleTags<BorrowState> = "amountSelected";
+  const currentStep: PossibleTags<BorrowState> = "modeSelected";
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -314,6 +382,9 @@ const BorrowStateMachine: React.FC<{
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
       );
+    case "modeSelected":
+      return;
+      <ModeSelectedComp state={state.modeSelected} dispatch={setState} />;
     case "borrowTx":
       return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;
     case "borrowedTx":
