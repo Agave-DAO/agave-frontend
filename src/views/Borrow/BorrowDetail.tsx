@@ -78,8 +78,8 @@ function createState<SelectedState extends PossibleTags<BorrowState>>(
 // THIS BorrowState IS ALL WRONG AND NEEDS FIXING WHEN THE QUERIES ARE DONE
 const stateNames: Record<PossibleTags<BorrowState>, string> = {
   init: "Token",
-  amountSelected: "Delegate",
-  modeSelected: "Mode",
+  amountSelected: "Mode",
+  modeSelected: "Delegate",
   borrowTx: "Borrow",
   borrowedTx: "Borrowed",
 };
@@ -170,16 +170,10 @@ const AmountSelectedComp: React.FC<{
   } = useApproveDelegationMutation(approvalArgs);
   const interestRateMode = BigNumber.from(2);
   const onSubmit = React.useCallback(() => {
-    mutateAsync()
-      .then(() =>
-        isReserveTokenDefinition(state.token)
-          ? dispatch(createState("borrowTx", { interestRateMode, ...state }))
-          : dispatch(
-              createState("modeSelected", { interestRateMode, ...state })
-            )
-      )
-      // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
+    isReserveTokenDefinition(state.token)
+      ? dispatch(createState("borrowTx", { interestRateMode, ...state }))
+      : dispatch(createState("modeSelected", { interestRateMode, ...state }))
+          // TODO: Switch to an error-display state that returns to init
   }, [state, dispatch, mutateAsync]);
   const currentStep: PossibleTags<BorrowState> = "amountSelected";
   const stepperBar = React.useMemo(
@@ -205,7 +199,7 @@ const AmountSelectedComp: React.FC<{
         stepNumber={1}
         stepName="Mode"
         stepDesc="Select your interest rate mode"
-        actionName="Approve"
+        actionName="Confirm"
         onActionClick={onSubmit}
         totalSteps={visibleStateNames.length}
       />
@@ -258,7 +252,7 @@ const ModeSelectedComp: React.FC<{
     >
       {stepperBar}
       <ControllerItem
-        stepNumber={1}
+        stepNumber={2}
         stepName="Delegate"
         stepDesc="Submit to delegate approval to WETHGateway"
         actionName="Approve"
@@ -318,7 +312,7 @@ const BorrowTxComp: React.FC<{
     >
       {stepperBar}
       <ControllerItem
-        stepNumber={1}
+        stepNumber={3}
         stepName="Borrow"
         stepDesc="Please submit to borrow"
         actionName="Borrow"
@@ -356,7 +350,7 @@ const BorrowedTxComp: React.FC<{
     >
       {stepperBar}
       <ControllerItem
-        stepNumber={2}
+        stepNumber={4}
         stepName="Borrowed"
         stepDesc={`Borrow of ${bigNumberToString(
           state.amountToBorrow,
@@ -383,8 +377,9 @@ const BorrowStateMachine: React.FC<{
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
       );
     case "modeSelected":
-      return;
-      <ModeSelectedComp state={state.modeSelected} dispatch={setState} />;
+      return (
+        <ModeSelectedComp state={state.modeSelected} dispatch={setState} />
+      );
     case "borrowTx":
       return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;
     case "borrowedTx":
