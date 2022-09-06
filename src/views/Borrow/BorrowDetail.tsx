@@ -257,7 +257,10 @@ const ModeSelectedComp: React.FC<{
     mutateAsync()
       .then(() => dispatch(createState("borrowTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
+      .catch(e => {
+        console.log(state);
+        dispatch(createState("init", { token: state.token }));
+      });
   }, [state, dispatch, mutateAsync]);
   const currentStep: PossibleTags<BorrowState> = "modeSelected";
   const stepperBar = React.useMemo(
@@ -319,7 +322,9 @@ const BorrowTxComp: React.FC<{
     mutateAsync()
       .then(() => dispatch(createState("borrowedTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
+      .catch(e => {
+        dispatch(createState("init", { token: state.token }));
+      });
   }, [state, dispatch, mutateAsync]);
   const currentStep: PossibleTags<BorrowState> = "borrowTx";
   const stepperBar = React.useMemo(
@@ -403,16 +408,20 @@ const BorrowStateMachine: React.FC<{
     case "init":
       return <InitialComp state={state.init} dispatch={setState} />;
     case "amountSelected":
+      // console.log(state);
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
       );
     case "modeSelected":
+      // console.log(state);
       return (
         <ModeSelectedComp state={state.modeSelected} dispatch={setState} />
       );
     case "borrowTx":
+      // console.log(state);
       return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;
     case "borrowedTx":
+      // console.log(state);
       return <BorrowedTxComp state={state.borrowedTx} dispatch={setState} />;
   }
 };
