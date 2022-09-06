@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
@@ -37,6 +37,7 @@ import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { fontSizes } from "../../utils/constants";
+import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -155,27 +156,17 @@ const AmountSelectedComp: React.FC<{
   state: AmountSelectedState;
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
-  const chainAddresses = useChainAddresses();
-  const wrappedNativeAddress = useWrappedNativeAddress().data;
-  const reserveData = useLendingReserveData(wrappedNativeAddress).data;
-  const approvalArgs = React.useMemo<UseApproveDelegationMutationProps>(
-    () => ({
-      asset: reserveData?.variableDebtTokenAddress,
-      amount: state.amountToBorrow,
-      spender: chainAddresses?.wrappedNativeGateway,
-    }),
-    [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
-  );
-  const {
-    approvalMutation: { mutateAsync },
-  } = useApproveDelegationMutation(approvalArgs);
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
+  const reserveData = useProtocolReserveConfiguration(
+    asset?.tokenAddress
+  )?.data;
+  const { stableBorrowRateEnabled } = reserveData ?? {};
 
-  // start on variable rate mode
-  const [interestRateMode, setInterestRateMode] = useState(2);
+  const [interestRateMode, setInterestRateMode] = React.useState<number>(2);
 
   const onSubmit = React.useCallback(() => {
-    setInterestRateMode(val => (1))
-    console.log("interestRateMode: ", interestRateMode);
     isReserveTokenDefinition(state.token)
       ? dispatch(
           createState("borrowTx", {
@@ -190,7 +181,7 @@ const AmountSelectedComp: React.FC<{
           })
         );
     // TODO: Switch to an error-display state that returns to init
-  }, [interestRateMode, state, dispatch, mutateAsync]);
+  }, [interestRateMode, state, dispatch]);
 
   const currentStep: PossibleTags<BorrowState> = "amountSelected";
   const stepperBar = React.useMemo(
@@ -210,9 +201,9 @@ const AmountSelectedComp: React.FC<{
         <Checkbox
           size="lg"
           colorScheme="orange"
-          onChange={event => setInterestRateMode(event.target.checked ? 1 : 2)}
-          defaultChecked={interestRateMode == 2}
-          isDisabled={!true}
+          onChange={event => setInterestRateMode(event.target.checked ? 2 : 1)}
+          defaultChecked={true}
+          isDisabled={!stableBorrowRateEnabled || state.token.tokenAddress === NATIVE_TOKEN}
         >
           Variable Borrowing
         </Checkbox>
@@ -313,9 +304,11 @@ const BorrowTxComp: React.FC<{
       asset: state.token.tokenAddress,
       amount: state.amountToBorrow,
       onBehalfOf: account ?? undefined,
+      interestRateMode: state.interestRateMode,
     }),
     [state, account]
   );
+  
   const {
     borrowMutation: { mutateAsync },
   } = useBorrowMutation(borrowArgs);

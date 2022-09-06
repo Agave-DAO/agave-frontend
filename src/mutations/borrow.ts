@@ -26,6 +26,7 @@ export interface UseBorrowMutationProps {
   asset: string | NATIVE_TOKEN | undefined;
   onBehalfOf: string | undefined;
   amount: BigNumber | undefined;
+  interestRateMode: BigNumber | undefined;
 }
 
 export interface UseBorrowMutationDto {
@@ -46,6 +47,7 @@ export const useBorrowMutation = ({
   asset,
   onBehalfOf,
   amount,
+  interestRateMode,
 }: UseBorrowMutationProps): UseBorrowMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
@@ -90,12 +92,12 @@ export const useBorrowMutation = ({
       if (!chainAddresses) {
         return undefined;
       }
-      if (!asset || !onBehalfOf || !amount) {
+      if (!asset || !onBehalfOf || !amount || (!interestRateMode?.eq(1) && !interestRateMode?.eq(2))) {
         return undefined;
       }
 
       let borrow;
-      const interestRateMode = 2;
+
       const referralCode = 0;
       if (asset === NATIVE_TOKEN) {
         const gatewayContract = WETHGateway__factory.connect(
