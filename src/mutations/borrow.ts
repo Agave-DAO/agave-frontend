@@ -92,7 +92,12 @@ export const useBorrowMutation = ({
       if (!chainAddresses) {
         return undefined;
       }
-      if (!asset || !onBehalfOf || !amount || (!interestRateMode?.eq(1) && !interestRateMode?.eq(2))) {
+      if (
+        !asset ||
+        !onBehalfOf ||
+        !amount ||
+        (!interestRateMode?.eq(1) && !interestRateMode?.eq(2))
+      ) {
         return undefined;
       }
 

@@ -203,7 +203,10 @@ const AmountSelectedComp: React.FC<{
           colorScheme="orange"
           onChange={event => setInterestRateMode(event.target.checked ? 2 : 1)}
           defaultChecked={true}
-          isDisabled={!stableBorrowRateEnabled || state.token.tokenAddress === NATIVE_TOKEN}
+          isDisabled={
+            !stableBorrowRateEnabled ||
+            state.token.tokenAddress === NATIVE_TOKEN
+          }
         >
           Variable Borrowing
         </Checkbox>
@@ -308,7 +311,7 @@ const BorrowTxComp: React.FC<{
     }),
     [state, account]
   );
-  
+
   const {
     borrowMutation: { mutateAsync },
   } = useBorrowMutation(borrowArgs);
