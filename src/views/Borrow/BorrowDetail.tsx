@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { VStack } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
@@ -10,7 +10,7 @@ import {
   ReserveOrNativeTokenDefinition,
   useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
-import { Box, Center, Text } from "@chakra-ui/react";
+import { Box, Center, Checkbox, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
@@ -36,6 +36,7 @@ import {
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
+import { fontSizes } from "../../utils/constants";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -168,13 +169,29 @@ const AmountSelectedComp: React.FC<{
   const {
     approvalMutation: { mutateAsync },
   } = useApproveDelegationMutation(approvalArgs);
-  const interestRateMode = BigNumber.from(2);
+
+  // start on variable rate mode
+  const [interestRateMode, setInterestRateMode] = useState(2);
+
   const onSubmit = React.useCallback(() => {
+    setInterestRateMode(val => (1))
+    console.log("interestRateMode: ", interestRateMode);
     isReserveTokenDefinition(state.token)
-      ? dispatch(createState("borrowTx", { interestRateMode, ...state }))
-      : dispatch(createState("modeSelected", { interestRateMode, ...state }))
-          // TODO: Switch to an error-display state that returns to init
-  }, [state, dispatch, mutateAsync]);
+      ? dispatch(
+          createState("borrowTx", {
+            interestRateMode: BigNumber.from(interestRateMode),
+            ...state,
+          })
+        )
+      : dispatch(
+          createState("modeSelected", {
+            interestRateMode: BigNumber.from(interestRateMode),
+            ...state,
+          })
+        );
+    // TODO: Switch to an error-display state that returns to init
+  }, [interestRateMode, state, dispatch, mutateAsync]);
+
   const currentStep: PossibleTags<BorrowState> = "amountSelected";
   const stepperBar = React.useMemo(
     () => (
@@ -185,6 +202,23 @@ const AmountSelectedComp: React.FC<{
       />
     ),
     [currentStep]
+  );
+
+  const borrowModeCheckbox = React.useMemo(
+    () => (
+      <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
+        <Checkbox
+          size="lg"
+          colorScheme="orange"
+          onChange={event => setInterestRateMode(event.target.checked ? 1 : 2)}
+          defaultChecked={interestRateMode == 2}
+          isDisabled={!true}
+        >
+          Variable Borrowing
+        </Checkbox>
+      </Text>
+    ),
+    [currentStep, setInterestRateMode]
   );
   return (
     <WizardOverviewWrapper
@@ -198,10 +232,10 @@ const AmountSelectedComp: React.FC<{
       <ControllerItem
         stepNumber={1}
         stepName="Mode"
-        stepDesc="Select your interest rate mode"
         actionName="Confirm"
         onActionClick={onSubmit}
         totalSteps={visibleStateNames.length}
+        childComponent={borrowModeCheckbox}
       />
     </WizardOverviewWrapper>
   );

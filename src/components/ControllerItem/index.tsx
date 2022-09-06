@@ -28,7 +28,7 @@ export const ControllerItem: React.FC<{
         >
           {stepNumber}/{totalSteps} {stepName}
         </Text>
-        {stepDesc && (
+        {(childComponent || stepDesc) && (
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
             {childComponent ? childComponent : stepDesc}
           </Text>
