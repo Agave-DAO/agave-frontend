@@ -1,5 +1,5 @@
 import { Box, Text, VStack } from "@chakra-ui/layout";
-import React from "react";
+import React, { useState } from "react";
 import ColoredText from "../../components/ColoredText";
 import InfoWeiBox from "./InfoWeiBox";
 import { BigNumber, constants } from "ethers";
@@ -24,6 +24,7 @@ import {
 } from "../../utils/propertyCalculator";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { bigNumberToString } from "../../utils/fixedPoint";
+import { useUserVariableDebtForAsset } from "../../queries/userAssets";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
@@ -40,6 +41,21 @@ export const DashOverviewIntro: React.FC<{
     asset.tokenAddress === NATIVE_TOKEN
       ? wNative?.tokenAddress
       : asset.tokenAddress;
+
+  const localStorageMinSafeHF = localStorage.getItem("minSafeHF");
+  // Check if localStorage has a valid value for minSafeHF,
+  // if the value is not valid, set it to the default value
+  if (
+    localStorageMinSafeHF === "NaN" ||
+    localStorageMinSafeHF === null ||
+    localStorageMinSafeHF === "" ||
+    localStorageMinSafeHF === "0"
+  ) {
+    localStorage.setItem("minSafeHF", MIN_SAFE_HEALTH_FACTOR.toString());
+  }
+  const [minSafeHF, setMinSafeHF] = useState<BigNumber>(
+    BigNumber.from(localStorage.getItem("minSafeHF"))
+  );
 
   const newHealthFactor = useNewHealthFactorCalculator(
     amount,
@@ -58,29 +74,36 @@ export const DashOverviewIntro: React.FC<{
     balance,
     tokenAddress,
     mode,
-    MIN_SAFE_HEALTH_FACTOR
+    minSafeHF
   );
 
-  const limitAmount =
-    (mode === "withdraw" || mode === "borrow") &&
-    balance &&
-    maxAmount?.lt(balance)
-      ? maxAmount.gt(constants.Zero)
-        ? maxAmount
-        : constants.Zero
-      : (mode === "deposit" || mode === "repay") &&
-        asset.tokenAddress === NATIVE_TOKEN
-      ? balance?.sub(MINIMUM_NATIVE_RESERVE)
-      : balance;
-  // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
+  const borrowedAmount = useUserVariableDebtForAsset(tokenAddress).data;
 
+  const limitAmount =
+    mode === "withdraw" || mode === "borrow"
+      ? balance && maxAmount?.lt(balance)
+        ? maxAmount.gt(constants.Zero)
+          ? maxAmount
+          : constants.Zero
+        : balance
+      : mode === "deposit"
+      ? asset.tokenAddress === NATIVE_TOKEN
+        ? balance?.sub(MINIMUM_NATIVE_RESERVE)
+        : balance
+      : balance && borrowedAmount?.gt(balance)
+      ? asset.tokenAddress === NATIVE_TOKEN
+        ? balance?.sub(MINIMUM_NATIVE_RESERVE)
+        : balance
+      : borrowedAmount?.mul(1000001).div(1000000);
+
+  // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
   const infiniteAmount =
     mode === "withdraw" &&
     amount &&
     limitAmount &&
     newHealthFactorAsBigNumber &&
     limitAmount.eq(amount) &&
-    newHealthFactorAsBigNumber?.gt(MIN_SAFE_HEALTH_FACTOR)
+    newHealthFactorAsBigNumber?.gt(minSafeHF)
       ? MAX_UINT256
       : undefined;
 
@@ -100,6 +123,7 @@ export const DashOverviewIntro: React.FC<{
         mode={mode}
         balance={limitAmount}
         decimals={decimals ? decimals : 18}
+        setMinSafeHF={setMinSafeHF}
       />
       <Box h="4.3rem" />
       <Button

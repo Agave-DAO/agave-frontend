@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { CellProps, Column, Renderer } from "react-table";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
@@ -18,6 +18,10 @@ import { isMobile } from "react-device-detect";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { NATIVE_TOKEN } from "../../queries/allReserveTokens";
 import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
+import {
+  ReserveAssetConfiguration,
+  useMultipleProtocolReserveConfiguration,
+} from "../../queries/protocolAssetConfiguration";
 
 const BalanceView: React.FC<{ tokenAddress: string }> = ({ tokenAddress }) => {
   const price = useAssetPriceInDai(tokenAddress);
@@ -55,9 +59,41 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
     tokenAddress: string;
     aTokenAddress: string;
   }
+  interface AssetConfigurationWithAddress extends ReserveAssetConfiguration {
+    tokenAddress: string;
+  }
+
+  const [tokenConfigs, setTokenConfigs] =
+    useState<{ [TokenAddress: string]: AssetConfigurationWithAddress }>();
+
   const [isMobile] = useMediaQuery("(max-width: 32em)");
 
   const reserves = useAllReserveTokensWithData();
+  const reserveAddresses = reserves.data?.map(
+    ({ tokenAddress }) => tokenAddress
+  );
+
+  const tokenReservesConfigs: AssetConfigurationWithAddress[] | undefined =
+    useMultipleProtocolReserveConfiguration(reserveAddresses)?.data;
+
+  useEffect(() => {
+    if (tokenReservesConfigs) {
+      Promise.all(tokenReservesConfigs).then(tokens => {
+        const tokenConfig = Object.values(tokens).reduce(
+          (
+            acc: { [TokenAddress: string]: AssetConfigurationWithAddress },
+            token: AssetConfigurationWithAddress
+          ) => {
+            acc[token.tokenAddress] = token;
+            return acc;
+          },
+          {} as { [TokenAddress: string]: AssetConfigurationWithAddress }
+        );
+        setTokenConfigs(tokenConfig);
+      });
+    }
+  }, [tokenReservesConfigs]);
+
   const nativeSymbols = useNativeSymbols();
   const assetRecords = React.useMemo(() => {
     const assets =
@@ -68,15 +104,23 @@ export const DepositTable: React.FC<{ activeType: string }> = ({
           aTokenAddress,
         })
       ) ?? [];
-    return assets.map(asset => {
-      return asset.symbol === nativeSymbols.wrappednative
-        ? {
-            ...asset,
-            symbol: nativeSymbols?.native,
-          }
-        : asset;
-    });
-  }, [reserves]);
+    return assets
+      .map(asset => {
+        return asset.symbol === nativeSymbols.wrappednative
+          ? {
+              ...asset,
+              symbol: nativeSymbols?.native,
+            }
+          : asset;
+      })
+      .filter(asset => {
+        if (tokenConfigs) {
+          const config = tokenConfigs[asset.tokenAddress];
+          return config?.isActive && !config?.isFrozen;
+        }
+        return true;
+      });
+  }, [reserves, tokenConfigs, nativeSymbols]);
 
   const columns: Column<AssetRecord>[] = React.useMemo(
     () => [
