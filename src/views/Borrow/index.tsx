@@ -1,6 +1,6 @@
 import React from "react";
 import { BigNumber, BigNumberish } from "ethers";
-import { useUserVariableDebtTokenBalancesDaiWei } from "../../queries/userAssets";
+import { useUserStableAndVariableDebtTokenBalancesDaiWei } from "../../queries/userAssets";
 import { BorrowLayout } from "./layout";
 
 export interface BorrowAsset {
@@ -13,10 +13,9 @@ export interface BorrowAsset {
 }
 
 export const Borrow: React.FC<{}> = () => {
-  const [activeValue, setActiveValue] = React.useState<"All" | "Stable Coins">(
-    "All"
-  );
-  const balances = useUserVariableDebtTokenBalancesDaiWei();
+  const [activeValue, setActiveValue] =
+    React.useState<"All" | "Stable Coins">("All");
+  const balances = useUserStableAndVariableDebtTokenBalancesDaiWei();
   const borrowedList: BorrowAsset[] = React.useMemo(
     () => balances?.data?.filter(asset => !asset.balance.isZero()) ?? [],
     [balances]
