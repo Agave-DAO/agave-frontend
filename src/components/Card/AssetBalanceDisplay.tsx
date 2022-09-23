@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Box, Tooltip, Flex } from "@chakra-ui/react";
+import { Text, Box, Tooltip, Flex, VStack } from "@chakra-ui/react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon } from "../../utils/icons";
 import { DepositAsset } from "../../views/Deposit";
@@ -23,9 +23,14 @@ export const AssetBalanceDisplay: React.FC<{
         >
           <Box textAlign="center" alignSelf="center" d="flex">
             <TokenIcon symbol={asset?.symbol} />
-            <Text ml={4} alignSelf="center">
-              {asset?.symbol}
-            </Text>
+            <VStack spacing={-2} ml={4} textAlign="start" align="left">
+              <Text >{asset?.symbol}</Text>
+              {"borrowMode" in asset ? (
+                <Text fontSize="lg">{asset?.borrowMode === 1 ? "Stable" : "Variable"} Borrow</Text>
+              ) : (
+                <></>
+              )}
+            </VStack>
           </Box>
           <Box p={1} textAlign="end">
             <Tooltip

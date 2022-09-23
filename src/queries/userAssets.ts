@@ -95,18 +95,19 @@ export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
 
 export const useUserStableAndVariableDebtForAsset =
   buildQueryHookWhenParamsDefinedChainAddrs<
-    BigNumber,
+    { stableDebt: BigNumber; variableDebt: BigNumber },
     [_p1: "user", _p2: "asset", assetAddress: string | undefined, _p3: "debt"],
     [assetAddress: string]
   >(
     async (params, assetAddress) => {
       return useUserReserveData
         .fetchQueryDefined(params, assetAddress)
-        .then(result =>
-          result.currentStableDebt
-            ? result.currentVariableDebt.add(result.currentStableDebt)
-            : result.currentVariableDebt
-        );
+        .then(result => {
+          return {
+            variableDebt: result.currentVariableDebt,
+            stableDebt: result.currentStableDebt,
+          };
+        });
     },
     assetAddress => ["user", "asset", assetAddress, "debt"],
     () => undefined,
@@ -156,22 +157,24 @@ export const useUserVariableDebtForAsset =
 
 export const useUserStableAndVariableDebtTokenBalances =
   buildQueryHookWhenParamsDefinedChainAddrs<
-    { symbol: string; tokenAddress: string; balance: BigNumber }[],
+    { symbol: string; tokenAddress: string; balance: BigNumber, borrowMode: number }[],
     [_p1: "user", _p2: "allReserves", _p3: "debts"],
     []
   >(
     async params => {
       const reserves = await useAllReserveTokens.fetchQueryDefined(params);
 
-      const reservesWithStableAndVaribleDebt = await Promise.all(
+      const reservesWithStableAndVariableDebt = await Promise.all(
         reserves.map(reserve =>
           useUserStableAndVariableDebtForAsset
             .fetchQueryDefined(params, reserve.tokenAddress)
-            .then(debt => ({ ...reserve, balance: debt }))
+            .then(debt => [
+              { ...reserve, balance: debt.stableDebt, borrowMode: 1 },
+              { ...reserve, balance: debt.variableDebt, borrowMode: 2 },
+            ])
         )
       );
-
-      return reservesWithStableAndVaribleDebt;
+      return reservesWithStableAndVariableDebt.flat();
     },
     () => ["user", "allReserves", "debts"],
     () => undefined,
@@ -245,6 +248,7 @@ export interface DebtTokenBalancesDaiWei {
   decimals: BigNumberish;
   daiWeiPricePer: BigNumber | null;
   daiWeiPriceTotal: BigNumber | null;
+  borrowMode: number;
 }
 
 export const useUserStableAndVariableDebtTokenBalancesDaiWei =

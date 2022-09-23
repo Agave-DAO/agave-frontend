@@ -10,6 +10,7 @@ export interface BorrowAsset {
   decimals: BigNumberish;
   daiWeiPricePer: BigNumber | null;
   daiWeiPriceTotal: BigNumber | null;
+  borrowMode: number
 }
 
 export const Borrow: React.FC<{}> = () => {
