@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DashboardLayout } from "./layout";
 import {
   useUserDepositAssetBalancesWithReserveInfo,
-  useUserVariableDebtTokenBalances,
+  useUserStableAndVariableDebtTokenBalances,
 } from "../../queries/userAssets";
 import { BigNumber } from "ethers";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
@@ -21,6 +21,7 @@ export interface AssetData {
   symbol: string;
   backingReserve?: ReserveTokenDefinition | undefined;
   balance: BigNumber;
+  borrowMode?: number;
 }
 
 export const Dashboard: React.FC<{}> = () => {
@@ -41,7 +42,7 @@ export const Dashboard: React.FC<{}> = () => {
     useState<{ [TokenAddress: string]: AssetConfigurationWithAddress }>();
 
   // Borrow list
-  const borrows = useUserVariableDebtTokenBalances();
+  const borrows = useUserStableAndVariableDebtTokenBalances();
   const borrowsAddress: string[] | undefined = borrows?.data
     ?.filter(asset => !asset.balance.isZero())
     .map(borrow => borrow.tokenAddress);

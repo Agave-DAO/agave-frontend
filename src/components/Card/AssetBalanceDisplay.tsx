@@ -24,9 +24,11 @@ export const AssetBalanceDisplay: React.FC<{
           <Box textAlign="center" alignSelf="center" d="flex">
             <TokenIcon symbol={asset?.symbol} />
             <VStack spacing={-2} ml={4} textAlign="start" align="left">
-              <Text >{asset?.symbol}</Text>
+              <Text>{asset?.symbol}</Text>
               {"borrowMode" in asset ? (
-                <Text fontSize="lg">{asset?.borrowMode === 1 ? "Stable" : "Variable"} Borrow</Text>
+                <Text fontSize="lg">
+                  {asset?.borrowMode === 1 ? "Stable" : "Variable"} Borrow
+                </Text>
               ) : (
                 <></>
               )}
