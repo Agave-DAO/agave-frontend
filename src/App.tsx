@@ -138,6 +138,7 @@ const App: React.FC<IAppProps> = props => {
               <Route path="/borrow/:assetName" component={BorrowDetail} exact />
               {/* <Route path="/borrow/confirm/:assetName/:amount" component={BorrowConfirm} exact /> */}
               <Route path="/repay/:assetName" component={RepayDetail} exact />
+              <Route path="/repay/:assetName/:borrowMode" component={RepayDetail} exact />
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
               {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
               <Route path="/stake" component={Staking} />
