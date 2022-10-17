@@ -205,6 +205,23 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
           w="30%"
           spacing={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
+          alignItems={{ base: "flex-start", lg: "center" }}
+          justifyContent="flex-start"
+          flexDirection={{ base: "column", lg: "row" }}
+        >
+          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} pr="1rem">
+            Borrow Mode
+          </Text>
+          <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
+            <Text display="inline-block" fontWeight="bold" fontSize="inherit">
+              {borrowMode === 1 ? "Stable" : "Variable"}
+            </Text>
+          </Box>
+        </Flex>
+        <Flex
+          w="30%"
+          spacing={spacings.md}
+          mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="flex-start"
           flexDirection={{ base: "column", lg: "row" }}
