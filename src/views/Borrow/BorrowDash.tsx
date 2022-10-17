@@ -74,6 +74,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
   // const maximumLtv = reserveConfiguration?.ltv;
   // const currentLtv = userAccountData?.currentLtv;
   const variableBorrowAPR = reserveProtocolData?.variableBorrowRate;
+  const stableBorrowAPR = reserveProtocolData?.stableBorrowRate;
   const healthFactor = userAccountData?.healthFactor;
   const totalCollateralEth = userAccountData?.totalCollateralEth;
   const userStableDebt = asset
@@ -199,6 +200,25 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
             <Text display="inline-block" fontWeight="bold" fontSize="inherit">
               {fixedNumberToPercentage(variableBorrowAPR, 4, 2)}%
+            </Text>
+          </Box>
+        </Flex>
+        <Flex
+          spacing={spacings.md}
+          mr={{ base: "0rem", md: "1rem" }}
+          alignItems={{ base: "flex-start", lg: "center" }}
+          justifyContent="flex-start"
+          flexDirection={{ base: "column", lg: "row" }}
+        >
+          <Text
+            fontSize={{ base: fontSizes.sm, md: fontSizes.md }}
+            mr={{ base: "0rem", md: "1rem" }}
+          >
+            {isSmallerThan900 ? "Stable APR" : "Stable APR"}
+          </Text>
+          <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
+            <Text display="inline-block" fontWeight="bold" fontSize="inherit">
+              {fixedNumberToPercentage(stableBorrowAPR, 4, 2)}%
             </Text>
           </Box>
         </Flex>
