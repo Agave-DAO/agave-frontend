@@ -36,9 +36,9 @@ export function bigNumberToString(
   decimalsTarget: BigNumberish = 2,
   assetDecimals: BigNumberish = 18
 ): string {
-  if (!input || input === null || input.isZero()) {
+  if (!input || input === null || (BigNumber.isBigNumber(input) && input.isZero())) {
     return "0";
-  } else if (input.gt("999999999999999999999999999999")) {
+  } else if (BigNumber.isBigNumber(input) && input.gt("999999999999999999999999999999")) {
     return "∞";
   }
   let decimalsTargetNum: number =

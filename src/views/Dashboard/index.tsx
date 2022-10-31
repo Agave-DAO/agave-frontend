@@ -44,13 +44,13 @@ export const Dashboard: React.FC<{}> = () => {
   // Borrow list
   const borrows = useUserStableAndVariableDebtTokenBalances();
   const borrowsAddress: string[] | undefined = borrows?.data
-    ?.filter(asset => !asset.balance.isZero())
+    ?.filter(asset => (BigNumber.isBigNumber(asset.balance) && !asset.balance.isZero()))
     .map(borrow => borrow.tokenAddress);
 
   // Deposit list
   const balances = useUserDepositAssetBalancesWithReserveInfo();
   const backingBalancesAddress = balances?.data
-    ?.filter(asset => !asset.balance.isZero())
+    ?.filter(asset => (asset.balance !== undefined &&  !asset.balance.isZero()))
     .map(a => a.reserve?.tokenAddress);
 
   const tokenAddresses = borrowsAddress
@@ -81,7 +81,7 @@ export const Dashboard: React.FC<{}> = () => {
   const nativeSymbols = useNativeSymbols();
   const borrowedList: AssetData[] = React.useMemo(() => {
     const assets =
-      borrows?.data?.filter(asset => !asset.balance.isZero()) ?? [];
+      borrows?.data?.filter(asset => (BigNumber.isBigNumber(asset.balance) && !asset.balance.isZero())) ?? [];
 
     return assets
       .map(asset => {
@@ -103,7 +103,7 @@ export const Dashboard: React.FC<{}> = () => {
 
   const depositedList: AssetData[] = React.useMemo(() => {
     const assets = (
-      balances?.data?.filter(asset => !asset.balance.isZero()) ?? []
+      balances?.data?.filter(asset => (BigNumber.isBigNumber(asset.balance) && !asset.balance.isZero())) ?? []
     ).map(a => ({ ...a, backingReserve: a.reserve }));
 
     return assets

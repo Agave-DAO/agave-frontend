@@ -144,7 +144,10 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   ) : (
     <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
   );
-  const collateral = reserveData?.usageAsCollateralEnabled ? "Yes" : "No";
+  const collateral = reserveData?.usageAsCollateralEnabled 
+    ? (ltv > 0) 
+      ? "Yes" : "No"
+    : "No";
   const stable = reserveData?.stableBorrowRateEnabled ? "Yes" : "No";
 
   // ** Media Quieries
