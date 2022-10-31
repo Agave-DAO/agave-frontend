@@ -38,7 +38,7 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
     assetOrAddress: string | NATIVE_TOKEN | undefined,
     _p3: "balance"
   ],
-  [assetOrAddress: string | NATIVE_TOKEN| ReserveOrNativeTokenDefinition]
+  [assetOrAddress: string | NATIVE_TOKEN | ReserveOrNativeTokenDefinition]
 >(
   async (params, assetOrAddress) => {
     assetOrAddress = selectReserveTokenAddress(assetOrAddress);
@@ -46,10 +46,7 @@ export const useUserAssetBalance = buildQueryHookWhenParamsDefinedChainAddrs<
     if (assetOrAddress === NATIVE_TOKEN) {
       return await params.library.getBalance(params.account);
     }
-    const asset = Erc20abi__factory.connect(
-      assetOrAddress,
-      params.library
-    );
+    const asset = Erc20abi__factory.connect(assetOrAddress, params.library);
 
     return await asset.balanceOf(params.account);
   },
@@ -96,6 +93,49 @@ export const useUserAssetAllowance = buildQueryHookWhenParamsDefinedChainAddrs<
   }
 );
 
+export const useUserStableAndVariableDebtForAsset =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    { stableDebt: BigNumber; variableDebt: BigNumber },
+    [_p1: "user", _p2: "asset", assetAddress: string | undefined, _p3: "debt"],
+    [assetAddress: string]
+  >(
+    async (params, assetAddress) => {
+      return useUserReserveData
+        .fetchQueryDefined(params, assetAddress)
+        .then(result => {
+          return {
+            variableDebt: result.currentVariableDebt,
+            stableDebt: result.currentStableDebt,
+          };
+        });
+    },
+    assetAddress => ["user", "asset", assetAddress, "debt"],
+    () => undefined,
+    {
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
+export const useUserStableDebtForAsset =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    BigNumber,
+    [_p1: "user", _p2: "asset", assetAddress: string | undefined, _p3: "debt"],
+    [assetAddress: string]
+  >(
+    async (params, assetAddress) => {
+      return useUserReserveData
+        .fetchQueryDefined(params, assetAddress)
+        .then(result => result.currentStableDebt);
+    },
+    assetAddress => ["user", "asset", assetAddress, "debt"],
+    () => undefined,
+    {
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
 export const useUserVariableDebtForAsset =
   buildQueryHookWhenParamsDefinedChainAddrs<
     BigNumber,
@@ -110,6 +150,64 @@ export const useUserVariableDebtForAsset =
     assetAddress => ["user", "asset", assetAddress, "debt"],
     () => undefined,
     {
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
+export const useUserStableAndVariableDebtTokenBalances =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    { symbol: string; tokenAddress: string; balance: BigNumber, borrowMode: number }[],
+    [_p1: "user", _p2: "allReserves", _p3: "debts"],
+    []
+  >(
+    async params => {
+      const reserves = await useAllReserveTokens.fetchQueryDefined(params);
+
+      const reservesWithStableAndVariableDebt = await Promise.all(
+        reserves.map(reserve =>
+          useUserStableAndVariableDebtForAsset
+            .fetchQueryDefined(params, reserve.tokenAddress)
+            .then(debt => [
+              { ...reserve, balance: debt.stableDebt, borrowMode: 1 },
+              { ...reserve, balance: debt.variableDebt, borrowMode: 2 },
+            ])
+        )
+      );
+      return reservesWithStableAndVariableDebt.flat();
+    },
+    () => ["user", "allReserves", "debts"],
+    () => undefined,
+    {
+      refetchOnMount: true,
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
+export const useUserStableDebtTokenBalances =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    { symbol: string; tokenAddress: string; balance: BigNumber }[],
+    [_p1: "user", _p2: "allReserves", _p3: "debts"],
+    []
+  >(
+    async params => {
+      const reserves = await useAllReserveTokens.fetchQueryDefined(params);
+
+      const reservesWithStableDebt = await Promise.all(
+        reserves.map(reserve =>
+          useUserStableDebtForAsset
+            .fetchQueryDefined(params, reserve.tokenAddress)
+            .then(debt => ({ ...reserve, balance: debt }))
+        )
+      );
+
+      return reservesWithStableDebt;
+    },
+    () => ["user", "allReserves", "debts"],
+    () => undefined,
+    {
+      refetchOnMount: true,
       staleTime: 2 * 60 * 1000,
       cacheTime: 60 * 60 * 1000,
     }
@@ -135,6 +233,114 @@ export const useUserVariableDebtTokenBalances =
       return reservesWithVariableDebt;
     },
     () => ["user", "allReserves", "debts"],
+    () => undefined,
+    {
+      refetchOnMount: true,
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
+export interface DebtTokenBalancesDaiWei {
+  symbol: string;
+  tokenAddress: string;
+  balance: BigNumber;
+  decimals: BigNumberish;
+  daiWeiPricePer: BigNumber | null;
+  daiWeiPriceTotal: BigNumber | null;
+  borrowMode: number;
+}
+
+export const useUserStableAndVariableDebtTokenBalancesDaiWei =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    DebtTokenBalancesDaiWei[],
+    [_p1: "user", _p2: "allReserves", _p3: "debts", _p4: "dai"],
+    []
+  >(
+    async params => {
+      const reserves =
+        await useUserStableAndVariableDebtTokenBalances.fetchQueryDefined(
+          params
+        );
+      const withDaiPrices = await Promise.all(
+        reserves.map(reserve =>
+          Promise.all([
+            useAssetPriceInDaiWei.fetchQueryDefined(
+              params,
+              reserve.tokenAddress
+            ),
+            useDecimalCountForToken.fetchQueryDefined(
+              params,
+              reserve.tokenAddress
+            ),
+          ]).then(([daiPricePerToken, decimals]) => ({
+            ...reserve,
+            daiWeiPricePer: daiPricePerToken,
+            daiWeiPriceTotal:
+              daiPricePerToken
+                ?.mul(reserve.balance)
+                .div(weiPerToken(decimals)) ?? null,
+            decimals,
+          }))
+        )
+      );
+
+      return withDaiPrices;
+    },
+    () => ["user", "allReserves", "debts", "dai"],
+    () => undefined,
+    {
+      refetchOnMount: true,
+      staleTime: 2 * 60 * 1000,
+      cacheTime: 60 * 60 * 1000,
+    }
+  );
+
+export interface StableDebtTokenBalancesDaiWei {
+  symbol: string;
+  tokenAddress: string;
+  balance: BigNumber;
+  decimals: BigNumberish;
+  daiWeiPricePer: BigNumber | null;
+  daiWeiPriceTotal: BigNumber | null;
+}
+
+export const useUserStableDebtTokenBalancesDaiWei =
+  buildQueryHookWhenParamsDefinedChainAddrs<
+    StableDebtTokenBalancesDaiWei[],
+    [_p1: "user", _p2: "allReserves", _p3: "debts", _p4: "dai"],
+    []
+  >(
+    async params => {
+      const reserves = await useUserStableDebtTokenBalances.fetchQueryDefined(
+        params
+      );
+      const withDaiPrices = await Promise.all(
+        reserves.map(reserve =>
+          Promise.all([
+            useAssetPriceInDaiWei.fetchQueryDefined(
+              params,
+              reserve.tokenAddress
+            ),
+            useDecimalCountForToken.fetchQueryDefined(
+              params,
+              reserve.tokenAddress
+            ),
+          ]).then(([daiPricePerToken, decimals]) => ({
+            ...reserve,
+            daiWeiPricePer: daiPricePerToken,
+            daiWeiPriceTotal:
+              daiPricePerToken
+                ?.mul(reserve.balance)
+                .div(weiPerToken(decimals)) ?? null,
+            decimals,
+          }))
+        )
+      );
+
+      return withDaiPrices;
+    },
+    () => ["user", "allReserves", "debts", "dai"],
     () => undefined,
     {
       refetchOnMount: true,

@@ -11,9 +11,9 @@ import {
   useUserDepositAssetBalancesDaiWei,
   useUserReserveAssetBalances,
   useUserReserveAssetBalancesDaiWei,
-  useUserVariableDebtForAsset,
-  useUserVariableDebtTokenBalances,
-  useUserVariableDebtTokenBalancesDaiWei,
+  useUserStableAndVariableDebtForAsset,
+  useUserStableAndVariableDebtTokenBalances,
+  useUserStableAndVariableDebtTokenBalancesDaiWei,
 } from "../queries/userAssets";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { NATIVE_TOKEN } from "../queries/allReserveTokens";
@@ -23,6 +23,7 @@ import { useLendingReserveData } from "../queries/lendingReserveData";
 export interface UseRepayMutationProps {
   asset: string | NATIVE_TOKEN | undefined;
   amount: BigNumber;
+  borrowMode: number;
 }
 
 export interface UseRepayMutationDto {
@@ -43,6 +44,7 @@ export interface UseRepayMutationDto {
 export const useRepayMutation = ({
   asset,
   amount,
+  borrowMode,
 }: UseRepayMutationProps): UseRepayMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
@@ -64,10 +66,11 @@ export const useRepayMutation = ({
     asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
     "0x00"
   );
-  const variableDebtQueryKey = useUserVariableDebtTokenBalances.buildKey(
-    chainId ?? undefined,
-    account ?? undefined
-  );
+  const variableDebtQueryKey =
+    useUserStableAndVariableDebtTokenBalances.buildKey(
+      chainId ?? undefined,
+      account ?? undefined
+    );
 
   const debtQueryKey = ["user", "allReserves", "debt"] as const;
   const repayMutationKey = [...debtQueryKey, amount] as const;
@@ -85,9 +88,7 @@ export const useRepayMutation = ({
         return undefined;
       }
       let repay;
-      // TODO: Note that `rateMode` is fixed to 2 (variable)
-      // since we don't expect to support stable rates in v1
-      const rateMode = 2;
+      const rateMode = borrowMode;
       if (asset === NATIVE_TOKEN) {
         const gatewayContract = WETHGateway__factory.connect(
           chainAddresses.wrappedNativeGateway,
@@ -133,8 +134,11 @@ export const useRepayMutation = ({
                   useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
                   useUserReserveAssetBalances.buildKey(chainId, account),
                   useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
-                  useUserVariableDebtTokenBalances.buildKey(chainId, account),
-                  useUserVariableDebtTokenBalancesDaiWei.buildKey(
+                  useUserStableAndVariableDebtTokenBalances.buildKey(
+                    chainId,
+                    account
+                  ),
+                  useUserStableAndVariableDebtTokenBalancesDaiWei.buildKey(
                     chainId,
                     account
                   ),

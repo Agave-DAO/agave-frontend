@@ -22,7 +22,7 @@ import {
 import { useUserAccountData } from "../../queries/userAccountData";
 import {
   useUserAssetBalance,
-  useUserVariableDebtForAsset,
+  useUserStableAndVariableDebtForAsset,
 } from "../../queries/userAssets";
 import { fontSizes, spacings } from "../../utils/constants";
 import { CollateralComposition } from "../../components/Chart/CollateralComposition";
@@ -36,34 +36,41 @@ import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
 export type RepayDashProps = {
   token: Readonly<ReserveOrNativeTokenDefinition>;
+  borrowMode: number;
 };
 
 type RepayDashReserveProps = {
   token: Readonly<ReserveTokenDefinition>;
+  borrowMode: number;
 };
 
 type RepayDashNativeProps = {
   token: Readonly<NativeTokenDefinition>;
+  borrowMode: number;
 };
 
 type RepayDashLayoutProps = {
   token: Readonly<ExtendedReserveTokenDefinition> | undefined;
   tokenBalance: BigNumber | undefined;
   native?: Readonly<NativeTokenDefinition>;
+  borrowMode: number;
 };
 
-export const RepayDash: React.FC<RepayDashProps> = ({ token }) =>
+export const RepayDash: React.FC<RepayDashProps> = ({ token, borrowMode }) =>
   React.useMemo(
     () =>
       isReserveTokenDefinition(token) ? (
-        <RepayDashReserve token={token} />
+        <RepayDashReserve token={token} borrowMode={borrowMode} />
       ) : (
-        <RepayDashNative token={token} />
+        <RepayDashNative token={token} borrowMode={borrowMode} />
       ),
     [token]
   );
 
-const RepayDashReserve: React.FC<RepayDashReserveProps> = ({ token }) => {
+const RepayDashReserve: React.FC<RepayDashReserveProps> = ({
+  token,
+  borrowMode,
+}) => {
   const { data: reserves } = useAllReserveTokensWithData();
   const reserve = React.useMemo(
     () =>
@@ -76,10 +83,19 @@ const RepayDashReserve: React.FC<RepayDashReserveProps> = ({ token }) => {
     [reserves, token.tokenAddress]
   );
   const { data: tokenBalance } = useUserAssetBalance(reserve?.tokenAddress);
-  return <RepayDashLayout token={reserve} tokenBalance={tokenBalance} />;
+  return (
+    <RepayDashLayout
+      token={reserve}
+      tokenBalance={tokenBalance}
+      borrowMode={borrowMode}
+    />
+  );
 };
 
-const RepayDashNative: React.FC<RepayDashNativeProps> = ({ token }) => {
+const RepayDashNative: React.FC<RepayDashNativeProps> = ({
+  token,
+  borrowMode,
+}) => {
   const { data: reserves } = useAllReserveTokensWithData();
   const { data: tokenBalance } = useUserAssetBalance(token);
   const { data: wrappedNative } = useWrappedNativeDefinition();
@@ -100,6 +116,7 @@ const RepayDashNative: React.FC<RepayDashNativeProps> = ({ token }) => {
       token={reserve}
       tokenBalance={tokenBalance}
       native={token}
+      borrowMode={borrowMode}
     />
   );
 };
@@ -108,12 +125,15 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
   token,
   tokenBalance,
   native,
+  borrowMode,
 }) => {
   // General
   const { account: userAccountAddress } = useAppWeb3();
   // Debts
-  const { data: debt } = useUserVariableDebtForAsset(token?.tokenAddress);
-
+  const { data: debts } = useUserStableAndVariableDebtForAsset(
+    token?.tokenAddress
+  );
+  const debt = borrowMode === 1 ? debts?.stableDebt : debts?.variableDebt;
   // User account data and balances
   const { data: userAccountData } = useUserAccountData(
     userAccountAddress ?? undefined
@@ -179,6 +199,23 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
               {bigNumberToString(tokenBalance, 4, decimals)}
             </Text>
             {isSmallerThan400 ? null : " " + symbol}
+          </Box>
+        </Flex>
+        <Flex
+          w="30%"
+          spacing={spacings.md}
+          mr={{ base: "0rem", md: "1rem" }}
+          alignItems={{ base: "flex-start", lg: "center" }}
+          justifyContent="flex-start"
+          flexDirection={{ base: "column", lg: "row" }}
+        >
+          <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }} pr="1rem">
+            Borrow Mode
+          </Text>
+          <Box fontSize={{ base: fontSizes.md, md: fontSizes.lg }}>
+            <Text display="inline-block" fontWeight="bold" fontSize="inherit">
+              {borrowMode === 1 ? "Stable" : "Variable"}
+            </Text>
           </Box>
         </Flex>
         <Flex

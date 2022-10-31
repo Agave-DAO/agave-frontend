@@ -10,7 +10,7 @@ import {
   ReserveOrNativeTokenDefinition,
   useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
-import { Box, Center, Text } from "@chakra-ui/react";
+import { Box, Center, Checkbox, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
@@ -36,6 +36,8 @@ import {
 import { useLendingReserveData } from "../../queries/lendingReserveData";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
+import { fontSizes } from "../../utils/constants";
+import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
@@ -45,7 +47,11 @@ interface AmountSelectedState extends InitialState {
   amountToBorrow: BigNumber;
 }
 
-interface BorrowTXState extends AmountSelectedState {
+interface ModeSelectedState extends AmountSelectedState {
+  interestRateMode: BigNumber;
+}
+
+interface BorrowTXState extends ModeSelectedState {
   // approvalTXHash: string | undefined;
 }
 
@@ -56,6 +62,7 @@ interface BorrowedTXState extends BorrowTXState {
 type BorrowState = OneTaggedPropertyOf<{
   init: InitialState;
   amountSelected: AmountSelectedState;
+  modeSelected: ModeSelectedState;
   borrowTx: BorrowTXState;
   borrowedTx: BorrowedTXState;
 }>;
@@ -73,13 +80,15 @@ function createState<SelectedState extends PossibleTags<BorrowState>>(
 // THIS BorrowState IS ALL WRONG AND NEEDS FIXING WHEN THE QUERIES ARE DONE
 const stateNames: Record<PossibleTags<BorrowState>, string> = {
   init: "Token",
-  amountSelected: "Delegate",
+  amountSelected: "Mode",
+  modeSelected: "Delegate",
   borrowTx: "Borrow",
   borrowedTx: "Borrowed",
 };
 
 const visibleStateNames: ReadonlyArray<PossibleTags<BorrowState>> = [
   "amountSelected",
+  "modeSelected",
   "borrowTx",
   "borrowedTx",
 ] as const;
@@ -127,9 +136,7 @@ const InitialComp: React.FC<{
       : userAssetMaxAvailable;
   const onSubmit = React.useCallback(
     amountToBorrow => {
-      isReserveTokenDefinition(state.token)
-        ? dispatch(createState("borrowTx", { amountToBorrow, ...state }))
-        : dispatch(createState("amountSelected", { amountToBorrow, ...state }));
+      dispatch(createState("amountSelected", { amountToBorrow, ...state }));
     },
     [state, dispatch]
   );
@@ -147,6 +154,89 @@ const InitialComp: React.FC<{
 
 const AmountSelectedComp: React.FC<{
   state: AmountSelectedState;
+  dispatch: (nextState: BorrowState) => void;
+}> = ({ state, dispatch }) => {
+  const { data: wNative } = useWrappedNativeDefinition();
+  const asset =
+    state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
+  const reserveData = useProtocolReserveConfiguration(
+    asset?.tokenAddress
+  )?.data;
+  const { stableBorrowRateEnabled } = reserveData ?? {};
+
+  const [interestRateMode, setInterestRateMode] = React.useState<number>(2);
+
+  const onSubmit = React.useCallback(() => {
+    isReserveTokenDefinition(state.token)
+      ? dispatch(
+          createState("borrowTx", {
+            interestRateMode: BigNumber.from(interestRateMode),
+            ...state,
+          })
+        )
+      : dispatch(
+          createState("modeSelected", {
+            interestRateMode: BigNumber.from(interestRateMode),
+            ...state,
+          })
+        );
+    // TODO: Switch to an error-display state that returns to init
+  }, [interestRateMode, state, dispatch]);
+
+  const currentStep: PossibleTags<BorrowState> = "amountSelected";
+  const stepperBar = React.useMemo(
+    () => (
+      <StepperBar
+        states={visibleStateNames}
+        currentState={currentStep}
+        stateNames={stateNames}
+      />
+    ),
+    [currentStep]
+  );
+
+  const borrowModeCheckbox = React.useMemo(
+    () => (
+      <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
+        <Checkbox
+          size="lg"
+          colorScheme="orange"
+          onChange={event => setInterestRateMode(event.target.checked ? 2 : 1)}
+          defaultChecked={true}
+          isDisabled={
+            !stableBorrowRateEnabled ||
+            state.token.tokenAddress === NATIVE_TOKEN
+          }
+        >
+          Variable Borrowing
+        </Checkbox>
+      </Text>
+    ),
+    [currentStep, setInterestRateMode]
+  );
+  return (
+    <WizardOverviewWrapper
+      title={BorrowTitle}
+      amount={state.amountToBorrow}
+      asset={state.token}
+      collateral={true}
+      increase={true}
+    >
+      {stepperBar}
+      <ControllerItem
+        stepNumber={1}
+        stepName="Mode"
+        actionName="Confirm"
+        onActionClick={onSubmit}
+        totalSteps={visibleStateNames.length}
+        childComponent={borrowModeCheckbox}
+      />
+    </WizardOverviewWrapper>
+  );
+};
+
+const ModeSelectedComp: React.FC<{
+  state: ModeSelectedState;
   dispatch: (nextState: BorrowState) => void;
 }> = ({ state, dispatch }) => {
   const chainAddresses = useChainAddresses();
@@ -167,9 +257,12 @@ const AmountSelectedComp: React.FC<{
     mutateAsync()
       .then(() => dispatch(createState("borrowTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
+      .catch(e => {
+        console.log(state);
+        dispatch(createState("init", { token: state.token }));
+      });
   }, [state, dispatch, mutateAsync]);
-  const currentStep: PossibleTags<BorrowState> = "amountSelected";
+  const currentStep: PossibleTags<BorrowState> = "modeSelected";
   const stepperBar = React.useMemo(
     () => (
       <StepperBar
@@ -190,7 +283,7 @@ const AmountSelectedComp: React.FC<{
     >
       {stepperBar}
       <ControllerItem
-        stepNumber={1}
+        stepNumber={2}
         stepName="Delegate"
         stepDesc="Submit to delegate approval to WETHGateway"
         actionName="Approve"
@@ -217,9 +310,11 @@ const BorrowTxComp: React.FC<{
       asset: state.token.tokenAddress,
       amount: state.amountToBorrow,
       onBehalfOf: account ?? undefined,
+      interestRateMode: state.interestRateMode,
     }),
     [state, account]
   );
+
   const {
     borrowMutation: { mutateAsync },
   } = useBorrowMutation(borrowArgs);
@@ -227,7 +322,9 @@ const BorrowTxComp: React.FC<{
     mutateAsync()
       .then(() => dispatch(createState("borrowedTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
-      .catch(e => dispatch(createState("init", state)));
+      .catch(e => {
+        dispatch(createState("init", { token: state.token }));
+      });
   }, [state, dispatch, mutateAsync]);
   const currentStep: PossibleTags<BorrowState> = "borrowTx";
   const stepperBar = React.useMemo(
@@ -250,7 +347,7 @@ const BorrowTxComp: React.FC<{
     >
       {stepperBar}
       <ControllerItem
-        stepNumber={1}
+        stepNumber={3}
         stepName="Borrow"
         stepDesc="Please submit to borrow"
         actionName="Borrow"
@@ -288,7 +385,7 @@ const BorrowedTxComp: React.FC<{
     >
       {stepperBar}
       <ControllerItem
-        stepNumber={2}
+        stepNumber={4}
         stepName="Borrowed"
         stepDesc={`Borrow of ${bigNumberToString(
           state.amountToBorrow,
@@ -313,6 +410,10 @@ const BorrowStateMachine: React.FC<{
     case "amountSelected":
       return (
         <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
+      );
+    case "modeSelected":
+      return (
+        <ModeSelectedComp state={state.modeSelected} dispatch={setState} />
       );
     case "borrowTx":
       return <BorrowTxComp state={state.borrowTx} dispatch={setState} />;

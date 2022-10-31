@@ -24,7 +24,7 @@ import {
 } from "../../utils/propertyCalculator";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { bigNumberToString } from "../../utils/fixedPoint";
-import { useUserVariableDebtForAsset } from "../../queries/userAssets";
+import { useUserStableAndVariableDebtForAsset } from "../../queries/userAssets";
 
 /** INTRO SECTION */
 export const DashOverviewIntro: React.FC<{
@@ -34,7 +34,8 @@ export const DashOverviewIntro: React.FC<{
   amount: BigNumber | undefined;
   setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
   balance: BigNumber | undefined;
-}> = ({ asset, mode, onSubmit, amount, setAmount, balance }) => {
+  borrowMode?: number;
+}> = ({ asset, mode, onSubmit, amount, setAmount, balance, borrowMode }) => {
   const { data: decimals } = useDecimalCountForToken(asset.tokenAddress);
   const { data: wNative } = useWrappedNativeDefinition();
   const tokenAddress =
@@ -77,8 +78,10 @@ export const DashOverviewIntro: React.FC<{
     minSafeHF
   );
 
-  const borrowedAmount = useUserVariableDebtForAsset(tokenAddress).data;
+  const debts = useUserStableAndVariableDebtForAsset(tokenAddress).data;
 
+  const borrowedAmount =
+    borrowMode === 1 ? debts?.stableDebt : debts?.variableDebt;
   const limitAmount =
     mode === "withdraw" || mode === "borrow"
       ? balance && maxAmount?.lt(balance)

@@ -3,7 +3,7 @@ import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
 import {
   useUserDepositAssetBalancesDaiWei,
-  useUserVariableDebtTokenBalancesDaiWei,
+  useUserStableAndVariableDebtTokenBalancesDaiWei,
 } from "../queries/userAssets";
 import {
   useAllReserveTokensWithConfiguration,
@@ -29,7 +29,8 @@ export function useAllAssetsData() {
   const { data: userDepositAssetBalancesDaiWei } =
     useUserDepositAssetBalancesDaiWei();
   const { data: userVariableDebtTokenBalancesDaiWei } =
-    useUserVariableDebtTokenBalancesDaiWei();
+    useUserStableAndVariableDebtTokenBalancesDaiWei();
+  console.log(userVariableDebtTokenBalancesDaiWei)
 
   const assetsData = reserveTokens?.map((t: ReserveTokensConfiguration) => {
     const totalBorrowedForAsset = userVariableDebtTokenBalancesDaiWei?.find(
