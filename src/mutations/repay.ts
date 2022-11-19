@@ -11,14 +11,12 @@ import {
   useUserDepositAssetBalancesDaiWei,
   useUserReserveAssetBalances,
   useUserReserveAssetBalancesDaiWei,
-  useUserStableAndVariableDebtForAsset,
   useUserStableAndVariableDebtTokenBalances,
   useUserStableAndVariableDebtTokenBalancesDaiWei,
 } from "../queries/userAssets";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { NATIVE_TOKEN } from "../queries/allReserveTokens";
 import { useWrappedNativeDefinition } from "../queries/wrappedNativeAddress";
-import { useLendingReserveData } from "../queries/lendingReserveData";
 
 export interface UseRepayMutationProps {
   asset: string | NATIVE_TOKEN | undefined;
@@ -121,7 +119,6 @@ export const useRepayMutation = ({
     },
     {
       onSuccess: async (unitAmountResult, vars, context) => {
-        const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
         await Promise.allSettled([
           queryClient.invalidateQueries(variableDebtQueryKey),
           queryClient.invalidateQueries(allowanceQueryKey),

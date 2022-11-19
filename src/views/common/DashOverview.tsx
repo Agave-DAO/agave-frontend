@@ -10,7 +10,6 @@ import {
   LINEAR_GRADIENT_BG,
   MIN_SAFE_HEALTH_FACTOR,
   MINIMUM_NATIVE_RESERVE,
-  MAX_INT256,
   MAX_UINT256,
 } from "../../utils/constants";
 import {
@@ -23,7 +22,6 @@ import {
   useNewHealthFactorCalculator,
 } from "../../utils/propertyCalculator";
 import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
-import { bigNumberToString } from "../../utils/fixedPoint";
 import { useUserStableAndVariableDebtForAsset } from "../../queries/userAssets";
 
 /** INTRO SECTION */

@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, Spinner } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import { useProtocolReserveData } from "../../queries/protocolReserveData";
 import { fixedNumberToPercentage } from "../../utils/fixedPoint";
 import { PercentageView } from "./PercentageView";

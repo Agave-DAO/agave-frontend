@@ -5,16 +5,15 @@ import { useHistory, useRouteMatch } from "react-router-dom";
 import { WithdrawDash } from "./WithdrawDash";
 import { DashOverviewIntro } from "../common/DashOverview";
 import {
-  isNativeTokenDefinition,
   isReserveTokenDefinition,
   NATIVE_TOKEN,
   ReserveOrNativeTokenDefinition,
-  ReserveTokenDefinition,
   useTokenDefinitionBySymbol,
 } from "../../queries/allReserveTokens";
 import { Box, Center, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
-import { BigNumber, constants } from "ethers";
+import { BigNumber } from "ethers";
+// import { constants } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import { useUserAssetBalance } from "../../queries/userAssets";
 import { bigNumberToString } from "../../utils/fixedPoint";
@@ -365,7 +364,6 @@ export const WithdrawDetail: React.FC = () => {
   const {
     allReserves,
     token: asset,
-    wrappedNativeToken,
   } = useTokenDefinitionBySymbol(assetName);
   if (!asset) {
     return (

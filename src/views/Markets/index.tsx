@@ -23,7 +23,7 @@ import {
   fixedNumberToPercentage,
   bigNumberToString,
 } from "../../utils/fixedPoint";
-import { BigNumber, constants, FixedNumber } from "ethers";
+import { BigNumber, FixedNumber } from "ethers";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAllReserveTokensWithData } from "../../queries/lendingReserveData";
 import { CellProps, Column, Renderer } from "react-table";
@@ -47,7 +47,6 @@ import { ModalIcon } from "../../utils/icons";
 import { useDisclosure } from "@chakra-ui/hooks";
 import {
   TargetedTokenData,
-  useKpiTokensAPY,
   useRewardTokensAPY,
 } from "../../queries/rewardTokens";
 import {

@@ -7,7 +7,6 @@ import { useProtocolReserveData } from "./protocolReserveData";
 import { useAllReserveTokensWithData } from "./lendingReserveData";
 import { useAssetPriceInDaiWei } from "./assetPriceInDai";
 import { useDecimalCountForToken } from "./decimalsForToken";
-import { bigNumberToString } from "../utils/fixedPoint";
 import { useTotalMarketSize } from "./marketSize";
 
 export interface RewardTokenData {

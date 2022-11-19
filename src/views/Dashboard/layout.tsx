@@ -24,7 +24,7 @@ import { isMobileOnly } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
 import { DashboardTable, DashboardTableType } from "./table";
 import { DashboardEmptyState } from "./emptyState";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { AssetData } from ".";
 import { useUserDepositAssetBalancesDaiWei } from "../../queries/userAssets";
 import { BigNumber, constants, ethers } from "ethers";
@@ -32,7 +32,6 @@ import { useUserAccountData } from "../../queries/userAccountData";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import gnoagave from "../../assets/image/gnoagave.png";
-import carrot from "../../assets/image/carrot.png";
 import { useClaimRewardsMutation } from "../../mutations/claimRewards";
 import { useAllProtocolTokens } from "../../queries/allATokens";
 import { useUserRewards } from "../../queries/rewardTokens";
@@ -77,18 +76,18 @@ const ClaimRewardsBox: React.FC<{}> = () => {
     [claimRewardsMutation, w3.library]
   );
 
-  const spin = keyframes`
-  0% {transform: rotate(0deg);}
-  50% {transform: rotate(40deg);}
-  100% {transform: rotate(0deg)}
-`;
+  // const spin = keyframes`
+  // 0% {transform: rotate(0deg);}
+  // 50% {transform: rotate(40deg);}
+  // 100% {transform: rotate(0deg)}
+  // `;
   const bounce = keyframes`
 0%, 20%, 40%, 60%, 80%, 100% {transform: translateX(0);}
 20% {transform: translateY(3px);}
 80% {transform: translateY(-3px);}
 `;
 
-  const spinAnimation = `${spin} infinite 2.5s linear`;
+  // const spinAnimation = `${spin} infinite 2.5s linear`;
   const bounceAnimation = `${bounce} infinite 2.5s linear`;
 
   const rewardsBalance = useUserRewards().data;
@@ -109,6 +108,7 @@ const ClaimRewardsBox: React.FC<{}> = () => {
     >
       <a
         href="https://gnosis.symm.fi/#/pool/0x870bb2c024513b5c9a69894dcc65fb5c47e422f3000200000000000000000014"
+        rel="noreferrer"
         target="_blank"
       >
         <Image

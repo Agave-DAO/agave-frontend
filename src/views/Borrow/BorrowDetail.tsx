@@ -14,7 +14,6 @@ import { Box, Center, Checkbox, Text } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
-import { formatEther } from "ethers/lib/utils";
 import { ControllerItem } from "../../components/ControllerItem";
 import {
   useBorrowMutation,

@@ -5,17 +5,15 @@ import {
   Spinner,
   Switch,
   Tooltip,
-  useMediaQuery,
 } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import React from "react";
-import { isMobile, isDesktop } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 import { Link, useHistory } from "react-router-dom";
-import { CellProps, Column, Renderer, useRowSelect } from "react-table";
+import { CellProps, Column, Renderer } from "react-table";
 import { AssetData } from ".";
 import ColoredText from "../../components/ColoredText";
 import { useCollateralModeMutation } from "../../mutations/collateralMode";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useUserReserveData } from "../../queries/protocolReserveData";
 import { fontSizes } from "../../utils/constants";
 import {

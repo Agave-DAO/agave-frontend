@@ -22,10 +22,7 @@ import { WeiBox } from "../../components/Actions/WeiBox";
 import { fontSizes } from "../../utils/constants";
 import { TokenIcon } from "../../utils/icons";
 import { SettingsIcon } from "@chakra-ui/icons";
-import {
-  bigNumberToString,
-  fixedNumberToPercentage,
-} from "../../utils/fixedPoint";
+import { bigNumberToString } from "../../utils/fixedPoint";
 import { ColoredText } from "../../components/ColoredText";
 
 const animationKeyframes = keyframes`
@@ -152,7 +149,7 @@ const InfoWeiBox: React.FC<
           {balance &&
             FixedNumber.fromValue(balance, decimals)
             .toString()
-            .slice(0, ((FixedNumber.fromValue(balance, decimals).toString().indexOf(".") == 1) ? 8 : FixedNumber.fromValue(balance, decimals).toString().indexOf(".")+3))}
+            .slice(0, ((FixedNumber.fromValue(balance, decimals).toString().indexOf(".") === 1) ? 8 : FixedNumber.fromValue(balance, decimals).toString().indexOf(".")+3))}
             {" "}
           {currency}
         </Text>

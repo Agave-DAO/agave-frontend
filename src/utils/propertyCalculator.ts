@@ -1,5 +1,5 @@
 import React from "react";
-import { BigNumber, FixedNumber } from "@ethersproject/bignumber";
+import { BigNumber } from "@ethersproject/bignumber";
 import { constants } from "ethers";
 import {
   useUserDepositAssetBalancesDaiWei,

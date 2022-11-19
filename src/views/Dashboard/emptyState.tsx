@@ -2,7 +2,7 @@ import React, { MouseEventHandler } from "react";
 import { Button, Center, CenterProps } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
-import { isMobile, isDesktop } from "react-device-detect";
+import { isDesktop } from "react-device-detect";
 
 export const EMPTY_TYPE = {
   Deposit: "Deposit",

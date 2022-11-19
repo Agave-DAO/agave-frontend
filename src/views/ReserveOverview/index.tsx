@@ -7,7 +7,7 @@ import ColoredText from "../../components/ColoredText";
 import { Button } from "@chakra-ui/button";
 import { Center, Container, Flex } from "@chakra-ui/react";
 import { useNativeSymbols } from "../../utils/icons";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
+
 /*
 Agave Asset Page Notes | React Template Edited by Pauly Sun 🌞 July 15th, 2021 
 ✔ Completed Seperated & Rebuilt Component Tree | July 7th, 2021

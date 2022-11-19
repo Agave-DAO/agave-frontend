@@ -33,7 +33,6 @@ import {
 import { round2Fixed } from "../../utils/helpers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon } from "../../utils/icons";
-import { BigNumber } from "ethers";
 
 const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
   asset,

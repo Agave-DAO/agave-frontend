@@ -2,7 +2,6 @@ import React from "react";
 
 import { BigNumber } from "@ethersproject/bignumber";
 import {
-  useUserReserveAssetBalancesDaiWei,
   ReserveAssetBalancesDaiWei,
   useUserDepositAssetBalancesDaiWei,
 } from "../queries/userAssets";
