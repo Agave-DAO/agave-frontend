@@ -26,6 +26,8 @@ import { RepayDetail } from "./views/Repay/RepayDetail";
 // import InterestSwap from './views/InterestSwap';
 import { Staking } from "./views/Staking";
 import { StakingBanner } from "./views/Staking/layout";
+import { Swapper } from "./views/Swapper";
+import { SwapperBanner } from "./views/Swapper/layout";
 import "react-notifications-component/dist/theme.css";
 import "./App.css";
 //import "animate.css/animate.min.css";
@@ -123,6 +125,7 @@ const App: React.FC<IAppProps> = props => {
 				        <Route path="/withdraw"><WithdrawBanner/></Route>
                 <Route path="/repay"><RepayBanner/></Route>
                 <Route path="/reserve-overview/:assetName" ><ReserveBanner/></Route>
+                <Route path="/swap"><SwapperBanner/></Route>
               </Switch>
             }
           >
@@ -142,6 +145,7 @@ const App: React.FC<IAppProps> = props => {
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
               {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
               <Route path="/stake" component={Staking} />
+              <Route path="/swap" component={Swapper} />
               <Redirect from="/" to="/markets" />
             </Switch>
           </Layout>

@@ -15,6 +15,8 @@ export interface StrongTypedChainAddresses<
 
   readonly incentivesController: string;
 
+  readonly swapperCoordinator: string;
+
   readonly explorer?: string | undefined;
   readonly rpcUrl?: string | undefined;
 }
@@ -51,6 +53,8 @@ export const internalAddressesPerNetwork: Record<
     walletBalanceProvider: "",
     incentivesController: "",
 
+    swapperCoordinator: "",
+
     explorer: "https://rinkeby.etherscan.io",
   },
   Gnosis: {
@@ -67,6 +71,8 @@ export const internalAddressesPerNetwork: Record<
     wrappedNativeGateway: "0x36A644cC38Ae257136EEca5919800f364d73FeFC",
 
     incentivesController: "0xfa255f5104f129B78f477e9a6D050a02f31A5D86",
+
+    swapperCoordinator: "0x6d09B58230be2E721EeD4E116b352Bb5050910E5",
 
     explorer: "https://blockscout.com/xdai/mainnet",
     rpcUrl: "https://rpc.gnosischain.com/",

@@ -19,6 +19,9 @@ export const Links: React.FC<{}> = () => {
       <NavTabLink exact to="/stake">
         STAKE
       </NavTabLink>
+      <NavTabLink exact to="/swap">
+        SWAP
+      </NavTabLink>
     </>
   );
 };
