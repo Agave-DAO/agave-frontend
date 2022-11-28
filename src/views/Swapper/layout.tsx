@@ -1,8 +1,15 @@
 import { Box, Button, Center, Flex, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
-import { isDesktop } from "react-device-detect";
-import { useAppWeb3 } from "../../hooks/appWeb3";
+import { getUserProxyAddress } from "../../queries/userProxy";
+
+export interface UserProxyLayoutProps  {
+  userProxyResult: () => any;
+}
+
+export function createProxyAddress() {
+  console.log('function called');
+}
 
 export const SwapperBanner: React.FC<{}> = props => {
     return (
@@ -19,17 +26,16 @@ export const SwapperBanner: React.FC<{}> = props => {
                     fontWeight="normal"
                     color="white"
                 >
-                    No proxy contract
+                    
                 </Text>
             </Center>
         </>
     );
 }
 
-export const CreateProxyLayout: React.FC<{}> = props => {
-    
-    const address: string | undefined = useAppWeb3().account ?? undefined;
-    return (
+export const CreateProxyLayout: React.FC<UserProxyLayoutProps> = props => {
+
+  return (
         <Center
         w={ "100%"}
         boxSizing="content-box"
@@ -65,6 +71,7 @@ export const CreateProxyLayout: React.FC<{}> = props => {
             h="40px"
             margin="10px"
             padding="20px"
+            onClick={createProxyAddress}
           >
             Create proxy contract
           </Button>
@@ -76,10 +83,15 @@ export const CreateProxyLayout: React.FC<{}> = props => {
 
 
 
-export const SwapperLayout: React.FC<{}> = props => {
-    return (
-        <>
-            <CreateProxyLayout />
-        </>
-    );
+export const ProxyLayout: React.FC<UserProxyLayoutProps> = ({
+  userProxyResult
+}:any) => {
+  const proxyAddress = getUserProxyAddress()['data'];
+  console.log('userProxyResult',userProxyResult);
+  return (
+      <>
+          ProxyAddress: {proxyAddress}
+      </>
+  );
 }
+
