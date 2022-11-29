@@ -1,5 +1,5 @@
 import React from "react";
-import { CreateProxyLayout, ProxyLayout } from "./layout";
+import { CreateProxyLayout, ProxyLayout, WaitingLayout, ErrorLayout } from "./layout";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { getUserProxyAddress} from "../../queries/userProxy";
 import { useUserProxyMutation } from "../../mutations/userProxy"
@@ -28,18 +28,20 @@ export const Swapper: React.FC<{}> = props => {
 
     if (proxyAddress === undefined) {
         return (
-            <>
-                Please wait
-            </>
-        )
+            <WaitingLayout />
+        );
     } else if (proxyAddress === '0x0000000000000000000000000000000000000000') {
         return (
             <CreateProxyLayout mutationCall={userProxyMutationCall}/>
         );
+    } else if (proxyAddress.slice(0,2) != '0x') {
+        return (
+            <ErrorLayout />
+        );
     } else {
         return (
             <ProxyLayout />
-        );
+        );       
     }
   };
 

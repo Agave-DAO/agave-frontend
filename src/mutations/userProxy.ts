@@ -4,9 +4,6 @@ import { SwapperCoordinator__factory } from "../contracts";
 import { Account, ChainId } from "../utils/queryBuilder";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { getChainAddresses } from "../utils/chainAddresses";
-import { useAppWeb3 } from "../hooks/appWeb3";
-import { BigNumber } from "@ethersproject/bignumber";
-import { ContractTransaction } from "ethers";
 import { usingProgressNotification } from "../utils/progressNotification";
 
 export interface UserProxyMutationProps {

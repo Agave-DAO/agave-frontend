@@ -1,16 +1,14 @@
-import { Box, Button, Center, Flex, Stack, Text, useColorModeValue } from "@chakra-ui/react";
+import { Box, Button, Center, Flex, Stack, Text, Image, useColorModeValue } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
 import { getUserProxyAddress } from "../../queries/userProxy";
+import loadingImg from "../../assets/image/loading.svg";
+import errorImg from "../../assets/image/error.svg";
 
 export interface UserProxyLayoutProps  {
   mutationCall: () => any;
 }
 
-
-export function createProxyAddress() {
-  
-}
 
 export const SwapperBanner: React.FC<{}> = props => {
     return (
@@ -78,6 +76,68 @@ export const CreateProxyLayout: React.FC<UserProxyLayoutProps> = props => {
           </Button>
 
         </Box>
+      </Center>
+    )
+}
+
+export const WaitingLayout: React.FC<{}> = props => {
+
+  return (
+        <Center
+        w={ "100%"}
+        boxSizing="content-box"
+        flexDirection="column"
+        rounded="xl"
+        float="left"
+        minH="25.6rem"
+        bg="primary.900"
+        px={{ base: "0rem", md: "0rem" }}
+        py="2.4rem"
+        {...props}
+        >
+
+          <Image src={loadingImg} boxSize="2.5rem" />
+
+          <Text
+            color="white"
+            textAlign="center"
+            margin="2.8rem"
+            fontSize={{ base: fontSizes.md, md: "inherit" }}
+          >
+            Checking for proxy address...
+          </Text>
+
+      </Center>
+    )
+}
+
+export const ErrorLayout: React.FC<{}> = props => {
+
+  return (
+        <Center
+        w={ "100%"}
+        boxSizing="content-box"
+        flexDirection="column"
+        rounded="xl"
+        float="left"
+        minH="25.6rem"
+        bg="primary.900"
+        px={{ base: "0rem", md: "0rem" }}
+        py="2.4rem"
+        {...props}
+        >
+
+          <Image src={errorImg} boxSize="2.5rem" />
+
+          <Text
+            color="white"
+            textAlign="center"
+            margin="2.8rem"
+            fontSize={{ base: fontSizes.md, md: "inherit" }}
+          >
+            An error occurred!
+          </Text>
+
       </Center>
     )
 }
