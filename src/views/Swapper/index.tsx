@@ -34,14 +34,11 @@ export const Swapper: React.FC<{}> = props => {
         )
     } else if (proxyAddress === '0x0000000000000000000000000000000000000000') {
         return (
-            <ProxyLayout userProxyResult={userProxyMutationCall} />
-            //<CreateProxyLayout />
+            <CreateProxyLayout mutationCall={userProxyMutationCall}/>
         );
     } else {
         return (
-            <ProxyLayout 
-                userProxyResult={userProxyMutationCall} 
-            />
+            <ProxyLayout />
         );
     }
   };

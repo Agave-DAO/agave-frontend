@@ -7,6 +7,7 @@ import { getChainAddresses } from "../utils/chainAddresses";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { BigNumber } from "@ethersproject/bignumber";
 import { ContractTransaction } from "ethers";
+import { usingProgressNotification } from "../utils/progressNotification";
 
 export interface UserProxyMutationProps {
     chainId: ChainId | undefined;
@@ -17,74 +18,19 @@ export interface UserProxyMutationArgs {
     library: JsonRpcProvider;
   }
 
-export interface UserProxyMutationResult {}
+export interface UserProxyMutationResult {
+    txHash: string;
+}
 
-export interface UserProxyMutationDto{
-    userProxyMutation: UseMutationResult<
-        ContractTransaction | undefined,
+export interface UserProxyMutationDto 
+    extends UseMutationResult<
+    UserProxyMutationResult | undefined,
         unknown,
-        void,
+        UserProxyMutationArgs,
         unknown
-    >;
-
+    >{
+    key: readonly [ChainId | undefined, Account | undefined];
 }
-
-export const useUserProxyMutation =  ({
-    address
-}: UserProxyMutationProps): UserProxyMutationDto => {
-    const queryClient = useQueryClient();
-    const { chainId, account, library } = useAppWeb3();
-
-    const userProxyMutationKey = '';
-
-    const userProxyMutation = useMutation(
-        async () => {
-            
-            if (!library || !chainId || !account) {
-                throw new Error("Account or asset details are not available");
-            }
-
-            console.log('chainId',chainId);
-            console.log('library',library);
-            console.log('account',account);
-
-            const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
-            console.log('chainAddrs',chainAddrs);
-
-            if (!chainAddrs) {
-                throw new Error("chainAddrs error");
-            }
-
-
-            const coordinator = SwapperCoordinator__factory.connect(
-                chainAddrs.swapperCoordinator,
-                library.getSigner()
-            );
-            const receipt = await coordinator.generateUserProxy();
-            return receipt;
-        
-        },
-        {
-            onMutate: async () => {
-                // This function will fire before the mutation function is fired and is passed the same variables the mutation function would receive
-            },
-            onSuccess: async (result) => {
-                // This function will fire when the mutation is successful and will be passed the mutation's result.
-                console.log("success", result);
-            },
-            onError: async (_err) => {
-                // This function will fire if the mutation encounters an error and will be passed the error.
-                console.log("error",_err);
-            }
-        },
-
-    );
-
-    return {userProxyMutation}
-
-}
-/*
-
 
 export const useUserProxyMutation =  ({
     chainId,
@@ -92,8 +38,8 @@ export const useUserProxyMutation =  ({
 }: UserProxyMutationProps): UserProxyMutationDto => {
     const queryClient = useQueryClient();
     const mutationKey = React.useMemo(
-      () => [chainId, address] as const,
-      [chainId, address]
+        () => [chainId, address] as const,
+        [chainId, address]
     );
 
     const mutation = useMutation<
@@ -105,7 +51,6 @@ export const useUserProxyMutation =  ({
         mutationKey,
         async (args): Promise<UserProxyMutationResult | undefined> => {
             const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
-            console.log('chainAddrs',chainAddrs);
             if (
               chainId === undefined ||
               address === undefined ||
@@ -113,15 +58,35 @@ export const useUserProxyMutation =  ({
             ) {
               return undefined;
             }
-            const signer = args.library.getSigner();            
+            const signer = args.library.getSigner();           
+
             const coordinator = SwapperCoordinator__factory.connect(
                 chainAddrs.swapperCoordinator,
                 signer
             );
-            return await coordinator.generateUserProxy();
-        
+
+            console.log("useUserProxyMutation", "attempting to start user proxy");
+            const userProxyRequest = coordinator.generateUserProxy();
+            const userProxyConfirmation = await usingProgressNotification(
+              "Awaiting transaction approval",
+              "Please sign the transaction with your wallet.",
+              "info",
+              userProxyRequest
+            );
+            const userProxyReceipt = await usingProgressNotification(
+              "Awaiting transaction confirmation",
+              "Please wait while the blockchain processes your transaction",
+              "success",
+              userProxyConfirmation.wait()
+            );
+            return userProxyReceipt.status &&
+            userProxyReceipt.events?.some(ev => ev.event === "UserProxy")
+            ? { txHash: userProxyReceipt.transactionHash }
+            : undefined;
         },
         {
+            useErrorBoundary: false,
+            retry: false,
             onSuccess: async (result) => {
                 console.log("success", result);
             },
@@ -136,6 +101,5 @@ export const useUserProxyMutation =  ({
         () => ({ ...mutation, key: mutationKey }),
         [mutation, mutationKey]
     );
-}
 
-*/
+}

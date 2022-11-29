@@ -4,11 +4,12 @@ import { fontSizes } from "../../utils/constants";
 import { getUserProxyAddress } from "../../queries/userProxy";
 
 export interface UserProxyLayoutProps  {
-  userProxyResult: () => any;
+  mutationCall: () => any;
 }
 
+
 export function createProxyAddress() {
-  console.log('function called');
+  
 }
 
 export const SwapperBanner: React.FC<{}> = props => {
@@ -71,7 +72,7 @@ export const CreateProxyLayout: React.FC<UserProxyLayoutProps> = props => {
             h="40px"
             margin="10px"
             padding="20px"
-            onClick={createProxyAddress}
+            onClick={props.mutationCall}
           >
             Create proxy contract
           </Button>
@@ -83,11 +84,10 @@ export const CreateProxyLayout: React.FC<UserProxyLayoutProps> = props => {
 
 
 
-export const ProxyLayout: React.FC<UserProxyLayoutProps> = ({
+export const ProxyLayout: React.FC<{}> = ({
   userProxyResult
 }:any) => {
   const proxyAddress = getUserProxyAddress()['data'];
-  console.log('userProxyResult',userProxyResult);
   return (
       <>
           ProxyAddress: {proxyAddress}
