@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { SwapperCoordinator__factory } from "../contracts";
 import { Account, ChainId } from "../utils/queryBuilder";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { usingProgressNotification } from "../utils/progressNotification";
+import { getUserProxyAddress} from "../queries/userProxy";
 
 export interface UserProxyMutationProps {
     chainId: ChainId | undefined;
@@ -12,7 +13,8 @@ export interface UserProxyMutationProps {
 }
 
 export interface UserProxyMutationArgs {
-    library: JsonRpcProvider;
+    library: JsonRpcProvider,
+    setLayout: any
   }
 
 export interface UserProxyMutationResult {
@@ -26,7 +28,7 @@ export interface UserProxyMutationDto
         UserProxyMutationArgs,
         unknown
     >{
-    key: readonly [ChainId | undefined, Account | undefined];
+
 }
 
 export const useUserProxyMutation =  ({
@@ -34,10 +36,8 @@ export const useUserProxyMutation =  ({
     address,
 }: UserProxyMutationProps): UserProxyMutationDto => {
     const queryClient = useQueryClient();
-    const mutationKey = React.useMemo(
-        () => [chainId, address] as const,
-        [chainId, address]
-    );
+    const userProxyAddress = getUserProxyAddress()['data'];
+
 
     const mutation = useMutation<
         UserProxyMutationResult | undefined,
@@ -45,7 +45,6 @@ export const useUserProxyMutation =  ({
         UserProxyMutationArgs,
         unknown
     >(
-        mutationKey,
         async (args): Promise<UserProxyMutationResult | undefined> => {
             const chainAddrs = chainId ? getChainAddresses(chainId) : undefined;
             if (
@@ -84,8 +83,11 @@ export const useUserProxyMutation =  ({
         {
             useErrorBoundary: false,
             retry: false,
-            onSuccess: async (result) => {
-                console.log("success", result);
+            onSuccess: async (data, args, context) => {
+                console.log("Success!");
+                console.log('Data', data);
+                console.log('Context', context);
+                args.setLayout('test');
             },
             onError: async (_err) => {
                 console.log("error",_err);
@@ -94,9 +96,10 @@ export const useUserProxyMutation =  ({
 
     );
 
+
     return React.useMemo(
-        () => ({ ...mutation, key: mutationKey }),
-        [mutation, mutationKey]
+        () => ({ ...mutation }),
+        [mutation]
     );
 
 }

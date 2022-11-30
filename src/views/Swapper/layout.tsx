@@ -149,9 +149,33 @@ export const ProxyLayout: React.FC<{}> = ({
 }:any) => {
   const proxyAddress = getUserProxyAddress()['data'];
   return (
-      <>
-          ProxyAddress: {proxyAddress}
-      </>
-  );
+    <Center
+    w={ "100%"}
+    boxSizing="content-box"
+    flexDirection="column"
+    rounded="xl"
+    float="left"
+    minH="25.6rem"
+    bg="primary.900"
+    px={{ base: "0rem", md: "0rem" }}
+    py="2.4rem"
+    >
+    <ColoredText
+      fontSize={{ base: "1.6rem", md: "1.8rem" }}
+      textAlign="center"
+    >
+      Proxy address
+    </ColoredText>
+    <Text
+      color="white"
+      textAlign="center"
+      margin="2.8rem"
+      fontSize={{ base: fontSizes.md, md: "inherit" }}
+    >
+      {proxyAddress}
+    </Text>
+
+  </Center>
+)
 }
 
