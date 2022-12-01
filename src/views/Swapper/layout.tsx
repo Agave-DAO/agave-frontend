@@ -1,4 +1,4 @@
-import { Box, Button, Center, Flex, Stack, Text, Image, useColorModeValue } from "@chakra-ui/react";
+import { Box, Button, Center, Flex, Stack, Text, Image, useColorModeValue, VStack, StackDivider } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
 import { getUserProxyAddress } from "../../queries/userProxy";
@@ -9,10 +9,11 @@ export interface UserProxyLayoutProps  {
   mutationCall: () => any;
 }
 
+export interface StakingBannerProps {}
 
-export const SwapperBanner: React.FC<{}> = props => {
+export const SwapperBanner: React.FC<StakingBannerProps> = props => {
     return (
-        <>
+
             <Center width="100%" justifyContent="space-between">
                 <Text
                     fontWeight="bold"
@@ -28,7 +29,7 @@ export const SwapperBanner: React.FC<{}> = props => {
                     
                 </Text>
             </Center>
-        </>
+
     );
 }
 
@@ -144,38 +145,82 @@ export const ErrorLayout: React.FC<{}> = props => {
 
 
 
-export const ProxyLayout: React.FC<{}> = ({
-  userProxyResult
-}:any) => {
+export const ProxyLayout: React.FC<{}> = ({userProxyResult, props}:any) => {
   const proxyAddress = getUserProxyAddress()['data'];
   return (
-    <Center
-    w={ "100%"}
-    boxSizing="content-box"
-    flexDirection="column"
-    rounded="xl"
-    float="left"
-    minH="25.6rem"
-    bg="primary.900"
-    px={{ base: "0rem", md: "0rem" }}
-    py="2.4rem"
-    >
-    <ColoredText
-      fontSize={{ base: "1.6rem", md: "1.8rem" }}
-      textAlign="center"
-    >
-      Proxy address
-    </ColoredText>
-    <Text
-      color="white"
-      textAlign="center"
-      margin="2.8rem"
-      fontSize={{ base: fontSizes.md, md: "inherit" }}
-    >
-      {proxyAddress}
-    </Text>
+    <Flex
+      flexDirection={{ base: "column", md: "row" }}
+      px={{ base: "0.5rem", md: "0" }}
+      my={10}
+      height="100%"
+      alignItems="flex-start">
 
-  </Center>
-)
+      <Box w={{ base: "100%", md: "auto" }}>
+
+        <Box
+          w="auto"
+          minW={{ md: 300 }}
+          mr={{ base: 0, md: 10 }}
+          marginTop={0}
+          boxSizing="content-box"
+          rounded="xl"
+          bg="primary.900"
+          py="2rem"
+          color="white">
+
+          <Center>
+
+            <Text 
+              margin="10px">
+                Total orders: 0
+            </Text>
+
+          </Center>
+
+          <Center>
+
+            <Button
+              bg={useColorModeValue({ base: "primary.500", md: "primary.500" }, "primary.500")}
+              colorScheme="teal"
+              size="xl"
+              h="40px"
+              margin="10px"
+              padding="20px">
+              Place new order
+            </Button>
+
+          </Center>
+
+        </Box>
+
+      </Box>
+
+      <Box
+        boxSizing="content-box"
+        rounded="xl"
+        minH="12.75rem"
+        w="100%"
+        bg="primary.900"
+        py="2rem"
+        mb={{ base: "1rem", md: "0" }}
+        color="white">
+          <ColoredText
+            fontSize={{ base: "1.6rem", md: "1.8rem" }}
+            textAlign="center">
+            Active orders
+          </ColoredText>
+          <Box w="100%" pl={27} pr={27} pt={5}>
+            <Box overflowY="auto">
+              <Text
+                textAlign="center">
+                No orders
+              </Text>
+            </Box>
+          </Box>
+
+      </Box>
+
+    </Flex>
+  )
 }
 
