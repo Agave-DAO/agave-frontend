@@ -5,7 +5,7 @@ import { Account, ChainId } from "../utils/queryBuilder";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { usingProgressNotification } from "../utils/progressNotification";
-import { getUserProxyAddress} from "../queries/userProxy";
+import { getUserProxyAddressQuery} from "../queries/userProxy";
 
 export interface UserProxyMutationProps {
     chainId: ChainId | undefined;
@@ -36,7 +36,7 @@ export const useUserProxyMutation =  ({
     address,
 }: UserProxyMutationProps): UserProxyMutationDto => {
     const queryClient = useQueryClient();
-    const userProxyAddress = getUserProxyAddress()['data'];
+    const userProxyAddress = getUserProxyAddressQuery()['data'];
 
 
     const mutation = useMutation<

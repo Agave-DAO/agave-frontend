@@ -72,7 +72,7 @@ export const internalAddressesPerNetwork: Record<
 
     incentivesController: "0xfa255f5104f129B78f477e9a6D050a02f31A5D86",
 
-    swapperCoordinator: "0x6d09B58230be2E721EeD4E116b352Bb5050910E5",
+    swapperCoordinator: "0xc999C20EBd7F00B366E3A8809046120E10484b35",
 
     explorer: "https://blockscout.com/xdai/mainnet",
     rpcUrl: "https://rpc.gnosischain.com/",

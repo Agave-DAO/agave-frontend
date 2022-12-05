@@ -1,7 +1,6 @@
 import { Box, Button, Center, Flex, Stack, Text, Image, useColorModeValue, VStack, StackDivider } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
-import { getUserProxyAddress } from "../../queries/userProxy";
 import loadingImg from "../../assets/image/loading.svg";
 import errorImg from "../../assets/image/error.svg";
 
@@ -71,7 +70,7 @@ export const CreateProxyLayout: React.FC<UserProxyLayoutProps> = props => {
             h="40px"
             margin="10px"
             padding="20px"
-            onClick={props.mutationCall}
+            //onClick={props.mutationCall}
           >
             Create proxy contract
           </Button>
@@ -143,10 +142,8 @@ export const ErrorLayout: React.FC<{}> = props => {
     )
 }
 
+export const ProxyLayout: React.FC<{}> = ({props}:any) => {
 
-
-export const ProxyLayout: React.FC<{}> = ({userProxyResult, props}:any) => {
-  const proxyAddress = getUserProxyAddress()['data'];
   return (
     <Flex
       flexDirection={{ base: "column", md: "row" }}
@@ -155,7 +152,7 @@ export const ProxyLayout: React.FC<{}> = ({userProxyResult, props}:any) => {
       height="100%"
       alignItems="flex-start">
 
-      <Box w={{ base: "100%", md: "auto" }}>
+      <Box w={{ base: "100%", md: "auto" }} mb="10px">
 
         <Box
           w="auto"
@@ -173,6 +170,10 @@ export const ProxyLayout: React.FC<{}> = ({userProxyResult, props}:any) => {
             <Text 
               margin="10px">
                 Total orders: 0
+            </Text>
+
+            <Text>
+
             </Text>
 
           </Center>

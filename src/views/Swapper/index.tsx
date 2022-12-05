@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { CreateProxyLayout, ProxyLayout, WaitingLayout, ErrorLayout } from "./layout";
 import { useAppWeb3 } from "../../hooks/appWeb3";
-import { getUserProxyAddress} from "../../queries/userProxy";
+import { getUserProxyAddressQuery} from "../../queries/userProxy";
 import { useUserProxyMutation } from "../../mutations/userProxy"
 
 export interface SwapperProps {
@@ -10,7 +10,7 @@ export interface SwapperProps {
 
 export const Swapper: React.FC<SwapperProps> = props => {
     const w3 = useAppWeb3();
-    const userProxyAddress = getUserProxyAddress()['data'];
+    const userProxyAddress = getUserProxyAddressQuery()['data'];
     const [layout, setLayout] = React.useState(<WaitingLayout />);
 
     const userProxyMutation = useUserProxyMutation({
@@ -26,17 +26,16 @@ export const Swapper: React.FC<SwapperProps> = props => {
     [userProxyMutation, w3.library]
     );
 
-    
-
     useEffect(()=> {
+        console.log("userProxyAddress",userProxyAddress);
         if (userProxyAddress === undefined) {
             setLayout(<WaitingLayout />);
         } else if (userProxyAddress === '0x0000000000000000000000000000000000000000') {
             setLayout(<CreateProxyLayout mutationCall={userProxyMutationCall}/>);
         } else if (userProxyAddress.slice(0,2) != '0x') {
-            setLayout(<ErrorLayout />);
+           setLayout(<ErrorLayout />);
         } else {
-            setLayout(<ProxyLayout />);
+           setLayout(<ProxyLayout />);
         }
     },[userProxyAddress]);
 
