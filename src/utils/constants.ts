@@ -4,6 +4,7 @@ import agaveImg from "../assets/image/coins/agave.webp";
 import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
 import usdcImg from "../assets/image/coins/usdc.svg";
+import usdtImg from "../assets/image/coins/usdt.svg";
 import { theme } from "@chakra-ui/theme";
 import { BigNumber, constants } from "ethers";
 export const LINEAR_GRADIENT_BG =
@@ -57,6 +58,7 @@ export const imagesBySymbol: Record<string, string | undefined> = {
   HNY: honeyImg,
   WBTC: wbtcImg,
   USDC: usdcImg,
+  USDT: usdtImg,
   WXDAI: wxdaiImg,
 };
 

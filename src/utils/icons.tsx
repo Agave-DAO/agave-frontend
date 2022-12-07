@@ -39,6 +39,7 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "agSTAKE":
       return StakeLogo;
     case "USDT":
+    case "agUSDT":
       return UsdtLogo;
     case "BTC":
     case "WBTC":
