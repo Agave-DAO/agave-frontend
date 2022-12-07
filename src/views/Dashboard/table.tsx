@@ -126,7 +126,7 @@ export const DashboardTable: React.FC<{
 }> = ({ mode, assets }) => {
   const history = useHistory();
   const onActionClicked = React.useCallback(
-    (route: String, asset: Readonly<ReserveTokenDefinition>) => {
+    (route: String, asset: Readonly<AssetData>) => {
       if (route === "Deposit-Borrow") {
         if (mode === DashboardTableType.Deposit) {
           history.push(`/deposit/${asset.symbol}`);
@@ -137,7 +137,11 @@ export const DashboardTable: React.FC<{
         if (mode === DashboardTableType.Deposit) {
           history.push(`/withdraw/${asset.symbol}`);
         } else if (mode === DashboardTableType.Borrow) {
-          history.push(`/repay/${asset.symbol}`);
+          history.push(
+            `/repay/${asset.symbol}/${
+              asset.borrowMode === 1 ? "stable" : "variable"
+            }`
+          );
         }
       }
     },
@@ -187,24 +191,29 @@ export const DashboardTable: React.FC<{
       {
         Header: mode === DashboardTableType.Borrow ? "APR" : "APY",
         accessor: row => row.backingReserve?.tokenAddress ?? row.tokenAddress,
-        Cell: (({ value }) =>
+        Cell: (({ value, row }) =>
           /* There's a difference between the deposit APY and the borrow APR.
              Lending rates are obviously higher than borrowing rates */
           mode === DashboardTableType.Borrow ? (
-            <BorrowAPRView tokenAddress={value} />
+            <BorrowAPRView
+              tokenAddress={value}
+              isStable={row.original.borrowMode === 1}
+            />
           ) : (
             <DepositAPYView tokenAddress={value} />
           )) as Renderer<CellProps<AssetData, string>>,
       },
       {
-        Header: mode === DashboardTableType.Borrow ? " " : "Collateral",
+        Header: mode === DashboardTableType.Borrow ? "Mode" : "Collateral",
         accessor: row => row.backingReserve,
         Cell: (({ row }) =>
           mode === DashboardTableType.Deposit && row.original.backingReserve ? (
             <CollateralView
               tokenAddress={row.original.backingReserve?.tokenAddress}
             />
-          ) : null) as Renderer<CellProps<AssetData, string>>,
+          ) : (
+            <Text>{row.original.borrowMode === 1 ? "Stable" : "Variable"}</Text>
+          )) as Renderer<CellProps<AssetData, string>>,
       },
       {
         Header: mode === DashboardTableType.Borrow ? "Actions" : "Actions",
@@ -228,6 +237,7 @@ export const DashboardTable: React.FC<{
                   tokenAddress:
                     row.original.backingReserve?.tokenAddress ??
                     row.original.tokenAddress,
+                  balance: row.original.balance,
                 })
               }
             >
@@ -249,6 +259,8 @@ export const DashboardTable: React.FC<{
                   tokenAddress:
                     row.original.backingReserve?.tokenAddress ??
                     row.original.tokenAddress,
+                  balance: row.original.balance,
+                  borrowMode: row.original.borrowMode,
                 })
               }
             >

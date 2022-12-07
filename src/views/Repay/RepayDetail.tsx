@@ -15,7 +15,7 @@ import { BigNumber, constants } from "ethers";
 import { OneTaggedPropertyOf, PossibleTags } from "../../utils/types";
 import {
   useUserAssetBalance,
-  useUserVariableDebtForAsset,
+  useUserStableAndVariableDebtForAsset,
 } from "../../queries/userAssets";
 import { useRepayMutation, UseRepayMutationProps } from "../../mutations/repay";
 import {
@@ -31,6 +31,7 @@ import { bnMax, bnMin } from "../../utils/helpers";
 
 interface InitialState {
   token: Readonly<ReserveOrNativeTokenDefinition>;
+  borrowMode: Readonly<number>;
 }
 
 interface AmountSelectedState extends InitialState {
@@ -88,9 +89,12 @@ const InitialComp: React.FC<{
     state.token.tokenAddress === NATIVE_TOKEN ? wNative : state.token;
 
   const { data: userBalance } = useUserAssetBalance(state.token.tokenAddress);
-  const { data: debtForAsset } = useUserVariableDebtForAsset(
+  const { data: debts } = useUserStableAndVariableDebtForAsset(
     asset?.tokenAddress
   );
+  const debtForAsset =
+    state.borrowMode === 1 ? debts?.stableDebt : debts?.variableDebt;
+
   const availableToRepay: BigNumber | undefined = React.useMemo(() => {
     // If either are null, we can't provide anything useful
     // Propagating undefined lets the DashOverviewIntro know we're still loading the value
@@ -124,6 +128,7 @@ const InitialComp: React.FC<{
       mode="repay"
       onSubmit={onSubmit}
       balance={availableToRepay}
+      borrowMode={state.borrowMode}
     />
   );
 };
@@ -194,6 +199,7 @@ const RepayTxComp: React.FC<{
     () => ({
       asset: state.token.tokenAddress,
       amount: state.amountToRepay,
+      borrowMode: state.borrowMode,
     }),
     [state]
   );
@@ -292,37 +298,44 @@ const RepayStateMachine: React.FC<{
   }
 };
 
-const RepayDetailForAsset: React.FC<{ asset: ReserveOrNativeTokenDefinition }> =
-  ({ asset }) => {
-    const dash = React.useMemo(() => <RepayDash token={asset} />, [asset]);
+const RepayDetailForAsset: React.FC<{
+  asset: ReserveOrNativeTokenDefinition;
+  borrowMode: number;
+}> = ({ asset, borrowMode }) => {
+  const dash = React.useMemo(
+    () => <RepayDash token={asset} borrowMode={borrowMode} />,
+    [asset]
+  );
 
-    const [repayState, setRepayState] = React.useState<RepayState>(
-      createState("init", { token: asset })
-    );
+  const [repayState, setRepayState] = React.useState<RepayState>(
+    createState("init", { token: asset, borrowMode: borrowMode })
+  );
 
-    return (
-      <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
-        {dash}
-        <Center
-          w="100%"
-          color="primary.100"
-          bg="primary.900"
-          rounded="lg"
-          padding="1em"
-        >
-          <RepayStateMachine state={repayState} setState={setRepayState} />
-        </Center>
-      </VStack>
-    );
-  };
+  return (
+    <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
+      {dash}
+      <Center
+        w="100%"
+        color="primary.100"
+        bg="primary.900"
+        rounded="lg"
+        padding="1em"
+      >
+        <RepayStateMachine state={repayState} setState={setRepayState} />
+      </Center>
+    </VStack>
+  );
+};
 
 export const RepayDetail: React.FC = () => {
   const match =
     useRouteMatch<{
       assetName: string | undefined;
+      borrowMode: string | undefined;
     }>();
   const history = useHistory();
   const assetName = match.params.assetName;
+  const borrowMode = match.params.borrowMode === "variable" ? 2 : 1;
   const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
   if (!asset) {
     return (
@@ -361,5 +374,5 @@ export const RepayDetail: React.FC = () => {
     );
   }
 
-  return <RepayDetailForAsset asset={asset} />;
+  return <RepayDetailForAsset asset={asset} borrowMode={borrowMode} />;
 };

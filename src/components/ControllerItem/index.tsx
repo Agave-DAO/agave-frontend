@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactChild } from "react";
 import { Center, VStack, Text, Button } from "@chakra-ui/react";
 import { LINEAR_GRADIENT_BG, fontSizes } from "../../utils/constants";
 
@@ -9,6 +9,7 @@ export const ControllerItem: React.FC<{
   stepNumber: number;
   onActionClick: () => void;
   totalSteps: number;
+  childComponent?: ReactChild | undefined;
 }> = ({
   stepDesc,
   stepName,
@@ -16,6 +17,7 @@ export const ControllerItem: React.FC<{
   onActionClick,
   totalSteps,
   stepNumber,
+  childComponent,
 }) => {
   return (
     <Center w="100%" justifyContent="space-between" p="1.2rem">
@@ -26,9 +28,9 @@ export const ControllerItem: React.FC<{
         >
           {stepNumber}/{totalSteps} {stepName}
         </Text>
-        {stepDesc && (
+        {(childComponent || stepDesc) && (
           <Text fontSize={{ base: fontSizes.sm, md: fontSizes.md }}>
-            {stepDesc}
+            {childComponent ? childComponent : stepDesc}
           </Text>
         )}
       </VStack>

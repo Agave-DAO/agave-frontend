@@ -174,6 +174,15 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
           <BorrowAPRView tokenAddress={value} />
         )) as Renderer<CellProps<AssetRecord, string>>,
       },
+      {
+        id: "stableBorrowAPR",
+        Header: "Stable APR",
+        accessor: row => row.tokenAddress,
+        Cell: (({ value }) => (
+            <BorrowAPRView tokenAddress={value} isStable={true}/>
+        )) as Renderer<CellProps<AssetRecord, string>>,
+        disableSortBy: true,
+      },
     ],
     [isMobile, lendingPool]
   );

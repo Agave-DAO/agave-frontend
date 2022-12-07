@@ -19,7 +19,7 @@ export const Deposit: React.FC<{}> = () => {
     React.useState<"All" | "Stable Coins">("All");
   const balances = useUserDepositAssetBalancesDaiWei();
   const depositedList: DepositAsset[] = React.useMemo(
-    () => balances?.data?.filter(asset => !asset.balance.isZero()) ?? [],
+    () => balances?.data?.filter(asset => (BigNumber.isBigNumber(asset.balance) && !asset.balance.isZero())) ?? [],
     [balances]
   );
   return React.useMemo(
