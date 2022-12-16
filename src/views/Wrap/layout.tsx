@@ -1,7 +1,27 @@
 import React from "react";
-import { Box, Center, Text, Flex, VStack, StackDivider, Spinner } from "@chakra-ui/react";
+import { 
+    Box, 
+    Center, 
+    Text, 
+    Flex, 
+    VStack, 
+    StackDivider, 
+    Spinner, 
+    Button,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Input
+} from "@chakra-ui/react";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly, isMobile } from "react-device-detect";
+import { useDisclosure } from "@chakra-ui/hooks";
+import ColoredText from "../../components/ColoredText";
+import { ModalIcon } from "../../utils/icons";
+import { fontSizes, spacings } from "../../utils/constants";
 
 export const WrapBanner: React.FC<{}> = () => {
     return (
@@ -13,7 +33,7 @@ export const WrapBanner: React.FC<{}> = () => {
               color="white"
               fontSize={{ base: "1.8rem", md: "2.4rem" }}
             >
-              Wrapped tokens
+              Wrap tokens
             </Text>
           </Center>
         )}
@@ -23,7 +43,7 @@ export const WrapBanner: React.FC<{}> = () => {
 
 export const WrapLayout: React.FC<{}> = () => {
     return (
-        <Flex flexDirection="column">
+      <Flex flexDirection="column">
         <Flex
           align="center"
           flexBasis="auto"
@@ -33,97 +53,30 @@ export const WrapLayout: React.FC<{}> = () => {
           m="auto"
           color="white"
         >
-          <UpperBox
-            title="Column 1"
-            textAlign="center"
-            mr={{ base: "inherit", lg: "2%" }}
+          <OuterBox
+            outerType="wrap"
+            mr={{ base: "inherit", lg: "1%" }}
           >
-            <VStack flexDirection="column" h="7.5rem" alignItems="baseline">
-              <HStack d="flex" mt="0.5rem">
-                <Text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</Text>
-              </HStack>
-            </VStack>
-          </UpperBox>
-          <UpperBox
-            title="Column 2"
-            textAlign="center"
-            mt={{ base: "2rem", lg: "inherit" }}
+          </OuterBox>
+
+          <OuterBox
+            outerType="unwrap"
+            ml={{ base: "inherit", lg: "1%" }}
           >
-            <Box
-              d="flex"
-              flexDirection="row"
-              textAlign="center"
-              justifyContent="space-between"
-              whiteSpace="nowrap"
-              h="7.5rem"
-            >
-              <VStack
-                flexDirection="column"
-                h="7rem"
-                alignItems="center"
-              >
-                <HStack d="flex" mt="0.5rem">
-                    <Text>{isMobile ? "#1" : "Value 1"}</Text>
-                </HStack>
-                <Text fontWeight="bold" textAlign="center" mt="0.5em">
-                    -
-                </Text>
-              </VStack>
-              <VStack
-                flexDirection="column"
-                h="7rem"
-                alignItems="center"
-                ml={{ base: "0.5rem", md: "1.5rem" }}
-                mr={{ base: "0.5rem", md: "1.5rem" }}
-                >
-                <HStack d="flex" mt="0.5rem">
-                    <Text>{isMobile ? "#2" : "Value 2"}</Text>
-                </HStack>
-                <Text fontWeight="bold" textAlign="center" mt="0.5em">
-                    <Spinner
-                      speed="0.5s"
-                      emptyColor="gray.200"
-                      color="yellow.500"
-                    />
-                </Text>
-              </VStack>
-              <VStack
-                flexDirection="column"
-                h="7rem"
-                alignItems="center"
-                ml={{ base: "0.5rem", md: "1.5rem" }}
-                mr={{ base: "0.5rem", md: "1.5rem" }}
-              >
-                <HStack d="flex" mt="0.5rem">
-                    <Text>{isMobile ? "#3" : "Value 3"}</Text>
-                </HStack>
-                <Text fontWeight="bold" textAlign="center" mt="0.5em">
-                  0
-                </Text>
-              </VStack>
-              <VStack
-                flexDirection="column"
-                h="7rem"
-                alignItems="center"
-              >
-                <HStack d="flex" mt="0.5rem">
-                    <Text>{isMobile ? "#4" : "Value 4"}</Text>
-                </HStack>
-                <Text fontWeight="bold" textAlign="left" mt="0.5em">
-                  Yes
-                </Text>
-              </VStack>
-            </Box>
-          </UpperBox>
+          </OuterBox>
+
         </Flex>
       </Flex>
+
     );
 }
 
 
 
-const UpperBox: React.FC<{ title: string } & CenterProps> = ({
-    title,
+const OuterBox: React.FC<{ 
+    outerType: string; // wrap, unwrap
+} & CenterProps> = ({
+    outerType,
     children,
     ...props
   }) => {
@@ -132,7 +85,9 @@ const UpperBox: React.FC<{ title: string } & CenterProps> = ({
         boxSizing="content-box"
         flexDirection="column"
         rounded="xl"
+        textAlign="center"
         minH="10.6rem"
+        mb="5"
         minW={{ base: "100%", lg: "auto" }}
         flex={1}
         bg="primary.900"
@@ -140,23 +95,173 @@ const UpperBox: React.FC<{ title: string } & CenterProps> = ({
         {...props}
       >
         <VStack
-          divider={
-            <StackDivider
-              borderColor="#36CFA2"
-              h="0.188rem"
-              backgroundColor="#36CFA2"
-            />
-          }
           spacing={4}
-          w="100%"
-          align="stretch"
+          w="90%"
+          align="center"
           flexDirection="column"
         >
-          <Text px={{ base: "2rem", md: "3rem" }} h="25">
-            {title}
+          <Text>
+            {outerType=="wrap"?"Wrap tokens":"Unwrap tokens"}
           </Text>
-          <Box px={{ base: "2rem", md: "3rem" }}>{children}</Box>
+          <InnerBox
+            tokenAmount=""
+            balance="0"
+            outerType={outerType}
+            innerType="from"
+            isModalTrigger={true}
+            onClick={() =>{}}
+          />
+          <InnerBox
+            tokenAmount=""
+            balance="0"
+            outerType={outerType}
+            innerType="to"
+            isModalTrigger={false}
+            onClick={() =>{}}
+          />
+          <Button
+            width="30%"
+            mt="2.4rem"
+            textTransform="uppercase"
+            background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+            color="secondary.900"
+            fontWeight="bold"
+            px={{ base: "10rem", md: "6rem" }}
+            py="1.5rem"
+            fontSize={fontSizes.md}
+           >
+            {outerType=="wrap"?"Wrap":"Unwrap"}
+          </Button>
         </VStack>
       </Center>
     );
   };
+
+  const InnerBox: React.FC<{
+    tokenAmount: string;
+    balance: string;
+    innerType: string; // from, to
+    outerType: string; // wrap, unwrap
+    isModalTrigger?: boolean;
+    onClick: React.MouseEventHandler;
+    buttonOverrideContent?: React.ReactNode | undefined;
+  }> = ({
+    tokenAmount,
+    balance,
+    innerType,
+    outerType,
+    onClick,
+    isModalTrigger,
+    buttonOverrideContent,
+  }) => {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    return (
+      <Box
+        w="100%"
+        maxW="100%"
+        px={{ base: "1.1rem", md: "2.2rem" }}
+        py={{ base: spacings.md, md: "1.5rem" }}
+        bg="secondary.900"
+        rounded="2xl"
+        position="relative"
+        minW="40%"
+        mx={{ base: "0.5rem", md: "1rem" }}
+        my="1rem"
+        align="center"
+      >
+        <HStack spacing="1rem" mr="1rem" height="100%">
+            <VStack
+                spacing={4}
+                w="90%"
+                align="stretch"
+                textAlign="left"
+                flexDirection="column"
+            >
+                <Input
+                    type="text"
+                    fontSize="40"
+                    maxWidth="100px"
+                    height="50px"
+                    rounded="0s"
+                    border="0"
+                    borderBottom="1px solid var(--chakra-colors-primary-900)"
+                    placeHolder="0"
+                    value={tokenAmount}
+                />
+
+                {innerType=="from"?
+                    <Button
+                        color="white"
+                        fontSize={{ base: "1rem", md: fontSizes.sm }}
+                        fontWeight="normal"
+                        bg="primary.300"
+                        alignSelf="flex-start"
+                        disabled={true}
+                    >
+                        MAX
+                    </Button>
+                :""}
+            </VStack>
+            <VStack
+                spacing={4}
+                w="90%"
+                align="stretch"
+                textAlign="right"
+                flexDirection="column"
+            >
+                {buttonOverrideContent === undefined ? (
+                    <Button
+                        color="white"
+                        fontSize={{ base: "1rem", md: fontSizes.md }}
+                        fontWeight="normal"
+                        bg="primary.300"
+                        py="1rem"
+                        my="1.2rem"
+                        padding="5px"
+                        alignSelf="flex-end"
+                        px={{ base: "5%", md: "2.171rem" }}
+                        disabled={innerType=="to"}
+                        onClick={onOpen}
+                    >
+                        {innerType=="from"?"Select token":(outerType=="wrap"?"Wrapped token":"Unwrapped token")}
+                    </Button>
+                ) : (
+                 <>{buttonOverrideContent}</>
+                )}
+                
+            </VStack>
+        </HStack>
+        {isModalTrigger && (
+            <Modal isOpen={isOpen} onClose={onClose} isCentered>
+            <ModalOverlay />
+            <ModalContent
+                color="primary.900"
+                bg="linear-gradient(180deg, #F3FFF7 8.89%, #DCFFF1 146.53%)"
+                px={{ base: "1.5rem", md: "2.9rem" }}
+                py="3.5rem"
+                rounded="lg"
+                minW={{ base: "80%", md: "30vw" }}
+                minH={{ base: "50%", md: "30vh" }}
+            >
+                List of tokens here
+                <ModalFooter>
+                <Button
+                    w={{ base: "100%", md: "60%" }}
+                    m="auto"
+                    py="1.5rem"
+                    fontSize={{ base: "1.6rem", md: fontSizes.md }}
+                    bg="secondary.100"
+                    color="white"
+                    fontWeight="normal"
+                    onClick={onClose}
+                >
+                    Close
+                </Button>
+                </ModalFooter>
+            </ModalContent>
+            </Modal>
+        )}
+      </Box>
+    );
+  };
+  
