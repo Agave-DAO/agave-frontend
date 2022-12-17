@@ -23,9 +23,11 @@ import ColoredText from "../../components/ColoredText";
 import { ModalIcon } from "../../utils/icons";
 import { fontSizes, spacings } from "../../utils/constants";
 import { useUserAssetBalance } from "../../queries/userAssets";
+import { tokenDecimals } from "../../queries/tokenDecimals";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { externalAddresses } from "../../utils/contracts/contractAddresses/externalAdresses";
 import { BigNumber } from "ethers";
+import { bigNumberToString } from "../../utils/fixedPoint";
 
 export interface IWrap {}
 
@@ -293,23 +295,23 @@ const TokenListBox: React.FC<{
     ...props
 }) => {
 
-    const toWrapList = ['USDC', 'WXDAI', 'LINK', 'GNO', 'FOX', 'USDT', 'WETH', 'WBTC'];
-    const toUnwrapList = ['agUSDC', 'agWXDAI', 'agLINK', 'agGNO', 'agFOX', 'agUSDT', 'agWETH', 'agWBTC'];
+    const toWrapList = ['WXDAI', 'USDC', 'LINK', 'GNO', 'FOX', 'USDT', 'WETH', 'WBTC'];
+    const toUnwrapList = ['agWXDAI', 'agUSDC', 'agLINK', 'agGNO', 'agFOX', 'agUSDT', 'agWETH', 'agWBTC'];
 
     const tokenList = (outerType=='wrap')?toWrapList:toUnwrapList;
 
     const balances:any = {
-        'USDC': useUserAssetBalance(externalAddresses.USDC),
         'WXDAI': useUserAssetBalance(externalAddresses.WXDAI),
+        'USDC': useUserAssetBalance(externalAddresses.USDC),
         'LINK': useUserAssetBalance(externalAddresses.LINK),
         'GNO': useUserAssetBalance(externalAddresses.GNO),
         'FOX': useUserAssetBalance(externalAddresses.FOX),
         'USDT': useUserAssetBalance(externalAddresses.USDT),
         'WETH': useUserAssetBalance(externalAddresses.WETH),
         'WBTC': useUserAssetBalance(externalAddresses.WBTC),
-        
-        'agUSDC': useUserAssetBalance(externalAddresses.agUSDC),
+
         'agWXDAI': useUserAssetBalance(externalAddresses.agWXDAI),
+        'agUSDC': useUserAssetBalance(externalAddresses.agUSDC),
         'agLINK': useUserAssetBalance(externalAddresses.agLINK),
         'agGNO': useUserAssetBalance(externalAddresses.agGNO),
         'agFOX': useUserAssetBalance(externalAddresses.agFOX),
@@ -318,7 +320,27 @@ const TokenListBox: React.FC<{
         'agWBTC': useUserAssetBalance(externalAddresses.agWBTC),
     };
 
-    console.log(balances);
+    const decimals:any = {
+        'WXDAI': tokenDecimals(externalAddresses.WXDAI),
+        'USDC': tokenDecimals(externalAddresses.USDC),
+        'LINK': tokenDecimals(externalAddresses.LINK),
+        'GNO': tokenDecimals(externalAddresses.GNO),
+        'FOX': tokenDecimals(externalAddresses.FOX),
+        'USDT': tokenDecimals(externalAddresses.USDT),
+        'WETH': tokenDecimals(externalAddresses.WETH),
+        'WBTC': tokenDecimals(externalAddresses.WBTC),
+
+        'agWXDAI': tokenDecimals(externalAddresses.agWXDAI),
+        'agUSDC': tokenDecimals(externalAddresses.agUSDC),
+        'agLINK': tokenDecimals(externalAddresses.agLINK),
+        'agGNO': tokenDecimals(externalAddresses.agGNO),
+        'agFOX': tokenDecimals(externalAddresses.agFOX),
+        'agUSDT': tokenDecimals(externalAddresses.agUSDT),
+        'agWETH': tokenDecimals(externalAddresses.agWETH),
+        'agWBTC': tokenDecimals(externalAddresses.agWBTC),
+    }
+
+    console.log(decimals);
 
     return (
         <Center>
@@ -348,7 +370,7 @@ const TokenListBox: React.FC<{
                             padding="2px"
                             pl="10px"
                         >
-                            {balances[x].data?balances[x].data.toString():"-"}
+                            {balances[x].data&&decimals[x]?bigNumberToString(balances[x].data, 2, decimals[x].data):<Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500"/>}
                         </Box>
                     </HStack>
                 )}
