@@ -14,7 +14,10 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    Input
+    Tooltip,
+    Input,
+    NumberInput,
+    NumberInputField,
 } from "@chakra-ui/react";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { isMobileOnly, isMobile } from "react-device-detect";
@@ -28,6 +31,9 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import { externalAddresses } from "../../utils/contracts/contractAddresses/externalAdresses";
 import { BigNumber } from "ethers";
 import { bigNumberToString } from "../../utils/fixedPoint";
+import { TokenIcon, useNativeSymbols } from "../../utils/icons";
+
+
 
 export interface IWrap {}
 
@@ -82,8 +88,6 @@ export const WrapLayout: React.FC<{}> = () => {
     );
 }
 
-
-
 const OuterBox: React.FC<{
     outerType: string; // wrap, unwrap
 } & CenterProps> = ({
@@ -117,7 +121,6 @@ const OuterBox: React.FC<{
             {outerType=="wrap"?"Wrap tokens":"Unwrap tokens"}
           </ColoredText>
           <InnerBox
-            tokenAmount=""
             balance="0"
             outerType={outerType}
             innerType="from"
@@ -125,7 +128,6 @@ const OuterBox: React.FC<{
             onClick={() =>{}}
           />
           <InnerBox
-            tokenAmount=""
             balance="0"
             outerType={outerType}
             innerType="to"
@@ -152,7 +154,6 @@ const OuterBox: React.FC<{
 };
 
 const InnerBox: React.FC<{
-    tokenAmount: string;
     balance: string;
     innerType: string; // from, to
     outerType: string; // wrap, unwrap
@@ -160,7 +161,6 @@ const InnerBox: React.FC<{
     onClick: React.MouseEventHandler;
     buttonOverrideContent?: React.ReactNode | undefined;
 }> = ({
-    tokenAmount,
     balance,
     innerType,
     outerType,
@@ -191,17 +191,24 @@ const InnerBox: React.FC<{
                 textAlign="left"
                 flexDirection="column"
             >
-                <Input
-                    type="text"
-                    fontSize="40"
-                    maxWidth="100px"
-                    height="50px"
-                    rounded="0s"
-                    border="0"
-                    borderBottom="1px solid var(--chakra-colors-primary-900)"
-                    placeholder="0"
-                    defaultValue={tokenAmount}
-                />
+                <NumberInput>
+                    <NumberInputField
+                        min={0}
+                        defaultValue={100}
+                        fontSize={{ base:"20px", sm:"30px"}}
+                        maxWidth="200px"
+                        height="27px"
+                        padding="0"
+                        rounded="0s"
+                        border="0"
+                        _focus={{ boxShadow:"0"}}
+                        borderBottom="1px solid var(--chakra-colors-primary-900)"
+                        _hover={{borderBottom: "1px solid var(--chakra-colors-primary-900)"}}
+                        boxShadow="0 !important"
+                        placeholder="0"
+                        disabled={innerType=="to"}
+                    />
+                </NumberInput>
 
                 {innerType=="from"?
                     <Button
@@ -213,6 +220,8 @@ const InnerBox: React.FC<{
                         disabled={true}
                         height="auto"
                         py="3px"
+                        _hover={{bgColor: innerType=="from"?"primary.900":"" }}
+                        _active={{bgColor: innerType=="from"?"primary.900":"" }}
                     >
                         MAX
                     </Button>
@@ -225,25 +234,28 @@ const InnerBox: React.FC<{
                 textAlign="right"
                 flexDirection="column"
             >
-                {buttonOverrideContent === undefined ? (
-                    <Button
-                        color="white"
-                        fontSize={{ base: "1rem", md: fontSizes.md }}
-                        fontWeight="normal"
-                        bg="primary.300"
-                        py="1.6rem"
-                        my="1.2rem"
-                        alignSelf="flex-end"
-                        px={{ base: "5%", md: "2.171rem" }}
-                        disabled={innerType=="to"}
-                        onClick={onOpen}
-                    >
-                        {innerType=="from"?"Select token":(outerType=="wrap"?"Wrapped token":"Unwrapped token")}
-                    </Button>
-                ) : (
-                 <>{buttonOverrideContent}</>
-                )}
-                
+
+                <Button
+                    className={innerType+"-"+outerType}
+                    color={innerType=="from"?"white":"var(--chakra-colors-primary-900)"}
+                    fontSize={{ base: "1.3rem", md: fontSizes.md }}
+                    fontWeight="normal"
+                    border={innerType=="to"?"2px solid var(--chakra-colors-primary-900)":""}
+                    bg="primary.300"
+                    py="1.6rem"
+                    my="1.2rem"
+                    width="140px"
+                    alignSelf="flex-end"
+                    px={{ base: "5%", md: "2.171rem" }}
+                    onClick={onOpen}
+                    bgColor={innerType=="to"?"secondary.900":""}
+                    _hover={{bgColor: innerType=="from"?"primary.900":"" }}
+                    _active={{bgColor: innerType=="from"?"primary.900":"" }}
+                    disabled={innerType=="to"}
+                    opacity="1 !important"
+                >
+                    {innerType=="from"?"Select token":(outerType=="wrap"?"Wrapped token":"Unwrapped token")}
+                </Button>
             </VStack>
         </HStack>
 
@@ -254,10 +266,10 @@ const InnerBox: React.FC<{
             <ModalContent
                 color="primary.900"
                 bg="linear-gradient(180deg, #F3FFF7 8.89%, #DCFFF1 146.53%)"
-                px={{ base: "1.5rem", md: "2.9rem" }}
-                py="3.5rem"
+                px={{ base: "3rem", md: "3.9rem" }}
+                py="2rem"
                 rounded="lg"
-                minW={{ base: "80%", md: "30vw" }}
+                border="5px double #044d44"
                 minH={{ base: "50%", md: "30vh" }}
             >
                 <TokenListBox 
@@ -268,12 +280,15 @@ const InnerBox: React.FC<{
                 <Button
                     w={{ base: "100%", md: "60%" }}
                     m="auto"
+                    mt="20px"
                     py="1.5rem"
                     fontSize={{ base: "1.6rem", md: fontSizes.md }}
                     bg="secondary.100"
                     color="white"
                     fontWeight="normal"
                     onClick={onClose}
+                    _hover={{bgColor:"secondary.900"}}
+                    _active={{bgColor:"secondary.900"}}
                 >
                     Close
                 </Button>
@@ -340,39 +355,68 @@ const TokenListBox: React.FC<{
         'agWBTC': tokenDecimals(externalAddresses.agWBTC),
     }
 
-    console.log(decimals);
+    function selectToken(event: React.MouseEvent<HTMLButtonElement>) {
+        console.log("clicked", event.currentTarget.name);
+        return '';
+    }
 
     return (
         <Center>
-            <VStack width="100%">
-                {tokenList.map(x => 
-                    <HStack 
+            <VStack 
+                width="100%"
+                divider = {<StackDivider margin="52px" />}
+            >
+                <Text>Select your token</Text>
+                {tokenList.map(tkn => 
+                    <Button
+                        onClick={selectToken}
                         width="100%"
+                        opacity="0.9"
+                        _hover={{ opacity: "1" }}
+                        cursor="pointer"
+                        name={tkn}
+                        fontWeight="normal"
+                        padding="0"
+                        border="0"
                     >
-                        <Box
-                            background="secondary.900"
-                            color="white"
-                            roundedLeft="5"
-                            width="50%"
-                            mr="-3px"
-                            textAlign="right"
-                            padding="2px"
-                            pr="10px"
+                        <HStack 
+                            width="100%"
                         >
-                            {x}
-                        </Box>
-
-                        <Box
-                            background="primary.900"
-                            color="white"
-                            roundedRight="5"
-                            width="50%"
-                            padding="2px"
-                            pl="10px"
-                        >
-                            {balances[x].data&&decimals[x]?bigNumberToString(balances[x].data, 2, decimals[x].data):<Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500"/>}
-                        </Box>
-                    </HStack>
+                            <Box
+                                background="secondary.900"
+                                color="white"
+                                rounded="5"
+                                width="100%"
+                                mr="-3px"
+                                textAlign="right"
+                                padding="2px"
+                                pr="10px"
+                            >
+                                <HStack
+                                    divider={
+                                    <StackDivider
+                                        borderColor="primary.900"
+                                        h="2.5rem"
+                                    />
+                                    } 
+                                >
+                                    <TokenIcon 
+                                        symbol={tkn} 
+                                        width="8" 
+                                        height="8"
+                                        marginX="10px"
+                                    />
+                                    <Text 
+                                        width="100%"
+                                        textAlign="left"
+                                        marginX="8px"
+                                    >
+                                        {tkn}
+                                    </Text>
+                                </HStack>
+                            </Box>
+                        </HStack>
+                    </Button>
                 )}
             </VStack>
         </Center>
