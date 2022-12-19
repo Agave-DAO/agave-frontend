@@ -128,7 +128,7 @@ export const BorrowTable: React.FC<{ activeType: string }> = () => {
       .filter(asset => {
         if (tokenConfigs) {
           const config = tokenConfigs[asset.tokenAddress];
-          return config?.isActive && !config?.isFrozen;
+          return config?.isActive && !config?.isFrozen && config?.borrowingEnabled;
         }
         return true;
       });

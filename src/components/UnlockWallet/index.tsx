@@ -157,7 +157,7 @@ export const UnlockWallet: React.FC<{}> = props => {
       console.log(`WalletConnect URI: ${uri}`);
     });
     await activate(walletConnectConnector);
-  };
+  }
 
   return (
     <Center

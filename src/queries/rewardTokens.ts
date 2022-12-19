@@ -127,7 +127,7 @@ export const useRewardTokensData = buildQueryHookWhenParamsDefinedChainAddrs<
         (await useAssetPriceInDaiWei.fetchQueryDefined(
           params,
           underlying.tokenAddress
-        )) ?? constants.Zero;
+        )) || constants.Zero;
 
       const decimals = await useDecimalCountForToken.fetchQueryDefined(
         params,
