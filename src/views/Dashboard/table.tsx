@@ -7,6 +7,7 @@ import {
   Tooltip,
   useMediaQuery,
 } from "@chakra-ui/react";
+import { LockIcon, SmallCloseIcon } from "@chakra-ui/icons";
 import { BigNumber } from "ethers";
 import React from "react";
 import { isMobile, isDesktop } from "react-device-detect";
@@ -15,8 +16,8 @@ import { CellProps, Column, Renderer, useRowSelect } from "react-table";
 import { AssetData } from ".";
 import ColoredText from "../../components/ColoredText";
 import { useCollateralModeMutation } from "../../mutations/collateralMode";
-import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
 import { useUserReserveData } from "../../queries/protocolReserveData";
+import { useProtocolReserveConfiguration } from "../../queries/protocolAssetConfiguration";
 import { fontSizes } from "../../utils/constants";
 import {
   BasicTableRenderer,
@@ -34,8 +35,10 @@ export enum DashboardTableType {
 
 const ThreeStateSwitch: React.FC<{
   state: boolean | null;
+  active: boolean | null;
   onClick: (previousState: boolean | null) => void;
-}> = ({ state, onClick }) => {
+}> = ({ state, active, onClick }) => {
+  console.log("active", active, state);
   const onClickWrapped = React.useCallback(() => {
     onClick(state);
   }, [state, onClick]);
@@ -51,39 +54,40 @@ const ThreeStateSwitch: React.FC<{
         >
           {state === null ? (
             <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
-          ) : state ? (
+          ) : state && active === true ? (
             "Yes"
-          ) : (
+          ) : active ? (
             "No"
+          ) : (
+            <LockIcon w={8} h={8} color="red.500" />
           )}
         </Text>
-
-        <Switch
-          ml="3rem"
-          size="lg"
-          colorScheme="yellow"
-          aria-checked={state === null ? "mixed" : undefined}
-          isChecked={state === null ? undefined : state}
-          isDisabled={state === null}
-          onChange={onClickWrapped}
-        />
+        {active === true ? (
+          <Switch
+            ml="3rem"
+            size="lg"
+            colorScheme="yellow"
+            aria-checked={state === null ? "mixed" : undefined}
+            isChecked={state === null ? undefined : state}
+            isDisabled={state === null}
+            onChange={onClickWrapped}
+          />
+        ) : null}
       </Box>
     ),
-    [onClickWrapped, state]
+    [onClickWrapped, state, active]
   );
 };
 
-const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
+const CollateralView: React.FC<{ tokenAddress: string | undefined, canCollateral: boolean | undefined }> = ({
   tokenAddress,
+  canCollateral
 }) => {
-  const { data: reserveConfiguration } = useUserReserveData(tokenAddress);
-  const reserveUsedAsCollateral =
-    reserveConfiguration?.usageAsCollateralEnabled;
-
+  const { data: userReserveData } = useUserReserveData(tokenAddress);
+  const reserveUsedAsCollateral = userReserveData?.usageAsCollateralEnabled;
   const {
     collateralModeMutation: { mutate, isLoading: mutationIsLoading },
   } = useCollateralModeMutation(tokenAddress);
-
   const toggleUseAssetAsCollateral = React.useCallback(() => {
     if (reserveUsedAsCollateral === undefined || mutationIsLoading) {
       return;
@@ -100,8 +104,10 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
         label={
           mutationIsLoading || reserveUsedAsCollateral === undefined
             ? ""
-            : reserveUsedAsCollateral
+            : reserveUsedAsCollateral && canCollateral
             ? "Disable use of this asset as collateral"
+            : canCollateral
+            ? "Can't be used as collateral"
             : "Enable use of this asset as collateral"
         }
         fontSize="2xl"
@@ -111,12 +117,13 @@ const CollateralView: React.FC<{ tokenAddress: string | undefined }> = ({
         <>
           <ThreeStateSwitch
             state={mutationIsLoading ? null : reserveUsedAsCollateral ?? null}
+            active={canCollateral ?? null}
             onClick={toggleUseAssetAsCollateral}
           />
         </>
       </Tooltip>
     ),
-    [reserveUsedAsCollateral, toggleUseAssetAsCollateral, mutationIsLoading]
+    [canCollateral, reserveUsedAsCollateral, toggleUseAssetAsCollateral, mutationIsLoading]
   );
 };
 
@@ -145,7 +152,7 @@ export const DashboardTable: React.FC<{
         }
       }
     },
-    [mode, history]
+    [assets, mode, history]
   );
 
   const columns: Column<AssetData>[] = React.useMemo(
@@ -210,6 +217,7 @@ export const DashboardTable: React.FC<{
           mode === DashboardTableType.Deposit && row.original.backingReserve ? (
             <CollateralView
               tokenAddress={row.original.backingReserve?.tokenAddress}
+              canCollateral={row.original.canCollateral}
             />
           ) : (
             <Text>{row.original.borrowMode === 1 ? "Stable" : "Variable"}</Text>
@@ -219,32 +227,34 @@ export const DashboardTable: React.FC<{
         Header: mode === DashboardTableType.Borrow ? "Actions" : "Actions",
         accessor: row => row.tokenAddress,
         Cell: (({ row }) => (
-          <Box
-            d="flex"
-            flexDir="row"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Button
-              fontSize={{ base: fontSizes.md, md: fontSizes.lg }}
-              bg="secondary.900"
-              _hover={{ bg: "primary.50" }}
-              mr="1rem"
-              onClick={() =>
-                onActionClicked("Deposit-Borrow", {
-                  symbol:
-                    row.original.backingReserve?.symbol ?? row.original.symbol,
-                  tokenAddress:
-                    row.original.backingReserve?.tokenAddress ??
-                    row.original.tokenAddress,
-                  balance: row.original.balance,
-                })
-              }
-            >
-              <ColoredText fontWeight="400">
-                {mode === DashboardTableType.Borrow ? "Borrow" : "Deposit"}
-              </ColoredText>
-            </Button>
+          <Box d="flex" flexDir="row" alignItems="center" justifyContent="end">
+            {(mode === DashboardTableType.Borrow && row.original.canBorrow) ||
+            (mode === DashboardTableType.Deposit && row.original.canDeposit) ? (
+              <Button
+                fontSize={{ base: fontSizes.md, md: fontSizes.lg }}
+                bg="secondary.900"
+                _hover={{ bg: "primary.50" }}
+                mr="1rem"
+                onClick={() => {
+                  onActionClicked("Deposit-Borrow", {
+                    symbol:
+                      row.original.backingReserve?.symbol ??
+                      row.original.symbol,
+                    tokenAddress:
+                      row.original.backingReserve?.tokenAddress ??
+                      row.original.tokenAddress,
+                    balance: row.original.balance,
+                  });
+                }}
+              >
+                {mode === DashboardTableType.Borrow &&
+                row.original.canBorrow === true ? (
+                  <ColoredText fontWeight="400">{"Borrow"}</ColoredText>
+                ) : (
+                  <ColoredText fontWeight="400">{"Deposit"}</ColoredText>
+                )}
+              </Button>
+            ) : null}
             <Button
               fontSize={{ base: fontSizes.sm, md: fontSizes.md }}
               borderColor="primary.50"
@@ -266,7 +276,7 @@ export const DashboardTable: React.FC<{
             >
               {mode === DashboardTableType.Borrow ? "Repay" : "Withdraw"}
             </Button>
-          </Box>
+          </Box>  
         )) as Renderer<CellProps<AssetData, string>>,
       },
     ],

@@ -26,7 +26,7 @@ function getWeb3Library(
   connector?: AbstractConnector | undefined
 ): Web3Provider {
   const library = new Web3Provider(provider);
-  library.pollingInterval = 12_000;
+  library.pollingInterval = 5000;
   return library;
 }
 

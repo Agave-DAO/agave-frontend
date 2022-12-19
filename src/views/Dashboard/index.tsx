@@ -22,6 +22,9 @@ export interface AssetData {
   backingReserve?: ReserveTokenDefinition | undefined;
   balance: BigNumber;
   borrowMode?: number;
+  canDeposit?: boolean;
+  canBorrow?: boolean;
+  canCollateral?: boolean;
 }
 
 export const Dashboard: React.FC<{}> = () => {
@@ -89,13 +92,19 @@ export const Dashboard: React.FC<{}> = () => {
           ? {
               ...asset,
               symbol: nativeSymbols?.native,
+              canBorrow: (tokenConfigs && (!tokenConfigs[asset.tokenAddress]?.isFrozen && tokenConfigs[asset.tokenAddress].borrowingEnabled)),
+              canCollateral: (tokenConfigs && (!tokenConfigs[asset.tokenAddress]?.ltv.isZero() && tokenConfigs[asset.tokenAddress].usageAsCollateralEnabled))
             }
-          : asset;
+          : {
+            ...asset,
+            canBorrow: (tokenConfigs && (!tokenConfigs[asset.tokenAddress]?.isFrozen && tokenConfigs[asset.tokenAddress].borrowingEnabled)),
+            canCollateral: (tokenConfigs && (!tokenConfigs[asset.tokenAddress]?.ltv.isZero() && tokenConfigs[asset.tokenAddress].usageAsCollateralEnabled))
+          };
       })
       .filter(asset => {
         if (tokenConfigs) {
           const config = tokenConfigs[asset.tokenAddress];
-          return config?.isActive && !config?.isFrozen;
+          return config?.isActive;
         }
         return true;
       });
@@ -115,20 +124,25 @@ export const Dashboard: React.FC<{}> = () => {
                 ...asset.backingReserve,
                 symbol: nativeSymbols.native,
               },
+              canDeposit: (tokenConfigs && !(tokenConfigs[asset.backingReserve.tokenAddress]?.isFrozen)),
+              canCollateral: (tokenConfigs && (!tokenConfigs[asset.backingReserve.tokenAddress]?.ltv.isZero() && tokenConfigs[asset.backingReserve.tokenAddress]?.usageAsCollateralEnabled))
             }
-          : asset;
+          : {
+            ...asset,
+            canDeposit: (tokenConfigs && !(tokenConfigs[asset.backingReserve.tokenAddress]?.isFrozen)),
+            canCollateral: (tokenConfigs && tokenConfigs[asset.backingReserve.tokenAddress]?.usageAsCollateralEnabled && (!tokenConfigs[asset.backingReserve.tokenAddress]?.ltv.isZero() && tokenConfigs[asset.backingReserve.tokenAddress]?.usageAsCollateralEnabled))        };
       })
       .filter(asset => {
         if (tokenConfigs) {
           const config = tokenConfigs[asset.backingReserve.tokenAddress];
-          return config?.isActive && !config?.isFrozen;
+          return config?.isActive;
         }
         return true;
       });
   }, [balances]);
 
-  // Rewards information
-  const userRewards = useUserRewards();
+    // Rewards information
+    const userRewards = useUserRewards();
 
   return (
     <DashboardLayout
