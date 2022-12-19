@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { 
     Box, 
     Center, 
@@ -32,6 +32,7 @@ import { externalAddresses } from "../../utils/contracts/contractAddresses/exter
 import { BigNumber } from "ethers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon, useNativeSymbols } from "../../utils/icons";
+import { stableValueHash } from "react-query/types/core/utils";
 
 
 
@@ -168,152 +169,6 @@ const InnerBox: React.FC<{
     isModalTrigger,
     buttonOverrideContent,
 }) => {
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    return (
-      <Box
-        w="100%"
-        maxW="100%"
-        px={{ base: "1.1rem", md: "2.2rem" }}
-        py={{ base: spacings.md, md: "1.5rem" }}
-        bg="secondary.900"
-        rounded="2xl"
-        position="relative"
-        minW="40%"
-        mx={{ base: "0.5rem", md: "1rem" }}
-        my="1rem"
-        align="center"
-      >
-        <HStack spacing="1rem" mr="1rem" height="100%">
-            <VStack
-                spacing={4}
-                w="90%"
-                align="stretch"
-                textAlign="left"
-                flexDirection="column"
-            >
-                <NumberInput>
-                    <NumberInputField
-                        min={0}
-                        defaultValue={100}
-                        fontSize={{ base:"20px", sm:"30px"}}
-                        maxWidth="200px"
-                        height="27px"
-                        padding="0"
-                        rounded="0s"
-                        border="0"
-                        _focus={{ boxShadow:"0"}}
-                        borderBottom="1px solid var(--chakra-colors-primary-900)"
-                        _hover={{borderBottom: "1px solid var(--chakra-colors-primary-900)"}}
-                        boxShadow="0 !important"
-                        placeholder="0"
-                        disabled={innerType=="to"}
-                    />
-                </NumberInput>
-
-                {innerType=="from"?
-                    <Button
-                        color="white"
-                        fontSize={{ base: "1rem", md: fontSizes.sm }}
-                        fontWeight="normal"
-                        bg="primary.300"
-                        alignSelf="flex-start"
-                        disabled={true}
-                        height="auto"
-                        py="3px"
-                        _hover={{bgColor: innerType=="from"?"primary.900":"" }}
-                        _active={{bgColor: innerType=="from"?"primary.900":"" }}
-                    >
-                        MAX
-                    </Button>
-                :""}
-            </VStack>
-            <VStack
-                spacing={4}
-                w="90%"
-                align="stretch"
-                textAlign="right"
-                flexDirection="column"
-            >
-
-                <Button
-                    className={innerType+"-"+outerType}
-                    color={innerType=="from"?"white":"var(--chakra-colors-primary-900)"}
-                    fontSize={{ base: "1.3rem", md: fontSizes.md }}
-                    fontWeight="normal"
-                    border={innerType=="to"?"2px solid var(--chakra-colors-primary-900)":""}
-                    bg="primary.300"
-                    py="1.6rem"
-                    my="1.2rem"
-                    width="140px"
-                    alignSelf="flex-end"
-                    px={{ base: "5%", md: "2.171rem" }}
-                    onClick={onOpen}
-                    bgColor={innerType=="to"?"secondary.900":""}
-                    _hover={{bgColor: innerType=="from"?"primary.900":"" }}
-                    _active={{bgColor: innerType=="from"?"primary.900":"" }}
-                    disabled={innerType=="to"}
-                    opacity="1 !important"
-                >
-                    {innerType=="from"?"Select token":(outerType=="wrap"?"Wrapped token":"Unwrapped token")}
-                </Button>
-            </VStack>
-        </HStack>
-
-        {isModalTrigger && (
-            
-            <Modal isOpen={isOpen} onClose={onClose} isCentered>
-            <ModalOverlay />
-            <ModalContent
-                color="primary.900"
-                bg="linear-gradient(180deg, #F3FFF7 8.89%, #DCFFF1 146.53%)"
-                px={{ base: "3rem", md: "3.9rem" }}
-                py="2rem"
-                rounded="lg"
-                border="5px double #044d44"
-                minH={{ base: "50%", md: "30vh" }}
-            >
-                <TokenListBox 
-                    outerType={outerType} 
-                />
-
-                <ModalFooter>
-                <Button
-                    w={{ base: "100%", md: "60%" }}
-                    m="auto"
-                    mt="20px"
-                    py="1.5rem"
-                    fontSize={{ base: "1.6rem", md: fontSizes.md }}
-                    bg="secondary.100"
-                    color="white"
-                    fontWeight="normal"
-                    onClick={onClose}
-                    _hover={{bgColor:"secondary.900"}}
-                    _active={{bgColor:"secondary.900"}}
-                >
-                    Close
-                </Button>
-                </ModalFooter>
-            </ModalContent>
-            </Modal>
-        )}
-      </Box>
-    );
-};
-
-
-
-const TokenListBox: React.FC<{ 
-    outerType: string; // wrap, unwrap
-} & CenterProps> = ({
-    outerType,
-    children,
-    ...props
-}) => {
-
-    const toWrapList = ['WXDAI', 'USDC', 'LINK', 'GNO', 'FOX', 'USDT', 'WETH', 'WBTC'];
-    const toUnwrapList = ['agWXDAI', 'agUSDC', 'agLINK', 'agGNO', 'agFOX', 'agUSDT', 'agWETH', 'agWBTC'];
-
-    const tokenList = (outerType=='wrap')?toWrapList:toUnwrapList;
 
     const balances:any = {
         'WXDAI': useUserAssetBalance(externalAddresses.WXDAI),
@@ -355,10 +210,230 @@ const TokenListBox: React.FC<{
         'agWBTC': tokenDecimals(externalAddresses.agWBTC),
     }
 
-    function selectToken(event: React.MouseEvent<HTMLButtonElement>) {
-        console.log("clicked", event.currentTarget.name);
-        return '';
-    }
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const balanceToWrapChange = (e:any) => e.target.value?setBalanceToWrap(e.target.value):'';
+    const balanceToUnwrapChange = (e:any) => e.target.value?setBalanceToUnwrap(e.target.value):'';
+    const [ tokenToWrap, setTokenToWrap ] = React.useState('');
+    const [ tokenToUnwrap, setTokenToUnwrap ] = React.useState('');
+    const [ balanceToWrap, setBalanceToWrap ] = React.useState(0);
+    const [ balanceToUnwrap, setBalanceToUnwrap ] = React.useState(0);
+    const [ maxBalanceToWrap, setMaxBalanceToWrap ] = React.useState(0);
+    const [ maxBalanceToUnwrap, setMaxBalanceToUnwrap ] = React.useState(0);
+    const [ toWrapButtonText, setToWrapButtonText ] = React.useState<any>('Select token');
+    const [ toUnwrapButtonText, setToUnwrapButtonText ] = React.useState<any>('Select token');
+    const [ wrappedButtonText, setWrappedButtonText ] = React.useState<any>('Wrapped token');
+    const [ unwrappedButtonText, setUnwrappedButtonText ] = React.useState<any>('Unwrapped token');
+    
+    useEffect(() => {
+        if (tokenToWrap=='') {
+            setToWrapButtonText("Select token");
+            setMaxBalanceToWrap(0);
+        } else {
+            setBalanceToWrap(0);
+            setToWrapButtonText(
+                <HStack>
+                    <TokenIcon 
+                        symbol={tokenToWrap} 
+                        width="8" 
+                        height="8"
+                        mt="-1px"
+                    />
+                    <Text 
+                        width="100%"
+                        textAlign="left"
+                        marginX="8px"
+                    >
+                        {tokenToWrap}
+                    </Text>
+                </HStack>
+            )
+            setMaxBalanceToWrap(Number(bigNumberToString(balances[tokenToWrap].data, 10, decimals[tokenToWrap].data)));
+        };
+        onClose();
+
+    }, [tokenToWrap]);
+
+    useEffect(() => {
+        
+    }, [tokenToUnwrap]);
+
+    return (
+      <Box
+        w="100%"
+        maxW="100%"
+        px={{ base: "1.1rem", md: "2.2rem" }}
+        py={{ base: spacings.md, md: "1.5rem" }}
+        bg="secondary.900"
+        rounded="2xl"
+        position="relative"
+        minW="40%"
+        mx={{ base: "0.5rem", md: "1rem" }}
+        my="1rem"
+        align="center"
+      >
+        <HStack spacing="1rem" mr="1rem" height="100%">
+            <VStack
+                spacing={4}
+                w="90%"
+                align="stretch"
+                textAlign="left"
+                flexDirection="column"
+            >
+                <NumberInput
+                    // TODO NEXT: handle keypress of . and 0
+                    min={0}
+                    max={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
+                    keepWithinRange={true}
+                    type="number"
+                    value={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+                    onChange={(valueString) => (outerType=="wrap"?setBalanceToWrap(Number(valueString)):setBalanceToUnwrap(Number(valueString)))}
+                >
+                    <NumberInputField 
+                        fontSize={{ base:"20px", sm:"30px"}}
+                        maxWidth="200px"
+                        height="27px"
+                        padding="0"
+                        rounded="0s"
+                        border="0"
+                        _focus={{ boxShadow:"0"}}
+                        borderBottom="1px solid var(--chakra-colors-primary-900)"
+                        _hover={{borderBottom: "1px solid var(--chakra-colors-primary-900)"}}
+                        boxShadow="0 !important"
+                        disabled={outerType=="wrap"?(tokenToWrap==''|| innerType=="to"):(tokenToUnwrap=='' || innerType=="to")}
+                    />
+                </NumberInput>
+
+                {innerType=="from"?
+                    <HStack>
+                        <Button
+                            color="white"
+                            fontSize={{ base: "1rem", md: fontSizes.sm }}
+                            fontWeight="normal"
+                            bg="primary.300"
+                            alignSelf="flex-start"
+                            disabled={outerType=="wrap"?(maxBalanceToWrap==0):(maxBalanceToUnwrap==0)}
+                            height="auto"
+                            py="3px"
+                            onClick={()=>{outerType=="wrap"?setBalanceToWrap(maxBalanceToWrap):setBalanceToUnwrap(maxBalanceToUnwrap)}}
+                            _hover={{bgColor: innerType=="from"?"primary.900":"" }}
+                            _active={{bgColor: innerType=="from"?"primary.900":"" }}
+                        >
+                            MAX
+                        </Button>
+
+                        <ColoredText
+                            opacity="0.4"
+                            fontSize="1.4rem"
+                        >
+                            {outerType=="wrap"?maxBalanceToWrap.toString():maxBalanceToUnwrap.toString()}
+
+                        </ColoredText>
+                    </HStack>
+                :""}
+            </VStack>
+            <VStack
+                spacing={4}
+                w="90%"
+                align="stretch"
+                textAlign="right"
+                flexDirection="column"
+            >
+
+                <Button
+                    className={innerType+"-"+outerType}
+                    color={innerType=="from"?"white":"var(--chakra-colors-primary-900)"}
+                    fontSize={{ base: "1.3rem", md: fontSizes.md }}
+                    fontWeight="normal"
+                    border={innerType=="to"?"2px solid var(--chakra-colors-primary-900)":""}
+                    bg="primary.300"
+                    py="1.6rem"
+                    my="1.2rem"
+                    width="140px"
+                    alignSelf="flex-end"
+                    px={{ base: "5%", md: "2.171rem" }}
+                    onClick={onOpen}
+                    bgColor={innerType=="to"?"secondary.900":""}
+                    _hover={{bgColor: innerType=="from"?"primary.900":"" }}
+                    _active={{bgColor: innerType=="from"?"primary.900":"" }}
+                    disabled={innerType=="to"}
+                    opacity="1 !important"
+                >
+                    { innerType=="from"?( 
+                        outerType=="wrap"?toWrapButtonText:toUnwrapButtonText
+                    ):(
+                        outerType=="wrap"?wrappedButtonText:unwrappedButtonText
+                    )}
+                </Button>
+            </VStack>
+        </HStack>
+
+        {isModalTrigger && (
+            
+            <Modal isOpen={isOpen} onClose={onClose} isCentered>
+            <ModalOverlay />
+            <ModalContent
+                color="primary.900"
+                bg="linear-gradient(180deg, #F3FFF7 8.89%, #DCFFF1 146.53%)"
+                px={{ base: "3rem", md: "3.9rem" }}
+                py="2rem"
+                rounded="lg"
+                border="5px double #044d44"
+                minH={{ base: "50%", md: "30vh" }}
+            >
+                <TokenListBox 
+                    outerType={outerType} 
+                    setTokenToWrap={setTokenToWrap}
+                    setTokenToUnwrap={setTokenToUnwrap}
+                    onClose={onClose}
+                />
+
+                <ModalFooter>
+                <Button
+                    w={{ base: "100%", md: "60%" }}
+                    m="auto"
+                    mt="20px"
+                    py="1.5rem"
+                    fontSize={{ base: "1.6rem", md: fontSizes.md }}
+                    bg="secondary.100"
+                    color="white"
+                    fontWeight="normal"
+                    onClick={() => {
+                        outerType=="wrap"?setTokenToWrap(''):setTokenToUnwrap('');
+                        onClose();
+                    }}
+                    _hover={{bgColor:"secondary.900"}}
+                    _active={{bgColor:"secondary.900"}}
+                >
+                    Close
+                </Button>
+                </ModalFooter>
+            </ModalContent>
+            </Modal>
+        )}
+      </Box>
+    );
+};
+
+
+
+const TokenListBox: React.FC<{ 
+    outerType: string; // wrap, unwrap
+    setTokenToWrap: any;
+    setTokenToUnwrap: any;
+    onClose:any;
+} & CenterProps> = ({
+    outerType,
+    setTokenToWrap,
+    setTokenToUnwrap,
+    onClose,
+    children,
+    ...props
+}) => {
+
+    const toWrapList = ['WXDAI', 'USDC', 'LINK', 'GNO', 'FOX', 'USDT', 'WETH', 'WBTC'];
+    const toUnwrapList = ['agWXDAI', 'agUSDC', 'agLINK', 'agGNO', 'agFOX', 'agUSDT', 'agWETH', 'agWBTC'];
+
+    const tokenList = (outerType=='wrap')?toWrapList:toUnwrapList;
 
     return (
         <Center>
@@ -369,7 +444,10 @@ const TokenListBox: React.FC<{
                 <Text>Select your token</Text>
                 {tokenList.map(tkn => 
                     <Button
-                        onClick={selectToken}
+                        onClick={(e)=> {
+                            outerType=="wrap"?setTokenToWrap(tkn):setTokenToUnwrap(tkn);
+                            onClose(); 
+                        }}
                         width="100%"
                         opacity="0.9"
                         _hover={{ opacity: "1" }}
