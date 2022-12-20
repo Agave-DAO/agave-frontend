@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { 
     Box, 
     Center, 
@@ -213,16 +213,17 @@ const InnerBox: React.FC<{
     const { isOpen, onOpen, onClose } = useDisclosure();
     const balanceToWrapChange = (e:any) => e.target.value?setBalanceToWrap(e.target.value):'';
     const balanceToUnwrapChange = (e:any) => e.target.value?setBalanceToUnwrap(e.target.value):'';
-    const [ tokenToWrap, setTokenToWrap ] = React.useState('');
-    const [ tokenToUnwrap, setTokenToUnwrap ] = React.useState('');
-    const [ balanceToWrap, setBalanceToWrap ] = React.useState(0);
-    const [ balanceToUnwrap, setBalanceToUnwrap ] = React.useState(0);
-    const [ maxBalanceToWrap, setMaxBalanceToWrap ] = React.useState(0);
-    const [ maxBalanceToUnwrap, setMaxBalanceToUnwrap ] = React.useState(0);
-    const [ toWrapButtonText, setToWrapButtonText ] = React.useState<any>('Select token');
-    const [ toUnwrapButtonText, setToUnwrapButtonText ] = React.useState<any>('Select token');
-    const [ wrappedButtonText, setWrappedButtonText ] = React.useState<any>('Wrapped token');
-    const [ unwrappedButtonText, setUnwrappedButtonText ] = React.useState<any>('Unwrapped token');
+    const [ tokenToWrap, setTokenToWrap ] = useState('');
+    const [ tokenToUnwrap, setTokenToUnwrap ] = useState('');
+    const [ balanceToWrap, setBalanceToWrap ] = useState(0);
+    const [ balanceToUnwrap, setBalanceToUnwrap ] = useState(0);
+    const [ maxBalanceToWrap, setMaxBalanceToWrap ] = useState(0);
+    const [ maxBalanceToUnwrap, setMaxBalanceToUnwrap ] = useState(0);
+    const [ toWrapButtonText, setToWrapButtonText ] = useState<any>('Select token');
+    const [ toUnwrapButtonText, setToUnwrapButtonText ] = useState<any>('Select token');
+    const [ wrappedButtonText, setWrappedButtonText ] = useState<any>('Wrapped token');
+    const [ unwrappedButtonText, setUnwrappedButtonText ] = useState<any>('Unwrapped token');
+    const maxDecimalsToDisplay = 5;
     
     useEffect(() => {
         if (tokenToWrap=='') {
@@ -247,14 +248,37 @@ const InnerBox: React.FC<{
                     </Text>
                 </HStack>
             )
-            setMaxBalanceToWrap(Number(bigNumberToString(balances[tokenToWrap].data, 10, decimals[tokenToWrap].data)));
+            setMaxBalanceToWrap(Number(bigNumberToString(balances[tokenToWrap].data, maxDecimalsToDisplay, decimals[tokenToWrap].data)));
         };
         onClose();
-
     }, [tokenToWrap]);
 
     useEffect(() => {
-        
+        if (tokenToUnwrap=='') {
+            setToUnwrapButtonText("Select token");
+            setMaxBalanceToUnwrap(0);
+        } else {
+            setBalanceToUnwrap(0);
+            setToUnwrapButtonText(
+                <HStack>
+                    <TokenIcon 
+                        symbol={tokenToUnwrap} 
+                        width="8" 
+                        height="8"
+                        mt="-1px"
+                    />
+                    <Text 
+                        width="100%"
+                        textAlign="left"
+                        marginX="8px"
+                    >
+                        {tokenToUnwrap}
+                    </Text>
+                </HStack>
+            )
+            setMaxBalanceToUnwrap(Number(bigNumberToString(balances[tokenToUnwrap].data, maxDecimalsToDisplay, decimals[tokenToUnwrap].data)));
+        };
+        onClose();        
     }, [tokenToUnwrap]);
 
     return (
@@ -271,74 +295,8 @@ const InnerBox: React.FC<{
         my="1rem"
         align="center"
       >
-        <HStack spacing="1rem" mr="1rem" height="100%">
-            <VStack
-                spacing={4}
-                w="90%"
-                align="stretch"
-                textAlign="left"
-                flexDirection="column"
-            >
-                <NumberInput
-                    // TODO NEXT: handle keypress of . and 0
-                    min={0}
-                    max={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
-                    keepWithinRange={true}
-                    type="number"
-                    value={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
-                    onChange={(valueString) => (outerType=="wrap"?setBalanceToWrap(Number(valueString)):setBalanceToUnwrap(Number(valueString)))}
-                >
-                    <NumberInputField 
-                        fontSize={{ base:"20px", sm:"30px"}}
-                        maxWidth="200px"
-                        height="27px"
-                        padding="0"
-                        rounded="0s"
-                        border="0"
-                        _focus={{ boxShadow:"0"}}
-                        borderBottom="1px solid var(--chakra-colors-primary-900)"
-                        _hover={{borderBottom: "1px solid var(--chakra-colors-primary-900)"}}
-                        boxShadow="0 !important"
-                        disabled={outerType=="wrap"?(tokenToWrap==''|| innerType=="to"):(tokenToUnwrap=='' || innerType=="to")}
-                    />
-                </NumberInput>
-
-                {innerType=="from"?
-                    <HStack>
-                        <Button
-                            color="white"
-                            fontSize={{ base: "1rem", md: fontSizes.sm }}
-                            fontWeight="normal"
-                            bg="primary.300"
-                            alignSelf="flex-start"
-                            disabled={outerType=="wrap"?(maxBalanceToWrap==0):(maxBalanceToUnwrap==0)}
-                            height="auto"
-                            py="3px"
-                            onClick={()=>{outerType=="wrap"?setBalanceToWrap(maxBalanceToWrap):setBalanceToUnwrap(maxBalanceToUnwrap)}}
-                            _hover={{bgColor: innerType=="from"?"primary.900":"" }}
-                            _active={{bgColor: innerType=="from"?"primary.900":"" }}
-                        >
-                            MAX
-                        </Button>
-
-                        <ColoredText
-                            opacity="0.4"
-                            fontSize="1.4rem"
-                        >
-                            {outerType=="wrap"?maxBalanceToWrap.toString():maxBalanceToUnwrap.toString()}
-
-                        </ColoredText>
-                    </HStack>
-                :""}
-            </VStack>
-            <VStack
-                spacing={4}
-                w="90%"
-                align="stretch"
-                textAlign="right"
-                flexDirection="column"
-            >
-
+        <Center>
+            <VStack spacing="1rem" mr="1rem" height="100%">
                 <Button
                     className={innerType+"-"+outerType}
                     color={innerType=="from"?"white":"var(--chakra-colors-primary-900)"}
@@ -347,8 +305,9 @@ const InnerBox: React.FC<{
                     border={innerType=="to"?"2px solid var(--chakra-colors-primary-900)":""}
                     bg="primary.300"
                     py="1.6rem"
-                    my="1.2rem"
+                    verticalAlign="top"
                     width="140px"
+                    minWidth="120px"
                     alignSelf="flex-end"
                     px={{ base: "5%", md: "2.171rem" }}
                     onClick={onOpen}
@@ -365,7 +324,67 @@ const InnerBox: React.FC<{
                     )}
                 </Button>
             </VStack>
-        </HStack>
+
+            <VStack>
+                <HStack>
+                    <NumberInput
+                        // TODO NEXT: handle keypress of . and 0
+                        min={0}
+                        max={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
+                        keepWithinRange={true}
+                        type="number"
+                        value={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+                        onChange={(valueString) => (outerType=="wrap"?setBalanceToWrap(Number(valueString)):setBalanceToUnwrap(Number(valueString)))}
+                    >
+                        <NumberInputField 
+                            fontSize={{ base:"20px", sm:"25px"}}
+                            height="27px"
+                            padding="0"
+                            rounded="0s"
+                            border="0"
+                            _focus={{ boxShadow:"0"}}
+                            borderBottom="1px solid var(--chakra-colors-primary-900)"
+                            _hover={{borderBottom: "1px solid var(--chakra-colors-primary-900)"}}
+                            boxShadow="0 !important"
+                            disabled={outerType=="wrap"?(tokenToWrap==''|| innerType=="to"):(tokenToUnwrap=='' || innerType=="to")}
+                        />
+                    </NumberInput>
+                    <Button
+                            color="white"
+                            fontSize={{ base: "1rem", md: fontSizes.sm }}
+                            fontWeight="normal"
+                            bg="primary.300"
+                            disabled={outerType=="wrap"?(maxBalanceToWrap==0):(maxBalanceToUnwrap==0)}
+                            height="auto"
+                            py="3px"
+                            marginBottom="-8px !important"
+                            onClick={()=>{outerType=="wrap"?setBalanceToWrap(maxBalanceToWrap):setBalanceToUnwrap(maxBalanceToUnwrap)}}
+                            _hover={{bgColor: innerType=="from"?"primary.900":"" }}
+                            _active={{bgColor: innerType=="from"?"primary.900":"" }}
+                        >
+                            MAX
+                    </Button>
+                </HStack>
+
+
+
+                {innerType=="from"?(
+                    <HStack
+                        width="100%"
+                    >
+                        <Text
+                            opacity={(outerType=="wrap"&&tokenToWrap!="") || (outerType=="unwrap"&&tokenToUnwrap!="")?"1":"0.3"}
+                            fontSize="1.32rem"
+                            color="white"
+                        >
+                            Available: {outerType=="wrap"?maxBalanceToWrap.toString():maxBalanceToUnwrap.toString()} {outerType=="wrap"?tokenToWrap:tokenToUnwrap}
+                        </Text>
+                    </HStack>
+                ):(
+                    ""
+                )}
+            </VStack>
+        </Center>
 
         {isModalTrigger && (
             
