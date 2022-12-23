@@ -51,12 +51,10 @@ export const useApproveDelegationMutation = ({
         asset,
         library.getSigner()
       );
-      console.log(asset, spender, amount, tokenContract);
       const priorAllowance = await tokenContract.borrowAllowance(
         account,
         spender
       );
-      console.log(asset, spender, amount, priorAllowance);
       if (priorAllowance.lt(amount)) {
         const approval = tokenContract.approveDelegation(spender, amount);
         const approvalConfirmation = await usingProgressNotification(

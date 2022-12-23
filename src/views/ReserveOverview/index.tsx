@@ -38,7 +38,6 @@ const ReserveOverview: React.FC = () => {
     const commonAsset = allReserves.data?.find(
       asset => asset.symbol === assetName
     );
-    console.log(allReserves.data, nativeSymbols.wrappednative, assetName);
     return nativeAsset &&
       (nativeSymbols.wrappednative === assetName ||
         nativeSymbols.native === assetName)

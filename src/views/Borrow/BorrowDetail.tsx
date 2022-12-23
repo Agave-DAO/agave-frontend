@@ -258,7 +258,6 @@ const ModeSelectedComp: React.FC<{
       .then(() => dispatch(createState("borrowTx", { ...state })))
       // TODO: Switch to an error-display state that returns to init
       .catch(e => {
-        console.log(state);
         dispatch(createState("init", { token: state.token }));
       });
   }, [state, dispatch, mutateAsync]);

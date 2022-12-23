@@ -24,8 +24,6 @@ export const useAsset = (assetName: string | undefined): UseAssetDto => {
         console.warn(`Asset ${assetName} not found`);
         return;
       }
-      console.log("Asset:");
-      console.log(asset);
       return asset;
     },
     {

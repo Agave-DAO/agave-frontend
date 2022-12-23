@@ -38,7 +38,6 @@ const ThreeStateSwitch: React.FC<{
   active: boolean | null;
   onClick: (previousState: boolean | null) => void;
 }> = ({ state, active, onClick }) => {
-  console.log("active", active, state);
   const onClickWrapped = React.useCallback(() => {
     onClick(state);
   }, [state, onClick]);

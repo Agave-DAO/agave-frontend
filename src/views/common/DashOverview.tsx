@@ -64,7 +64,7 @@ export const DashOverviewIntro: React.FC<{
     mode === "withdraw" || mode === "deposit",
     mode === "deposit" || mode === "borrow"
   );
-
+  
   const newHealthFactorAsBigNumber = newHealthFactor
     ? BigNumber.from((1000 * newHealthFactor.toUnsafeFloat()).toFixed(0))
     : newHealthFactor === null
