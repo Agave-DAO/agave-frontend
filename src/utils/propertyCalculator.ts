@@ -28,12 +28,12 @@ export function useAllAssetsData() {
   const { data: reserveTokens } = useAllReserveTokensWithConfiguration();
   const { data: userDepositAssetBalancesDaiWei } =
     useUserDepositAssetBalancesDaiWei();
-  const { data: userVariableDebtTokenBalancesDaiWei } =
+  const { data: userDebtTokenBalancesDaiWei } =
     useUserStableAndVariableDebtTokenBalancesDaiWei();
-  console.log(userVariableDebtTokenBalancesDaiWei)
+  const filteredReserveTokens = reserveTokens?.filter(t=> {return (t.isActive && !t.isFrozen) ? true : false})
 
-  const assetsData = reserveTokens?.map((t: ReserveTokensConfiguration) => {
-    const totalBorrowedForAsset = userVariableDebtTokenBalancesDaiWei?.find(
+  const assetsData = filteredReserveTokens?.map((t: ReserveTokensConfiguration) => {
+    const totalBorrowedForAsset = userDebtTokenBalancesDaiWei?.filter(
       ele => ele.tokenAddress === t.tokenAddress
     );
 
@@ -46,7 +46,7 @@ export function useAllAssetsData() {
     const liquidationThreshold = t.rawliquidationThreshold;
 
     const pricePer = totalBorrowedForAsset
-      ? totalBorrowedForAsset.daiWeiPricePer
+      ? totalBorrowedForAsset[0].daiWeiPricePer
       : null;
 
     const collateralBalance = userDepositAsset
@@ -56,15 +56,26 @@ export function useAllAssetsData() {
       ? userDepositAsset.daiWeiPriceTotal
       : null;
     const collateralBorrowCapacity =
-      ltv && collateralValue ? ltv.mul(collateralValue).div(10000) : null;
+      ltv && collateralValue
+        ? ltv.eq(constants.Zero)
+          ? collateralValue
+          : ltv.mul(collateralValue).div(10000)
+        : null;
 
     const collateralMaxCapacity =
       collateralValue && liquidationThreshold
-        ? liquidationThreshold.mul(collateralValue).div(10000)
+        ? liquidationThreshold.eq(constants.Zero)
+          ? collateralValue
+          : liquidationThreshold.mul(collateralValue).div(10000)
         : null;
-    const totalBorrowsValue = totalBorrowedForAsset
-      ? totalBorrowedForAsset.daiWeiPriceTotal
-      : null;
+    const totalBorrowsValue =
+      totalBorrowedForAsset &&
+      totalBorrowedForAsset[0].daiWeiPriceTotal &&
+      totalBorrowedForAsset[1].daiWeiPriceTotal
+        ? totalBorrowedForAsset[0].daiWeiPriceTotal.add(
+            totalBorrowedForAsset[1].daiWeiPriceTotal
+          )
+        : null;
     return {
       tokenConfig: t,
       aTokenAddress: userDepositAsset?.aTokenAddress,
@@ -91,9 +102,8 @@ function newHealthFactorGivenAssetsData(
     tokenAddress !== undefined && assetsData
       ? assetsData.find(t => t.tokenConfig.tokenAddress === tokenAddress)
       : undefined;
-
   const oldTotalCollateralMaxCapacity = assetsData?.reduce((acc, next) => {
-    return next.collateralMaxCapacity
+    return (next.collateralMaxCapacity && next.tokenConfig.borrowingEnabled)
       ? acc.add(next.collateralMaxCapacity)
       : acc;
   }, constants.Zero);
@@ -148,6 +158,7 @@ function newHealthFactorGivenAssetsData(
         ? oldTotalBorrowsvalue.sub(changeTotalBorrowsvalue)
         : oldTotalBorrowsvalue.sub(tokenData.borrowsValue)
       : undefined;
+
   // Multiply by 10^27 to be compatible with the Ray format and then converted into FixedNumber
   const newHealthFactor =
     newTotalBorrowsvalue &&

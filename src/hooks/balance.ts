@@ -25,7 +25,6 @@ export const useBalance = (asset: IMarketData | undefined): UseBalanceDto => {
     balanceQueryKey,
     async ctx => {
       const [address, library, asset]: typeof balanceQueryKey = ctx.queryKey;
-      console.log(address, library, asset);
       if (!address || !library || !asset) {
         return undefined;
       }
@@ -34,8 +33,6 @@ export const useBalance = (asset: IMarketData | undefined): UseBalanceDto => {
         library.getSigner()
       );
       const tokenBalance = await contract.balanceOf(address);
-      console.log("Token balance:");
-      console.log(bigNumberToString(tokenBalance));
       return tokenBalance;
     },
     {
