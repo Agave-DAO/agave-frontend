@@ -98,7 +98,6 @@ export const DashOverviewIntro: React.FC<{
         ? balance?.sub(MINIMUM_NATIVE_RESERVE)
         : balance
       : borrowedAmount?.mul(1000001).div(1000000);
-
   // If the amount selected is the max amount then the approval and payment is of MAX_UINT256 in order to pay the full amount.
   const infiniteAmount =
     mode === "withdraw" &&
@@ -145,9 +144,9 @@ export const DashOverviewIntro: React.FC<{
         py=".8rem"
         onClick={() => onSubmit(infiniteAmount || amount || BigNumber.from(0))}
       >
-        {balance === BigNumber.from(0) && amount?.gt(balance)
+        {balance === constants.Zero && amount?.gt(balance)
           ? "Not enough Balance"
-          : limitAmount && amount?.gt(limitAmount)
+          : limitAmount && amount?.gt(limitAmount) && newHealthFactorAsBigNumber?.lt(1000)
           ? "Insufficient collateral to cover risk"
           : "Continue"}
       </Button>
