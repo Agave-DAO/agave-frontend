@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, ReactNode } from "react";
 import { 
     Box, 
     Center, 
@@ -90,86 +90,14 @@ export const WrapLayout: React.FC<{}> = () => {
 }
 
 const OuterBox: React.FC<{
-    outerType: string; // wrap, unwrap
+    outerType: "wrap" | "unwrap";
 } & CenterProps> = ({
     outerType,
     children,
     ...props
 }) => {
-    return (
-      <Center
-        boxSizing="content-box"
-        flexDirection="column"
-        rounded="xl"
-        textAlign="center"
-        minH="10.6rem"
-        mb="5"
-        minW={{ base: "100%", lg: "auto" }}
-        flex={1}
-        bg="primary.900"
-        py="1rem"
-        {...props}
-      >
-        <VStack
-          spacing={4}
-          w="90%"
-          align="center"
-          flexDirection="column"
-        >
-          <ColoredText
-            fontSize="1.8rem"
-          >
-            {outerType=="wrap"?"Wrap tokens":"Unwrap tokens"}
-          </ColoredText>
-          <InnerBox
-            balance="0"
-            outerType={outerType}
-            innerType="from"
-            isModalTrigger={true}
-            onClick={() =>{}}
-          />
-          <InnerBox
-            balance="0"
-            outerType={outerType}
-            innerType="to"
-            isModalTrigger={false}
-            onClick={() =>{}}
-          />
-          <Button
-            width="30%"
-            mt="2.4rem"
-            textTransform="uppercase"
-            background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-            color="secondary.900"
-            fontWeight="bold"
-            px={{ base: "10rem", md: "6rem" }}
-            py="1.5rem"
-            fontSize={fontSizes.md}
-            disabled={true}
-           >
-            {outerType=="wrap"?"Wrap":"Unwrap"}
-          </Button>
-        </VStack>
-      </Center>
-    );
-};
 
-const InnerBox: React.FC<{
-    balance: string;
-    innerType: string; // from, to
-    outerType: string; // wrap, unwrap
-    isModalTrigger?: boolean;
-    onClick: React.MouseEventHandler;
-    buttonOverrideContent?: React.ReactNode | undefined;
-}> = ({
-    balance,
-    innerType,
-    outerType,
-    onClick,
-    isModalTrigger,
-    buttonOverrideContent,
-}) => {
-
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const balances:any = {
         'WXDAI': useUserAssetBalance(externalAddresses.WXDAI),
         'USDC': useUserAssetBalance(externalAddresses.USDC),
@@ -209,8 +137,6 @@ const InnerBox: React.FC<{
         'agWETH': tokenDecimals(externalAddresses.agWETH),
         'agWBTC': tokenDecimals(externalAddresses.agWBTC),
     }
-
-    const { isOpen, onOpen, onClose } = useDisclosure();
     const balanceToWrapChange = (e:any) => e.target.value?setBalanceToWrap(e.target.value):'';
     const balanceToUnwrapChange = (e:any) => e.target.value?setBalanceToUnwrap(e.target.value):'';
     const [ tokenToWrap, setTokenToWrap ] = useState('');
@@ -221,14 +147,17 @@ const InnerBox: React.FC<{
     const [ maxBalanceToUnwrap, setMaxBalanceToUnwrap ] = useState(0);
     const [ toWrapButtonText, setToWrapButtonText ] = useState<any>('Select token');
     const [ toUnwrapButtonText, setToUnwrapButtonText ] = useState<any>('Select token');
-    const [ wrappedButtonText, setWrappedButtonText ] = useState<any>('Wrapped token');
-    const [ unwrappedButtonText, setUnwrappedButtonText ] = useState<any>('Unwrapped token');
+    const [ wrappedButtonText, setWrappedButtonText ] = useState<any>('');
+    const [ unwrappedButtonText, setUnwrappedButtonText ] = useState<any>('');
     const maxDecimalsToDisplay = 5;
-    
+    const toTextColor = "white";
+
     useEffect(() => {
         if (tokenToWrap=='') {
             setToWrapButtonText("Select token");
+            setWrappedButtonText("");
             setMaxBalanceToWrap(0);
+            setBalanceToWrap(0);
         } else {
             setBalanceToWrap(0);
             setToWrapButtonText(
@@ -243,26 +172,16 @@ const InnerBox: React.FC<{
                         width="100%"
                         textAlign="left"
                         marginX="8px"
+                        fontSize="15px"
                     >
                         {tokenToWrap}
                     </Text>
                 </HStack>
-            )
-            setMaxBalanceToWrap(Number(bigNumberToString(balances[tokenToWrap].data, maxDecimalsToDisplay, decimals[tokenToWrap].data)));
-        };
-        onClose();
-    }, [tokenToWrap]);
-
-    useEffect(() => {
-        if (tokenToUnwrap=='') {
-            setToUnwrapButtonText("Select token");
-            setMaxBalanceToUnwrap(0);
-        } else {
-            setBalanceToUnwrap(0);
-            setToUnwrapButtonText(
+            );
+            setWrappedButtonText(
                 <HStack>
                     <TokenIcon 
-                        symbol={tokenToUnwrap} 
+                        symbol={"ag"+tokenToWrap} 
                         width="8" 
                         height="8"
                         mt="-1px"
@@ -271,15 +190,120 @@ const InnerBox: React.FC<{
                         width="100%"
                         textAlign="left"
                         marginX="8px"
+                        fontSize="15px"
+                        color={toTextColor}
                     >
-                        {tokenToUnwrap}
+                        {"ag"+tokenToWrap}
                     </Text>
                 </HStack>
-            )
-            setMaxBalanceToUnwrap(Number(bigNumberToString(balances[tokenToUnwrap].data, maxDecimalsToDisplay, decimals[tokenToUnwrap].data)));
+            );
+            setMaxBalanceToWrap(Number(bigNumberToString(balances[tokenToWrap].data, maxDecimalsToDisplay, decimals[tokenToWrap].data)));
         };
-        onClose();        
-    }, [tokenToUnwrap]);
+        onClose();
+    }, [tokenToWrap]);
+
+
+    return (
+      <Center
+        boxSizing="content-box"
+        flexDirection="column"
+        rounded="xl"
+        textAlign="center"
+        minH="10.6rem"
+        mb="5"
+        minW={{ base: "100%", lg: "auto" }}
+        flex={1}
+        bg="primary.900"
+        py="1rem"
+        {...props}
+      >
+        <VStack
+          spacing={4}
+          w="90%"
+          align="center"
+          flexDirection="column"
+        >
+          <ColoredText
+            fontSize="1.8rem"
+          >
+            {outerType=="wrap"?"Wrap tokens":"Unwrap tokens"}
+          </ColoredText>
+          <InnerBox
+            token={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
+            setToken={outerType=="wrap"?setTokenToWrap:setTokenToUnwrap}
+            balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+            maxBalance={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
+            setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
+            buttonText={outerType=="wrap"?toWrapButtonText:toUnwrapButtonText}
+            maxDecimalsToDisplay={maxDecimalsToDisplay}
+            toTextColor={toTextColor}
+            outerType={outerType}
+            innerType="from"
+            isModalTrigger={true}
+            onClick={() =>{}}
+          />
+          <InnerBox
+            token={outerType=="wrap"?'ag'+tokenToWrap:'ag'+tokenToUnwrap}
+            setToken={undefined}
+            balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+            maxBalance={undefined}
+            setBalance={undefined}
+            buttonText={outerType=="wrap"?wrappedButtonText:unwrappedButtonText}
+            maxDecimalsToDisplay={maxDecimalsToDisplay}
+            toTextColor={toTextColor}
+            outerType={outerType}
+            innerType="to"
+            isModalTrigger={false}
+            onClick={() =>{}}
+          />
+          <Button
+            width="30%"
+            mt="2.4rem"
+            textTransform="uppercase"
+            background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+            color="secondary.900"
+            fontWeight="bold"
+            px={{ base: "10rem", md: "6rem" }}
+            py="1.5rem"
+            fontSize={fontSizes.md}
+            disabled={true}
+           >
+            {outerType=="wrap"?"Wrap":"Unwrap"}
+          </Button>
+        </VStack>
+      </Center>
+    );
+};
+
+const InnerBox: React.FC<{
+    balance: number;
+    maxBalance: any,
+    setBalance: any,
+    token: string;
+    setToken: any,
+    buttonText: string | ReactNode | undefined;
+    innerType: "from" | "to";
+    outerType: "wrap" | "unwrap";
+    maxDecimalsToDisplay: number;
+    toTextColor: string;
+    isModalTrigger?: boolean;
+    onClick: React.MouseEventHandler;
+}> = ({
+    balance,
+    maxBalance,
+    setBalance,
+    token,
+    setToken,
+    buttonText,
+    innerType,
+    outerType,
+    maxDecimalsToDisplay,
+    toTextColor,
+    onClick,
+    isModalTrigger,
+}) => {
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     return (
       <Box
@@ -298,11 +322,10 @@ const InnerBox: React.FC<{
         <Center>
             <VStack spacing="1rem" mr="1rem" height="100%">
                 <Button
-                    className={innerType+"-"+outerType}
-                    color={innerType=="from"?"white":"var(--chakra-colors-primary-900)"}
+                    key={innerType+"-"+outerType}
+                    color="white"
                     fontSize={{ base: "1.3rem", md: fontSizes.md }}
                     fontWeight="normal"
-                    border={innerType=="to"?"2px solid var(--chakra-colors-primary-900)":""}
                     bg="primary.300"
                     py="1.6rem"
                     verticalAlign="top"
@@ -314,27 +337,23 @@ const InnerBox: React.FC<{
                     bgColor={innerType=="to"?"secondary.900":""}
                     _hover={{bgColor: innerType=="from"?"primary.900":"" }}
                     _active={{bgColor: innerType=="from"?"primary.900":"" }}
-                    disabled={innerType=="to"}
-                    opacity="1 !important"
+                    disabled={innerType=="to"||outerType=="unwrap"}
+                    opacity={outerType=="wrap"?"1 !important":""}
                 >
-                    { innerType=="from"?( 
-                        outerType=="wrap"?toWrapButtonText:toUnwrapButtonText
-                    ):(
-                        outerType=="wrap"?wrappedButtonText:unwrappedButtonText
-                    )}
+                    {buttonText}
+
                 </Button>
             </VStack>
 
             <VStack>
                 <HStack>
                     <NumberInput
-                        // TODO NEXT: handle keypress of . and 0
                         min={0}
-                        max={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
+                        max={maxBalance}
                         keepWithinRange={true}
                         type="number"
-                        value={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
-                        onChange={(valueString) => (outerType=="wrap"?setBalanceToWrap(Number(valueString)):setBalanceToUnwrap(Number(valueString)))}
+                        value={balance}
+                        onChange={(valueString) => setBalance(Number(valueString))}
                     >
                         <NumberInputField 
                             fontSize={{ base:"20px", sm:"25px"}}
@@ -342,28 +361,17 @@ const InnerBox: React.FC<{
                             padding="0"
                             rounded="0s"
                             border="0"
+                            color={innerType=="from"?"white":toTextColor}
                             _focus={{ boxShadow:"0"}}
-                            borderBottom="1px solid var(--chakra-colors-primary-900)"
-                            _hover={{borderBottom: "1px solid var(--chakra-colors-primary-900)"}}
+                            borderBottom={innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}
+                            _hover={{borderBottom: innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}}
                             boxShadow="0 !important"
-                            disabled={outerType=="wrap"?(tokenToWrap==''|| innerType=="to"):(tokenToUnwrap=='' || innerType=="to")}
+                            disabled={token=='' || innerType=='to'}
+                            _disabled={{opacity:(token!=''&&token!=='ag'?"1":"0.4")}}
+                            opacity={innerType=="to"?"0.7":"1"}
                         />
                     </NumberInput>
-                    <Button
-                            color="white"
-                            fontSize={{ base: "1rem", md: fontSizes.sm }}
-                            fontWeight="normal"
-                            bg="primary.300"
-                            disabled={outerType=="wrap"?(maxBalanceToWrap==0):(maxBalanceToUnwrap==0)}
-                            height="auto"
-                            py="3px"
-                            marginBottom="-8px !important"
-                            onClick={()=>{outerType=="wrap"?setBalanceToWrap(maxBalanceToWrap):setBalanceToUnwrap(maxBalanceToUnwrap)}}
-                            _hover={{bgColor: innerType=="from"?"primary.900":"" }}
-                            _active={{bgColor: innerType=="from"?"primary.900":"" }}
-                        >
-                            MAX
-                    </Button>
+
                 </HStack>
 
 
@@ -373,12 +381,35 @@ const InnerBox: React.FC<{
                         width="100%"
                     >
                         <Text
-                            opacity={(outerType=="wrap"&&tokenToWrap!="") || (outerType=="unwrap"&&tokenToUnwrap!="")?"1":"0.3"}
+                            opacity={(token!="")?"0.8":"0.3"}
                             fontSize="1.32rem"
                             color="white"
+                            textAlign="center"
+                            width="100%"
                         >
-                            Available: {outerType=="wrap"?maxBalanceToWrap.toString():maxBalanceToUnwrap.toString()} {outerType=="wrap"?tokenToWrap:tokenToUnwrap}
+                            Available: {maxBalance.toString()}
                         </Text>
+
+
+                        {innerType=="from"?(
+                            <Button
+                                    color="white"
+                                    fontSize={{ base: "1rem", md: fontSizes.sm }}
+                                    fontWeight="normal"
+                                    bg="primary.300"
+                                    disabled={maxBalance==0}
+                                    height="auto"
+                                    py="3px"
+                                    onClick={()=>{setBalance(maxBalance)}}
+                                    _hover={{bgColor: innerType=="from"?"primary.900":"" }}
+                                    _active={{bgColor: innerType=="from"?"primary.900":"" }}
+                                >
+                                    MAX
+                            </Button>
+                        ):("")}
+
+
+
                     </HStack>
                 ):(
                     ""
@@ -401,8 +432,7 @@ const InnerBox: React.FC<{
             >
                 <TokenListBox 
                     outerType={outerType} 
-                    setTokenToWrap={setTokenToWrap}
-                    setTokenToUnwrap={setTokenToUnwrap}
+                    setToken={setToken}
                     onClose={onClose}
                 />
 
@@ -417,7 +447,7 @@ const InnerBox: React.FC<{
                     color="white"
                     fontWeight="normal"
                     onClick={() => {
-                        outerType=="wrap"?setTokenToWrap(''):setTokenToUnwrap('');
+                        setToken('');
                         onClose();
                     }}
                     _hover={{bgColor:"secondary.900"}}
@@ -437,13 +467,11 @@ const InnerBox: React.FC<{
 
 const TokenListBox: React.FC<{ 
     outerType: string; // wrap, unwrap
-    setTokenToWrap: any;
-    setTokenToUnwrap: any;
+    setToken: any;
     onClose:any;
 } & CenterProps> = ({
     outerType,
-    setTokenToWrap,
-    setTokenToUnwrap,
+    setToken,
     onClose,
     children,
     ...props
@@ -464,7 +492,7 @@ const TokenListBox: React.FC<{
                 {tokenList.map(tkn => 
                     <Button
                         onClick={(e)=> {
-                            outerType=="wrap"?setTokenToWrap(tkn):setTokenToUnwrap(tkn);
+                            setToken(tkn);
                             onClose(); 
                         }}
                         width="100%"
@@ -475,6 +503,7 @@ const TokenListBox: React.FC<{
                         fontWeight="normal"
                         padding="0"
                         border="0"
+                        key={outerType+tkn}
                     >
                         <HStack 
                             width="100%"
