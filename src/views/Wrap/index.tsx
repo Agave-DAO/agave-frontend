@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactNode } from "react";
+import React, { useEffect, useState, useMemo, useRef, ReactNode } from "react";
 import { 
     Box, 
     Center, 
@@ -16,6 +16,7 @@ import {
     ModalFooter,
     Tooltip,
     Input,
+    InputProps,
     NumberInput,
     NumberInputField,
 } from "@chakra-ui/react";
@@ -29,14 +30,92 @@ import { useUserAssetBalance } from "../../queries/userAssets";
 import { tokenDecimals } from "../../queries/tokenDecimals";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { externalAddresses } from "../../utils/contracts/contractAddresses/externalAdresses";
-import { BigNumber } from "ethers";
+import { BigNumber, FixedNumber } from "ethers";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { stableValueHash } from "react-query/types/core/utils";
+import { BigNumberish, parseFixed } from "@ethersproject/bignumber";
 
 
 
 export interface IWrap {}
+
+export interface ITextInput extends InputProps {
+    innerType: string,
+    outerType: string,
+    token: string,
+    toTextColor: string
+}
+
+export interface RawInputProps {
+    value: string;
+    setValue: (newRawAmount: string) => void;
+    error?: boolean | undefined;
+    helperText?: string | undefined;
+}
+
+export interface AmountInputProps {
+    amount: BigNumber | undefined;
+    decimals: number;
+    setAmount: (newValue: BigNumber | undefined) => void;
+    minAmount?: BigNumber | undefined;
+    maxAmount?: BigNumber | undefined;
+    children: (
+      rawInputProps: RawInputProps
+    ) => React.ReactElement<any, any> | null;
+}
+
+// Equate (BigNumber | undefined) instances with eachother
+function eqBigNumberOptions(
+    a: BigNumber | undefined,
+    b: BigNumber | undefined
+): boolean {
+    return !(a !== b && (a === undefined || b === undefined || !a.eq(b)));
+}
+
+function clampBigNumber(
+    value: BigNumberish,
+    minAmount: BigNumber | undefined,
+    maxAmount: BigNumber | undefined
+): BigNumber {
+    if (value == null) {
+      return value;
+    }
+    if (maxAmount && maxAmount.lt(value)) {
+      return maxAmount;
+    }
+    if (minAmount && minAmount.gt(value)) {
+      return minAmount;
+    }
+    return BigNumber.from(value);
+}
+
+function balanceAsText(balance:BigNumber,decimals:BigNumber) {
+    return FixedNumber.fromValue(balance, decimals)
+    .toString()
+    .slice(0, ((FixedNumber.fromValue(balance, decimals).toString().indexOf(".") == 1) ? 8 : FixedNumber.fromValue(balance, decimals).toString().indexOf(".")+3))
+}
+
+const TextInput: React.FC<ITextInput> = props => {
+    return (
+      <Input
+        fontSize={{ base:"20px", sm:"25px"}}
+        height="27px"
+        padding="0"
+        rounded="0s"
+        border="0"
+        color={props.innerType=="from"?"white":props.toTextColor}
+        _focus={{ boxShadow:"0"}}
+        borderBottom={props.innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}
+        _hover={{borderBottom: props.innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}}
+        boxShadow="0 !important"
+        disabled={props.token=='' || props.innerType=='to'}
+        _disabled={{opacity:(props.token!=''&&props.token!=='ag'?"1":"0.4")}}
+        opacity={props.innerType=="to"?"0.7":"1"}
+        {...props}
+      />
+    );
+  };
 
 export const WrapBanner: React.FC<{}> = () => {
     return (
@@ -57,8 +136,6 @@ export const WrapBanner: React.FC<{}> = () => {
 }
 
 export const WrapLayout: React.FC<{}> = () => {
-
-
 
     return (
       <Flex flexDirection="column">
@@ -137,71 +214,129 @@ const OuterBox: React.FC<{
         'agWETH': tokenDecimals(externalAddresses.agWETH),
         'agWBTC': tokenDecimals(externalAddresses.agWBTC),
     }
-    const balanceToWrapChange = (e:any) => e.target.value?setBalanceToWrap(e.target.value):'';
-    const balanceToUnwrapChange = (e:any) => e.target.value?setBalanceToUnwrap(e.target.value):'';
+
     const [ tokenToWrap, setTokenToWrap ] = useState('');
     const [ tokenToUnwrap, setTokenToUnwrap ] = useState('');
-    const [ balanceToWrap, setBalanceToWrap ] = useState(0);
-    const [ balanceToUnwrap, setBalanceToUnwrap ] = useState(0);
-    const [ maxBalanceToWrap, setMaxBalanceToWrap ] = useState(0);
-    const [ maxBalanceToUnwrap, setMaxBalanceToUnwrap ] = useState(0);
+    const [ balanceToWrap, setBalanceToWrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
+    const [ balanceToUnwrap, setBalanceToUnwrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
+    const [ maxBalanceToWrap, setMaxBalanceToWrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
+    const [ maxBalanceToUnwrap, setMaxBalanceToUnwrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
     const [ toWrapButtonText, setToWrapButtonText ] = useState<any>('Select token');
     const [ toUnwrapButtonText, setToUnwrapButtonText ] = useState<any>('Select token');
     const [ wrappedButtonText, setWrappedButtonText ] = useState<any>('');
     const [ unwrappedButtonText, setUnwrappedButtonText ] = useState<any>('');
+    const [ tokenToWrapDecimals, setTokenToWrapDecimals ] = useState(0);
+    const [ tokenToUnwrapDecimals, setTokenToUnwrapDecimals ] = useState(0);
+
     const maxDecimalsToDisplay = 5;
     const toTextColor = "white";
 
-    useEffect(() => {
-        if (tokenToWrap=='') {
-            setToWrapButtonText("Select token");
-            setWrappedButtonText("");
-            setMaxBalanceToWrap(0);
-            setBalanceToWrap(0);
-        } else {
-            setBalanceToWrap(0);
-            setToWrapButtonText(
-                <HStack>
-                    <TokenIcon 
-                        symbol={tokenToWrap} 
-                        width="8" 
-                        height="8"
-                        mt="-1px"
-                    />
-                    <Text 
-                        width="100%"
-                        textAlign="left"
-                        marginX="8px"
-                        fontSize="15px"
-                    >
-                        {tokenToWrap}
-                    </Text>
-                </HStack>
-            );
-            setWrappedButtonText(
-                <HStack>
-                    <TokenIcon 
-                        symbol={"ag"+tokenToWrap} 
-                        width="8" 
-                        height="8"
-                        mt="-1px"
-                    />
-                    <Text 
-                        width="100%"
-                        textAlign="left"
-                        marginX="8px"
-                        fontSize="15px"
-                        color={toTextColor}
-                    >
-                        {"ag"+tokenToWrap}
-                    </Text>
-                </HStack>
-            );
-            setMaxBalanceToWrap(Number(bigNumberToString(balances[tokenToWrap].data, maxDecimalsToDisplay, decimals[tokenToWrap].data)));
-        };
-        onClose();
-    }, [tokenToWrap]);
+    
 
+    useEffect(() => {
+       console.log(decimals);
+      if (tokenToWrap=='') {
+          setToWrapButtonText("Select token");
+          setWrappedButtonText("");
+          setMaxBalanceToWrap(BigNumber.from(0));
+          setBalanceToWrap(BigNumber.from(0));
+          setTokenToWrapDecimals(0);
+      } else {
+          setBalanceToWrap(BigNumber.from(0));
+          setToWrapButtonText(
+              <HStack>
+                  <TokenIcon 
+                      symbol={tokenToWrap} 
+                      width="8" 
+                      height="8"
+                      mt="-1px"
+                  />
+                  <Text 
+                      width="100%"
+                      textAlign="left"
+                      marginX="8px"
+                      fontSize="15px"
+                  >
+                      {tokenToWrap}
+                  </Text>
+              </HStack>
+          );
+          setWrappedButtonText(
+              <HStack>
+                  <TokenIcon 
+                      symbol={"ag"+tokenToWrap} 
+                      width="8" 
+                      height="8"
+                      mt="-1px"
+                  />
+                  <Text 
+                      width="100%"
+                      textAlign="left"
+                      marginX="8px"
+                      fontSize="15px"
+                      color={toTextColor}
+                  >
+                      {"ag"+tokenToWrap}
+                  </Text>
+              </HStack>
+          );
+          setMaxBalanceToWrap(balances[tokenToWrap].data);
+          setTokenToWrapDecimals(decimals[tokenToWrap].data);
+      };
+      onClose();
+  }, [tokenToWrap]);
+
+  useEffect(() => {
+      if (tokenToUnwrap=='') {
+          setToUnwrapButtonText("Select token");
+          setUnwrappedButtonText("");
+          setMaxBalanceToUnwrap(BigNumber.from(0));
+          setBalanceToUnwrap(BigNumber.from(0));
+          setTokenToUnwrapDecimals(0);
+      } else {
+          setBalanceToUnwrap(BigNumber.from(0));
+          setToUnwrapButtonText(
+              <HStack>
+                  <TokenIcon 
+                      symbol={tokenToUnwrap} 
+                      width="8" 
+                      height="8"
+                      mt="-1px"
+                  />
+                  <Text 
+                      width="100%"
+                      textAlign="left"
+                      marginX="8px"
+                      fontSize="15px"
+                  >
+                      {tokenToUnwrap}
+                  </Text>
+              </HStack>
+          );
+          setUnwrappedButtonText(
+              <HStack>
+                  <TokenIcon 
+                      symbol={tokenToUnwrap.substring(2)} 
+                      width="8" 
+                      height="8"
+                      mt="-1px"
+                  />
+                  <Text 
+                      width="100%"
+                      textAlign="left"
+                      marginX="8px"
+                      fontSize="15px"
+                      color={toTextColor}
+                  >
+                      {tokenToUnwrap.substring(2)}
+                  </Text>
+              </HStack>
+          );
+          setMaxBalanceToUnwrap(balances[tokenToUnwrap].data);
+          setTokenToUnwrapDecimals(decimals[tokenToUnwrap].data);
+      };
+      onClose();
+  }, [tokenToUnwrap]);
 
     return (
       <Center
@@ -236,6 +371,7 @@ const OuterBox: React.FC<{
             setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
             buttonText={outerType=="wrap"?toWrapButtonText:toUnwrapButtonText}
             maxDecimalsToDisplay={maxDecimalsToDisplay}
+            tokenDecimals={tokenToWrapDecimals}
             toTextColor={toTextColor}
             outerType={outerType}
             innerType="from"
@@ -243,13 +379,14 @@ const OuterBox: React.FC<{
             onClick={() =>{}}
           />
           <InnerBox
-            token={outerType=="wrap"?'ag'+tokenToWrap:'ag'+tokenToUnwrap}
+            token={outerType=="wrap"?'ag'+tokenToWrap:tokenToUnwrap.substring(2)}
             setToken={undefined}
             balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
-            maxBalance={undefined}
-            setBalance={undefined}
+            maxBalance={BigNumber.from(0)}
+            setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
             buttonText={outerType=="wrap"?wrappedButtonText:unwrappedButtonText}
             maxDecimalsToDisplay={maxDecimalsToDisplay}
+            tokenDecimals={tokenToWrapDecimals}
             toTextColor={toTextColor}
             outerType={outerType}
             innerType="to"
@@ -275,16 +412,19 @@ const OuterBox: React.FC<{
     );
 };
 
+
+
 const InnerBox: React.FC<{
-    balance: number;
-    maxBalance: any,
-    setBalance: any,
+    balance: BigNumber | undefined,
+    maxBalance: BigNumber | undefined,
+    setBalance: (newValue: BigNumber | undefined) => void,
     token: string;
     setToken: any,
     buttonText: string | ReactNode | undefined;
     innerType: "from" | "to";
     outerType: "wrap" | "unwrap";
     maxDecimalsToDisplay: number;
+    tokenDecimals: number;
     toTextColor: string;
     isModalTrigger?: boolean;
     onClick: React.MouseEventHandler;
@@ -298,6 +438,7 @@ const InnerBox: React.FC<{
     innerType,
     outerType,
     maxDecimalsToDisplay,
+    tokenDecimals,
     toTextColor,
     onClick,
     isModalTrigger,
@@ -337,7 +478,7 @@ const InnerBox: React.FC<{
                     bgColor={innerType=="to"?"secondary.900":""}
                     _hover={{bgColor: innerType=="from"?"primary.900":"" }}
                     _active={{bgColor: innerType=="from"?"primary.900":"" }}
-                    disabled={innerType=="to"||outerType=="unwrap"}
+                    disabled={innerType=="to"}
                     opacity={outerType=="wrap"?"1 !important":""}
                 >
                     {buttonText}
@@ -347,30 +488,28 @@ const InnerBox: React.FC<{
 
             <VStack>
                 <HStack>
-                    <NumberInput
-                        min={0}
-                        max={maxBalance}
-                        keepWithinRange={true}
-                        type="number"
-                        value={balance}
-                        onChange={(valueString) => setBalance(Number(valueString))}
+                    <AmountField 
+                      amount={balance}
+                      setAmount={setBalance}
+                      maxAmount={maxBalance}
+                      minAmount={BigNumber.from(0)}
+                      decimals={tokenDecimals}
                     >
-                        <NumberInputField 
-                            fontSize={{ base:"20px", sm:"25px"}}
-                            height="27px"
-                            padding="0"
-                            rounded="0s"
-                            border="0"
-                            color={innerType=="from"?"white":toTextColor}
-                            _focus={{ boxShadow:"0"}}
-                            borderBottom={innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}
-                            _hover={{borderBottom: innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}}
-                            boxShadow="0 !important"
-                            disabled={token=='' || innerType=='to'}
-                            _disabled={{opacity:(token!=''&&token!=='ag'?"1":"0.4")}}
-                            opacity={innerType=="to"?"0.7":"1"}
-                        />
-                    </NumberInput>
+                        {({ value, setValue, error }) => (
+                            <TextInput
+                            value={value}
+                            onChange={ev => setValue(ev.target.value)}
+                            isInvalid={error !== undefined}
+                            innerType={innerType}
+                            outerType={outerType}
+                            toTextColor={toTextColor}
+                            token={token}
+                            />
+                        )}                        
+                    </AmountField>
+                    
+
+                    
 
                 </HStack>
 
@@ -387,7 +526,7 @@ const InnerBox: React.FC<{
                             textAlign="center"
                             width="100%"
                         >
-                            Available: {maxBalance.toString()}
+                            Available: {maxBalance?balanceAsText(maxBalance,BigNumber.from(tokenDecimals)):"0"}
                         </Text>
 
 
@@ -397,7 +536,7 @@ const InnerBox: React.FC<{
                                     fontSize={{ base: "1rem", md: fontSizes.sm }}
                                     fontWeight="normal"
                                     bg="primary.300"
-                                    disabled={maxBalance==0}
+                                    disabled={maxBalance==BigNumber.from(0)}
                                     height="auto"
                                     py="3px"
                                     onClick={()=>{setBalance(maxBalance)}}
@@ -463,7 +602,82 @@ const InnerBox: React.FC<{
     );
 };
 
+const AmountField: React.FC<AmountInputProps> = ({
+    amount,
+    decimals,
+    setAmount,
+    maxAmount,
+    minAmount,
+    children,
+}) => {  
+    const [state, setState] = useState({
+        baked: amount,
+        raw: amount ? FixedNumber.fromValue(amount, decimals).toString() : "",
+        err: undefined as string | undefined,
+    });
 
+    useEffect(() => {
+        if (!eqBigNumberOptions(amount, state.baked)) {
+          setState({
+            baked: amount,
+            raw:
+              amount !== undefined
+                ? FixedNumber.fromValue(amount, decimals).toString()
+                : state.raw,
+            err: state.err,
+          });
+        }
+      }, [state.raw, state.baked, state.err, amount, decimals]);
+
+    const updateRawAmount = useMemo(
+        () => (newValue: string) => {
+            const preparse = newValue.trim();
+            let parsedAmount: BigNumber;
+            try {
+              parsedAmount = parseFixed(preparse, decimals);
+
+              if (maxAmount && parsedAmount.gt(maxAmount)) {
+                parsedAmount = maxAmount;
+                throw true;
+              }
+
+              
+            } catch {
+              setState({
+                baked: undefined,
+                raw: preparse,
+                err: "Invalid input",
+              });
+              if (amount !== undefined) {
+                setAmount(undefined);
+              }
+              return;
+            }
+            setState({
+              baked: parsedAmount,
+              raw: preparse,
+              err: undefined,
+            });
+            if (amount === undefined || amount?.eq(parsedAmount) === false) {
+              setAmount(parsedAmount);
+            }
+          },
+          [setState, setAmount, minAmount, maxAmount, decimals, amount]
+    );
+
+    return useMemo(
+        () =>
+          children({
+            value: state.raw,
+            setValue: updateRawAmount,
+            error: state.err !== undefined ? true : undefined,
+            helperText: state.err,
+          }),
+        [state.raw, state.err, updateRawAmount, children]
+    );
+
+
+};
 
 const TokenListBox: React.FC<{ 
     outerType: string; // wrap, unwrap
