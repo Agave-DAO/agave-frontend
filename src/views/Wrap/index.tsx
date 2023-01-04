@@ -26,7 +26,7 @@ import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
 import { ModalIcon } from "../../utils/icons";
 import { fontSizes, spacings } from "../../utils/constants";
-import { useUserAssetBalance } from "../../queries/userAssets";
+import { useUserAssetBalance, useUserStableAndVariableDebtForAsset } from "../../queries/userAssets";
 import { tokenDecimals } from "../../queries/tokenDecimals";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import { externalAddresses } from "../../utils/contracts/contractAddresses/externalAdresses";
@@ -35,7 +35,9 @@ import { bigNumberToString } from "../../utils/fixedPoint";
 import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { stableValueHash } from "react-query/types/core/utils";
 import { BigNumberish, parseFixed } from "@ethersproject/bignumber";
-
+import { useChainAddresses } from "../../utils/chainAddresses";
+import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { resourceLimits } from "worker_threads";
 
 
 export interface IWrap {}
@@ -174,49 +176,105 @@ const OuterBox: React.FC<{
     ...props
 }) => {
 
+    const internalAddresses = internalAddressesPerNetwork.Gnosis;
+
+
+    const [ balanceWXDAI, setbalanceWXDAI ] = useState<any>(useUserAssetBalance(internalAddresses.WXDAI));
+    const [ balanceUSDC, setBalanceUSDC ] = useState<any>(useUserAssetBalance(internalAddresses.USDC));
+    const [ balanceGNO, setBalanceGNO ] = useState<any>(useUserAssetBalance(internalAddresses.GNO));
+    const [ balanceUSDT, setBalanceUSDT ] = useState<any>(useUserAssetBalance(internalAddresses.USDT));
+    const [ balanceWETH, setBalanceWETH ] = useState<any>(useUserAssetBalance(internalAddresses.WETH));
+    const [ balanceWBTC, setBalanceWBTC ] = useState<any>(useUserAssetBalance(internalAddresses.WBTC));
+
+    const [ balanceAgWXDAI, setBalanceAgWXDAI ] = useState<any>(useUserAssetBalance(internalAddresses.agWXDAI));
+    const [ balanceAgUSDC, setBalanceAgUSDC ] = useState<any>(useUserAssetBalance(internalAddresses.agUSDC));
+    const [ balanceAgGNO, setBalanceAgGNO ] = useState<any>(useUserAssetBalance(internalAddresses.agGNO));
+    const [ balanceAgUSDT, setBalanceAgUSDT ] = useState<any>(useUserAssetBalance(internalAddresses.agUSDT));
+    const [ balanceAgWETH, setBalanceAgWETH ] = useState<any>(useUserAssetBalance(internalAddresses.agWETH));
+    const [ balanceAgWBTC, setBalanceAgWBTC ] = useState<any>(useUserAssetBalance(internalAddresses.agWBTC));
+
+    const [ balanceCagWXDAI, setBalanceCagWXDAI ] = useState<any>(useUserAssetBalance(internalAddresses.cagWXDAIProxy));
+    const [ balanceCagUSDC, setBalanceCagUSDC ] = useState<any>(useUserAssetBalance(internalAddresses.cagUSDCProxy));
+    const [ balanceCagGNO, setBalanceCagGNO ] = useState<any>(useUserAssetBalance(internalAddresses.cagGNOProxy));
+    const [ balanceCagUSDT, setBalanceCagUSDT ] = useState<any>(useUserAssetBalance(internalAddresses.cagUSDTProxy));
+    const [ balanceCagWETH, setBalanceCagWETH ] = useState<any>(useUserAssetBalance(internalAddresses.cagWETHProxy));
+    const [ balanceCagWBTC, setBalanceCagWBTC ] = useState<any>(useUserAssetBalance(internalAddresses.cagWBTCProxy));
+
+    const [ decimalsWXDAI, setdecimalsWXDAI ] = useState<any>(tokenDecimals(internalAddresses.WXDAI));
+    const [ decimalsUSDC, setDecimalsUSDC ] = useState<any>(tokenDecimals(internalAddresses.USDC));
+    const [ decimalsGNO, setDecimalsGNO ] = useState<any>(tokenDecimals(internalAddresses.GNO));
+    const [ decimalsUSDT, setDecimalsUSDT ] = useState<any>(tokenDecimals(internalAddresses.USDT));
+    const [ decimalsWETH, setDecimalsWETH ] = useState<any>(tokenDecimals(internalAddresses.WETH));
+    const [ decimalsWBTC, setDecimalsWBTC ] = useState<any>(tokenDecimals(internalAddresses.WBTC));
+
+    const [ decimalsAgWXDAI, setDecimalsAgWXDAI ] = useState<any>(tokenDecimals(internalAddresses.agWXDAI));
+    const [ decimalsAgUSDC, setDecimalsAgUSDC ] = useState<any>(tokenDecimals(internalAddresses.agUSDC));
+    const [ decimalsAgGNO, setDecimalsAgGNO ] = useState<any>(tokenDecimals(internalAddresses.agGNO));
+    const [ decimalsAgUSDT, setDecimalsAgUSDT ] = useState<any>(tokenDecimals(internalAddresses.agUSDT));
+    const [ decimalsAgWETH, setDecimalsAgWETH ] = useState<any>(tokenDecimals(internalAddresses.agWETH));
+    const [ decimalsAgWBTC, setDecimalsAgWBTC ] = useState<any>(tokenDecimals(internalAddresses.agWBTC));
+
+    const [ decimalsCagWXDAI, setDecimalsCagWXDAI ] = useState<any>(tokenDecimals(internalAddresses.cagWXDAIProxy));
+    const [ decimalsCagUSDC, setDecimalsCagUSDC ] = useState<any>(tokenDecimals(internalAddresses.cagUSDCProxy));
+    const [ decimalsCagGNO, setDecimalsCagGNO ] = useState<any>(tokenDecimals(internalAddresses.cagGNOProxy));
+    const [ decimalsCagUSDT, setDecimalsCagUSDT ] = useState<any>(tokenDecimals(internalAddresses.cagUSDTProxy));
+    const [ decimalsCagWETH, setDecimalsCagWETH ] = useState<any>(tokenDecimals(internalAddresses.cagWETHProxy));
+    const [ decimalsCagWBTC, setDecimalsCagWBTC ] = useState<any>(tokenDecimals(internalAddresses.cagWBTCProxy));
+
+    const [ balances, setBalances ] = useState<any>();
+    const [ decimals, setDecimals ] = useState<any>();
+
+    useEffect(()=>{
+      setBalances({
+        'WXDAI': balanceWXDAI,
+        'USDC': balanceUSDC,
+        'GNO': balanceGNO,
+        'USDT': balanceUSDT,
+        'WETH': balanceWETH,
+        'WBTC': balanceWBTC,
+        'agWXDAI': balanceAgWXDAI,
+        'agUSDC': balanceAgUSDC,
+        'agGNO': balanceAgGNO,
+        'agUSDT': balanceAgUSDT,
+        'agWETH': balanceAgWETH,
+        'agWBTC': balanceAgWBTC,
+        'cagWXDAI': balanceCagWXDAI,
+        'cagUSDC': balanceCagUSDC,
+        'cagGNO': balanceCagGNO,
+        'cagUSDT': balanceCagUSDT,
+        'cagWETH': balanceCagWETH,
+        'cagWBTC': balanceCagWBTC,
+      });
+    },[balanceWXDAI, balanceUSDC, balanceGNO,  balanceUSDT, balanceWETH, balanceWBTC, balanceAgWXDAI, balanceAgUSDC, balanceAgGNO, balanceAgUSDT, balanceAgWETH, balanceAgWBTC, balanceCagWXDAI, balanceCagUSDC, balanceCagGNO, balanceCagUSDT, balanceCagWETH, balanceCagWBTC]);
+
+    useEffect(()=>{
+      setDecimals({
+        'WXDAI': decimalsWXDAI,
+        'USDC': decimalsUSDC,
+        'GNO': decimalsGNO,
+        'USDT': decimalsUSDT,
+        'WETH': decimalsWETH,
+        'WBTC': decimalsWBTC,
+        'agWXDAI': decimalsAgWXDAI,
+        'agUSDC': decimalsAgUSDC,
+        'agGNO': decimalsAgGNO,
+        'agUSDT': decimalsAgUSDT,
+        'agWETH': decimalsAgWETH,
+        'agWBTC': decimalsAgWBTC,
+        'cagWXDAI': decimalsCagWXDAI,
+        'cagUSDC': decimalsCagUSDC,
+        'cagGNO': decimalsCagGNO,
+        'cagUSDT': decimalsCagUSDT,
+        'cagWETH': decimalsCagWETH,
+        'cagWBTC': decimalsCagWBTC,
+      });
+    },[decimalsWXDAI, decimalsUSDC, decimalsGNO, decimalsUSDT, decimalsWETH, decimalsWBTC, decimalsAgWXDAI, decimalsAgUSDC, decimalsAgGNO, decimalsAgUSDT, decimalsAgWETH, decimalsAgWBTC, decimalsCagWXDAI, decimalsCagUSDC, decimalsCagGNO, decimalsCagUSDT, decimalsCagWETH, decimalsCagWBTC]);
+
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const balances:any = {
-        'WXDAI': useUserAssetBalance(externalAddresses.WXDAI),
-        'USDC': useUserAssetBalance(externalAddresses.USDC),
-        'LINK': useUserAssetBalance(externalAddresses.LINK),
-        'GNO': useUserAssetBalance(externalAddresses.GNO),
-        'FOX': useUserAssetBalance(externalAddresses.FOX),
-        'USDT': useUserAssetBalance(externalAddresses.USDT),
-        'WETH': useUserAssetBalance(externalAddresses.WETH),
-        'WBTC': useUserAssetBalance(externalAddresses.WBTC),
-
-        'agWXDAI': useUserAssetBalance(externalAddresses.agWXDAI),
-        'agUSDC': useUserAssetBalance(externalAddresses.agUSDC),
-        'agLINK': useUserAssetBalance(externalAddresses.agLINK),
-        'agGNO': useUserAssetBalance(externalAddresses.agGNO),
-        'agFOX': useUserAssetBalance(externalAddresses.agFOX),
-        'agUSDT': useUserAssetBalance(externalAddresses.agUSDT),
-        'agWETH': useUserAssetBalance(externalAddresses.agWETH),
-        'agWBTC': useUserAssetBalance(externalAddresses.agWBTC),
-    };
-
-    const decimals:any = {
-        'WXDAI': tokenDecimals(externalAddresses.WXDAI),
-        'USDC': tokenDecimals(externalAddresses.USDC),
-        'LINK': tokenDecimals(externalAddresses.LINK),
-        'GNO': tokenDecimals(externalAddresses.GNO),
-        'FOX': tokenDecimals(externalAddresses.FOX),
-        'USDT': tokenDecimals(externalAddresses.USDT),
-        'WETH': tokenDecimals(externalAddresses.WETH),
-        'WBTC': tokenDecimals(externalAddresses.WBTC),
-
-        'agWXDAI': tokenDecimals(externalAddresses.agWXDAI),
-        'agUSDC': tokenDecimals(externalAddresses.agUSDC),
-        'agLINK': tokenDecimals(externalAddresses.agLINK),
-        'agGNO': tokenDecimals(externalAddresses.agGNO),
-        'agFOX': tokenDecimals(externalAddresses.agFOX),
-        'agUSDT': tokenDecimals(externalAddresses.agUSDT),
-        'agWETH': tokenDecimals(externalAddresses.agWETH),
-        'agWBTC': tokenDecimals(externalAddresses.agWBTC),
-    }
-
     const [ tokenToWrap, setTokenToWrap ] = useState('');
     const [ tokenToUnwrap, setTokenToUnwrap ] = useState('');
+    const [ tokenToWrapTarget, setTokenToWrapTarget ] = useState('');
+    const [ tokenToUnwrapTarget, setTokenToUnwrapTarget ] = useState('');
     const [ balanceToWrap, setBalanceToWrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
     const [ balanceToUnwrap, setBalanceToUnwrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
     const [ maxBalanceToWrap, setMaxBalanceToWrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
@@ -231,112 +289,96 @@ const OuterBox: React.FC<{
     const maxDecimalsToDisplay = 5;
     const toTextColor = "white";
 
-    
+    const tokens = [
+      // unwrapped, wrapped
+      ['agWXDAI', 'cagWXDAI'],
+      ['agUSDC', 'cagUSDC'],
+      ['agGNO', 'cagGNO'],
+      ['agUSDT', 'cagUSDT'],
+      ['agWETH', 'cagWETH'],
+      ['agWBTC', 'cagWBTC'],
+    ]
+
+    function getTokenPair(tkn:string) {
+      let result = '';
+      tokens.forEach((x) => { 
+        if (tkn == x[0]) { result = x[1]; }
+        else if (tkn == x[1]) { result = x[0]; } 
+      });
+      return result;
+    }
+
+    function updateTokens(action:string) { // wrap or unwrap
+      const token = action=="wrap"?tokenToWrap:tokenToUnwrap;
+      const targetToken = getTokenPair(token);
+
+      if (token=='') {
+        action=="wrap"?setToWrapButtonText("Select token"):setToUnwrapButtonText("Select token");
+        action=="wrap"?setWrappedButtonText(""):setUnwrappedButtonText("");
+        action=="wrap"?setMaxBalanceToWrap(BigNumber.from(0)):setMaxBalanceToUnwrap(BigNumber.from(0));
+        action=="wrap"?setBalanceToWrap(BigNumber.from(0)):setBalanceToUnwrap(BigNumber.from(0));
+        action=="wrap"?setTokenToWrapDecimals(0):setTokenToUnwrapDecimals(0);
+    } else {
+        action=="wrap"?setBalanceToWrap(BigNumber.from(0)):setBalanceToUnwrap(BigNumber.from(0))
+
+        const btnText = (
+          <HStack>
+            <TokenIcon 
+                symbol={token} 
+                width="8" 
+                height="8"
+                mt="-1px"
+            />
+            <Text 
+                width="100%"
+                textAlign="left"
+                marginX="8px"
+                fontSize="15px"
+            >
+                {token}
+            </Text>
+         </HStack>
+        );
+
+        const targetBtnText =  (
+          <HStack>
+            <TokenIcon 
+                symbol={targetToken} 
+                width="8" 
+                height="8"
+                mt="-1px"
+            />
+            <Text 
+                width="100%"
+                textAlign="left"
+                marginX="8px"
+                fontSize="15px"
+                color={toTextColor}
+            >
+                {targetToken}
+            </Text>
+          </HStack>
+        );
+
+        action=="wrap"?setToWrapButtonText(btnText):setToUnwrapButtonText(btnText);
+        action=="wrap"?setWrappedButtonText(targetBtnText):setUnwrappedButtonText(targetBtnText);
+
+        action=="wrap"?setMaxBalanceToWrap(balances[token].data):setMaxBalanceToUnwrap(balances[token].data);
+        action=="wrap"?setTokenToWrapDecimals(decimals[token].data):setTokenToUnwrapDecimals(decimals[token].data);
+      };
+    }
 
     useEffect(() => {
-       console.log(decimals);
-      if (tokenToWrap=='') {
-          setToWrapButtonText("Select token");
-          setWrappedButtonText("");
-          setMaxBalanceToWrap(BigNumber.from(0));
-          setBalanceToWrap(BigNumber.from(0));
-          setTokenToWrapDecimals(0);
-      } else {
-          setBalanceToWrap(BigNumber.from(0));
-          setToWrapButtonText(
-              <HStack>
-                  <TokenIcon 
-                      symbol={tokenToWrap} 
-                      width="8" 
-                      height="8"
-                      mt="-1px"
-                  />
-                  <Text 
-                      width="100%"
-                      textAlign="left"
-                      marginX="8px"
-                      fontSize="15px"
-                  >
-                      {tokenToWrap}
-                  </Text>
-              </HStack>
-          );
-          setWrappedButtonText(
-              <HStack>
-                  <TokenIcon 
-                      symbol={"ag"+tokenToWrap} 
-                      width="8" 
-                      height="8"
-                      mt="-1px"
-                  />
-                  <Text 
-                      width="100%"
-                      textAlign="left"
-                      marginX="8px"
-                      fontSize="15px"
-                      color={toTextColor}
-                  >
-                      {"ag"+tokenToWrap}
-                  </Text>
-              </HStack>
-          );
-          setMaxBalanceToWrap(balances[tokenToWrap].data);
-          setTokenToWrapDecimals(decimals[tokenToWrap].data);
-      };
+      updateTokens("wrap");
       onClose();
-  }, [tokenToWrap]);
+    }, [tokenToWrap]);
 
-  useEffect(() => {
-      if (tokenToUnwrap=='') {
-          setToUnwrapButtonText("Select token");
-          setUnwrappedButtonText("");
-          setMaxBalanceToUnwrap(BigNumber.from(0));
-          setBalanceToUnwrap(BigNumber.from(0));
-          setTokenToUnwrapDecimals(0);
-      } else {
-          setBalanceToUnwrap(BigNumber.from(0));
-          setToUnwrapButtonText(
-              <HStack>
-                  <TokenIcon 
-                      symbol={tokenToUnwrap} 
-                      width="8" 
-                      height="8"
-                      mt="-1px"
-                  />
-                  <Text 
-                      width="100%"
-                      textAlign="left"
-                      marginX="8px"
-                      fontSize="15px"
-                  >
-                      {tokenToUnwrap}
-                  </Text>
-              </HStack>
-          );
-          setUnwrappedButtonText(
-              <HStack>
-                  <TokenIcon 
-                      symbol={tokenToUnwrap.substring(2)} 
-                      width="8" 
-                      height="8"
-                      mt="-1px"
-                  />
-                  <Text 
-                      width="100%"
-                      textAlign="left"
-                      marginX="8px"
-                      fontSize="15px"
-                      color={toTextColor}
-                  >
-                      {tokenToUnwrap.substring(2)}
-                  </Text>
-              </HStack>
-          );
-          setMaxBalanceToUnwrap(balances[tokenToUnwrap].data);
-          setTokenToUnwrapDecimals(decimals[tokenToUnwrap].data);
-      };
+    useEffect(() => {
+      updateTokens("unwrap");
       onClose();
-  }, [tokenToUnwrap]);
+    }, [tokenToUnwrap]);
+
+ 
 
     return (
       <Center
@@ -366,32 +408,38 @@ const OuterBox: React.FC<{
           <InnerBox
             token={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
             setToken={outerType=="wrap"?setTokenToWrap:setTokenToUnwrap}
+            setTokenTarget={outerType=="wrap"?setTokenToWrapTarget:setTokenToUnwrapTarget}
             balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
             maxBalance={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
             setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
             buttonText={outerType=="wrap"?toWrapButtonText:toUnwrapButtonText}
             maxDecimalsToDisplay={maxDecimalsToDisplay}
-            tokenDecimals={tokenToWrapDecimals}
+            tokenDecimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
             toTextColor={toTextColor}
             outerType={outerType}
             innerType="from"
             isModalTrigger={true}
             onClick={() =>{}}
+            tokens={tokens}
+            getTokenPair={getTokenPair}
           />
           <InnerBox
             token={outerType=="wrap"?'ag'+tokenToWrap:tokenToUnwrap.substring(2)}
             setToken={undefined}
+            setTokenTarget={undefined}
             balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
             maxBalance={BigNumber.from(0)}
             setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
             buttonText={outerType=="wrap"?wrappedButtonText:unwrappedButtonText}
             maxDecimalsToDisplay={maxDecimalsToDisplay}
-            tokenDecimals={tokenToWrapDecimals}
+            tokenDecimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
             toTextColor={toTextColor}
             outerType={outerType}
             innerType="to"
             isModalTrigger={false}
             onClick={() =>{}}
+            tokens={tokens}
+            getTokenPair={getTokenPair}
           />
           <Button
             width="30%"
@@ -412,14 +460,13 @@ const OuterBox: React.FC<{
     );
 };
 
-
-
 const InnerBox: React.FC<{
     balance: BigNumber | undefined,
     maxBalance: BigNumber | undefined,
     setBalance: (newValue: BigNumber | undefined) => void,
     token: string;
     setToken: any,
+    setTokenTarget: any,
     buttonText: string | ReactNode | undefined;
     innerType: "from" | "to";
     outerType: "wrap" | "unwrap";
@@ -428,12 +475,15 @@ const InnerBox: React.FC<{
     toTextColor: string;
     isModalTrigger?: boolean;
     onClick: React.MouseEventHandler;
+    tokens: string[][];
+    getTokenPair: any;
 }> = ({
     balance,
     maxBalance,
     setBalance,
     token,
     setToken,
+    setTokenTarget,
     buttonText,
     innerType,
     outerType,
@@ -441,6 +491,8 @@ const InnerBox: React.FC<{
     tokenDecimals,
     toTextColor,
     onClick,
+    tokens,
+    getTokenPair,
     isModalTrigger,
 }) => {
 
@@ -572,7 +624,10 @@ const InnerBox: React.FC<{
                 <TokenListBox 
                     outerType={outerType} 
                     setToken={setToken}
+                    setTokenTarget={setTokenTarget}
+                    getTokenPair={getTokenPair}
                     onClose={onClose}
+                    tokens={tokens}
                 />
 
                 <ModalFooter>
@@ -587,6 +642,7 @@ const InnerBox: React.FC<{
                     fontWeight="normal"
                     onClick={() => {
                         setToken('');
+                        setTokenTarget('');
                         onClose();
                     }}
                     _hover={{bgColor:"secondary.900"}}
@@ -682,19 +738,22 @@ const AmountField: React.FC<AmountInputProps> = ({
 const TokenListBox: React.FC<{ 
     outerType: string; // wrap, unwrap
     setToken: any;
+    setTokenTarget: any;
+    getTokenPair:any;
     onClose:any;
+    tokens:string[][];
 } & CenterProps> = ({
     outerType,
     setToken,
+    setTokenTarget,
+    getTokenPair,
     onClose,
+    tokens,
     children,
     ...props
 }) => {
 
-    const toWrapList = ['WXDAI', 'USDC', 'LINK', 'GNO', 'FOX', 'USDT', 'WETH', 'WBTC'];
-    const toUnwrapList = ['agWXDAI', 'agUSDC', 'agLINK', 'agGNO', 'agFOX', 'agUSDT', 'agWETH', 'agWBTC'];
-
-    const tokenList = (outerType=='wrap')?toWrapList:toUnwrapList;
+    const tokenList = (outerType=='wrap')?tokens.map(x => x[0]):tokens.map(x => x[1]);
 
     return (
         <Center>
@@ -707,6 +766,7 @@ const TokenListBox: React.FC<{
                     <Button
                         onClick={(e)=> {
                             setToken(tkn);
+                            setTokenTarget(getTokenPair(tkn));
                             onClose(); 
                         }}
                         width="100%"

@@ -17,6 +17,38 @@ export interface StrongTypedChainAddresses<
 
   readonly explorer?: string | undefined;
   readonly rpcUrl?: string | undefined;
+
+  readonly USDC: string | undefined;
+  readonly WXDAI: string | undefined;
+  readonly LINK: string | undefined;
+  readonly GNO: string | undefined;
+  readonly FOX: string | undefined;
+  readonly USDT: string | undefined;
+  readonly WETH: string | undefined;
+  readonly WBTC: string | undefined;
+
+  readonly agUSDC: string | undefined;
+  readonly agWXDAI: string | undefined;
+  readonly agLINK: string | undefined;
+  readonly agGNO: string | undefined;
+  readonly agFOX: string | undefined;
+  readonly agUSDT: string | undefined;
+  readonly agWETH: string | undefined;
+  readonly agWBTC: string | undefined;
+
+  readonly cagUSDCProxy: string | undefined;
+  readonly cagUSDCImpl: string | undefined;
+  readonly cagWXDAIProxy: string | undefined;
+  readonly cagWXDAIImpl: string | undefined;
+  readonly cagGNOProxy: string | undefined;
+  readonly cagGNOImpl: string | undefined;
+  readonly cagWBTCProxy: string | undefined;
+  readonly cagWBTCImpl: string | undefined;
+  readonly cagWETHProxy: string | undefined;
+  readonly cagWETHImpl: string | undefined;
+  readonly cagUSDTProxy: string | undefined;
+  readonly cagUSDTImpl: string | undefined;
+
 }
 
 export interface ChainAddresses extends StrongTypedChainAddresses<any, any> {
@@ -52,6 +84,39 @@ export const internalAddressesPerNetwork: Record<
     incentivesController: "",
 
     explorer: "https://rinkeby.etherscan.io",
+
+    USDC: "",
+    WXDAI: "",
+    LINK: "",
+    GNO: "",
+    FOX: "",
+    USDT: "",
+    WETH: "",
+    WBTC: "",   
+
+    agUSDC: "",
+    agWXDAI: "",
+    agLINK: "",
+    agGNO: "",
+    agFOX: "",
+    agUSDT: "",
+    agWETH: "",
+    agWBTC: "",
+
+    cagUSDCProxy: "",
+    cagUSDCImpl:  "",
+    cagWXDAIProxy: "",
+    cagWXDAIImpl: "",
+    cagGNOProxy: "",
+    cagGNOImpl: "",
+    cagWBTCProxy: "",
+    cagWBTCImpl: "",
+    cagWETHProxy: "",
+    cagWETHImpl: "",
+    cagUSDTProxy: "",
+    cagUSDTImpl: "",
+
+
   },
   Gnosis: {
     chainName: "Gnosis",
@@ -70,6 +135,38 @@ export const internalAddressesPerNetwork: Record<
 
     explorer: "https://blockscout.com/xdai/mainnet",
     rpcUrl: "https://rpc.gnosischain.com/",
+
+    USDC: "0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83",
+    WXDAI: "0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d",
+    LINK: "0xE2e73A1c69ecF83F464EFCE6A5be353a37cA09b2",
+    GNO: "0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb",
+    FOX: "0x21a42669643f45Bc0e086b8Fc2ed70c23D67509d",
+    USDT: "0x4ECaBa5870353805a9F068101A40E0f32ed605C6",
+    WETH: "0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1",
+    WBTC: "0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252",   
+
+    agUSDC: "0x291b5957c9cbe9ca6f0b98281594b4eb495f4ec1",
+    agWXDAI: "0xd4e420bbf00b0f409188b338c5d87df761d6c894",
+    agLINK: "0xa286ce70fb3a6269676c8d99bd9860de212252ef",
+    agGNO: "0xa26783ead6c1f4744685c14079950622674ae8a8",
+    agFOX: "0xa916a4891d80494c6cb0b49b11fd68238aaaf617",
+    agUSDT: "0x5b4ef67c63d091083ec4d30cfc4ac685ef051046",
+    agWETH: "0x44932e3b1e662adde2f7bac6d5081c5adab908c6",
+    agWBTC: "0x4863cfaf3392f20531aa72ce19e5783f489817d6",
+
+    cagUSDCProxy: "0x6D9Dc1282B9E25a91b266B6b61eF65a38f949f22",
+    cagUSDCImpl:  "0x13f2B819b7165686F36Af81d887e1459d19DE3FB",
+    cagWXDAIProxy: "0x01aC9005F8446AF28b065af87216b85faaC5f6E2",
+    cagWXDAIImpl: "0x248Ce8D11c990190642Aa4eb34e8Af2C832AcC13",
+    cagGNOProxy: "0xC1593302979e5e8e16E53C3303bf99fFa319D314",
+    cagGNOImpl: "0x9ae6D606d9ca14c59B703494bEA2d8870e5C97Ed",
+    cagWBTCProxy: "0x110e2D3d4C94596f5698C753D5cd43221D3Ec78b",
+    cagWBTCImpl: "0x85822764fe473028c753BC1124C5DF6607FCb2f0",
+    cagWETHProxy: "0x20e5eB701E8d711D419D444814308f8c2243461F",
+    cagWETHImpl: "0xd28490E975a49ce009163Bb9fEB566133acE4eD2",
+    cagUSDTProxy: "0x3D938f90AC251C1BCF6B4E399Dd72C8C685A9Bbc",
+    cagUSDTImpl: "0xA9502766df45F1bbdc4ea55a3fC38053Be25CC68",
+
   },
 } as const;
 
