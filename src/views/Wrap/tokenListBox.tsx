@@ -6,14 +6,12 @@ import { TokenIcon } from "../../utils/icons";
 export const TokenListBox: React.FC<{ 
     outerType: "wrap"|"unwrap";
     setToken: any;
-    setTokenTarget: any;
     getTokenPair:any;
     onClose:any;
     tokens:string[][];
 } & CenterProps> = ({
     outerType,
     setToken,
-    setTokenTarget,
     getTokenPair,
     onClose,
     tokens,
@@ -34,7 +32,6 @@ export const TokenListBox: React.FC<{
                     <Button
                         onClick={(e)=> {
                             setToken(tkn);
-                            setTokenTarget(getTokenPair(tkn));
                             onClose(); 
                         }}
                         width="100%"

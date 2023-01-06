@@ -1,225 +1,164 @@
-import React, { useEffect, useState, useMemo, useRef, ReactNode } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Center, Text, VStack, Button } from "@chakra-ui/react";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { useDisclosure } from "@chakra-ui/hooks";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
-import { useUserAssetBalance } from "../../queries/userAssets";
-import { tokenDecimals } from "../../queries/tokenDecimals";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { TokenIcon } from "../../utils/icons";
-import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
 import { InnerBox } from "./innerBox";
 
 export const OuterBox: React.FC<{
     outerType: "wrap" | "unwrap";
+    tokenBalances: any,
+    tokenDecimals: any,
+    tokens: any
 } & CenterProps> = ({
     outerType,
     children,
+    tokenBalances,
+    tokenDecimals,
+    tokens,
     ...props
 }) => {
-
-    const internalAddresses = internalAddressesPerNetwork.Gnosis;
-
-    const [ balanceWXDAI, setBalanceWXDAI ] = useState<any>(useUserAssetBalance(internalAddresses.WXDAI));
-    const [ balanceUSDC, setBalanceUSDC ] = useState<any>(useUserAssetBalance(internalAddresses.USDC));
-    const [ balanceGNO, setBalanceGNO ] = useState<any>(useUserAssetBalance(internalAddresses.GNO));
-    const [ balanceUSDT, setBalanceUSDT ] = useState<any>(useUserAssetBalance(internalAddresses.USDT));
-    const [ balanceWETH, setBalanceWETH ] = useState<any>(useUserAssetBalance(internalAddresses.WETH));
-    const [ balanceWBTC, setBalanceWBTC ] = useState<any>(useUserAssetBalance(internalAddresses.WBTC));
-
-    const [ balanceAgWXDAI, setBalanceAgWXDAI ] = useState<any>(useUserAssetBalance(internalAddresses.agWXDAI));
-    const [ balanceAgUSDC, setBalanceAgUSDC ] = useState<any>(useUserAssetBalance(internalAddresses.agUSDC));
-    const [ balanceAgGNO, setBalanceAgGNO ] = useState<any>(useUserAssetBalance(internalAddresses.agGNO));
-    const [ balanceAgUSDT, setBalanceAgUSDT ] = useState<any>(useUserAssetBalance(internalAddresses.agUSDT));
-    const [ balanceAgWETH, setBalanceAgWETH ] = useState<any>(useUserAssetBalance(internalAddresses.agWETH));
-    const [ balanceAgWBTC, setBalanceAgWBTC ] = useState<any>(useUserAssetBalance(internalAddresses.agWBTC));
-
-    const [ balanceCagWXDAI, setBalanceCagWXDAI ] = useState<any>(useUserAssetBalance(internalAddresses.cagWXDAIProxy));
-    const [ balanceCagUSDC, setBalanceCagUSDC ] = useState<any>(useUserAssetBalance(internalAddresses.cagUSDCProxy));
-    const [ balanceCagGNO, setBalanceCagGNO ] = useState<any>(useUserAssetBalance(internalAddresses.cagGNOProxy));
-    const [ balanceCagUSDT, setBalanceCagUSDT ] = useState<any>(useUserAssetBalance(internalAddresses.cagUSDTProxy));
-    const [ balanceCagWETH, setBalanceCagWETH ] = useState<any>(useUserAssetBalance(internalAddresses.cagWETHProxy));
-    const [ balanceCagWBTC, setBalanceCagWBTC ] = useState<any>(useUserAssetBalance(internalAddresses.cagWBTCProxy));
-
-    const [ decimalsWXDAI, setDecimalsWXDAI ] = useState<any>(tokenDecimals(internalAddresses.WXDAI));
-    const [ decimalsUSDC, setDecimalsUSDC ] = useState<any>(tokenDecimals(internalAddresses.USDC));
-    const [ decimalsGNO, setDecimalsGNO ] = useState<any>(tokenDecimals(internalAddresses.GNO));
-    const [ decimalsUSDT, setDecimalsUSDT ] = useState<any>(tokenDecimals(internalAddresses.USDT));
-    const [ decimalsWETH, setDecimalsWETH ] = useState<any>(tokenDecimals(internalAddresses.WETH));
-    const [ decimalsWBTC, setDecimalsWBTC ] = useState<any>(tokenDecimals(internalAddresses.WBTC));
-
-    const [ decimalsAgWXDAI, setDecimalsAgWXDAI ] = useState<any>(tokenDecimals(internalAddresses.agWXDAI));
-    const [ decimalsAgUSDC, setDecimalsAgUSDC ] = useState<any>(tokenDecimals(internalAddresses.agUSDC));
-    const [ decimalsAgGNO, setDecimalsAgGNO ] = useState<any>(tokenDecimals(internalAddresses.agGNO));
-    const [ decimalsAgUSDT, setDecimalsAgUSDT ] = useState<any>(tokenDecimals(internalAddresses.agUSDT));
-    const [ decimalsAgWETH, setDecimalsAgWETH ] = useState<any>(tokenDecimals(internalAddresses.agWETH));
-    const [ decimalsAgWBTC, setDecimalsAgWBTC ] = useState<any>(tokenDecimals(internalAddresses.agWBTC));
-
-    const [ decimalsCagWXDAI, setDecimalsCagWXDAI ] = useState<any>(tokenDecimals(internalAddresses.cagWXDAIProxy));
-    const [ decimalsCagUSDC, setDecimalsCagUSDC ] = useState<any>(tokenDecimals(internalAddresses.cagUSDCProxy));
-    const [ decimalsCagGNO, setDecimalsCagGNO ] = useState<any>(tokenDecimals(internalAddresses.cagGNOProxy));
-    const [ decimalsCagUSDT, setDecimalsCagUSDT ] = useState<any>(tokenDecimals(internalAddresses.cagUSDTProxy));
-    const [ decimalsCagWETH, setDecimalsCagWETH ] = useState<any>(tokenDecimals(internalAddresses.cagWETHProxy));
-    const [ decimalsCagWBTC, setDecimalsCagWBTC ] = useState<any>(tokenDecimals(internalAddresses.cagWBTCProxy));
-
-    const [ balances, setBalances ] = useState<any>();
-    const [ decimals, setDecimals ] = useState<any>();
-
-    useEffect(()=>{
-      setBalances({
-        'WXDAI': balanceWXDAI,
-        'USDC': balanceUSDC,
-        'GNO': balanceGNO,
-        'USDT': balanceUSDT,
-        'WETH': balanceWETH,
-        'WBTC': balanceWBTC,
-        'agWXDAI': balanceAgWXDAI,
-        'agUSDC': balanceAgUSDC,
-        'agGNO': balanceAgGNO,
-        'agUSDT': balanceAgUSDT,
-        'agWETH': balanceAgWETH,
-        'agWBTC': balanceAgWBTC,
-        'cagWXDAI': balanceCagWXDAI,
-        'cagUSDC': balanceCagUSDC,
-        'cagGNO': balanceCagGNO,
-        'cagUSDT': balanceCagUSDT,
-        'cagWETH': balanceCagWETH,
-        'cagWBTC': balanceCagWBTC,
-      });
-    },[balanceWXDAI, balanceUSDC, balanceGNO,  balanceUSDT, balanceWETH, balanceWBTC, balanceAgWXDAI, balanceAgUSDC, balanceAgGNO, balanceAgUSDT, balanceAgWETH, balanceAgWBTC, balanceCagWXDAI, balanceCagUSDC, balanceCagGNO, balanceCagUSDT, balanceCagWETH, balanceCagWBTC]);
-
-    useEffect(()=>{
-      setDecimals({
-        'WXDAI': decimalsWXDAI,
-        'USDC': decimalsUSDC,
-        'GNO': decimalsGNO,
-        'USDT': decimalsUSDT,
-        'WETH': decimalsWETH,
-        'WBTC': decimalsWBTC,
-        'agWXDAI': decimalsAgWXDAI,
-        'agUSDC': decimalsAgUSDC,
-        'agGNO': decimalsAgGNO,
-        'agUSDT': decimalsAgUSDT,
-        'agWETH': decimalsAgWETH,
-        'agWBTC': decimalsAgWBTC,
-        'cagWXDAI': decimalsCagWXDAI,
-        'cagUSDC': decimalsCagUSDC,
-        'cagGNO': decimalsCagGNO,
-        'cagUSDT': decimalsCagUSDT,
-        'cagWETH': decimalsCagWETH,
-        'cagWBTC': decimalsCagWBTC,
-      });
-    },[decimalsWXDAI, decimalsUSDC, decimalsGNO, decimalsUSDT, decimalsWETH, decimalsWBTC, decimalsAgWXDAI, decimalsAgUSDC, decimalsAgGNO, decimalsAgUSDT, decimalsAgWETH, decimalsAgWBTC, decimalsCagWXDAI, decimalsCagUSDC, decimalsCagGNO, decimalsCagUSDT, decimalsCagWETH, decimalsCagWBTC]);
 
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [ tokenToWrap, setTokenToWrap ] = useState('');
     const [ tokenToUnwrap, setTokenToUnwrap ] = useState('');
-    const [ tokenToWrapTarget, setTokenToWrapTarget ] = useState('');
-    const [ tokenToUnwrapTarget, setTokenToUnwrapTarget ] = useState('');
     const [ balanceToWrap, setBalanceToWrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
     const [ balanceToUnwrap, setBalanceToUnwrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
-    const [ maxBalanceToWrap, setMaxBalanceToWrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
-    const [ maxBalanceToUnwrap, setMaxBalanceToUnwrap ] = useState<BigNumber | undefined>(BigNumber.from(0));
-    const [ toWrapButtonText, setToWrapButtonText ] = useState<any>('Select token');
-    const [ toUnwrapButtonText, setToUnwrapButtonText ] = useState<any>('Select token');
-    const [ wrappedButtonText, setWrappedButtonText ] = useState<any>('');
-    const [ unwrappedButtonText, setUnwrappedButtonText ] = useState<any>('');
-    const [ tokenToWrapDecimals, setTokenToWrapDecimals ] = useState(0);
-    const [ tokenToUnwrapDecimals, setTokenToUnwrapDecimals ] = useState(0);
 
-    const maxDecimalsToDisplay = 5;
-    const toTextColor = "white";
+    const tokenToWrapTarget = React.useMemo(()=>{
+      return getTokenPair(tokenToWrap)
+    },[tokenToWrap]);
+    
+    const tokenToUnwrapTarget = React.useMemo(()=>{
+      return getTokenPair(tokenToWrap)
+    },[tokenToUnwrap]);
 
-    const tokens = [
-      // unwrapped, wrapped
-      ['agWXDAI', 'cagWXDAI'],
-      ['agUSDC', 'cagUSDC'],
-      ['agGNO', 'cagGNO'],
-      ['agUSDT', 'cagUSDT'],
-      ['agWETH', 'cagWETH'],
-      ['agWBTC', 'cagWBTC'],
-    ]
+    const maxBalanceToWrap = React.useMemo(() => {
+      console.log('maxBalanceToWrap', tokenBalances[tokenToWrap]);
+      return tokenBalances[tokenToWrap];
+    },[tokenToWrap, tokenBalances, tokenDecimals]);
+
+    const maxBalanceToUnwrap = React.useMemo(() => {
+      return tokenBalances[tokenToUnwrap];
+    },[tokenToUnwrap, tokenBalances, tokenDecimals]);
+
+    const tokenToWrapDecimals = React.useMemo(() => {
+      return tokenDecimals[tokenToWrap];
+    }, [tokenDecimals, tokenToWrap]);
+
+    const tokenToUnwrapDecimals = React.useMemo(() => {
+      return tokenDecimals[tokenToUnwrap];
+    }, [tokenDecimals, tokenToUnwrap]);
+
+    const toWrapButtonText = React.useMemo(() => {
+      const token = tokenToWrap;
+      let btnText = (
+        <HStack>
+          <TokenIcon 
+              symbol={token} 
+              width="8" 
+              height="8"
+              mt="-1px"
+          />
+          <Text 
+              width="100%"
+              textAlign="left"
+              marginX="8px"
+              fontSize="15px"
+          >
+              {token}
+          </Text>
+        </HStack>
+      );
+      return (token==''?"Select token":btnText);
+    },[tokenToWrap]);
+    
+    const toUnwrapButtonText = React.useMemo(() => {
+      const token = tokenToUnwrap;
+      let btnText = (
+        <HStack>
+          <TokenIcon 
+              symbol={token} 
+              width="8" 
+              height="8"
+              mt="-1px"
+          />
+          <Text 
+              width="100%"
+              textAlign="left"
+              marginX="8px"
+              fontSize="15px"
+          >
+              {token}
+          </Text>
+        </HStack>
+      );
+      return (token==''?"Select token":btnText);
+    },[tokenToUnwrap]);
+
+    const wrappedButtonText = React.useMemo(() => {
+      const targetToken = tokenToWrapTarget;
+      const btnText =  (
+        <HStack>
+          <TokenIcon 
+              symbol={targetToken} 
+              width="8" 
+              height="8"
+              mt="-1px"
+          />
+          <Text 
+              width="100%"
+              textAlign="left"
+              marginX="8px"
+              fontSize="15px"
+              color="white"
+          >
+              {targetToken}
+          </Text>
+        </HStack>
+      );
+      return (targetToken==''?"Select token":btnText);
+    },[tokenToWrapTarget]);
+
+    const unwrappedButtonText = React.useMemo(() => {
+      const targetToken = tokenToUnwrapTarget;
+      const btnText =  (
+        <HStack>
+          <TokenIcon 
+              symbol={targetToken} 
+              width="8" 
+              height="8"
+              mt="-1px"
+          />
+          <Text 
+              width="100%"
+              textAlign="left"
+              marginX="8px"
+              fontSize="15px"
+              color="white"
+          >
+              {targetToken}
+          </Text>
+        </HStack>
+      );
+      return (targetToken==''?"Select token":btnText);
+    },[tokenToUnwrapTarget]);
 
     function getTokenPair(tkn:string) {
       let result = '';
-      tokens.forEach((x) => { 
+      tokens.forEach((x:any) => { 
         if (tkn == x[0]) { result = x[1]; }
         else if (tkn == x[1]) { result = x[0]; } 
       });
       return result;
     }
 
-    function updateTokens(action:string) { // wrap or unwrap
-
-      const token = action=="wrap"?tokenToWrap:tokenToUnwrap;
-      const targetToken = getTokenPair(token);
-
-      if (token=='') {
-        action=="wrap"?setToWrapButtonText("Select token"):setToUnwrapButtonText("Select token");
-        action=="wrap"?setWrappedButtonText(""):setUnwrappedButtonText("");
-        action=="wrap"?setMaxBalanceToWrap(BigNumber.from(0)):setMaxBalanceToUnwrap(BigNumber.from(0));
-        action=="wrap"?setBalanceToWrap(BigNumber.from(0)):setBalanceToUnwrap(BigNumber.from(0));
-        action=="wrap"?setTokenToWrapDecimals(0):setTokenToUnwrapDecimals(0);
-      } else {
-        action=="wrap"?setBalanceToWrap(BigNumber.from(0)):setBalanceToUnwrap(BigNumber.from(0))
-
-        const btnText = (
-          <HStack>
-            <TokenIcon 
-                symbol={token} 
-                width="8" 
-                height="8"
-                mt="-1px"
-            />
-            <Text 
-                width="100%"
-                textAlign="left"
-                marginX="8px"
-                fontSize="15px"
-            >
-                {token}
-            </Text>
-         </HStack>
-        );
-
-        const targetBtnText =  (
-          <HStack>
-            <TokenIcon 
-                symbol={targetToken} 
-                width="8" 
-                height="8"
-                mt="-1px"
-            />
-            <Text 
-                width="100%"
-                textAlign="left"
-                marginX="8px"
-                fontSize="15px"
-                color={toTextColor}
-            >
-                {targetToken}
-            </Text>
-          </HStack>
-        );
-
-        action=="wrap"?setToWrapButtonText(btnText):setToUnwrapButtonText(btnText);
-        action=="wrap"?setWrappedButtonText(targetBtnText):setUnwrappedButtonText(targetBtnText);
-
-        action=="wrap"?setMaxBalanceToWrap(balances[token].data):setMaxBalanceToUnwrap(balances[token].data);
-        action=="wrap"?setTokenToWrapDecimals(decimals[token].data):setTokenToUnwrapDecimals(decimals[token].data);
-      };
-    }
-
     useEffect(() => {
-      updateTokens("wrap");
       onClose();
-    }, [tokenToWrap]);
-
-    useEffect(() => {
-      updateTokens("unwrap");
-      onClose();
-    }, [tokenToUnwrap]);
+    }, [tokenToWrap, tokenToUnwrap]);
 
      return (
       <Center
@@ -249,14 +188,11 @@ export const OuterBox: React.FC<{
           <InnerBox
             token={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
             setToken={outerType=="wrap"?setTokenToWrap:setTokenToUnwrap}
-            setTokenTarget={outerType=="wrap"?setTokenToWrapTarget:setTokenToUnwrapTarget}
             balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
             maxBalance={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
             setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
             buttonText={outerType=="wrap"?toWrapButtonText:toUnwrapButtonText}
-            maxDecimalsToDisplay={maxDecimalsToDisplay}
-            tokenDecimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
-            toTextColor={toTextColor}
+            decimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
             outerType={outerType}
             innerType="from"
             isModalTrigger={true}
@@ -267,14 +203,11 @@ export const OuterBox: React.FC<{
           <InnerBox
             token={outerType=="wrap"?'ag'+tokenToWrap:tokenToUnwrap.substring(2)}
             setToken={undefined}
-            setTokenTarget={undefined}
             balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
             maxBalance={BigNumber.from(0)}
             setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
             buttonText={outerType=="wrap"?wrappedButtonText:unwrappedButtonText}
-            maxDecimalsToDisplay={maxDecimalsToDisplay}
-            tokenDecimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
-            toTextColor={toTextColor}
+            decimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
             outerType={outerType}
             innerType="to"
             isModalTrigger={false}
@@ -299,4 +232,6 @@ export const OuterBox: React.FC<{
         </VStack>
       </Center>
     );
+
 };
+

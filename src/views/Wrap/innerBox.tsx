@@ -4,15 +4,8 @@ import { HStack } from "@chakra-ui/layout";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { fontSizes, spacings } from "../../utils/constants";
 import { BigNumber, FixedNumber } from "ethers";
-import { AmountField } from "./amountField";
 import { TokenListBox } from "./tokenListBox";
-
-interface ITextInput extends InputProps {
-    innerType: string,
-    outerType: string,
-    token: string,
-    toTextColor: string
-}
+import { AmountField } from "./amountField";
 
 function balanceAsText(balance:BigNumber,decimals:BigNumber) {
     return FixedNumber.fromValue(balance, decimals)
@@ -20,26 +13,7 @@ function balanceAsText(balance:BigNumber,decimals:BigNumber) {
     .slice(0, ((FixedNumber.fromValue(balance, decimals).toString().indexOf(".") == 1) ? 8 : FixedNumber.fromValue(balance, decimals).toString().indexOf(".")+3))
 }
 
-const TextInput: React.FC<ITextInput> = props => {
-    return (
-        <Input
-        fontSize={{ base:"20px", sm:"25px"}}
-        height="27px"
-        padding="0"
-        rounded="0s"
-        border="0"
-        color={props.innerType=="from"?"white":props.toTextColor}
-        _focus={{ boxShadow:"0"}}
-        borderBottom={props.innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}
-        _hover={{borderBottom: props.innerType=="from"?"1px solid var(--chakra-colors-primary-900)":"0"}}
-        boxShadow="0 !important"
-        disabled={props.token=='' || props.innerType=='to'}
-        _disabled={{opacity:(props.token!=''&&props.token!=='ag'?"1":"0.4")}}
-        opacity={props.innerType=="to"?"0.7":"1"}
-        {...props}
-        />
-    );
-};
+
 
 export const InnerBox: React.FC<{
     balance: BigNumber | undefined,
@@ -47,14 +21,11 @@ export const InnerBox: React.FC<{
     setBalance: (newValue: BigNumber | undefined) => void,
     token: string;
     setToken: any,
-    setTokenTarget: any,
     buttonText: string | ReactNode | undefined;
     innerType: "from" | "to";
     outerType: "wrap" | "unwrap";
-    maxDecimalsToDisplay: number;
-    tokenDecimals: number;
-    toTextColor: string;
-    isModalTrigger?: boolean;
+    decimals: number;
+      isModalTrigger?: boolean;
     onClick: React.MouseEventHandler;
     tokens: string[][];
     getTokenPair: any;
@@ -64,13 +35,10 @@ export const InnerBox: React.FC<{
     setBalance,
     token,
     setToken,
-    setTokenTarget,
     buttonText,
     innerType,
     outerType,
-    maxDecimalsToDisplay,
-    tokenDecimals,
-    toTextColor,
+    decimals,
     onClick,
     tokens,
     getTokenPair,
@@ -120,25 +88,15 @@ export const InnerBox: React.FC<{
 
             <VStack>
                 <HStack>
-                    <AmountField 
-                      amount={balance}
-                      setAmount={setBalance}
-                      maxAmount={maxBalance}
-                      minAmount={BigNumber.from(0)}
-                      decimals={tokenDecimals}
-                    >
-                        {({ value, setValue, error }) => (
-                            <TextInput
-                            value={value}
-                            onChange={ev => setValue(ev.target.value)}
-                            isInvalid={error !== undefined}
-                            innerType={innerType}
-                            outerType={outerType}
-                            toTextColor={toTextColor}
-                            token={token}
-                            />
-                        )}                        
-                    </AmountField>
+                    <AmountField
+                        balance={balance}
+                        setBalance={setBalance}
+                        maxBalance={maxBalance}
+                        decimals={decimals}
+                        innerType={innerType}
+                        outerType={outerType}
+                        token={token}
+                    />
                 </HStack>
 
                 {innerType=="from"?(
@@ -152,7 +110,7 @@ export const InnerBox: React.FC<{
                             textAlign="center"
                             width="100%"
                         >
-                            Available: {maxBalance?balanceAsText(maxBalance,BigNumber.from(tokenDecimals)):"0"}
+                            Available: {maxBalance?balanceAsText(maxBalance,BigNumber.from(decimals)):"0"}
                         </Text>
 
                         {innerType=="from"?(
@@ -193,7 +151,6 @@ export const InnerBox: React.FC<{
                 <TokenListBox 
                     outerType={outerType} 
                     setToken={setToken}
-                    setTokenTarget={setTokenTarget}
                     getTokenPair={getTokenPair}
                     onClose={onClose}
                     tokens={tokens}
@@ -210,7 +167,6 @@ export const InnerBox: React.FC<{
                     fontWeight="normal"
                     onClick={() => {
                         setToken('');
-                        setTokenTarget('');
                         onClose();
                     }}
                     _hover={{bgColor:"secondary.900"}}
