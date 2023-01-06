@@ -68,8 +68,8 @@ export const internalAddressesPerNetwork: Record<
 
     incentivesController: "0xfa255f5104f129B78f477e9a6D050a02f31A5D86",
 
-    explorer: "https://blockscout.com/xdai/mainnet",
-    rpcUrl: "https://rpc.gnosischain.com/",
+    explorer: "https://gnosisscan.io/",
+    rpcUrl: "https://rpc.gnosis.gateway.fm",
   },
 } as const;
 
