@@ -37,7 +37,6 @@ export const OuterBox: React.FC<{
     },[tokenToUnwrap]);
 
     const maxBalanceToWrap = React.useMemo(() => {
-      console.log('maxBalanceToWrap', tokenBalances[tokenToWrap]);
       return tokenBalances[tokenToWrap];
     },[tokenToWrap, tokenBalances, tokenDecimals]);
 

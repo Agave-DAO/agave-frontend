@@ -13,8 +13,6 @@ function balanceAsText(balance:BigNumber,decimals:BigNumber) {
     .slice(0, ((FixedNumber.fromValue(balance, decimals).toString().indexOf(".") == 1) ? 8 : FixedNumber.fromValue(balance, decimals).toString().indexOf(".")+3))
 }
 
-
-
 export const InnerBox: React.FC<{
     balance: BigNumber | undefined,
     maxBalance: BigNumber | undefined,

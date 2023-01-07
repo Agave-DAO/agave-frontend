@@ -84,30 +84,29 @@ export const WrapLayout: React.FC<{
 export const Wrap: React.FC<IWrap> = () => {
 
   const getBalances = useUserDepositAssetBalancesDaiWei();
-  const nativeSymbols = useNativeSymbols();
-  const depositedList: DepositAsset[] = React.useMemo(() => getBalances?.data?.filter(asset => (BigNumber.isBigNumber(asset.balance) && !asset.balance.isZero())) ?? [],[getBalances]);
+  const depositedList: DepositAsset[] = React.useMemo(() => getBalances?.data?.filter(asset => (BigNumber.isBigNumber(asset.balance))) ?? [],[getBalances]);
   
    const tokenBalances = React.useMemo(() => {
     let newBalances:any = {
-      'agWXDAI': BigNumber.from(0),
-      'agUSDC': BigNumber.from(0),
-      'agUSDT': BigNumber.from(0),
-      'agGNO': BigNumber.from(0),
-      'agWETH': BigNumber.from(0),
-      'agWBTC': BigNumber.from(0),
-      'cagWXDAI': BigNumber.from(0),
-      'cagUSDC': BigNumber.from(0),
-      'cagUSDT': BigNumber.from(0),
-      'cagGNO': BigNumber.from(0),
-      'cagWETH': BigNumber.from(0),
-      'cagWBTC': BigNumber.from(0)
+      'agWXDAI': undefined,
+      'agUSDC': undefined,
+      'agUSDT': undefined,
+      'agGNO': undefined,
+      'agWETH': undefined,
+      'agWBTC': undefined,
+      'cagWXDAI': undefined,
+      'cagUSDC': undefined,
+      'cagUSDT': undefined,
+      'cagGNO': undefined,
+      'cagWETH': undefined,
+      'cagWBTC': undefined
     }
     depositedList.forEach(function (x) {
       newBalances[x.aSymbol] = x.balance;
     });
-    console.log("balances", newBalances);
+    console.log(newBalances);
     return newBalances;
-  },[depositedList]);
+  },[getBalances]);
 
   const tokenDecimals = {
     'agWXDAI': 18,
@@ -134,13 +133,13 @@ export const Wrap: React.FC<IWrap> = () => {
     ['agWBTC', 'cagWBTC'],
   ]
 
-  return React.useMemo(() => (
+  return  (
       <WrapLayout 
         tokenBalances={tokenBalances}
         tokenDecimals={tokenDecimals}
         tokens={tokens}
       />
-  ),[]);
+  );
 
 };
 
