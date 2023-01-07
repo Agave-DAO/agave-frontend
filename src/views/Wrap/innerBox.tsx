@@ -1,5 +1,5 @@
 import React, { useMemo,ReactNode } from "react";
-import { Box, Center, Text, VStack, Button, Modal, ModalOverlay, ModalContent, ModalFooter, Input, InputProps } from "@chakra-ui/react";
+import { Box, Center, Text, VStack, Button, Modal, ModalOverlay, ModalContent, ModalFooter, Spinner, Input, InputProps } from "@chakra-ui/react";
 import { HStack } from "@chakra-ui/layout";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { fontSizes, spacings } from "../../utils/constants";
@@ -108,7 +108,15 @@ export const InnerBox: React.FC<{
                             textAlign="center"
                             width="100%"
                         >
-                            Available: {maxBalance?balanceAsText(maxBalance,BigNumber.from(decimals)):"0"}
+                            Available: {maxBalance?(
+                                balanceAsText(maxBalance,BigNumber.from(decimals))
+                            ):(
+                                token!=""?(
+                                    "N/A"
+                                ):(
+                                    "0.0"
+                                )
+                            )}
                         </Text>
 
                         {innerType=="from"?(
