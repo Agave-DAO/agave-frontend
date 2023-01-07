@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { BigNumber, FixedNumber } from "ethers";
 import { parseFixed } from "@ethersproject/bignumber";
 import { Input, InputProps } from "@chakra-ui/react";
+import { keyframes } from "styled-components";
 
 export interface RawInputProps {
   value: string;
@@ -25,6 +26,7 @@ interface ITextInput extends InputProps {
   innerType: string,
   outerType: string,
   token: string,
+  [key: string] :any
 }
 
 function eqBigNumberOptions(
@@ -35,6 +37,9 @@ function eqBigNumberOptions(
 }
 
 const TextInput: React.FC<ITextInput> = props => {
+
+  const filteredProps = Object.keys(props).filter(key => key !== 'outerType' && key !== 'innerType' && key !== 'token').reduce((acc, key) => ({ ...acc, [key]: props[key] }), {});
+
   return (
     <Input
       fontSize={{ base:"20px", sm:"25px"}}
@@ -50,7 +55,7 @@ const TextInput: React.FC<ITextInput> = props => {
       disabled={props.token=='' || props.innerType=='to'}
       _disabled={{opacity:(props.token!=''&&props.token!=='ag'?"1":"0.4")}}
       opacity={props.innerType=="to"?"0.7":"1"}
-      {...props}
+      {...filteredProps}
     />
   );
 };
