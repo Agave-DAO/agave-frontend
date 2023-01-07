@@ -119,7 +119,7 @@ export const OuterBox: React.FC<{
           </Text>
         </HStack>
       );
-      return (targetToken==''?"Select token":btnText);
+      return (targetToken==''?"":btnText);
     },[tokenToWrapTarget]);
 
     const unwrappedButtonText = React.useMemo(() => {
@@ -143,7 +143,7 @@ export const OuterBox: React.FC<{
           </Text>
         </HStack>
       );
-      return (targetToken==''?"Select token":btnText);
+      return (targetToken==''?"":btnText);
     },[tokenToUnwrapTarget]);
 
     function getTokenPair(tkn:string) {
