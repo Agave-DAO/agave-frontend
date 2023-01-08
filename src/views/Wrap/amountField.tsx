@@ -97,6 +97,10 @@ const FixedDecimalInput: React.FC<AmountInputProps> = ({
           parsedAmount = maxAmount;
           throw true;
         }
+        if (maxAmount && parsedAmount.lt(BigNumber.from(0))) {
+          parsedAmount = BigNumber.from(0);
+          throw true;
+        }
       } catch {
         setState({
           baked: undefined,

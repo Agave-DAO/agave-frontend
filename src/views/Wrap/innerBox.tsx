@@ -160,6 +160,7 @@ export const InnerBox: React.FC<{
                     getTokenPair={getTokenPair}
                     onClose={onClose}
                     tokens={tokens}
+                    setBalance={setBalance}
                 />
                 <ModalFooter>
                 <Button

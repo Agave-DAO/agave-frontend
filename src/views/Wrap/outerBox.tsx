@@ -224,7 +224,14 @@ export const OuterBox: React.FC<{
             px={{ base: "10rem", md: "6rem" }}
             py="1.5rem"
             fontSize={fontSizes.md}
-            disabled={true}
+            disabled={
+              (outerType=="wrap" && balanceToWrap === undefined) ||
+              (outerType=="unwrap" && balanceToUnwrap === undefined) ||
+              (outerType=="wrap" && balanceToWrap !== undefined && balanceToWrap<=BigNumber.from(0)) ||
+              (outerType=="unwrap" && balanceToUnwrap !== undefined && balanceToUnwrap<=BigNumber.from(0)) ||
+              (outerType=="wrap" && balanceToWrap !== undefined && balanceToWrap > maxBalanceToWrap) ||
+              (outerType=="unwrap" && balanceToUnwrap !== undefined && balanceToUnwrap > maxBalanceToUnwrap)
+            }
            >
             {outerType=="wrap"?"Wrap":"Unwrap"}
           </Button>

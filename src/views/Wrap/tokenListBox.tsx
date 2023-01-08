@@ -2,25 +2,27 @@ import React, { useMemo } from "react";
 import { Box, Center, Text, VStack, StackDivider, Button } from "@chakra-ui/react";
 import { CenterProps, HStack } from "@chakra-ui/layout";
 import { TokenIcon } from "../../utils/icons";
+import { BigNumber, FixedNumber } from "ethers";
 
 export const TokenListBox: React.FC<{ 
     outerType: "wrap"|"unwrap";
     setToken: any;
     getTokenPair:any;
     onClose:any;
+    setBalance: any;
     tokens:string[][];
 } & CenterProps> = ({
     outerType,
     setToken,
     getTokenPair,
     onClose,
+    setBalance,
     tokens,
     children,
     ...props
 }) => {
 
     const tokenList = (outerType=='wrap')?tokens.map(x => x[0]):tokens.map(x => x[1]);
-
     return (
         <Center>
             <VStack 
@@ -32,7 +34,8 @@ export const TokenListBox: React.FC<{
                     <Button
                         onClick={(e)=> {
                             setToken(tkn);
-                            onClose(); 
+                            onClose();
+                            setBalance(BigNumber.from(0));
                         }}
                         width="100%"
                         opacity="0.9"
