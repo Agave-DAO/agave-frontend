@@ -37,11 +37,11 @@ export const OuterBox: React.FC<{
     },[tokenToUnwrap]);
 
     const maxBalanceToWrap = React.useMemo(() => {
-      return tokenBalances[tokenToWrap];
+      return tokenToWrap==''? undefined : tokenBalances[tokenToWrap];
     },[tokenToWrap, tokenBalances, tokenDecimals]);
 
     const maxBalanceToUnwrap = React.useMemo(() => {
-      return tokenBalances[tokenToUnwrap];
+      return tokenToUnwrap==''? undefined : tokenBalances[tokenToUnwrap];
     },[tokenToUnwrap, tokenBalances, tokenDecimals]);
 
     const tokenToWrapDecimals = React.useMemo(() => {
