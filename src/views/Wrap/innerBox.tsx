@@ -7,12 +7,6 @@ import { BigNumber, FixedNumber } from "ethers";
 import { TokenListBox } from "./tokenListBox";
 import { AmountField } from "./amountField";
 
-function balanceAsText(balance:BigNumber,decimals:BigNumber) {
-    return FixedNumber.fromValue(balance, decimals)
-    .toString()
-    .slice(0, ((FixedNumber.fromValue(balance, decimals).toString().indexOf(".") == 1) ? 8 : FixedNumber.fromValue(balance, decimals).toString().indexOf(".")+3))
-}
-
 export const InnerBox: React.FC<{
     balance: BigNumber | undefined,
     maxBalance: BigNumber | undefined,
@@ -23,7 +17,7 @@ export const InnerBox: React.FC<{
     innerType: "from" | "to";
     outerType: "wrap" | "unwrap";
     decimals: number;
-      isModalTrigger?: boolean;
+    isModalTrigger?: boolean;
     onClick: React.MouseEventHandler;
     tokens: string[][];
     getTokenPair: any;
@@ -44,6 +38,29 @@ export const InnerBox: React.FC<{
 }) => {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const [avaliableBalanceText, setAvailableBalanceText] = React.useState("0.0");
+
+    React.useEffect(() => {
+        const text = (
+            maxBalance?(
+                balanceAsText(maxBalance,BigNumber.from(decimals))
+            ):(
+                token!=""?(
+                    "N/A"
+                ):(
+                    "0.0"
+                )
+            )
+        );
+        setAvailableBalanceText(text);
+    }, [maxBalance, decimals]);
+
+    function balanceAsText(balance:BigNumber,decimals:BigNumber) {
+        return FixedNumber.fromValue(balance, decimals)
+        .toString()
+        .slice(0, ((FixedNumber.fromValue(balance, decimals).toString().indexOf(".") == 1) ? 8 : FixedNumber.fromValue(balance, decimals).toString().indexOf(".")+3))
+    }    
 
     return (
       <Box
@@ -108,15 +125,7 @@ export const InnerBox: React.FC<{
                             textAlign="center"
                             width="100%"
                         >
-                            Available: {maxBalance?(
-                                balanceAsText(maxBalance,BigNumber.from(decimals))
-                            ):(
-                                token!=""?(
-                                    "N/A"
-                                ):(
-                                    "0.0"
-                                )
-                            )}
+                            Available: {avaliableBalanceText}
                         </Text>
 
                         {innerType=="from"?(
@@ -125,7 +134,7 @@ export const InnerBox: React.FC<{
                                     fontSize={{ base: "1rem", md: fontSizes.sm }}
                                     fontWeight="normal"
                                     bg="primary.300"
-                                    disabled={maxBalance==BigNumber.from(0)}
+                                    disabled={maxBalance==BigNumber.from(0) || token==''}
                                     height="auto"
                                     py="3px"
                                     onClick={()=>{setBalance(maxBalance)}}
@@ -175,6 +184,7 @@ export const InnerBox: React.FC<{
                     onClick={() => {
                         setToken('');
                         onClose();
+                        setBalance(BigNumber.from(0));
                     }}
                     _hover={{bgColor:"secondary.900"}}
                     _active={{bgColor:"secondary.900"}}

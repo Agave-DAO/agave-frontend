@@ -45,11 +45,11 @@ export const OuterBox: React.FC<{
     },[tokenToUnwrap, tokenBalances, tokenDecimals]);
 
     const tokenToWrapDecimals = React.useMemo(() => {
-      return tokenDecimals[tokenToWrap];
+      return tokenToWrap==''? 0 : tokenDecimals[tokenToWrap];
     }, [tokenDecimals, tokenToWrap]);
 
     const tokenToUnwrapDecimals = React.useMemo(() => {
-      return tokenDecimals[tokenToUnwrap];
+      return tokenToUnwrap==''? 0 : tokenDecimals[tokenToUnwrap];
     }, [tokenDecimals, tokenToUnwrap]);
 
     const toWrapButtonText = React.useMemo(() => {
