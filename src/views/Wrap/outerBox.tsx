@@ -7,6 +7,7 @@ import { fontSizes } from "../../utils/constants";
 import { BigNumber, BigNumberish } from "ethers";
 import { TokenIcon } from "../../utils/icons";
 import { InnerBox } from "./innerBox";
+import { Wrapping } from "./wrapping";
 
 export const OuterBox: React.FC<{
     outerType: "wrap" | "unwrap";
@@ -159,7 +160,26 @@ export const OuterBox: React.FC<{
       onClose();
     }, [tokenToWrap, tokenToUnwrap]);
 
-     return (
+    const [isWrapButtonDisabled, setIsWrapButtonDisabled] = React.useState(true);
+    const [isUnwrapButtonDisabled, setIsUnwrapButtonDisabled] = React.useState(true);
+    
+    React.useEffect(() => {
+      setIsWrapButtonDisabled(
+        (outerType=="wrap" && balanceToWrap === undefined) ||
+        (outerType=="wrap" && balanceToWrap !== undefined && balanceToWrap<=BigNumber.from(0)) ||
+        (outerType=="wrap" && balanceToWrap !== undefined && balanceToWrap > maxBalanceToWrap)     
+      )
+    }, [balanceToWrap]);    
+
+    React.useEffect(() => {
+      setIsUnwrapButtonDisabled(
+        (outerType=="unwrap" && balanceToUnwrap === undefined) ||
+        (outerType=="unwrap" && balanceToUnwrap !== undefined && balanceToUnwrap<=BigNumber.from(0)) ||
+        (outerType=="unwrap" && balanceToUnwrap !== undefined && balanceToUnwrap > maxBalanceToUnwrap)   
+      )
+    }, [balanceToUnwrap]);
+
+    return (
       <Center
         boxSizing="content-box"
         flexDirection="column"
@@ -225,17 +245,21 @@ export const OuterBox: React.FC<{
             py="1.5rem"
             fontSize={fontSizes.md}
             disabled={
-              (outerType=="wrap" && balanceToWrap === undefined) ||
-              (outerType=="unwrap" && balanceToUnwrap === undefined) ||
-              (outerType=="wrap" && balanceToWrap !== undefined && balanceToWrap<=BigNumber.from(0)) ||
-              (outerType=="unwrap" && balanceToUnwrap !== undefined && balanceToUnwrap<=BigNumber.from(0)) ||
-              (outerType=="wrap" && balanceToWrap !== undefined && balanceToWrap > maxBalanceToWrap) ||
-              (outerType=="unwrap" && balanceToUnwrap !== undefined && balanceToUnwrap > maxBalanceToUnwrap)
+              (outerType=="wrap" && isWrapButtonDisabled) ||
+              (outerType=="unwrap" && isUnwrapButtonDisabled)
             }
            >
             {outerType=="wrap"?"Wrap":"Unwrap"}
           </Button>
         </VStack>
+
+        {(outerType=="wrap" && !isWrapButtonDisabled) || (outerType=="unwrap" && !isUnwrapButtonDisabled)?(
+          <Wrapping 
+            type={outerType}
+            token={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
+            amount={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+          />
+        ):("")}
       </Center>
     );
 
