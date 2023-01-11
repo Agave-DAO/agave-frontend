@@ -1,5 +1,5 @@
-import React, { useMemo,ReactNode } from "react";
-import { Box, Center, Text, VStack, Button, Modal, ModalOverlay, ModalContent, ModalFooter, Spinner, Input, InputProps } from "@chakra-ui/react";
+import React, { useMemo,ReactNode, useEffect } from "react";
+import { Box, Center, Text, VStack, Button, Modal, ModalOverlay, ModalContent, ModalFooter, Spinner, Input, InputProps, StackDivider } from "@chakra-ui/react";
 import { HStack } from "@chakra-ui/layout";
 import { useDisclosure } from "@chakra-ui/hooks";
 import { fontSizes, spacings } from "../../utils/constants";
@@ -30,6 +30,7 @@ import { StepperBar, WizardOverviewWrapper } from "../common/Wizard";
 import { MINIMUM_NATIVE_RESERVE } from "../../utils/constants";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { DashOverviewIntro } from "../common/DashOverview";
+import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
 
 
 interface InitialState {
@@ -309,14 +310,67 @@ const DepositDetailForAsset: React.FC<{
 export const Wrapping: React.FC<{
   type: "wrap" | "unwrap";
   token: string;
+  target: string;
   amount: BigNumber | undefined;
+  decimals: BigNumber;
 }> = ({
   type,
   token,
-  amount
+  target,
+  amount,
+  decimals
 }) => {
+
   return (
-    <>Ready to {type} {bigNumberToString(amount)} {token}</>
+    <VStack
+      spacing={4}
+      w="90%"
+      align="center"
+      flexDirection="column"
+    >
+      <ColoredText
+        fontSize="1.8rem"
+      >
+        {type=="wrap"?"Wrap tokens":"Unwrap tokens"}
+      </ColoredText>
+      <Box
+            rounded="5px"
+            //bg="secondary.900"
+            //border="2px solid var(--chakra-colors-secondary-900)"
+            padding="3px 10px"
+            fontSize="1.4rem"      
+      >
+        <HStack fontWeight="bold">
+          <Box
+            rounded="5px"
+            bg="secondary.100"
+            border="2px solid var(--chakra-colors-secondary-900)"
+            padding="3px 10px"
+            fontSize="1.4rem"
+          >{token}</Box>
+          <Box color="secondary.900" fontWeight="bold"> ⇒ </Box>
+          <Box
+            rounded="5px"
+            bg="secondary.100"
+            border="2px solid var(--chakra-colors-secondary-900)"
+            padding="3px 10px"
+            fontSize="1.4rem"
+          >{target}</Box>
+        </HStack>
+        <Box
+          fontWeight="bold"
+          fontSize="1.8rem"
+          mt="10px"
+        >
+          {FixedNumber.fromValue(BigNumber.from(amount), decimals).toString()}
+        </Box>
+      </Box>
+      <StackDivider
+          h="0.188rem"
+          backgroundColor="secondary.900"
+      />
+
+    </VStack>
   )
 
 }
