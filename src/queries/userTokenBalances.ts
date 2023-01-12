@@ -42,13 +42,13 @@ const tokenBalance = buildQueryHookWhenParamsDefinedChainAddrs<
 const allTokens = {
     data: [
         ['agWXDAI', internalAddressesPerNetwork.Gnosis.agWXDAI],
-        ['agUSDT', internalAddressesPerNetwork.Gnosis.agUSDC],
+        ['agUSDT', internalAddressesPerNetwork.Gnosis.agUSDT],
         ['agUSDC', internalAddressesPerNetwork.Gnosis.agUSDC],
         ['agGNO', internalAddressesPerNetwork.Gnosis.agGNO],
         ['agWETH', internalAddressesPerNetwork.Gnosis.agWETH],
         ['agWBTC', internalAddressesPerNetwork.Gnosis.agWBTC],
         ['cagWXDAI', internalAddressesPerNetwork.Gnosis.cagWXDAI],
-        ['cagUSDT', internalAddressesPerNetwork.Gnosis.cagUSDC],
+        ['cagUSDT', internalAddressesPerNetwork.Gnosis.cagUSDT],
         ['cagUSDC', internalAddressesPerNetwork.Gnosis.cagUSDC],
         ['cagGNO', internalAddressesPerNetwork.Gnosis.cagGNO],
         ['cagWETH', internalAddressesPerNetwork.Gnosis.cagWETH],
