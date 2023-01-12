@@ -56,6 +56,7 @@ const allTokens = {
     ]
 }
 
+export const tokenAddresses = Object.fromEntries(allTokens.data.map(([token, data]) => [token, data]));
 
 export const userTokenBalances =
   buildQueryHookWhenParamsDefinedChainAddrs<

@@ -23,9 +23,9 @@ import {
 import { useUserReserveData } from "../queries/protocolReserveData";
 
 export interface UseDepositMutationProps {
-  asset: string | NATIVE_TOKEN | undefined;
-  spender: string | undefined;
-  amount: BigNumber | undefined;
+  asset: string;
+  spender: string;
+  amount: BigNumber;
 }
 
 export interface UseDepositMutationDto {
@@ -59,12 +59,12 @@ export const useDepositMutation = ({
   const assetBalanceQueryKey = useUserAssetBalance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress
+    asset
   );
   const allowanceQueryKey = useUserAssetAllowance.buildKey(
     chainId ?? undefined,
     account ?? undefined,
-    asset !== NATIVE_TOKEN ? asset : wrappedNativeToken?.tokenAddress,
+    asset,
     spender ?? undefined
   );
   const depositedQueryKey = [...allowanceQueryKey, "deposit"] as const;
@@ -79,12 +79,12 @@ export const useDepositMutation = ({
       if (!asset || !spender || !amount) {
         return undefined;
       }
+      let deposit;
       const contract = IStaticATokenLM__factory.connect(
-        spender,
-        library.getSigner()
+          spender,
+          library.getSigner()
       );
-
-      let deposit = contract.deposit(account, amount, 0, false);
+      deposit = contract.deposit(account, amount, 0, false);
       const depositConfirmation = await usingProgressNotification(
         "Awaiting deposit approval",
         "Please sign the transaction for deposit.",
@@ -98,7 +98,6 @@ export const useDepositMutation = ({
         depositConfirmation.wait()
       );
       return receipt.status ? amount : undefined;
-
     },
     {
       onSuccess: async (result, vars, context) => {
@@ -136,7 +135,7 @@ export const useDepositMutation = ({
                   useLendingReserveData
                     .fetchQueryDefined(
                       { account, chainAddrs, chainId, library, queryClient },
-                      asset !== NATIVE_TOKEN ? asset : wrappedNativeTokenAddress
+                      asset
                     )
                     .then(reserveData =>
                       useUserAssetBalance.buildKey(
@@ -151,7 +150,7 @@ export const useDepositMutation = ({
                   const userReserveDataKey = useUserReserveData.buildKey(
                     chainId ?? undefined,
                     account ?? undefined,
-                    asset !== NATIVE_TOKEN ? asset : wrappedNativeTokenAddress
+                    asset
                   );
                   queryClient.invalidateQueries(userReserveDataKey);
                 })

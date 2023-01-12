@@ -31,114 +31,71 @@ import { MINIMUM_NATIVE_RESERVE } from "../../utils/constants";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { DashOverviewIntro } from "../common/DashOverview";
 import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
+import { tokenAddresses } from "../../queries/userTokenBalances";
 
-
-interface InitialState {
-    token: any;
+interface AmountSelectedState {
+  amountToDeposit: BigNumber;
+  targetToken: string;
+  sourceToken: string;
 }
 
-interface AmountSelectedState extends InitialState {
-  token: any;
-  amountToWrap: BigNumber;
-}
+interface DepositTXState extends AmountSelectedState {}
 
-interface WrapTXState extends AmountSelectedState {}
+interface DepositedTXState extends DepositTXState {}
 
-interface WrappedTXState extends WrapTXState {
-}
 
-interface NativeTokenDefinition {
-  symbol: string;
-  tokenAddress: NATIVE_TOKEN;
-}
 
-type WrapState = OneTaggedPropertyOf<{
-    init: InitialState;
-    amountSelected: AmountSelectedState;
-    wrapTx: WrapTXState;
-    wrappedTx: WrappedTXState;
+type DepositState = OneTaggedPropertyOf<{
+  amountSelected: AmountSelectedState;
+  depositTx: DepositTXState;
+  depositedTx: DepositedTXState;
 }>;
 
-function createState<SelectedState extends PossibleTags<WrapState>>(
-    type: SelectedState,
-    value: WrapState[SelectedState]
-): WrapState {
-    return {
-        type,
-        [type]: value,
-    } as any;
+function createState<SelectedState extends PossibleTags<DepositState>>(
+  type: SelectedState,
+  value: DepositState[SelectedState]
+): DepositState {
+  return {
+    type,
+    [type]: value,
+  } as any;
 }
   
-const stateNames: Record<PossibleTags<WrapState>, string> = {
-    init: "Token",
-    amountSelected: "Approve",
-    wrapTx: "Wrap",
-    wrappedTx: "Finish",
+const stateNames: Record<PossibleTags<DepositState>, string> = {
+  amountSelected: "Approval",
+  depositTx: "Wrap",
+  depositedTx: "Finish",
 };
 
-const visibleStateNames: ReadonlyArray<PossibleTags<WrapState>> = [
-    "amountSelected",
-    "wrapTx",
-    "wrappedTx",
+const visibleStateNames: ReadonlyArray<PossibleTags<DepositState>> = [
+  "amountSelected",
+  "depositTx",
+  "depositedTx",
 ] as const;
 
-const WrapTitle = "Wrap overview";
-
-const InitialComp: React.FC<{
-    state: InitialState;
-    dispatch: (nextState: WrapState) => void;
-}> = ({ state, dispatch }) => {
-    const [amount, setAmount] = React.useState<BigNumber>();
-    const { data: userBalance } = useUserAssetBalance(state.token);
-  
-    const usefulBalance =
-      userBalance && state.token.tokenAddress === NATIVE_TOKEN
-        ? userBalance.sub(MINIMUM_NATIVE_RESERVE)
-        : userBalance;
-  
-    const onSubmit = React.useCallback(
-      amountToWrap =>
-        dispatch(createState("amountSelected", { amountToWrap, ...state })),
-      [state, dispatch]
-    );
-    return (
-      <DashOverviewIntro
-        asset={state.token}
-        amount={amount}
-        setAmount={setAmount}
-        mode="deposit"
-        onSubmit={onSubmit}
-        balance={usefulBalance}
-      />
-    );
-};
+const DepositTitle = "Overview";
 
 const AmountSelectedComp: React.FC<{
     state: AmountSelectedState;
-    dispatch: (nextState: WrapState) => void;
+    dispatch: (nextState: DepositState) => void;
   }> = ({ state, dispatch }) => {
-    const chainAddresses = useChainAddresses();
     const approvalArgs = React.useMemo<UseApprovalMutationProps>(
       () => ({
-        asset: isReserveTokenDefinition(state.token)
-          ? state.token.tokenAddress
-          : undefined,
-        amount: state.amountToWrap,
-        spender: isReserveTokenDefinition(state.token)
-          ? chainAddresses?.lendingPool
-          : chainAddresses?.wrappedNativeGateway,
+        asset: tokenAddresses[state.sourceToken],
+        amount: state.amountToDeposit,
+        spender: tokenAddresses[state.targetToken],
       }),
-      [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+      [state, tokenAddresses]
     );
     const {
       approvalMutation: { mutateAsync },
     } = useApprovalMutation(approvalArgs);
     const onSubmit = React.useCallback(() => {
       mutateAsync()
-        .then(() => dispatch(createState("wrapTx", { ...state })))
-        .catch(e => console.log("Error"));
+        .then(() => dispatch(createState("depositTx", { ...state })))
+        .catch(e => console.log(e));
     }, [state, dispatch, mutateAsync]);
-    const currentStep: PossibleTags<WrapState> = "amountSelected";
+    const currentStep: PossibleTags<DepositState> = "amountSelected";
     const stepperBar = React.useMemo(
       () => (
         <StepperBar
@@ -174,31 +131,28 @@ const AmountSelectedComp: React.FC<{
 };
 
 
-const WrapTxComp: React.FC<{
-    state: WrapTXState;
-    dispatch: (nextState: WrapState) => void;
-  }> = ({ state, dispatch }) => {
-    const chainAddresses = useChainAddresses();
-    const wrapArgs = React.useMemo<UseDepositMutationProps>(
+const DepositTxComp: React.FC<{
+  state: DepositTXState;
+  dispatch: (nextState: DepositState) => void;
+}> = ({ state, dispatch }) => {
+    const depositArgs = React.useMemo<UseDepositMutationProps>(
       () => ({
-        asset: state.token.tokenAddress,
-        amount: state.amountToWrap,
-        spender: isReserveTokenDefinition(state.token)
-          ? chainAddresses?.lendingPool
-          : chainAddresses?.wrappedNativeGateway,
+        asset: tokenAddresses[state.sourceToken],
+        amount: state.amountToDeposit,
+        spender: tokenAddresses[state.targetToken],
       }),
-      [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
+      [state, tokenAddresses]
     );
-    const history = useHistory();
+    console.log(depositArgs);
     const {
       depositMutation: { mutateAsync },
-    } = useDepositMutation(wrapArgs);
+    } = useDepositMutation(depositArgs);
     const onSubmit = React.useCallback(() => {
       mutateAsync()
-        .then(() => dispatch(createState("wrappedTx", { ...state })))
+      .then(() => dispatch(createState("depositedTx", { ...state })))
         .catch(e => console.log(e));
     }, [state, dispatch, mutateAsync]);
-    const currentStep: PossibleTags<WrapState> = "wrapTx";
+    const currentStep: PossibleTags<DepositState> = "depositTx";
     const stepperBar = React.useMemo(
       () => (
         <StepperBar
@@ -231,13 +185,13 @@ const WrapTxComp: React.FC<{
     );
 };
 
-const WrappedTxComp: React.FC<{
-    state: WrappedTXState;
-    dispatch: (nextState: WrapState) => void;
-  }> = ({ state, dispatch }) => {
+const DepositedTxComp: React.FC<{
+    state: DepositedTXState;
+    dispatch: (nextState: DepositState) => void;
+}> = ({ state, dispatch }) => {
     const history = useHistory();
-    const currentStep: PossibleTags<WrapState> = "wrappedTx";
-    const decimals = useDecimalCountForToken(state.token.tokenAddress).data;
+    const currentStep: PossibleTags<DepositState> = "depositedTx";
+    const decimals = useDecimalCountForToken(tokenAddresses[state.sourceToken]).data;
     const stepperBar = React.useMemo(
       () => (
         <StepperBar
@@ -270,47 +224,21 @@ const WrappedTxComp: React.FC<{
     );
 };
   
-export const WrapStateMachine: React.FC<{
-    state: WrapState;
-    setState: (newState: WrapState) => void;
-  }> = ({ state, setState }) => {
+const DepositStateMachine: React.FC<{
+  state: DepositState;
+  setState: (newState: DepositState) => void;
+}> = ({ state, setState }) => {
     switch (state.type) {
-      case "init":
-        return <InitialComp state={state.init} dispatch={setState} />;
       case "amountSelected":
         return (
           <AmountSelectedComp state={state.amountSelected} dispatch={setState} />
         );
-      case "wrapTx":
-        return <WrapTxComp state={state.wrapTx} dispatch={setState} />;
-      case "wrappedTx":
-        return <WrappedTxComp state={state.wrappedTx} dispatch={setState} />;
+      case "depositTx":
+        return <DepositTxComp state={state.depositTx} dispatch={setState} />;
+      case "depositedTx":
+        return <DepositedTxComp state={state.depositedTx} dispatch={setState} />;
     }
 };
-
-const DepositDetailForAsset: React.FC<{
-    asset: ReserveOrNativeTokenDefinition;
-  }> = ({ asset }) => {
-    const dash = React.useMemo(() => <DepositDash token={asset} />, [asset]);
-    const [wrapState, setWrapState] = React.useState<WrapState>(() =>
-      createState("init", { token: asset })
-    );
-    return (
-      <VStack color="white" spacing="3.5rem" mt="3.5rem" minH="65vh">
-        {dash}
-        <Center
-          w="100%"
-          color="primary.100"
-          bg="primary.900"
-          rounded="lg"
-          padding="1em"
-        >
-          <WrapStateMachine state={wrapState} setState={setWrapState} />
-        </Center>
-      </VStack>
-    );
-};
-
 
 export const Wrapping: React.FC<{
   type: "wrap" | "unwrap";
@@ -327,10 +255,10 @@ export const Wrapping: React.FC<{
 }) => {
 
 
-  const asset = {symbol: 'agWXDAI', tokenAddress: internalAddressesPerNetwork.Gnosis.agWXDAI};
-  
-  const [wrapState, setWrapState] = React.useState<WrapState>(() =>
-    createState("amountSelected", { amountToWrap: BigNumber.from(amount), token:asset })
+  // TODO
+
+  const [depositState, setDepositState] = React.useState<DepositState>(() =>
+    createState("amountSelected", { amountToDeposit: BigNumber.from(amount), targetToken:targetToken, sourceToken:sourceToken })
   );
 
   return (
@@ -347,8 +275,6 @@ export const Wrapping: React.FC<{
       </ColoredText>
       <Box
             rounded="5px"
-            //bg="secondary.900"
-            //border="2px solid var(--chakra-colors-secondary-900)"
             padding="3px 10px"
             fontSize="1.4rem"      
       >
@@ -379,7 +305,7 @@ export const Wrapping: React.FC<{
       </Box>
 
 
-      <WrapStateMachine state={wrapState} setState={setWrapState} />
+      <DepositStateMachine state={depositState} setState={setDepositState} />
 
     </VStack>
   )
