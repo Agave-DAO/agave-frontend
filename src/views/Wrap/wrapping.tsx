@@ -19,7 +19,7 @@ import { ControllerItem } from "../../components/ControllerItem";
 import {
   useDepositMutation,
   UseDepositMutationProps,
-} from "../../mutations/deposit";
+} from "../../mutations/depositByWrap";
 import {
     ReserveOrNativeTokenDefinition,
     isReserveTokenDefinition,
@@ -34,19 +34,22 @@ import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddre
 
 
 interface InitialState {
-    token: Readonly<ReserveOrNativeTokenDefinition>;
+    token: any;
 }
 
 interface AmountSelectedState extends InitialState {
-    amountToWrap: BigNumber;
+  token: any;
+  amountToWrap: BigNumber;
 }
 
-interface WrapTXState extends AmountSelectedState {
-
-}
+interface WrapTXState extends AmountSelectedState {}
 
 interface WrappedTXState extends WrapTXState {
+}
 
+interface NativeTokenDefinition {
+  symbol: string;
+  tokenAddress: NATIVE_TOKEN;
 }
 
 type WrapState = OneTaggedPropertyOf<{
@@ -68,9 +71,9 @@ function createState<SelectedState extends PossibleTags<WrapState>>(
   
 const stateNames: Record<PossibleTags<WrapState>, string> = {
     init: "Token",
-    amountSelected: "Approval",
+    amountSelected: "Approve",
     wrapTx: "Wrap",
-    wrappedTx: "Wrapped",
+    wrappedTx: "Finish",
 };
 
 const visibleStateNames: ReadonlyArray<PossibleTags<WrapState>> = [
@@ -133,7 +136,7 @@ const AmountSelectedComp: React.FC<{
     const onSubmit = React.useCallback(() => {
       mutateAsync()
         .then(() => dispatch(createState("wrapTx", { ...state })))
-        .catch(e => dispatch(createState("init", state)));
+        .catch(e => console.log("Error"));
     }, [state, dispatch, mutateAsync]);
     const currentStep: PossibleTags<WrapState> = "amountSelected";
     const stepperBar = React.useMemo(
@@ -147,23 +150,26 @@ const AmountSelectedComp: React.FC<{
       [currentStep]
     );
     return (
-      <WizardOverviewWrapper
-        title={WrapTitle}
-        amount={state.amountToWrap}
-        asset={state.token}
-        collateral={true}
-        increase={true}
-      >
+
+      <>
         {stepperBar}
-        <ControllerItem
-          stepNumber={1}
-          stepName="Approval"
-          stepDesc="Please submit to approve"
-          actionName="Approve"
-          onActionClick={onSubmit}
-          totalSteps={visibleStateNames.length}
-        />
-      </WizardOverviewWrapper>
+        <Button 
+          width="30%"
+          mt="20px !important"
+          textTransform="uppercase"
+          background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+          color="secondary.900"
+          fontWeight="bold"
+          px={{ base: "10rem", md: "6rem" }}
+          py="1.5rem"
+          fontSize={fontSizes.md}
+          onClick={()=>onSubmit()}
+          bg="secondary.900"
+        >
+          Approve
+        </Button>
+      </>
+
     );
 };
 
@@ -183,13 +189,14 @@ const WrapTxComp: React.FC<{
       }),
       [state, chainAddresses?.lendingPool, chainAddresses?.wrappedNativeGateway]
     );
+    const history = useHistory();
     const {
       depositMutation: { mutateAsync },
     } = useDepositMutation(wrapArgs);
     const onSubmit = React.useCallback(() => {
       mutateAsync()
         .then(() => dispatch(createState("wrappedTx", { ...state })))
-        .catch(e => dispatch(createState("init", state)));
+        .catch(e => console.log(e));
     }, [state, dispatch, mutateAsync]);
     const currentStep: PossibleTags<WrapState> = "wrapTx";
     const stepperBar = React.useMemo(
@@ -203,23 +210,24 @@ const WrapTxComp: React.FC<{
       [currentStep]
     );
     return (
-      <WizardOverviewWrapper
-        title={WrapTitle}
-        amount={state.amountToWrap}
-        asset={state.token}
-        collateral={true}
-        increase={true}
-      >
+      <>
         {stepperBar}
-        <ControllerItem
-          stepNumber={2}
-          stepName="Wrap"
-          stepDesc="Please submit to wrap your tokens"
-          actionName="Deposit"
-          onActionClick={onSubmit}
-          totalSteps={visibleStateNames.length}
-        />
-      </WizardOverviewWrapper>
+        <Button 
+          width="30%"
+          mt="20px !important"
+          textTransform="uppercase"
+          background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+          color="secondary.900"
+          fontWeight="bold"
+          px={{ base: "10rem", md: "6rem" }}
+          py="1.5rem"
+          fontSize={fontSizes.md}
+          onClick={()=>onSubmit()}
+          bg="secondary.900"
+        >
+          Wrap tokens
+        </Button>
+      </>
     );
 };
 
@@ -241,27 +249,24 @@ const WrappedTxComp: React.FC<{
       [currentStep]
     );
     return (
-      <WizardOverviewWrapper
-        title={WrapTitle}
-        amount={state.amountToWrap}
-        asset={state.token}
-        collateral={true}
-        increase={true}
-      >
+      <>
         {stepperBar}
-        <ControllerItem
-          stepNumber={3}
-          stepName="Wrapped"
-          stepDesc={`Wrap of ${bigNumberToString(
-            state.amountToWrap,
-            4,
-            decimals
-          )} ${state.token.symbol} successful`}
-          actionName="Finish"
-          onActionClick={() => history.push("/wrap")}
-          totalSteps={visibleStateNames.length}
-        />
-      </WizardOverviewWrapper>
+        <Button 
+          width="30%"
+          mt="20px !important"
+          textTransform="uppercase"
+          background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+          color="secondary.900"
+          fontWeight="bold"
+          px={{ base: "10rem", md: "6rem" }}
+          py="1.5rem"
+          fontSize={fontSizes.md}
+          onClick={()=>history.push("/wrap")}
+          bg="secondary.900"
+        >
+          Finish
+        </Button>
+      </>
     );
 };
   
@@ -309,17 +314,24 @@ const DepositDetailForAsset: React.FC<{
 
 export const Wrapping: React.FC<{
   type: "wrap" | "unwrap";
-  token: string;
-  target: string;
+  sourceToken: string;
+  targetToken: string;
   amount: BigNumber | undefined;
   decimals: BigNumber;
 }> = ({
   type,
-  token,
-  target,
+  sourceToken,
+  targetToken,
   amount,
   decimals
 }) => {
+
+
+  const asset = {symbol: 'agWXDAI', tokenAddress: internalAddressesPerNetwork.Gnosis.agWXDAI};
+  
+  const [wrapState, setWrapState] = React.useState<WrapState>(() =>
+    createState("amountSelected", { amountToWrap: BigNumber.from(amount), token:asset })
+  );
 
   return (
     <VStack
@@ -347,7 +359,7 @@ export const Wrapping: React.FC<{
             border="2px solid var(--chakra-colors-secondary-900)"
             padding="3px 10px"
             fontSize="1.4rem"
-          >{token}</Box>
+          >{sourceToken}</Box>
           <Box color="secondary.900" fontWeight="bold"> ⇒ </Box>
           <Box
             rounded="5px"
@@ -355,7 +367,7 @@ export const Wrapping: React.FC<{
             border="2px solid var(--chakra-colors-secondary-900)"
             padding="3px 10px"
             fontSize="1.4rem"
-          >{target}</Box>
+          >{targetToken}</Box>
         </HStack>
         <Box
           fontWeight="bold"
@@ -365,47 +377,12 @@ export const Wrapping: React.FC<{
           {FixedNumber.fromValue(BigNumber.from(amount), decimals).toString()}
         </Box>
       </Box>
-      <StackDivider
-          h="0.188rem"
-          backgroundColor="secondary.900"
-      />
+
+
+      <WrapStateMachine state={wrapState} setState={setWrapState} />
 
     </VStack>
   )
 
 }
 
-/*
-export const DepositDetail: React.FC = () => {
-    const match =
-      useRouteMatch<{
-        assetName: string | undefined;
-      }>();
-    const history = useHistory();
-    const assetName = match.params.assetName;
-    const { allReserves, token: asset } = useTokenDefinitionBySymbol(assetName);
-    if (!asset) {
-      return (
-        <Box
-          w="100%"
-          color="primary.100"
-          bg="primary.900"
-          rounded="lg"
-          padding="3em"
-        >
-          <Center>
-            {allReserves ? (
-              <>
-                No reserve found with asset symbol&nbsp;
-                <ColoredText>{assetName}</ColoredText>
-              </>
-            ) : (
-              "Loading reserves..."
-            )}
-          </Center>
-        </Box>
-      );
-    }
-    return <DepositDetailForAsset asset={asset} />;
-  };
-*/

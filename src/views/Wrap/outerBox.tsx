@@ -259,8 +259,8 @@ export const OuterBox: React.FC<{
         ):(
           <Wrapping 
             type={outerType}
-            token={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
-            target={outerType=="wrap"?tokenToWrapTarget:tokenToUnwrapTarget}
+            sourceToken={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
+            targetToken={outerType=="wrap"?tokenToWrapTarget:tokenToUnwrapTarget}
             amount={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
             decimals={outerType=="wrap"?tokenDecimals[tokenToWrap]:tokenDecimals[tokenToUnwrap]}
           />
