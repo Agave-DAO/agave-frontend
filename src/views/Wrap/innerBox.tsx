@@ -95,7 +95,7 @@ export const InnerBox: React.FC<{
                     _hover={{bgColor: innerType=="from"?"primary.900":"" }}
                     _active={{bgColor: innerType=="from"?"primary.900":"" }}
                     disabled={innerType=="to"}
-                    opacity={outerType=="wrap"?"1 !important":""}
+                    opacity="1 !important"
                 >
                     {buttonText}
                 </Button>

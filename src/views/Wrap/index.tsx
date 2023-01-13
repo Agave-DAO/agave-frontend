@@ -28,13 +28,11 @@ export const WrapBanner: React.FC<{}> = () => {
 }
 
 export const Wrap: React.FC<IWrap> = () => {
-  const { data: tokenBalances } = userTokenBalances();
-  return React.useMemo(
-    () => (
+  const tokenBalances = userTokenBalances();
+  return (
       <WrapLayout
         tokenBalances={tokenBalances}
       />
-    ), [tokenBalances]
   );
 };
 

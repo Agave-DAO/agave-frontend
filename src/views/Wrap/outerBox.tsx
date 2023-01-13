@@ -7,6 +7,7 @@ import { fontSizes } from "../../utils/constants";
 import { BigNumber, BigNumberish } from "ethers";
 import { TokenIcon } from "../../utils/icons";
 import { InnerBox } from "./innerBox";
+import { InfoBox } from "./infoBox";
 import { Wrapping } from "./wrapping";
 
 export const OuterBox: React.FC<{
@@ -34,15 +35,15 @@ export const OuterBox: React.FC<{
     },[tokenToWrap]);
     
     const tokenToUnwrapTarget = React.useMemo(()=>{
-      return getTokenPair(tokenToWrap)
+      return getTokenPair(tokenToUnwrap)
     },[tokenToUnwrap]);
 
     const maxBalanceToWrap = React.useMemo(() => {
-      return tokenToWrap==''? undefined : tokenBalances[tokenToWrap];
+      return tokenToWrap==''? BigNumber.from(0) : tokenBalances[tokenToWrap];
     },[tokenToWrap, tokenBalances, tokenDecimals]);
 
     const maxBalanceToUnwrap = React.useMemo(() => {
-      return tokenToUnwrap==''? undefined : tokenBalances[tokenToUnwrap];
+      return tokenToUnwrap==''? BigNumber.from(0) : tokenBalances[tokenToUnwrap];
     },[tokenToUnwrap, tokenBalances, tokenDecimals]);
 
     const tokenToWrapDecimals = React.useMemo(() => {
@@ -187,7 +188,6 @@ export const OuterBox: React.FC<{
         flexDirection="column"
         rounded="xl"
         textAlign="center"
-        minH="10.6rem"
         mb="5"
         minW={{ base: "100%", lg: "auto" }}
         flex={1}
@@ -195,7 +195,7 @@ export const OuterBox: React.FC<{
         py="1rem"
         {...props}
       >
-        {(outerType=="wrap" && !isWrappingActive) || (outerType=="unwrap" && !isUnwrappingActive)?(
+
           <VStack
             spacing={4}
             w="90%"
@@ -207,64 +207,72 @@ export const OuterBox: React.FC<{
             >
               {outerType=="wrap"?"Wrap tokens":"Unwrap tokens"}
             </ColoredText>
-            <InnerBox
-              token={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
-              setToken={outerType=="wrap"?setTokenToWrap:setTokenToUnwrap}
-              balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
-              maxBalance={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
-              setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
-              buttonText={outerType=="wrap"?toWrapButtonText:toUnwrapButtonText}
-              decimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
-              outerType={outerType}
-              innerType="from"
-              isModalTrigger={true}
-              onClick={() =>{}}
-              tokens={tokens}
-              getTokenPair={getTokenPair}
-            />
-            <InnerBox
-              token={outerType=="wrap"?'ag'+tokenToWrap:tokenToUnwrap.substring(2)}
-              setToken={undefined}
-              balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
-              maxBalance={BigNumber.from(0)}
-              setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
-              buttonText={outerType=="wrap"?wrappedButtonText:unwrappedButtonText}
-              decimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
-              outerType={outerType}
-              innerType="to"
-              isModalTrigger={false}
-              onClick={() =>{}}
-              tokens={tokens}
-              getTokenPair={getTokenPair}
-            />
-            <Button
-              width="30%"
-              mt="2.4rem"
-              textTransform="uppercase"
-              background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-              color="secondary.900"
-              fontWeight="bold"
-              px={{ base: "10rem", md: "6rem" }}
-              py="1.5rem"
-              fontSize={fontSizes.md}
-              onClick={e=>{e.preventDefault(); outerType=="wrap"?setIsWrappingActive(true):setIsUnwrappingActive(true)}}
-              disabled={
-                (outerType=="wrap" && isWrapButtonDisabled) ||
-                (outerType=="unwrap" && isUnwrapButtonDisabled)
-              }
-            >
-              {outerType=="wrap"?"Wrap":"Unwrap"}
-            </Button>
+            {(outerType=="wrap" && !isWrappingActive) || (outerType=="unwrap" && !isUnwrappingActive)?(
+              <InnerBox
+                token={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
+                setToken={outerType=="wrap"?setTokenToWrap:setTokenToUnwrap}
+                balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+                maxBalance={outerType=="wrap"?maxBalanceToWrap:maxBalanceToUnwrap}
+                setBalance={outerType=="wrap"?setBalanceToWrap:setBalanceToUnwrap}
+                buttonText={outerType=="wrap"?toWrapButtonText:toUnwrapButtonText}
+                decimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
+                outerType={outerType}
+                innerType="from"
+                isModalTrigger={true}
+                onClick={() =>{}}
+                tokens={tokens}
+                getTokenPair={getTokenPair}
+              />
+            ):(
+              ""
+            )};
+
+            {outerType=="wrap"&&tokenToWrap!="" || outerType=="unwrap"&&tokenToUnwrap!=""?(
+              <InfoBox
+                balance={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+                buttonTextFrom={outerType=="wrap"?toWrapButtonText:toUnwrapButtonText}
+                buttonTextTo={outerType=="wrap"?wrappedButtonText:unwrappedButtonText}
+                decimals={outerType=="wrap"?tokenToWrapDecimals:tokenToUnwrapDecimals}
+                outerType={outerType}
+              />
+            ):("")}
+
+            {(outerType=="wrap" && !isWrappingActive) || (outerType=="unwrap" && !isUnwrappingActive)?(
+
+              <Button
+                width="30%"
+                mt="2.4rem"
+                textTransform="uppercase"
+                background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+                color="secondary.900"
+                fontWeight="bold"
+                px={{ base: "10rem", md: "6rem" }}
+                py="1.5rem"
+                fontSize={fontSizes.md}
+                onClick={e=>{e.preventDefault(); outerType=="wrap"?setIsWrappingActive(true):setIsUnwrappingActive(true)}}
+                disabled={
+                  (outerType=="wrap" && isWrapButtonDisabled) ||
+                  (outerType=="unwrap" && isUnwrapButtonDisabled)
+                }
+              >
+                {outerType=="wrap"?"Wrap":"Unwrap"}
+              </Button>
+            ):(
+              <Wrapping 
+                type={outerType}
+                sourceToken={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
+                targetToken={outerType=="wrap"?tokenToWrapTarget:tokenToUnwrapTarget}
+                amount={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
+                decimals={outerType=="wrap"?tokenDecimals[tokenToWrap]:tokenDecimals[tokenToUnwrap]}
+              />
+            )};
+
         </VStack>
-        ):(
-          <Wrapping 
-            type={outerType}
-            sourceToken={outerType=="wrap"?tokenToWrap:tokenToUnwrap}
-            targetToken={outerType=="wrap"?tokenToWrapTarget:tokenToUnwrapTarget}
-            amount={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
-            decimals={outerType=="wrap"?tokenDecimals[tokenToWrap]:tokenDecimals[tokenToUnwrap]}
-          />
-        )}
+
+        
+
+          
+
       </Center>
     );
 

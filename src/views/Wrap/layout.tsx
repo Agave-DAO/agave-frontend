@@ -54,9 +54,12 @@ export const WrapLayout: React.FC<IWrap> = ({
   tokenBalances
 }) => {
   return (
-    <Flex flexDirection="column">
+    <Flex 
+      flexDirection="column"
+      alignItems="stretch"
+    >
       <Flex
-        align="center"
+        justifyContent="flex-start"
         flexBasis="auto"
         spacing="1em"
         w="100%"
