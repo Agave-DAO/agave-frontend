@@ -10,6 +10,7 @@ import {
   useUserReserveAssetBalances,
   useUserReserveAssetBalancesDaiWei,
 } from "../queries/userAssets";
+import { userTokenBalances } from "../queries/userTokenBalances";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
@@ -64,6 +65,10 @@ export const useWithdrawMutation = ({
     asset,
     spender
   );
+  const userTokenBalancesQueryKey = userTokenBalances.buildKey(
+    chainId ?? undefined,
+    account ?? undefined
+  );
   const withdrawnQueryKey = [...allowanceQueryKey, "withdraw"] as const;
 
   const withdrawMutationKey = [...withdrawnQueryKey, amount] as const;
@@ -84,10 +89,6 @@ export const useWithdrawMutation = ({
           library.getSigner()
       );
       withdraw = contract.withdraw(account, amount, false);
-      console.log("spender", spender);
-      console.log("account", account);
-      console.log("amount", amount);
-
       const withdrawConfirmation = await usingProgressNotification(
         "Awaiting withdraw approval",
         "Please sign the transaction for withdrawal.",
@@ -111,17 +112,16 @@ export const useWithdrawMutation = ({
           queryClient.invalidateQueries(allowanceQueryKey),
           queryClient.invalidateQueries(withdrawnQueryKey),
           queryClient.invalidateQueries(withdrawMutationKey),
+          queryClient.invalidateQueries(userTokenBalancesQueryKey),
           chainId && account
             ? Promise.allSettled(
                 [
                   useUserDepositAssetBalances.buildKey(chainId, account),
                   useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
-                  useUserDepositAssetBalancesWithReserveInfo.buildKey(
-                    chainId,
-                    account
-                  ),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
                   useUserReserveAssetBalances.buildKey(chainId, account),
                   useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                  userTokenBalances.buildKey(chainId, account)
                 ].map(k => queryClient.invalidateQueries(k))
               )
             : Promise.resolve(),

@@ -15,14 +15,12 @@ export const OuterBox: React.FC<{
     tokenBalances: any,
     tokenDecimals: any,
     tokens: any,
-    setTokenBalances: any,
 } & CenterProps> = ({
     outerType,
     children,
     tokenBalances,
     tokenDecimals,
     tokens,
-    setTokenBalances,
     ...props
 }) => {
 
@@ -231,6 +229,7 @@ export const OuterBox: React.FC<{
                 onClick={() =>{}}
                 tokens={tokens}
                 getTokenPair={getTokenPair}
+                tokenBalances={tokenBalances}
               />
             ):(
               ""

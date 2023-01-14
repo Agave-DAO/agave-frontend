@@ -49,19 +49,20 @@ const LoadingLayout: React.FC<{}> = () => {
 }
 
 export const Wrap: React.FC<IWrap> = () => {
-
-  const [layout, setLayout] = React.useState(<LoadingLayout />);
   const { data: tokenBalances } = userTokenBalances();
-
-  useEffect(() => {
-    console.log(tokenBalances);
-    if (tokenBalances !== undefined) {
-      setLayout(<WrapLayout balances={tokenBalances} />);
-    }
-  },[tokenBalances]);
-
-  return (
-    layout
-  )
+  if (tokenBalances !== undefined) {
+    console.log('agWXDAI', tokenBalances['agWXDAI']);
+    console.log('cagWXDAI', tokenBalances['cagWXDAI']);
+  }
+  return React.useMemo(
+    () => (
+      <WrapLayout
+        tokenBalances={tokenBalances}
+      />
+    ), [tokenBalances]
+  );
 };
+
+
+
 

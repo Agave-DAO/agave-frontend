@@ -21,6 +21,7 @@ export const InnerBox: React.FC<{
     onClick: React.MouseEventHandler;
     tokens: string[][];
     getTokenPair: any;
+    tokenBalances: any[];
 }> = ({
     balance,
     maxBalance,
@@ -35,14 +36,13 @@ export const InnerBox: React.FC<{
     tokens,
     getTokenPair,
     isModalTrigger,
+    tokenBalances
 }) => {
 
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const [avaliableBalanceText, setAvailableBalanceText] = React.useState("0.0");
-
-    React.useEffect(() => {
-        const text = (
+    const availableBalanceText = React.useMemo(() => {
+        return (
             maxBalance?(
                 balanceAsText(maxBalance,BigNumber.from(decimals))
             ):(
@@ -53,7 +53,6 @@ export const InnerBox: React.FC<{
                 )
             )
         );
-        setAvailableBalanceText(text);
     }, [maxBalance, decimals]);
 
     function balanceAsText(balance:BigNumber,decimals:BigNumber) {
@@ -94,8 +93,7 @@ export const InnerBox: React.FC<{
                     bgColor={innerType=="to"?"secondary.900":""}
                     _hover={{bgColor: innerType=="from"?"primary.900":"" }}
                     _active={{bgColor: innerType=="from"?"primary.900":"" }}
-                    disabled={innerType=="to"}
-                    opacity="1 !important"
+                    disabled={tokenBalances === undefined}
                 >
                     {buttonText}
                 </Button>
@@ -125,7 +123,7 @@ export const InnerBox: React.FC<{
                             textAlign="center"
                             width="100%"
                         >
-                            Available: {avaliableBalanceText}
+                            Available: {availableBalanceText}
                         </Text>
 
                         {innerType=="from"?(

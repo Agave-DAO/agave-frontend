@@ -10,6 +10,7 @@ import {
   useUserReserveAssetBalances,
   useUserReserveAssetBalancesDaiWei,
 } from "../queries/userAssets";
+import { userTokenBalances } from "../queries/userTokenBalances";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { usingProgressNotification } from "../utils/progressNotification";
 import { useUserAccountData } from "../queries/userAccountData";
@@ -49,7 +50,6 @@ export const useDepositMutation = ({
 }: UseDepositMutationProps): UseDepositMutationDto => {
   const queryClient = useQueryClient();
   const { chainId, account, library } = useAppWeb3();
-  const { data: wrappedNativeToken } = useWrappedNativeDefinition();
 
   const userAccountDataQueryKey = useUserAccountData.buildKey(
     chainId ?? undefined,
@@ -65,7 +65,11 @@ export const useDepositMutation = ({
     chainId ?? undefined,
     account ?? undefined,
     asset,
-    spender ?? undefined
+    spender
+  );
+  const userTokenBalancesQueryKey = userTokenBalances.buildKey(
+    chainId ?? undefined,
+    account ?? undefined
   );
   const depositedQueryKey = [...allowanceQueryKey, "deposit"] as const;
 
@@ -108,22 +112,21 @@ export const useDepositMutation = ({
           queryClient.invalidateQueries(allowanceQueryKey),
           queryClient.invalidateQueries(depositedQueryKey),
           queryClient.invalidateQueries(depositMutationKey),
+          queryClient.invalidateQueries(userTokenBalancesQueryKey),
           chainId && account
             ? Promise.allSettled(
                 [
                   useUserDepositAssetBalances.buildKey(chainId, account),
                   useUserDepositAssetBalancesDaiWei.buildKey(chainId, account),
-                  useUserDepositAssetBalancesWithReserveInfo.buildKey(
-                    chainId,
-                    account
-                  ),
+                  useUserDepositAssetBalancesWithReserveInfo.buildKey(chainId, account),
                   useUserReserveAssetBalances.buildKey(chainId, account),
                   useUserReserveAssetBalancesDaiWei.buildKey(chainId, account),
+                  userTokenBalances.buildKey(chainId, account)
                 ].map(k => queryClient.invalidateQueries(k))
               )
             : Promise.resolve(),
           asset && account && chainAddrs && chainId && library
-            ? useWrappedNativeAddress
+            ? useWrappedNativeDefinition
                 .fetchQueryDefined({
                   account,
                   chainAddrs,
@@ -131,7 +134,14 @@ export const useDepositMutation = ({
                   library,
                   queryClient,
                 })
-                .then(wrappedNativeTokenAddress => {
+                .then(wrappedNativeToken => {
+
+                  const userTokenBalancesQueryKey = userTokenBalances.buildKey(
+                    chainId ?? undefined,
+                    account ?? undefined
+                  );
+                  queryClient.invalidateQueries(userTokenBalancesQueryKey);
+
                   useLendingReserveData
                     .fetchQueryDefined(
                       { account, chainAddrs, chainId, library, queryClient },
@@ -153,6 +163,7 @@ export const useDepositMutation = ({
                     asset
                   );
                   queryClient.invalidateQueries(userReserveDataKey);
+
                 })
             : Promise.resolve(),
         ]);
