@@ -50,10 +50,6 @@ const LoadingLayout: React.FC<{}> = () => {
 
 export const Wrap: React.FC<IWrap> = () => {
   const { data: tokenBalances } = userTokenBalances();
-  if (tokenBalances !== undefined) {
-    console.log('agWXDAI', tokenBalances['agWXDAI']);
-    console.log('cagWXDAI', tokenBalances['cagWXDAI']);
-  }
   return React.useMemo(
     () => (
       <WrapLayout

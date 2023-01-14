@@ -245,10 +245,8 @@ const WithdrawStep: React.FC<{
   );
   return (
     <>
-      {stepperBar}
       <Button 
         width="30%"
-        mt="20px !important"
         background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
         color="secondary.900"
         fontWeight="bold"
@@ -287,10 +285,10 @@ const FinishStep: React.FC<{
 
     return (
       <>
-        {stepperBar}
+        {state.type=="wrap"?stepperBar:""}
         <Button 
           width="30%"
-          mt="20px !important"
+          mt={state.type=="wrap"?"20px !important":""}
           background="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
           color="secondary.900"
           fontWeight="bold"
