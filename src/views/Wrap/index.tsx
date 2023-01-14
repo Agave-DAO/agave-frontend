@@ -56,7 +56,7 @@ export const Wrap: React.FC<IWrap> = () => {
   useEffect(() => {
     console.log(tokenBalances);
     if (tokenBalances !== undefined) {
-      setLayout(<WrapLayout tokenBalances={tokenBalances} />);
+      setLayout(<WrapLayout balances={tokenBalances} />);
     }
   },[tokenBalances]);
 

@@ -4,7 +4,7 @@ import { isMobileOnly } from "react-device-detect";
 import { OuterBox } from "./outerBox";
 
 export interface IWrap {
-  tokenBalances: any;
+  balances: any;
 }
 
 const tokenDecimals = {
@@ -51,8 +51,11 @@ export const WrapBanner: React.FC<{}> = () => {
 }
 
 export const WrapLayout: React.FC<IWrap> = ({
-  tokenBalances
+  balances
 }) => {
+
+  const [tokenBalances, setTokenBalances] = React.useState(balances);
+
   return (
     <Flex 
       flexDirection="column"
@@ -72,6 +75,7 @@ export const WrapLayout: React.FC<IWrap> = ({
           tokenBalances={tokenBalances}
           tokenDecimals={tokenDecimals}
           tokens={tokens}
+          setTokenBalances={setTokenBalances}
           mr={{ base: "inherit", lg: "1%" }}
         >
         </OuterBox>
@@ -81,6 +85,7 @@ export const WrapLayout: React.FC<IWrap> = ({
           tokenBalances={tokenBalances}
           tokenDecimals={tokenDecimals}
           tokens={tokens}
+          setTokenBalances={setTokenBalances}
           ml={{ base: "inherit", lg: "1%" }}
         >
         </OuterBox>

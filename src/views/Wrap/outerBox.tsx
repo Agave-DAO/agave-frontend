@@ -14,13 +14,15 @@ export const OuterBox: React.FC<{
     outerType: "wrap" | "unwrap";
     tokenBalances: any,
     tokenDecimals: any,
-    tokens: any
+    tokens: any,
+    setTokenBalances: any,
 } & CenterProps> = ({
     outerType,
     children,
     tokenBalances,
     tokenDecimals,
     tokens,
+    setTokenBalances,
     ...props
 }) => {
 
@@ -182,6 +184,13 @@ export const OuterBox: React.FC<{
       )
     }, [balanceToUnwrap]);
 
+    function resetBox(type:string) {
+      type=="wrap"?setTokenToWrap(''):setTokenToUnwrap('');
+      type=="wrap"?setBalanceToWrap(BigNumber.from(0)):setBalanceToUnwrap(BigNumber.from(0));
+      type=="wrap"?setIsWrapButtonDisabled(true):setIsUnwrapButtonDisabled(true);
+      type=="wrap"?setIsWrappingActive(false):setIsUnwrappingActive(false);
+    }
+
     return (
       <Center
         boxSizing="content-box"
@@ -264,14 +273,11 @@ export const OuterBox: React.FC<{
                 targetToken={outerType=="wrap"?tokenToWrapTarget:tokenToUnwrapTarget}
                 amount={outerType=="wrap"?balanceToWrap:balanceToUnwrap}
                 decimals={outerType=="wrap"?tokenDecimals[tokenToWrap]:tokenDecimals[tokenToUnwrap]}
+                resetBox={resetBox}
               />
             )};
 
         </VStack>
-
-        
-
-          
 
       </Center>
     );
