@@ -62,7 +62,7 @@ export const internalAddressesPerNetwork: Record<
     staking: "0x610525b415c1BFAeAB1a3fc3d85D87b92f048221",
 
     agaveOracle: "0x062B9D1D3F5357Ef399948067E93B81F4B85db7a ",
-    aaveProtocolDataProvider: "0xe6729389dea76d47b5bcb0ba5c080821c3b51329  ",
+    aaveProtocolDataProvider: "0x24dCbd376Db23e4771375092344f5CbEA3541FC0  ",
     walletBalanceProvider: "0xc83259C1A02d7105A400706c3e1aDc054C5A1B87",
     wrappedNativeGateway: "0x36A644cC38Ae257136EEca5919800f364d73FeFC",
 
