@@ -5,6 +5,7 @@ import honeyImg from "../assets/image/coins/honey.webp";
 import wbtcImg from "../assets/image/coins/wbtc.svg";
 import usdcImg from "../assets/image/coins/usdc.svg";
 import usdtImg from "../assets/image/coins/usdt.svg";
+import eureImg from "../assets/image/coins/eure.svg";
 import { theme } from "@chakra-ui/theme";
 import { BigNumber, constants } from "ethers";
 export const LINEAR_GRADIENT_BG =
@@ -32,6 +33,7 @@ export const assetColor: { [key: string]: string } = {
   LINK: theme.colors.blue[500],
   GNO: theme.colors.gray[700],
   FOX: theme.colors.blue[900],
+  EURe: theme.colors.blue[900],
 };
 
 export const fontSizes = {
@@ -60,6 +62,7 @@ export const imagesBySymbol: Record<string, string | undefined> = {
   USDC: usdcImg,
   USDT: usdtImg,
   WXDAI: wxdaiImg,
+  EURe: eureImg,
 };
 
 export interface IMarketData {
