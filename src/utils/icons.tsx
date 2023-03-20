@@ -25,32 +25,38 @@ export function imageForTokenSymbol(symbol: string): string | null {
     case "WXDAI":
     case "XDAI":
     case "agWXDAI":
+    case "cagWXDAI":
       return WxdaiLogo;
     case "ETH":
     case "WETH":
     case "agWETH":
+    case "cagWETH":
       return EthLogo;
     case "HONEY":
     case "HNY":
       return HoneyLogo;
     case "USDC":
     case "agUSDC":
+    case "cagUSDC":
       return UsdcLogo;
     case "STAKE":
     case "agSTAKE":
       return StakeLogo;
     case "USDT":
     case "agUSDT":
+    case "cagUSDT":
       return UsdtLogo;
     case "BTC":
     case "WBTC":
     case "agWBTC":
+    case "cagWBTC":
       return WbtcLogo;
     case "LINK":
     case "agLINK":
       return LinkLogo;
     case "GNO":
     case "agGNO":
+    case "cagGNO":
       return GnoLogo;
     case "FOX":
     case "agFOX":

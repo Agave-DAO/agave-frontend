@@ -12,6 +12,8 @@ import { DashboardBanner } from "./views/Dashboard/layout";
 import { Deposit } from "./views/Deposit";
 import { DepositBanner } from "./views/Deposit/layout";
 import { DepositDetail } from "./views/Deposit/DepositDetail";
+import { WrapBanner } from "./views/Wrap/layout";
+import { Wrap } from "./views/Wrap";
 import {
   WithdrawBanner,
   WithdrawDetail,
@@ -111,16 +113,13 @@ const App: React.FC<IAppProps> = props => {
             header={
               // prettier-ignore
               <Switch>
-                <Route path="/dashboard">
-                  <DashboardBanner/>
-                </Route>
-                <Route path="/stake">
-                  <StakingBanner />
-                </Route>
+                <Route path="/dashboard"><DashboardBanner/></Route>
+                <Route path="/stake"><StakingBanner /></Route>
                 <Route path="/markets"><MarketsBanner/></Route>
                 <Route path="/deposit"><DepositBanner/></Route>
 				        <Route path="/borrow"><BorrowBanner/></Route>
 				        <Route path="/withdraw"><WithdrawBanner/></Route>
+                <Route path="/wrap"><WrapBanner/></Route>
                 <Route path="/repay"><RepayBanner/></Route>
                 <Route path="/reserve-overview/:assetName" ><ReserveBanner/></Route>
               </Switch>
@@ -142,6 +141,7 @@ const App: React.FC<IAppProps> = props => {
               {/* <Route path="/collateral/:assetName" component={Collateral} exact /> */}
               {/* <Route path="/interest-swap/:assetName" component={InterestSwap} exact /> */}
               <Route path="/stake" component={Staking} />
+              <Route path="/wrap" component={Wrap} />
               <Redirect from="/" to="/markets" />
             </Switch>
           </Layout>
