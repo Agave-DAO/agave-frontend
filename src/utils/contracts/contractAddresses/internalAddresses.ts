@@ -61,15 +61,15 @@ export const internalAddressesPerNetwork: Record<
     lendingPool: "0x5E15d5E33d318dCEd84Bfe3F4EACe07909bE6d9c",
     staking: "0x610525b415c1BFAeAB1a3fc3d85D87b92f048221",
 
-    agaveOracle: "0x64cE22B5bA4175002AC5B6CCE3570432cA363c29",
-    aaveProtocolDataProvider: "0x24dCbd376Db23e4771375092344f5CbEA3541FC0",
+    agaveOracle: "0x062B9D1D3F5357Ef399948067E93B81F4B85db7a ",
+    aaveProtocolDataProvider: "0xe6729389dea76d47b5bcb0ba5c080821c3b51329  ",
     walletBalanceProvider: "0xc83259C1A02d7105A400706c3e1aDc054C5A1B87",
     wrappedNativeGateway: "0x36A644cC38Ae257136EEca5919800f364d73FeFC",
 
     incentivesController: "0xfa255f5104f129B78f477e9a6D050a02f31A5D86",
 
     explorer: "https://gnosisscan.io/",
-    rpcUrl: "https://rpc.gnosis.gateway.fm",
+    rpcUrl: "https://gnosischain-rpc.gateway.pokt.network",
   },
 } as const;
 
