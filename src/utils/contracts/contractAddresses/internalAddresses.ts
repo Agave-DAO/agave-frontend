@@ -26,6 +26,7 @@ export interface StrongTypedChainAddresses<
   readonly USDT: string | undefined;
   readonly WETH: string | undefined;
   readonly WBTC: string | undefined;
+  readonly EURe: string | undefined;
 
   readonly agUSDC: string | undefined;
   readonly agWXDAI: string | undefined;
@@ -35,6 +36,7 @@ export interface StrongTypedChainAddresses<
   readonly agUSDT: string | undefined;
   readonly agWETH: string | undefined;
   readonly agWBTC: string | undefined;
+  readonly agEURe: string | undefined;
 
   readonly cagUSDC: string | undefined;
   readonly cagWXDAI: string | undefined;
@@ -87,6 +89,7 @@ export const internalAddressesPerNetwork: Record<
     USDT: "",
     WETH: "",
     WBTC: "",   
+    EURe: "", 
 
     agUSDC: "",
     agWXDAI: "",
@@ -96,6 +99,7 @@ export const internalAddressesPerNetwork: Record<
     agUSDT: "",
     agWETH: "",
     agWBTC: "",
+    agEURe: "", 
 
     cagUSDC: "",
     cagWXDAI: "",
@@ -113,8 +117,8 @@ export const internalAddressesPerNetwork: Record<
     lendingPool: "0x5E15d5E33d318dCEd84Bfe3F4EACe07909bE6d9c",
     staking: "0x610525b415c1BFAeAB1a3fc3d85D87b92f048221",
 
-    agaveOracle: "0x64cE22B5bA4175002AC5B6CCE3570432cA363c29",
-    aaveProtocolDataProvider: "0x24dCbd376Db23e4771375092344f5CbEA3541FC0",
+    agaveOracle: "0x062B9D1D3F5357Ef399948067E93B81F4B85db7a",
+    aaveProtocolDataProvider: "0xE6729389DEa76D47b5BcB0bA5c080821c3B51329",
     walletBalanceProvider: "0xc83259C1A02d7105A400706c3e1aDc054C5A1B87",
     wrappedNativeGateway: "0x36A644cC38Ae257136EEca5919800f364d73FeFC",
 
@@ -130,7 +134,8 @@ export const internalAddressesPerNetwork: Record<
     FOX: "0x21a42669643f45Bc0e086b8Fc2ed70c23D67509d",
     USDT: "0x4ECaBa5870353805a9F068101A40E0f32ed605C6",
     WETH: "0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1",
-    WBTC: "0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252",   
+    WBTC: "0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252", 
+    EURe: "0xcB444e90D8198415266c6a2724b7900fb12FC56E", 
 
     agUSDC: "0x291b5957c9cbe9ca6f0b98281594b4eb495f4ec1",
     agWXDAI: "0xd4e420bbf00b0f409188b338c5d87df761d6c894",
@@ -140,6 +145,7 @@ export const internalAddressesPerNetwork: Record<
     agUSDT: "0x5b4ef67c63d091083ec4d30cfc4ac685ef051046",
     agWETH: "0x44932e3b1e662adde2f7bac6d5081c5adab908c6",
     agWBTC: "0x4863cfaf3392f20531aa72ce19e5783f489817d6",
+    agEURe: "0xEB20B07a9abE765252E6b45e8292b12CB553CcA6",
 
     cagUSDC: "0x6D9Dc1282B9E25a91b266B6b61eF65a38f949f22",
     cagWXDAI: "0x01aC9005F8446AF28b065af87216b85faaC5f6E2",
