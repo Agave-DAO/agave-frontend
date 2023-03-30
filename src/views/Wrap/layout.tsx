@@ -14,22 +14,24 @@ const tokenDecimals = {
   'agGNO': 18,
   'agWETH': 18,
   'agWBTC': 8,
-  'cagWXDAI': 18,
-  'cagUSDC': 6,
-  'cagUSDT': 6,
-  'cagGNO': 18,
-  'cagWETH': 18,
-  'cagWBTC': 8
+  'wagWXDAI': 18,
+  'wagUSDC': 6,
+  'wagUSDT': 6,
+  'wagGNO': 18,
+  'wagWETH': 18,
+  'wagWBTC': 8,
+  'wagEURe': 18,
 };
 
 const tokens = [
   // unwrapped, wrapped
-  ['agWXDAI', 'cagWXDAI'],
-  ['agUSDC', 'cagUSDC'],
-  ['agGNO', 'cagGNO'],
-  ['agUSDT', 'cagUSDT'],
-  ['agWETH', 'cagWETH'],
-  ['agWBTC', 'cagWBTC'],
+  ['agWXDAI', 'wagWXDAI'],
+  ['agUSDC', 'wagUSDC'],
+  ['agGNO', 'wagGNO'],
+  ['agUSDT', 'wagUSDT'],
+  ['agWETH', 'wagWETH'],
+  ['agWBTC', 'wagWBTC'],
+  ['agEURe', 'wagEURe'],
 ]
 
 export const WrapBanner: React.FC<{}> = () => {

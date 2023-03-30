@@ -38,12 +38,13 @@ export interface StrongTypedChainAddresses<
   readonly agWBTC: string | undefined;
   readonly agEURe: string | undefined;
 
-  readonly cagUSDC: string | undefined;
-  readonly cagWXDAI: string | undefined;
-  readonly cagGNO: string | undefined;
-  readonly cagWBTC: string | undefined;
-  readonly cagWETH: string | undefined;
-  readonly cagUSDT: string | undefined;
+  readonly wagUSDC: string | undefined;
+  readonly wagWXDAI: string | undefined;
+  readonly wagGNO: string | undefined;
+  readonly wagWBTC: string | undefined;
+  readonly wagWETH: string | undefined;
+  readonly wagUSDT: string | undefined;
+  readonly wagEURe: string | undefined;
 
 }
 
@@ -101,12 +102,13 @@ export const internalAddressesPerNetwork: Record<
     agWBTC: "",
     agEURe: "", 
 
-    cagUSDC: "",
-    cagWXDAI: "",
-    cagGNO: "",
-    cagWBTC: "",
-    cagWETH: "",
-    cagUSDT: "",
+    wagUSDC: "",
+    wagWXDAI: "",
+    wagGNO: "",
+    wagWBTC: "",
+    wagWETH: "",
+    wagUSDT: "",
+    wagEURe: "",
 
   },
   Gnosis: {
@@ -147,12 +149,13 @@ export const internalAddressesPerNetwork: Record<
     agWBTC: "0x4863cfaf3392f20531aa72ce19e5783f489817d6",
     agEURe: "0xEB20B07a9abE765252E6b45e8292b12CB553CcA6",
 
-    cagUSDC: "0x6D9Dc1282B9E25a91b266B6b61eF65a38f949f22",
-    cagWXDAI: "0x01aC9005F8446AF28b065af87216b85faaC5f6E2",
-    cagGNO: "0xC1593302979e5e8e16E53C3303bf99fFa319D314",
-    cagWBTC: "0x110e2D3d4C94596f5698C753D5cd43221D3Ec78b",
-    cagWETH: "0x20e5eB701E8d711D419D444814308f8c2243461F",
-    cagUSDT: "0x3D938f90AC251C1BCF6B4E399Dd72C8C685A9Bbc",
+    wagUSDC: "0x300ABE8f7924BEb7115093361C4A78b9d9327Fb0",
+    wagWXDAI: "0xFF2A1866ecb13B67388C7a7DC1FdB3a5ff83Fb23",
+    wagGNO: "0xb5c3B258e461F17084a70624C2Fb2544710523B9",
+    wagWBTC: "0x620eEa23606C3B3818419E37Dd6867e5aBF074CC",
+    wagWETH: "0xf710Ef31830EeF5C25D47ABa5f60A0fCC045bA28",
+    wagUSDT: "0x991e64F303F4fFC38ABDc1bC93aB23FCF609c269",
+    wagEURe:"0x4f74D565379DFc78F56855E60b40282222f2Ae69",
 
   },
 } as const;

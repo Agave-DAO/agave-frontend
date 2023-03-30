@@ -47,12 +47,13 @@ const allTokens = {
         ['agGNO', internalAddressesPerNetwork.Gnosis.agGNO],
         ['agWETH', internalAddressesPerNetwork.Gnosis.agWETH],
         ['agWBTC', internalAddressesPerNetwork.Gnosis.agWBTC],
-        ['cagWXDAI', internalAddressesPerNetwork.Gnosis.cagWXDAI],
-        ['cagUSDT', internalAddressesPerNetwork.Gnosis.cagUSDT],
-        ['cagUSDC', internalAddressesPerNetwork.Gnosis.cagUSDC],
-        ['cagGNO', internalAddressesPerNetwork.Gnosis.cagGNO],
-        ['cagWETH', internalAddressesPerNetwork.Gnosis.cagWETH],
-        ['cagWBTC', internalAddressesPerNetwork.Gnosis.cagWBTC],
+        ['wagWXDAI', internalAddressesPerNetwork.Gnosis.wagWXDAI],
+        ['wagUSDT', internalAddressesPerNetwork.Gnosis.wagUSDT],
+        ['wagUSDC', internalAddressesPerNetwork.Gnosis.wagUSDC],
+        ['wagGNO', internalAddressesPerNetwork.Gnosis.wagGNO],
+        ['wagWETH', internalAddressesPerNetwork.Gnosis.wagWETH],
+        ['wagWBTC', internalAddressesPerNetwork.Gnosis.wagWBTC],
+        ['wagEURe', internalAddressesPerNetwork.Gnosis.wagEURe],
     ]
 }
 

@@ -15,7 +15,7 @@ import EureLogo from "../assets/image/coins/eure.svg";
 import React, { MouseEventHandler } from "react";
 import { SquareProps, Circle, Center } from "@chakra-ui/react";
 import { useAppWeb3 } from "../hooks/appWeb3";
-import { getChainAddresses } from "./chainAddresses";
+import { getChainAddresses } from "../utils/chainAddresses";
 
 export function imageForTokenSymbol(symbol: string): string | null {
   switch (symbol) {
@@ -63,6 +63,7 @@ export function imageForTokenSymbol(symbol: string): string | null {
       return FoxLogo;
     case "EURe":
     case "agEURe":
+    case "wagEURe":
       return EureLogo;
     default:
       return null;
