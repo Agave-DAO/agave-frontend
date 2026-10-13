@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { VariableDebtToken__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -49,7 +50,7 @@ export const useApproveDelegationMutation = ({
       }
       const tokenContract = VariableDebtToken__factory.connect(
         asset,
-        library.getSigner()
+        getTransactionSigner(library, account, chainId)
       );
       const priorAllowance = await tokenContract.borrowAllowance(
         account,

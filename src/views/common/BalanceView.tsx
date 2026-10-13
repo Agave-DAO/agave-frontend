@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text } from "@chakra-ui/layout";
+import { Box, Text } from "@chakra-ui/react";
 import { bigNumberToString } from "../../utils/fixedPoint";
 import { BigNumber } from "ethers";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";

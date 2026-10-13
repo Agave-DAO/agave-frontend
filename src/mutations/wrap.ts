@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { IStaticATokenLM__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -80,13 +81,16 @@ export const useDepositMutation = ({
       if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
       }
+      if (chainId !== 100) {
+        throw new Error("Wrapping is only available on Gnosis Chain");
+      }
       if (!asset || !spender || !amount) {
         return undefined;
       }
       let deposit;
       const contract = IStaticATokenLM__factory.connect(
           spender,
-          library.getSigner()
+          getTransactionSigner(library, account, chainId)
       );
       deposit = contract.deposit(account, amount, 0, false);
       const depositConfirmation = await usingProgressNotification(

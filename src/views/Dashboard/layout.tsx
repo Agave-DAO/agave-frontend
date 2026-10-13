@@ -14,12 +14,12 @@ import {
   keyframes,
   Tooltip
 } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { useDisclosure } from "@chakra-ui/react";
 import {
   bigNumberToString,
   fixedNumberToPercentage,
 } from "../../utils/fixedPoint";
-import { CenterProps, HStack } from "@chakra-ui/layout";
+import { CenterProps, HStack } from "@chakra-ui/react";
 import { isMobileOnly } from "react-device-detect";
 import { ModalIcon } from "../../utils/icons";
 import { DashboardTable, DashboardTableType } from "./table";
@@ -109,7 +109,7 @@ const ClaimRewardsBox: React.FC<{}> = () => {
     >
       <a
         href="https://gnosis.symm.fi/#/pool/0x870bb2c024513b5c9a69894dcc65fb5c47e422f3000200000000000000000014"
-        target="_blank"
+        target="_blank" rel="noopener noreferrer"
       >
         <Image
           src={gnoagave}
@@ -288,7 +288,7 @@ export const DashboardLayout: React.FC<DashboardProps> = ({
       <Flex
         align="center"
         flexBasis="auto"
-        spacing="1em"
+        gap="1em"
         w="100%"
         flexDirection={{ base: "column", lg: "row" }}
         m="auto"

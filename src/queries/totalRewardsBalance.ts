@@ -25,7 +25,10 @@ export const useTotalRewardsBalance = buildQueryHook<
     try {
       balance = await contract.getTotalRewardsBalance(stakerAddress);
     } catch (e) {
-      if (e.code === ErrorCode.CALL_EXCEPTION) {
+      if (
+        typeof e === "object" && e !== null &&
+        "code" in e && e.code === ErrorCode.CALL_EXCEPTION
+      ) {
         return BigNumber.from(0);
       }
       throw e;

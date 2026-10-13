@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { AgaveLendingABI__factory, WETHGateway__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -107,7 +108,7 @@ export const useBorrowMutation = ({
       if (asset === NATIVE_TOKEN) {
         const gatewayContract = WETHGateway__factory.connect(
           chainAddresses.wrappedNativeGateway,
-          library.getSigner()
+          getTransactionSigner(library, account, chainId)
         );
         borrow = gatewayContract.borrowETH(
           amount,
@@ -117,7 +118,7 @@ export const useBorrowMutation = ({
       } else {
         const lendingContract = AgaveLendingABI__factory.connect(
           chainAddresses.lendingPool,
-          library.getSigner()
+          getTransactionSigner(library, account, chainId)
         );
         borrow = lendingContract.borrow(
           asset,

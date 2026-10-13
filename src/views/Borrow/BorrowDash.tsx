@@ -102,7 +102,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
         px={{ base: "1rem", md: "2.4rem" }}
       >
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -139,15 +139,15 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
               fontWeight="bold"
             >
               {"$ " +
-                assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, {
+                (assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 4,
-                }) ?? " "}
+                }) ?? " ")}
             </Text>
           </Flex>
         </Flex>
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -166,7 +166,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Box>
         </Flex>
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -185,7 +185,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Box>
         </Flex>
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -204,7 +204,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Box>
         </Flex>
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -230,7 +230,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
         justifyContent="space-between"
       >
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="flex-start"
@@ -257,7 +257,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
           </Box>
         </Flex>
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="flex-start"
@@ -280,7 +280,7 @@ export const BorrowDash: React.FC<BorrowDashProps> = ({ token }) => {
         </Flex>
         <Flex
           h="100%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="flex-start"

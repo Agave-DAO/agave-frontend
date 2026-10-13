@@ -1,26 +1,19 @@
-import React, { useMemo } from "react";
-import { InjectedConnector } from "@web3-react/injected-connector";
-import { store as NotificationManager } from "react-notifications-component";
+import React, { useState } from "react";
+import { Store as NotificationManager } from "react-notifications-component";
 import coloredAgaveLogo from "../../assets/image/colored-agave-logo.svg";
 import { UnsupportedChainIdError } from "@web3-react/core";
-import {
-  frameConnector,
-  injectedConnector,
-  walletConnectConnector,
-} from "../../hooks/injectedConnectors";
+import { BrowserWallet, BrowserWalletConnector, useBrowserWallets } from "../../hooks/browserWallets";
 import { internalAddressesPerNetwork } from "../../utils/contracts/contractAddresses/internalAddresses";
 import {
   Box,
   Center,
   Text,
   Button,
-  useColorModeValue as mode,
   Stack,
   HStack,
 } from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
 import { changeChain } from "../../utils/changeChain";
-import { URI_AVAILABLE } from "@web3-react/walletconnect-connector";
 import ColoredText from "../ColoredText";
 import { useAppWeb3 } from "../../hooks/appWeb3";
 
@@ -55,7 +48,7 @@ const PrivacySection = (
         {" "}
         Contact us on
       </Text>
-      <a href="https://discord.gg/bkVwdxSfCn" target="_blank">
+      <a href="https://discord.gg/bkVwdxSfCn" target="_blank" rel="noopener noreferrer">
         <ColoredText>Discord</ColoredText>
       </a>
     </HStack>
@@ -63,38 +56,52 @@ const PrivacySection = (
 );
 
 export const UnlockWallet: React.FC<{}> = props => {
-  const { connector, activate, error } = useAppWeb3();
+  const { connector, activate, deactivate, error } = useAppWeb3();
+  const wallets = useBrowserWallets();
+  const [selectedConnector, setSelectedConnector] = useState<BrowserWalletConnector>();
+  const [connecting, setConnecting] = useState(false);
+  const [connectionError, setConnectionError] = useState<Error>();
+  const walletConnector = selectedConnector ?? (connector instanceof BrowserWalletConnector ? connector : undefined);
+  const walletError = connectionError ?? error;
 
-  const isMetamask = connector instanceof InjectedConnector;
-  const availableChains = useMemo(
-    () =>
-      Object.entries(internalAddressesPerNetwork).map(([name, addrs]) =>
-        isMetamask ? (
-          <Button
-            key={name}
-            bg={mode({ base: "primary.500", md: "primary.500" }, "primary.500")}
-            colorScheme="teal"
-            size="xl"
-            h="40px"
-            onClick={() =>
-              connector ? changeChain(connector, addrs.chainName) : null
-            }
-          >
-            {addrs.chainName}
-          </Button>
-        ) : (
-          <Text key={name} color="white">
-            {name}: {addrs.chainId}
-          </Text>
-        )
-      ),
-    [isMetamask]
-  );
+  const onConnect = async (wallet: BrowserWallet) => {
+    const connector = new BrowserWalletConnector(wallet.provider);
+    setSelectedConnector(connector);
+    setConnecting(true);
+    setConnectionError(undefined);
+    try {
+      await activate(connector, undefined, true);
+    } catch (error) {
+      setConnectionError(error instanceof Error ? error : new Error("Wallet connection failed"));
+      if (!(error instanceof UnsupportedChainIdError)) {
+        warnUser("Wallet connection failed", error instanceof Error ? error.message : "Please try again");
+      }
+    } finally {
+      setConnecting(false);
+    }
+  };
+
+  const onSwitchChain = async () => {
+    if (!walletConnector) return;
+    setConnecting(true);
+    try {
+      if (await changeChain(walletConnector, internalAddressesPerNetwork.Gnosis.chainName)) {
+        await activate(walletConnector, undefined, true);
+        setConnectionError(undefined);
+      } else {
+        warnUser("Network change failed", "Please select Gnosis Chain in your wallet");
+      }
+    } catch {
+      warnUser("Network change failed", "Please select Gnosis Chain in your wallet");
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   let detail = null;
-  if (error && error instanceof UnsupportedChainIdError) {
+  if (walletError && walletError instanceof UnsupportedChainIdError) {
     const firstIntegerRegex = /(\d+)/;
-    const selectedChain = error.message.match(firstIntegerRegex)?.[0];
+    const selectedChain = walletError.message.match(firstIntegerRegex)?.[0];
     detail = (
       <Center flexDirection="column">
         <Text
@@ -129,34 +136,21 @@ export const UnlockWallet: React.FC<{}> = props => {
         <Box>
           <Text color="white">Supported chains:</Text>
           <Stack spacing={4} direction="column">
-            {availableChains}
+            <Button onClick={onSwitchChain} isDisabled={connecting || !walletConnector}>
+              Switch to Gnosis Chain
+            </Button>
+            <Button isDisabled={connecting} onClick={() => {
+              deactivate();
+              setConnectionError(undefined);
+              setSelectedConnector(undefined);
+            }}>
+              Choose another wallet
+            </Button>
           </Stack>
           {PrivacySection}
         </Box>
       </Center>
     );
-  }
-
-  const onMetamaskConnect = async () => {
-    if (typeof (window as any).ethereum === "undefined") {
-      warnUser(
-        "Please install MetaMask!",
-        "Agave requires Metamask to be installed in your browser to work properly."
-      );
-      return;
-    }
-    await activate(injectedConnector);
-  };
-
-  const onFrameConnect = async () => {
-    await activate(frameConnector);
-  };
-
-  const onWalletConnect = async () => {
-    walletConnectConnector.once(URI_AVAILABLE, uri => {
-      console.log(`WalletConnect URI: ${uri}`);
-    });
-    await activate(walletConnectConnector);
   }
 
   return (
@@ -197,36 +191,25 @@ export const UnlockWallet: React.FC<{}> = props => {
             wallet to Gnosis Chain.
           </Text>
           <Stack>
-            <Button
-              minW={{ base: "100%", md: "15.8rem" }}
-              fontSize={{ base: fontSizes.md, md: "inherit" }}
-              py={{ base: "1.5rem", md: ".8rem" }}
-              color="secondary.900"
-              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-              onClick={onMetamaskConnect}
-            >
-              MetaMask
-            </Button>
-            <Button
-              minW={{ base: "100%", md: "15.8rem" }}
-              fontSize={{ base: fontSizes.md, md: "inherit" }}
-              py={{ base: "1.5rem", md: ".8rem" }}
-              color="secondary.900"
-              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-              onClick={onFrameConnect}
-            >
-              Frame
-            </Button>
-            <Button
-              minW={{ base: "100%", md: "15.8rem" }}
-              fontSize={{ base: fontSizes.md, md: "inherit" }}
-              py={{ base: "1.5rem", md: ".8rem" }}
-              color="secondary.900"
-              bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
-              onClick={onWalletConnect}
-            >
-              WalletConnect
-            </Button>
+            {wallets.map(wallet => (
+              <Button
+                key={wallet.info.uuid}
+                minW={{ base: "100%", md: "15.8rem" }}
+                fontSize={{ base: fontSizes.md, md: "inherit" }}
+                py={{ base: "1.5rem", md: ".8rem" }}
+                color="secondary.900"
+                bg="linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%);"
+                onClick={() => onConnect(wallet)}
+                isDisabled={connecting}
+              >
+                {wallet.info.name}
+              </Button>
+            ))}
+            {wallets.length === 0 && (
+              <Text color="white" textAlign="center">
+                No browser wallet detected. Install Rabby, Ambire, or MetaMask, then refresh this page.
+              </Text>
+            )}
           </Stack>
         </>
       )}

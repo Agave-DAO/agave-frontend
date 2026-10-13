@@ -167,7 +167,7 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
       >
         <Flex
           w="30%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -185,7 +185,7 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
         </Flex>
         <Flex
           w="30%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="flex-start"
@@ -203,7 +203,7 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
         </Flex>
         <Flex
           w="30%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -220,7 +220,7 @@ export const RepayDashLayout: React.FC<RepayDashLayoutProps> = ({
         </Flex>
         <Flex
           w="30%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="flex-start"

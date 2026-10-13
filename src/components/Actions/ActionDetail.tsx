@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
-import { store as NotificationManager } from "react-notifications-component";
+import { Store as NotificationManager } from "react-notifications-component";
 import Button from "../../components/Button";
 import { IMarketData } from "../../utils/constants";
 import { bigNumberToString } from "../../utils/fixedPoint";

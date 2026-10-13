@@ -1,13 +1,13 @@
 import { isMobile } from "react-device-detect";
 import {
-  ReactNotificationOptions,
-  store as NotificationManager,
+  iNotification,
+  Store as NotificationManager,
 } from "react-notifications-component";
 
 export async function usingProgressNotification<T>(
   title: string,
   message: string,
-  notificationType: ReactNotificationOptions["type"],
+  notificationType: iNotification["type"],
   promise: Promise<T>
 ): Promise<T> {
   const notification = NotificationManager.addNotification({

@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { IStaticATokenLM__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -78,6 +79,9 @@ export const useWithdrawMutation = ({
       if (!library || !chainId || !account) {
         throw new Error("Account or asset details are not available");
       }
+      if (chainId !== 100) {
+        throw new Error("Unwrapping is only available on Gnosis Chain");
+      }
 
       if (!asset || !recipientAccount || !amount || !spender) {
         return undefined;
@@ -86,7 +90,7 @@ export const useWithdrawMutation = ({
       let withdraw;
       const contract = IStaticATokenLM__factory.connect(
           spender,
-          library.getSigner()
+          getTransactionSigner(library, account, chainId)
       );
       withdraw = contract.withdraw(account, amount, false);
       const withdrawConfirmation = await usingProgressNotification(

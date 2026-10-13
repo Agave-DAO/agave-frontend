@@ -77,10 +77,10 @@ export function SortedHtmlTable<TRecord extends object>({
 export interface BasicTableRendererProps<TRecord extends object> {
   linkpage?: string;
   table: TableRenderingInstance<TRecord>;
-  tableProps?: TableProps;
-  headProps?: TableColumnHeaderProps;
-  rowProps?: TableRowProps;
-  cellProps?: TableCellProps;
+  tableProps?: Omit<TableProps, "as">;
+  headProps?: Omit<TableColumnHeaderProps, "as">;
+  rowProps?: Omit<TableRowProps, "as">;
+  cellProps?: Omit<TableCellProps, "as">;
 }
 
 export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
@@ -100,12 +100,12 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
   );
   return React.useMemo(
     () => (
-      <Table {...getTableProps()} {...tableStyle}>
+      <Table<"table"> {...getTableProps()} {...tableStyle}>
         <Thead>
           {headerGroups.map(headerGroup => (
-            <Tr {...headerGroup.getHeaderGroupProps()}>
+            <Tr<"tr"> {...headerGroup.getHeaderGroupProps()}>
               {headerGroup.headers.map(column => (
-                <Th
+                <Th<"th">
                   {...column.getHeaderProps(column.getSortByToggleProps())}
                   {...headStyle}
                 >
@@ -130,14 +130,14 @@ export const BasicTableRenderer: React.FC<BasicTableRendererProps<any>> = ({
           {rows.map(row => {
             prepareRow(row);
             return (
-              <Tr
+              <Tr<"tr">
                 {...row.getRowProps()}
                 {...rowStyle}
                 onClick={() => handleRowClick(row)}
               >
                 {row.cells.map(cell => {
                   return (
-                    <Td {...cell.getCellProps()} {...cellStyle}>
+                    <Td<"td"> {...cell.getCellProps()} {...cellStyle}>
                       {cell.render("Cell")}
                     </Td>
                   );

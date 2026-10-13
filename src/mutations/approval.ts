@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { useMutation, useQueryClient, UseMutationResult } from "react-query";
 import { Erc20abi__factory } from "../contracts";
 import { BigNumber } from "@ethersproject/bignumber";
@@ -52,7 +53,7 @@ export const useApprovalMutation = ({
       }
       const tokenContract = Erc20abi__factory.connect(
         asset,
-        library.getSigner()
+        getTransactionSigner(library, account, chainId)
       );
       const priorAllowance = await tokenContract.allowance(account, spender);
       if (priorAllowance.lt(amount)) {

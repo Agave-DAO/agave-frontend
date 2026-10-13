@@ -64,7 +64,7 @@ export const WrapLayout: React.FC<IWrap> = ({
       <Flex
         justifyContent="flex-start"
         flexBasis="auto"
-        spacing="1em"
+        gap="1em"
         w="100%"
         flexDirection={{ base: "column", lg: "row" }}
         m="auto"

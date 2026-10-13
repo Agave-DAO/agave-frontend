@@ -67,7 +67,7 @@ const Button: React.FC<
       return <StyledLink to={to}>{text}</StyledLink>;
     } else if (href) {
       return (
-        <StyledExternalLink href={href} target="__blank">
+        <StyledExternalLink href={href} target="_blank" rel="noopener noreferrer">
           {text}
         </StyledExternalLink>
       );

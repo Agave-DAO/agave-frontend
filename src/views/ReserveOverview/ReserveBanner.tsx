@@ -1,7 +1,7 @@
 import React from "react";
 import ColoredText from "../../components/ColoredText";
 import { Flex, Spinner } from "@chakra-ui/react";
-import { Text } from "@chakra-ui/layout";
+import { Text } from "@chakra-ui/react";
 import { withRouter } from "react-router-dom";
 
 const ReserveBanner: React.FC<{}> = (props: any) => {

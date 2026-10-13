@@ -1,17 +1,21 @@
 import React, { useMemo } from "react";
 import {
-  Text,
+  Text as ChakraText,
+  TextProps,
   Center,
-  Badge,
+  Badge as ChakraBadge,
+  BadgeProps,
   useColorModeValue as mode,
 } from "@chakra-ui/react";
-import { InjectedConnector } from "@web3-react/injected-connector";
 
 import { bigNumberToString } from "../../../utils/fixedPoint";
 import { useAmountAvailableToStake } from "../../../queries/amountAvailableToStake";
 import { useAppWeb3 } from "../../../hooks/appWeb3";
 import { useWeb3React } from "@web3-react/core";
-import { ChainSelector, CurrentChainBox } from "./chain-display";
+import { CurrentChainBox } from "./chain-display";
+
+const Badge: React.FC<Omit<BadgeProps, "as">> = ChakraBadge;
+const Text: React.FC<Omit<TextProps, "as">> = ChakraText;
 
 export const UserProfile: React.FC<{}> = () => {
   // Light/Dark button functions
@@ -36,11 +40,10 @@ export const UserProfile: React.FC<{}> = () => {
 
   // Chain button functions
   const { connector } = useWeb3React();
-  const isMetamask = connector instanceof InjectedConnector;
   const chainSelector = React.useMemo(
     () =>
-      connector ? isMetamask ? <ChainSelector /> : <CurrentChainBox /> : null,
-    [connector, isMetamask]
+      connector ? <CurrentChainBox /> : null,
+    [connector]
   );
 
   return (

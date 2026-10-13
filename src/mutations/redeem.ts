@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { StakedToken__factory } from "../contracts";
 import { getChainAddresses } from "../utils/chainAddresses";
 import { Account, ChainId } from "../utils/queryBuilder";
@@ -26,15 +27,14 @@ export interface RedeemMutationResult {
   txHash: string;
 }
 
-export interface RedeemMutationDto
-  extends UseMutationResult<
+export type RedeemMutationDto = UseMutationResult<
     RedeemMutationResult | undefined,
     unknown,
     RedeemMutationArgs,
     unknown
-  > {
+  > & {
   key: readonly [ChainId | undefined, Account | undefined];
-}
+};
 
 export const useRedeemMutation = ({
   chainId,
@@ -62,7 +62,7 @@ export const useRedeemMutation = ({
       ) {
         return undefined;
       }
-      const signer = args.library.getSigner();
+      const signer = getTransactionSigner(args.library, address, chainId);
       const stakingContract = StakedToken__factory.connect(
         chainAddrs.staking,
         signer

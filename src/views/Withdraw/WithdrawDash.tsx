@@ -136,10 +136,10 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
             fontWeight="bold"
           >
             {"$" +
-              assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, {
+              (assetPriceInDai?.toUnsafeFloat().toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 4,
-              }) ?? " "}
+              }) ?? " ")}
           </Text>
         </Flex>
       </Flex>
@@ -150,7 +150,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
         justifyContent="space-between"
       >
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -167,7 +167,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
           </Box>
         </Flex>
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems="center"
           justifyContent="flex-start"
@@ -189,7 +189,7 @@ export const WithdrawDash: React.FC<WithdrawDashProps> = ({ token }) => {
           </HStack>
         </Flex>
         <Flex
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems="center"
           justifyContent="flex-start"

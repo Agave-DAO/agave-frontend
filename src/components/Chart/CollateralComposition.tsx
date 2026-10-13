@@ -45,7 +45,7 @@ export const CollateralComposition: React.FC = () => {
   return (
     <Flex
       h="100%"
-      spacing={spacings.md}
+      gap={spacings.md}
       mr={{ base: "0rem", md: "1rem" }}
       alignItems={{ base: "flex-start", md: "center" }}
       justifyContent="flex-start"

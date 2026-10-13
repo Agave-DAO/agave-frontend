@@ -14,7 +14,7 @@ import {
   Flex,
   Spinner,
 } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { useDisclosure } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { BigNumber, BigNumberish, constants, FixedNumber } from "ethers";
 import { useAppWeb3 } from "../../hooks/appWeb3";
@@ -137,7 +137,7 @@ const StakingSubCard: React.FC<{
       minW="40%"
       mx={{ base: "0.5rem", md: "1rem" }}
       my="1rem"
-      align="center"
+      alignItems="center"
     >
       {isModalTrigger && <ModalIcon onOpen={onOpen} />}
       <Text
@@ -340,7 +340,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
     <Flex
       align="center"
       flexBasis="auto"
-      spacing="1em"
+      gap="1em"
       w="100%"
       flexDirection={{ base: "column", lg: "row" }}
     >
@@ -429,7 +429,7 @@ export const StakingLayout: React.FC<StakingLayoutProps> = ({
           align="center"
           justify="space-between"
           flexBasis="auto"
-          spacing="1em"
+          gap="1em"
           flexDirection={{ base: "row", lg: "row" }}
         >
           <StakingSubCard

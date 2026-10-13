@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Text } from "@chakra-ui/layout";
+import { Box, Text } from "@chakra-ui/react";
 import { Divider, Flex, VStack } from "@chakra-ui/react";
 import { BorrowAsset } from ".";
 import { bigNumberToString } from "../../utils/fixedPoint";

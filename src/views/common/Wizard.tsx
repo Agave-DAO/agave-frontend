@@ -17,7 +17,7 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import { useUserAccountData } from "../../queries/userAccountData";
 import { useNewHealthFactorCalculator } from "../../utils/propertyCalculator";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { useDisclosure } from "@chakra-ui/react";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 import { useWrappedNativeAddress } from "../../queries/wrappedNativeAddress";
 import { constants } from "ethers";

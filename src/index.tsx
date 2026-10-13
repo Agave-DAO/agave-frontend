@@ -76,9 +76,3 @@ renderApp();
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
-
-if (process.env.NODE_ENV === "development" && module.hot) {
-  (window as any).FixedNumber = FixedNumber;
-  (window as any).BigNumber = BigNumber;
-  module.hot.accept("./App", renderApp);
-}

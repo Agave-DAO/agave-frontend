@@ -10,7 +10,7 @@ import {
   TableRenderer,
 } from "../../utils/htmlTable";
 import { DepositAPYView } from "../common/RatesView";
-import { Box, Text } from "@chakra-ui/layout";
+import { Box, Text } from "@chakra-ui/react";
 import { Center, Flex, useMediaQuery, Spinner } from "@chakra-ui/react";
 import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAssetBalance } from "../../queries/userAssets";

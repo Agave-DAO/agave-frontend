@@ -6,7 +6,7 @@ import wbtcImg from "../assets/image/coins/wbtc.svg";
 import usdcImg from "../assets/image/coins/usdc.svg";
 import usdtImg from "../assets/image/coins/usdt.svg";
 import eureImg from "../assets/image/coins/eure.svg";
-import { theme } from "@chakra-ui/theme";
+import { theme } from "@chakra-ui/react";
 import { BigNumber, constants } from "ethers";
 export const LINEAR_GRADIENT_BG =
   "linear-gradient(90.53deg, #9BEFD7 0%, #8BF7AB 47.4%, #FFD465 100%)";

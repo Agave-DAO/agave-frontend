@@ -32,7 +32,7 @@ import "react-notifications-component/dist/theme.css";
 import "./App.css";
 //import "animate.css/animate.min.css";
 import "react-notifications-component/dist/theme.css";
-import ReactNotification from "react-notifications-component";
+import { ReactNotifications } from "react-notifications-component";
 
 import BaseTheme from "./theme";
 import { useRewardTokensAPY } from "./queries/rewardTokens";
@@ -101,7 +101,7 @@ const theme = extendTheme({
 interface IAppProps {}
 
 const App: React.FC<IAppProps> = props => {
-  const notifications = React.useMemo(() => <ReactNotification />, []);
+  const notifications = React.useMemo(() => <ReactNotifications />, []);
   useRewardTokensAPY();
 
   return (

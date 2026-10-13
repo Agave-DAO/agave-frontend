@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import React from "react";
 import { UseMutationResult, useQueryClient, useMutation } from "react-query";
 import { StakedToken__factory } from "../contracts";
@@ -21,15 +22,14 @@ export interface CooldownMutationResult {
   txHash: string;
 }
 
-export interface CooldownMutationDto
-  extends UseMutationResult<
+export type CooldownMutationDto = UseMutationResult<
     CooldownMutationResult | undefined,
     unknown,
     CooldownMutationArgs,
     unknown
-  > {
+  > & {
   key: readonly [ChainId | undefined, Account | undefined];
-}
+};
 
 export const useCooldownMutation = ({
   chainId,
@@ -57,7 +57,7 @@ export const useCooldownMutation = ({
       ) {
         return undefined;
       }
-      const signer = args.library.getSigner();
+      const signer = getTransactionSigner(args.library, address, chainId);
       const stakingContract = StakedToken__factory.connect(
         chainAddrs.staking,
         signer

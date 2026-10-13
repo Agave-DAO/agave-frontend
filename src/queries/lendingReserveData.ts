@@ -75,7 +75,7 @@ export function reserveDataFromWeb3Result({
 }
 
 type Web3ReserveDataResult = PromisedType<
-  ReturnType<typeof AgaveLendingABI.prototype.getReserveData>
+  ReturnType<AgaveLendingABI["getReserveData"]>
 >;
 
 export const useLendingReserveData = buildQueryHookWhenParamsDefinedChainAddrs<

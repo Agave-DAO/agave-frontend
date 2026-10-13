@@ -1,7 +1,7 @@
 import React, { useMemo,ReactNode } from "react";
 import { Box, Center, Text, VStack, Button, Modal, ModalOverlay, ModalContent, ModalFooter, Spinner, Input, InputProps } from "@chakra-ui/react";
-import { HStack } from "@chakra-ui/layout";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { HStack } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
 import { BigNumber, FixedNumber } from "ethers";
 import { TokenListBox } from "./tokenListBox";
@@ -39,7 +39,7 @@ export const InfoBox: React.FC<{
         minW="40%"
         mx={{ base: "0.5rem", md: "1rem" }}
         my="1rem"
-        align="center"
+        alignItems="center"
       >
         <Center>
             <VStack spacing="1rem" mr="1rem" height="100%">

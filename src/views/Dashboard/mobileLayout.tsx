@@ -6,7 +6,7 @@ export const MobileDashboardLayout: React.FC<{}> = () => {
     <Flex
       align="center"
       flexBasis="auto"
-      spacing="1em"
+      gap="1em"
       w="100%"
       flexDirection={{ base: "column", lg: "row" }}
       m="auto"

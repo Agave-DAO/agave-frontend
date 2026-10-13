@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { BigNumber } from "ethers";
 import React from "react";
 import { UseMutationResult, useQueryClient, useMutation } from "react-query";
@@ -23,15 +24,14 @@ export interface ClaimRewardsMutationResult {
   txHash: string;
 }
 
-export interface ClaimMutationDto
-  extends UseMutationResult<
+export type ClaimMutationDto = UseMutationResult<
     ClaimRewardsMutationResult | undefined,
     unknown,
     ClaimRewardsMutationArgs,
     unknown
-  > {
+  > & {
   key: readonly [ChainId | undefined, Account | undefined];
-}
+};
 
 export const useClaimRewardsMutation = ({
   chainId,
@@ -59,7 +59,7 @@ export const useClaimRewardsMutation = ({
       ) {
         return undefined;
       }
-      const signer = args.library.getSigner();
+      const signer = getTransactionSigner(args.library, address, chainId);
       const incentivesContract = BaseIncentivesController__factory.connect(
         chainAddrs.incentivesController,
         signer

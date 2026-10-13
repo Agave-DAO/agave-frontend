@@ -49,7 +49,7 @@ export function userAccountDataFromWeb3Result({
 }
 
 type Web3UserAccountData = PromisedType<
-  ReturnType<typeof AgaveLendingABI.prototype.getUserAccountData>
+  ReturnType<AgaveLendingABI["getUserAccountData"]>
 >;
 
 export const useUserAccountData = buildQueryHookWhenParamsDefinedChainAddrs<

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Box, Center, Text, VStack, StackDivider, Button } from "@chakra-ui/react";
-import { CenterProps, HStack } from "@chakra-ui/layout";
+import { CenterProps, HStack } from "@chakra-ui/react";
 import { TokenIcon } from "../../utils/icons";
 import { BigNumber, FixedNumber } from "ethers";
 
