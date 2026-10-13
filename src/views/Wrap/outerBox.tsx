@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Center, Text, VStack, Button } from "@chakra-ui/react";
-import { CenterProps, HStack } from "@chakra-ui/layout";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { CenterProps, HStack } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import ColoredText from "../../components/ColoredText";
 import { fontSizes } from "../../utils/constants";
 import { BigNumber, BigNumberish } from "ethers";

@@ -29,7 +29,10 @@ export const useStakingEvents = buildQueryHook<
     try {
       balance = await contract.stakersCooldowns(stakerAddress);
     } catch (e) {
-      if (e.code === ErrorCode.CALL_EXCEPTION) {
+      if (
+        typeof e === "object" && e !== null &&
+        "code" in e && e.code === ErrorCode.CALL_EXCEPTION
+      ) {
         return BigNumber.from(0);
       }
       throw e;

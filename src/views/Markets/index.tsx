@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ColoredText from "../../components/ColoredText";
-import { Box, Text } from "@chakra-ui/layout";
+import { Box, Text } from "@chakra-ui/react";
 import {
   Center,
   Flex,
@@ -44,7 +44,7 @@ import {
 } from "../../utils/htmlTable";
 
 import { ModalIcon } from "../../utils/icons";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { useDisclosure } from "@chakra-ui/react";
 import {
   TargetedTokenData,
   useKpiTokensAPY,
@@ -606,7 +606,6 @@ export const Markets: React.FC<{}> = () => {
       rounded={{ md: "lg" }}
       minH={{ base: "6.6rem", md: "9.6rem" }}
       // bg={{ base: "primary.500", md: "primary.900" }}
-      fg={{ base: "primary.100", md: "primary.100" }}
       color={{ base: "primary.100", md: "primary.100" }}
     >
       <AssetTable viewMode="usd" />

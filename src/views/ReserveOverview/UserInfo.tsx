@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import UserInfoRow from "./UserInfoRow";
 import { Text, Flex, Container, Box, Button } from "@chakra-ui/react";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { useDisclosure } from "@chakra-ui/react";
 
 import { useAppWeb3 } from "../../hooks/appWeb3";
 import {

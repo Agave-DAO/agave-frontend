@@ -1,5 +1,5 @@
 import { QuestionIcon } from "@chakra-ui/icons";
-import { Image, ImageProps } from "@chakra-ui/image";
+import { Image, ImageProps } from "@chakra-ui/react";
 import AgaveLogo from "../assets/image/coins/agave.webp";
 import WxdaiLogo from "../assets/image/coins/wxdai.svg";
 import EthLogo from "../assets/image/coins/eth.svg";
@@ -13,7 +13,7 @@ import GnoLogo from "../assets/image/coins/gno.webp";
 import FoxLogo from "../assets/image/coins/fox.svg";
 import EureLogo from "../assets/image/coins/eure.svg";
 import React, { MouseEventHandler } from "react";
-import { SquareProps, Circle, Center } from "@chakra-ui/react";
+import { SquareProps, Circle } from "@chakra-ui/react";
 import { useAppWeb3 } from "../hooks/appWeb3";
 import { getChainAddresses } from "../utils/chainAddresses";
 
@@ -70,16 +70,16 @@ export function imageForTokenSymbol(symbol: string): string | null {
   }
 }
 
-export const TokenIcon: React.FC<{ symbol: string } & ImageProps> = ({
+export const TokenIcon: React.FC<{ symbol: string } & Omit<ImageProps, "as">> = ({
   symbol,
   ...imageProps
 }) => {
   return React.useMemo(() => {
     const svg = imageForTokenSymbol(symbol);
     if (svg === null) {
-      return <QuestionIcon w="24px" h="24px" />;
+      return <QuestionIcon<"svg"> boxSize="24px" />;
     }
-    return <Image src={svg} width="14" height="14" alt="?" {...imageProps} />;
+    return <Image<"img"> src={svg} width="14" height="14" alt="?" {...imageProps} />;
   }, [symbol, imageProps]);
 };
 
@@ -98,16 +98,15 @@ export function useNativeSymbols(): {
   return { native: nativeSymbol, wrappednative: wrappedNativeSymbol };
 }
 
-export const ModalIcon: React.FC<{ onOpen: MouseEventHandler } & SquareProps> =
+export const ModalIcon: React.FC<{ onOpen: MouseEventHandler } & Omit<SquareProps, "as">> =
   ({ onOpen, ...props }) => {
     return React.useMemo(
       () => (
-        <Circle
+        <Circle<"div">
           borderWidth={{ base: "1px", md: "2px" }}
-          width={{ base: "1.2rem", md: "1.5rem" }}
+          size={{ base: "1.2rem", md: "1.5rem" }}
           minHeight={{ base: "1.2rem", md: "1.5rem" }}
           boxSizing="content-box"
-          as={Center}
           fontSize={{ base: ".85rem", md: "1rem" }}
           color="yellow.100"
           borderColor="yellow.100"

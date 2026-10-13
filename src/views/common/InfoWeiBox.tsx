@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  VStack,
+  VStack as ChakraVStack,
   Flex,
   Text,
   StackProps,
@@ -28,6 +28,8 @@ import {
 } from "../../utils/fixedPoint";
 import { ColoredText } from "../../components/ColoredText";
 
+const VStack: React.FC<Omit<StackProps, "as">> = ChakraVStack;
+
 const animationKeyframes = keyframes`
   100% { transform: scale(1) rotate(360deg) }
 `;
@@ -38,7 +40,7 @@ const HealthFactorInput: React.FC<
   {
     healthFactor?: BigNumber | undefined;
     setMinSafeHF?: React.Dispatch<React.SetStateAction<BigNumber>>;
-  } & StackProps
+  } & Omit<StackProps, "as">
 > = ({ healthFactor, setMinSafeHF, ...props }) => {
   const textInput =
     parseFloat(localStorage.getItem("minSafeHF") || "1200") / 1000;
@@ -103,7 +105,7 @@ const HealthFactorInput: React.FC<
               type="number"
               min="1.000"
               max="10000000000"
-              keyboardType="numeric"
+              inputMode="decimal"
               defaultValue={textInput}
               step="0.001"
               onChange={handleChange}
@@ -125,7 +127,7 @@ const InfoWeiBox: React.FC<
     decimals: number;
     setAmount: React.Dispatch<React.SetStateAction<BigNumber | undefined>>;
     setMinSafeHF?: React.Dispatch<React.SetStateAction<BigNumber>>;
-  } & StackProps
+  } & Omit<StackProps, "as">
 > = ({
   mode,
   balance,

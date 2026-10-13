@@ -1,9 +1,9 @@
-import { Text, TextProps } from "@chakra-ui/layout";
+import { Text, TextProps } from "@chakra-ui/react";
 import { fontSizes } from "../../utils/constants";
 
-export const ColoredText: React.FC<TextProps> = props => {
+export const ColoredText: React.FC<Omit<TextProps, "as">> = props => {
   return (
-    <Text
+    <Text<"p">
       color="white"
       fontSize={{ base: fontSizes.sm, md: fontSizes.md }}
       fontWeight="bold"

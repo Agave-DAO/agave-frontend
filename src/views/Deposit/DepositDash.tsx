@@ -35,7 +35,7 @@ import { useWrappedNativeDefinition } from "../../queries/wrappedNativeAddress";
 import { fontSizes, spacings } from "../../utils/constants";
 import { ModalIcon, useNativeSymbols } from "../../utils/icons";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { useDisclosure } from "@chakra-ui/react";
 import { BigNumber } from "ethers";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 
@@ -160,7 +160,7 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
       >
         <Flex
           w="30%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", lg: "center" }}
           justifyContent="flex-start"
@@ -178,7 +178,7 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
         </Flex>
         <Flex
           w="30%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="flex-start"
@@ -196,7 +196,7 @@ const DepositDashLayout: React.FC<DepositDashLayoutProps> = ({
         </Flex>
         <Flex
           w="30%"
-          spacing={spacings.md}
+          gap={spacings.md}
           mr={{ base: "0rem", md: "1rem" }}
           alignItems={{ base: "flex-start", md: "center" }}
           justifyContent="slex-start"

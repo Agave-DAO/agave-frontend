@@ -13,7 +13,7 @@ import { useTotalBorrowedForAsset } from "../../queries/totalBorrowedForAsset";
 import { useAssetPriceInDai } from "../../queries/assetPriceInDai";
 import { useAssetUtilizationRate } from "../../queries/assetUtilizationRate";
 import { ReserveTokenDefinition } from "../../queries/allReserveTokens";
-import { useDisclosure } from "@chakra-ui/hooks";
+import { useDisclosure } from "@chakra-ui/react";
 import ModalComponent, { MODAL_TYPES } from "../../components/Modals";
 
 import { UnlockIcon, LockIcon } from "@chakra-ui/icons";
@@ -145,7 +145,7 @@ const ReserveInfo: React.FC<{ asset: ReserveTokenDefinition }> = ({
     <Spinner speed="0.5s" emptyColor="gray.200" color="yellow.500" />
   );
   const collateral = reserveData?.usageAsCollateralEnabled 
-    ? (ltv > 0) 
+    ? reserveData.rawltv.gt(0)
       ? "Yes" : "No"
     : "No";
   const stable = reserveData?.stableBorrowRateEnabled ? "Yes" : "No";

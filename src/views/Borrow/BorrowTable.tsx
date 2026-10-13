@@ -9,7 +9,7 @@ import {
   SortedHtmlTable,
   TableRenderer,
 } from "../../utils/htmlTable";
-import { Box, Text } from "@chakra-ui/layout";
+import { Box, Text } from "@chakra-ui/react";
 import { Center, Flex, useMediaQuery, Spinner } from "@chakra-ui/react";
 import { TokenIcon, useNativeSymbols } from "../../utils/icons";
 import { useUserAccountData } from "../../queries/userAccountData";

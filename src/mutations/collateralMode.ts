@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { useMutation, UseMutationResult, useQueryClient } from "react-query";
 import { AgaveLendingABI__factory } from "../contracts";
 import { useAppWeb3 } from "../hooks/appWeb3";
@@ -56,7 +57,7 @@ export const useCollateralModeMutation = (
       }
       const lendingContract = AgaveLendingABI__factory.connect(
         chainAddresses.lendingPool,
-        library.getSigner()
+        getTransactionSigner(library, account, chainId)
       );
       const collateralMode = lendingContract.setUserUseReserveAsCollateral(
         assetTokenAddress,

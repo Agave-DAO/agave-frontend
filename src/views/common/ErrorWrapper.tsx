@@ -1,4 +1,4 @@
-import { Center } from "@chakra-ui/layout";
+import { Center } from "@chakra-ui/react";
 
 export const ErrorWrapper: React.FC = ({ children }) => {
   return (

@@ -223,7 +223,7 @@ const ModalComponent: React.FC<{
           minH="14.4rem"
           minW="40%"
           m="0.5em"
-          align="center"
+          alignItems="center"
         >
           <Modal isOpen={isOpen} onClose={onClose} isCentered>
             <ModalOverlay />

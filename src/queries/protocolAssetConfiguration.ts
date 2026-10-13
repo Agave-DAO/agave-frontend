@@ -69,7 +69,7 @@ export function reserveConfigurationFromWeb3Result({
 
 type Web3ProtocolReserveDataResult = PromisedType<
   ReturnType<
-    typeof AaveProtocolDataProvider.prototype.getReserveConfigurationData
+    AaveProtocolDataProvider["getReserveConfigurationData"]
   >
 >;
 

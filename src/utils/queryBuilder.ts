@@ -160,7 +160,15 @@ export function buildQueryHook<
             ...params
           );
         } catch (e) {
-          e._queryKey = Array.from(ctx.queryKey);
+          // Preserve the original rejection even when metadata cannot be attached.
+          try {
+            if (typeof e === "object" && e !== null) {
+              Reflect.defineProperty(e, "_queryKey", {
+                value: Array.from(ctx.queryKey),
+                configurable: true,
+              });
+            }
+          } catch {}
           throw e;
         }
       },
@@ -222,7 +230,15 @@ export function buildQueryHook<
             ...args
           );
         } catch (e) {
-          e._queryKey = Array.from(ctx.queryKey);
+          // Preserve the original rejection even when metadata cannot be attached.
+          try {
+            if (typeof e === "object" && e !== null) {
+              Reflect.defineProperty(e, "_queryKey", {
+                value: Array.from(ctx.queryKey),
+                configurable: true,
+              });
+            }
+          } catch {}
           throw e;
         }
       },

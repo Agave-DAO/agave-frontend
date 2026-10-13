@@ -35,7 +35,7 @@ export const TransactionLog: React.FC<TransactionLogProps> = ({
       {isComplete ? (
         <HStack alignItems="center">
           <Text fontSize="1rem">Confirmed </Text>
-          <Circle bg={LINEAR_GRADIENT_BG} w=".6rem" h=".6rem" />
+          <Circle bg={LINEAR_GRADIENT_BG} size=".6rem" />
         </HStack>
       ) : (
         <HStack alignItems="center">
@@ -44,16 +44,17 @@ export const TransactionLog: React.FC<TransactionLogProps> = ({
         </HStack>
       )}
       {chainAddresses?.explorer ? (
-        <HStack
-          as={Link}
+        <Link
           href={`${chainAddresses?.explorer}/tx/${txHash}`}
           textDecoration="none !important"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Text fontSize="1rem">Explorer</Text>
-          <Image src={externalLink} boxSize=".8rem" />
-        </HStack>
+          <HStack>
+            <Text fontSize="1rem">Explorer</Text>
+            <Image src={externalLink} boxSize=".8rem" />
+          </HStack>
+        </Link>
       ) : null}
     </Center>
   );

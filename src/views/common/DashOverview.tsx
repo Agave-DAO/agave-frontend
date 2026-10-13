@@ -1,4 +1,4 @@
-import { Box, Text, VStack } from "@chakra-ui/layout";
+import { Box, Text, VStack } from "@chakra-ui/react";
 import React, { useState } from "react";
 import ColoredText from "../../components/ColoredText";
 import InfoWeiBox from "./InfoWeiBox";

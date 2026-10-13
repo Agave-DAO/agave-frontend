@@ -21,7 +21,7 @@ function getWeb3Library(
   return library;
 }
 
-test("renders learn react link", () => {
+test("renders wallet connection prompt", () => {
   act(() => {
     render(
       <Web3ReactProvider getLibrary={getWeb3Library}>
@@ -35,6 +35,6 @@ test("renders learn react link", () => {
       </Web3ReactProvider>
     );
   });
-  const linkElement = screen.getByText(/Please connect your wallet/i);
+  const linkElement = screen.getByText("Connect your wallet", { exact: true });
   expect(linkElement).toBeInTheDocument();
 });

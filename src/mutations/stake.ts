@@ -1,3 +1,4 @@
+import { getTransactionSigner } from "../utils/transactionSigner";
 import { BigNumber, constants } from "ethers";
 import React from "react";
 import { UseMutationResult, useQueryClient, useMutation } from "react-query";
@@ -24,15 +25,14 @@ export interface StakeMutationResult {
   txHash: string;
 }
 
-export interface StakeMutationDto
-  extends UseMutationResult<
+export type StakeMutationDto = UseMutationResult<
     StakeMutationResult | undefined,
     unknown,
     StakeMutationArgs,
     unknown
-  > {
+  > & {
   key: readonly [ChainId | undefined, Account | undefined];
-}
+};
 
 export const useStakeMutation = ({
   chainId,
@@ -60,7 +60,7 @@ export const useStakeMutation = ({
       ) {
         return undefined;
       }
-      const signer = args.library.getSigner();
+      const signer = getTransactionSigner(args.library, address, chainId);
       const stakingContract = StakedToken__factory.connect(
         chainAddrs.staking,
         signer

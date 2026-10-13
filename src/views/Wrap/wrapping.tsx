@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Center, Text, VStack, Button, Modal, ModalOverlay, ModalContent, ModalFooter, Spinner, Input, InputProps, StackDivider } from "@chakra-ui/react";
-import { HStack } from "@chakra-ui/layout";
+import { HStack } from "@chakra-ui/react";
 import { fontSizes, spacings } from "../../utils/constants";
 import { BigNumber, FixedNumber } from "ethers";
 import { useHistory } from "react-router-dom";
@@ -23,7 +23,6 @@ import { useAppWeb3 } from "../../hooks/appWeb3";
 import { StepperBar } from "../common/Wizard";
 import { useDecimalCountForToken } from "../../queries/decimalsForToken";
 import { tokenAddresses } from "../../queries/userTokenBalances";
-import { finishDraft } from "immer";
 import { userTokenBalances } from "../../queries/userTokenBalances";
 
 interface ApprovalState {
@@ -359,7 +358,7 @@ export const Wrapping: React.FC<{
       minW="40%"
       mx={{ base: "0.5rem", md: "1rem" }}
       my="1rem"
-      align="center"
+      textAlign="center"
     >
       <VStack
         spacing={4}

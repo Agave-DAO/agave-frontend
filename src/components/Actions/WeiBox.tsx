@@ -79,9 +79,9 @@ export interface WeiBoxProps {
   maxAmount?: BigNumber | undefined;
 }
 
-const TextInput: React.FC<InputProps> = props => {
+const TextInput: React.FC<Omit<InputProps, "as">> = props => {
   return (
-    <Input
+    <Input<"input">
       size="lg"
       pl={{ base: "1rem", md: "5rem" }}
       pr={{ base: "13rem", md: "15rem" }}
@@ -288,7 +288,7 @@ export const WeiBox: React.FC<WeiBoxProps> = ({
             color="white"
             fontWeight="bold"
             onClick={() => setWeiView(!weiView)}
-            alt="Change input mode between Wei and decimal number of Tokens"
+            aria-label="Change input mode between Wei and decimal number of Tokens"
           >
             <RepeatIcon pointerEvents="none" />
           </Button>

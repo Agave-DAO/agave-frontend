@@ -57,7 +57,7 @@ export function reserveDataFromWeb3Result({
 }
 
 type Web3ProtocolReserveDataResult = PromisedType<
-  ReturnType<typeof AaveProtocolDataProvider.prototype.getReserveData>
+  ReturnType<AaveProtocolDataProvider["getReserveData"]>
 >;
 
 export const useProtocolReserveData = buildQueryHookWhenParamsDefinedChainAddrs<
@@ -132,7 +132,7 @@ export function userReserveDataFromWeb3Result({
 }
 
 type Web3ProtocolUserReserveDataResult = PromisedType<
-  ReturnType<typeof AaveProtocolDataProvider.prototype.getUserReserveData>
+  ReturnType<AaveProtocolDataProvider["getUserReserveData"]>
 >;
 
 export const useUserReserveData = buildQueryHookWhenParamsDefinedChainAddrs<

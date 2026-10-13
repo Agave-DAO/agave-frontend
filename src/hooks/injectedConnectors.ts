@@ -1,35 +1,5 @@
-import { InjectedConnector } from "@web3-react/injected-connector";
-import { FrameConnector } from "@web3-react/frame-connector";
-import { WalletConnectConnector } from "@web3-react/walletconnect-connector";
 import React, { useEffect, useMemo } from "react";
-import {
-  ValidNetworkIds,
-  internalAddressesPerNetworkId,
-} from "../utils/contracts/contractAddresses/internalAddresses";
 import { useAppWeb3 } from "./appWeb3";
-
-export const injectedConnector = new InjectedConnector({
-  supportedChainIds: Object.values(ValidNetworkIds),
-});
-
-export const frameConnector = new FrameConnector({
-  supportedChainIds: Object.values([0x64]), // Frame connector can only connect to one chain at a time, so let's just use XDAI
-});
-
-export const walletConnectConnector = new WalletConnectConnector({
-  bridge: "https://bridge.walletconnect.org",
-  // Generate an RPC table such that each chain we have RPCs for is present
-  rpc: Object.fromEntries(
-    Object.values(internalAddressesPerNetworkId)
-      // Filter to chains which have an rpcUrl set
-      // This filter-guard syntax is a result of .filter not propagating content information on its own
-      .filter(
-        (addr): addr is typeof addr & Required<Pick<typeof addr, "rpcUrl">> =>
-          !!addr.rpcUrl
-      )
-      .map(addr => [addr.chainId, addr.rpcUrl] as const)
-  ),
-});
 
 export interface AmbientConnectionState {
   key: string | DEFAULT_CONNECTION_KEY;
@@ -118,32 +88,15 @@ export function useAmbientConnection(key?: string | undefined): {
   active: boolean;
   activating: boolean;
 } {
-  const { active, activate } = useAppWeb3(key);
+  const { active } = useAppWeb3(key);
   const {
     connection: { tried },
     setTried,
   } = useAmbientConnectionContext(key);
-  // Init to active state to mean: If we are already active, don't bother doing anything
+  // Wallet choice is explicit; never reconnect through a shared window.ethereum.
   useEffect(() => {
-    // TODO: Move into a useQuery invocation to track result state; Until then: intentionally forget the awaitable result
-    if (!active && !tried) {
-      injectedConnector.isAuthorized().then(authorized => {
-        if (authorized) {
-          activate(injectedConnector, undefined, true).catch(() => {
-            setTried(true); // An attempt was made
-          });
-        } else {
-          setTried(true);
-        }
-      });
-    }
-  }); // Only fire once on mount
-
-  useEffect(() => {
-    if (!tried && active) {
-      setTried(true);
-    }
-  }, [tried, active]);
+    if (!tried) setTried(true);
+  }, [tried, setTried]);
 
   return useMemo(
     () => ({

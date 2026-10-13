@@ -1,5 +1,5 @@
 import React from "react";
-import { VStack } from "@chakra-ui/layout";
+import { VStack } from "@chakra-ui/react";
 import { Button } from "@chakra-ui/button";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { BorrowDash } from "./BorrowDash";
